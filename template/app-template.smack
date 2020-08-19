@@ -1,0 +1,24 @@
+# All rights on app for system
+System ~APP~ rwxa
+
+# Access shared
+~APP~ System:Shared rx
+~APP~ User:App-Shared x
+
+# Systemd ==> Really need to be system ?
+~APP~ System wx
+
+# Access lib/
+~APP~ ~APP~:Lib rx
+
+# Access conf
+~APP~ ~APP~:Conf rx
+
+# Access http
+~APP~ ~APP~:Http r
+
+# Access data
+~APP~ ~APP~:Data rx
+
+# Access exec
+~APP~ ~APP~:Exec rx

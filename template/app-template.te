@@ -1,0 +1,70 @@
+###########################################################################
+# Copyright 2020 IoT.bzh
+#
+# author: Arthur Guyader <arthur.guyader@iot.bzh>
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+###########################################################################
+
+
+policy_module(~ID~,1.0)
+
+# Types Definition
+type ~APP~_t;
+type ~APP~_lib_t;
+type ~APP~_conf_t;
+type ~APP~_exec_t;
+type ~APP~_icon_t;
+type ~APP~_data_t;
+type ~APP~_http_t;
+
+gen_require(`
+    type bin_t;
+    type unreserved_port_t;
+	type unconfined_t;
+    type unconfined_service_t;
+')
+
+# Domain definition
+init_domain(~APP~_t, ~APP~_exec_t);
+domain_entry_file(~APP~_t, bin_t);
+
+
+# Load shared library
+allow ~APP~_t ~APP~_lib_t:file mmap_exec_file_perms;
+allow ~APP~_t ~APP~_lib_t:dir list_dir_perms;
+
+# Allow create socket
+platform_var_rw_dir(~APP~_t);
+corenet_tcp_bind_generic_node(~APP~_t);
+corenet_tcp_bind_all_unreserved_ports(~APP~_t);
+allow ~APP~_t self:tcp_socket create_stream_socket_perms;
+allow ~APP~_t self:unix_dgram_socket create_stream_socket_perms;
+
+# Allow read /etc/resolv.conf
+sysnet_read_config(~APP~_t);
+
+# connect to init with unix socket
+init_stream_connect(~APP~_t);
+init_rw_stream_sockets(~APP~_t);
+
+# Send messages to kernel unix datagram sockets
+kernel_dgram_send(~APP~_t);
+
+# Associate domain to filesystems
+fs_associate(~APP~_lib_t);
+
+allow init_t ~APP~_t:process {siginh};
+
+# Allow unconfined to install app
+~APP~_install(unconfined_t);

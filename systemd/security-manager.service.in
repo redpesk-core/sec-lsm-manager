@@ -1,0 +1,20 @@
+[Unit]
+Description=Security Manager service
+#Requires=afm-system-setup.service
+
+[Service]
+#ExecStart=/usr/bin/security-managerd --user @USER@ --group @GROUP@ --make-db-dir --own-db-dir
+ExecStart=/usr/bin/security-managerd -l
+
+Type=notify
+
+KillMode=process
+TimeoutStopSec=3
+Restart=always
+
+Sockets=security-manager.socket
+
+#NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target

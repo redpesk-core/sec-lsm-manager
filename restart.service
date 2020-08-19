@@ -1,0 +1,3 @@
+sudo systemctl stop security-manager.service
+sudo systemctl stop security-manager.socket
+sudo systemctl start security-manager.socket

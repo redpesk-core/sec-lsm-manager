@@ -1,0 +1,5 @@
+Name: security-manager
+Description: security-manager package
+Version: @CYNAGORA_VERSION@
+Libs: -L@CMAKE_INSTALL_FULL_LIBDIR@ -lsecurity-manager
+Cflags: -I@CMAKE_INSTALL_FULL_INCLUDEDIR@

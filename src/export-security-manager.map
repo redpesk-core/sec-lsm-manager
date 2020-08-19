@@ -1,0 +1,8 @@
+{
+global:
+    security_manager_*;
+local:
+    *;
+};
+
+

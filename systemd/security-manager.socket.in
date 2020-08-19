@@ -1,0 +1,17 @@
+[Socket]
+FileDescriptorName=security-manager
+ListenStream=@DEFAULT_SOCKET_DIR@/security-manager.socket
+#SocketUser=@USER@
+#SocketGroup=@GROUP@
+SocketMode=0777
+#SmackLabelIPIn=@
+#SmackLabelIPOut=@
+
+Service=security-manager.service
+
+[Unit]
+Wants=security-manager.target
+Before=security-manager.target
+
+[Install]
+WantedBy=sockets.target

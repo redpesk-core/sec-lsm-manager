@@ -1,0 +1,42 @@
+###########################################################################
+# Copyright 2020 IoT.bzh
+#
+# author: Arthur Guyader <arthur.guyader@iot.bzh>
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+###########################################################################
+
+
+
+########################################
+## <summary>
+##	Allow the specified domain to install
+##  application
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`~APP~_install',`
+	gen_require(`
+		type ~APP~_lib_t;
+	')
+
+	allow $1 ~APP~_lib_t:dir manage_dir_perms;
+    allow $1 ~APP~_lib_t:dir relabel_dir_perms;
+
+    allow $1 ~APP~_lib_t:file manage_file_perms;
+    allow $1 ~APP~_lib_t:file relabel_file_perms;
+')
