@@ -144,7 +144,7 @@ static int label_exec(const char *path, const char *label) {
 
     if (!check_executable(path)) {
         ERROR("%s not executable", path);
-        return -1;
+        return 0; // Check that it should not be restricted.
     }
 
     int rc = set_smack(path, XATTR_NAME_SMACKEXEC, label);
