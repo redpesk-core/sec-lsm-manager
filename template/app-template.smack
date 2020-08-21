@@ -3,7 +3,7 @@ System ~APP~ rwxa
 
 # Access shared
 ~APP~ System:Shared rx
-~APP~ User:App-Shared x
+~APP~ User:App-Shared wx
 
 # Systemd ==> Really need to be system ?
 ~APP~ System wx
