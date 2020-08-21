@@ -109,7 +109,7 @@ static int label_dir_transmute(const char *path) {
 
     if (!check_file_type(path, __S_IFDIR)) {
         LOG("%s not directory", path);
-        return -1;
+        return 0;
     }
 
     int rc = set_smack(path, XATTR_NAME_SMACKTRANSMUTE, "TRUE");
@@ -137,18 +137,13 @@ static int label_exec(const char *path, const char *label) {
         return -EINVAL;
     }
 
-    if (check_file_type(path, __S_IFDIR)) {
-        LOG("label_exec on a directory, don't apply");
+    if (!check_file_type(path, __S_IFREG)) {
+        LOG("%s not regular file", path);
         return 0;
     }
 
-    if (!check_file_type(path, __S_IFREG)) {
-        LOG("%s not regular file", path);
-        return -1;
-    }
-
     if (!check_executable(path)) {
-        LOG("%s not executable", path);
+        ERROR("%s not executable", path);
         return -1;
     }
 
