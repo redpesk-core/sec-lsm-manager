@@ -464,14 +464,12 @@ int remove_smack_rules(const secure_app_t *secure_app, const char *smack_rules_d
         rc = remove_load_rules(file);
         if (rc < 0) {
             ERROR("remove_load_rules");
-            goto end2;
         }
     }
 
     rc = remove_file(file);
     if (rc < 0) {
         ERROR("remove");
-        goto end2;
     }
 
 end2:
