@@ -140,7 +140,6 @@ int get_path_type_info(enum path_type path_type, char **suffix, bool *is_executa
             return 0;
         case type_lib:
             *suffix = suffix_lib;
-            *is_executable = true;
             return 0;
         case type_public:
             *is_public = true;
