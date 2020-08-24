@@ -3,22 +3,25 @@ System ~APP~ rwxa
 
 # Access shared
 ~APP~ System:Shared rx
-~APP~ User:App-Shared wx
+~APP~ User:App-Shared rwx
 
 # Systemd ==> Really need to be system ?
 ~APP~ System wx
 
-# Access lib/
+# Access lib
 ~APP~ ~APP~:Lib rx
 
 # Access conf
 ~APP~ ~APP~:Conf rx
 
 # Access http
-~APP~ ~APP~:Http r
+~APP~ ~APP~:Http rx
 
 # Access data
 ~APP~ ~APP~:Data rx
 
 # Access exec
 ~APP~ ~APP~:Exec rx
+
+# Access User:Home ==> /home/0/
+~APP~ User:Home rx
