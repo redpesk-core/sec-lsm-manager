@@ -147,10 +147,9 @@ int security_manager_handle_set_id(security_manager_handle_t *sm_handle, const c
     int rc = secure_app_set_id(sm_handle->secure_app, id);
     if (rc < 0) {
         ERROR("secure_app_set_id");
-        return rc;
     }
 
-    return 0;
+    return rc;
 }
 
 /* see security-manager-operation.h */
