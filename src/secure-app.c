@@ -119,7 +119,8 @@ int secure_app_set_id(secure_app_t *secure_app, const char *id) {
         ERROR("id undefined");
         return -EINVAL;
     } else if (secure_app->id) {
-        return 1;
+        ERROR("id already set");
+        return -EINVAL;
     }
 
     secure_app->id = strdup(id);
