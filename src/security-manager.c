@@ -22,47 +22,7 @@
  * $RP_END_LICENSE$
  *
  *
- *                                                                                        systemd-socket
- *                                                                                               ^
- *                        +---------------------------+            +----------------------+      |             +-----------------------------+
- *                        |                           |            |                      |      |             |                             |
- *                        | libsecurity-manager-core  +<-----------+  security-managerd   +<-----+-------------+ libsecurity-manager-client  |
- *                        |                           |            |                      |                    |                             |
- *                        +--------+----------------+-+            +----------------------+                    +-----------------------+-----+
- *                                 |                |                                                                                  ^
- *                                 |                |                                                                                  |
- *                                 |                |                                                                                  |
- *       systemd-socket  <---------+                |                                                                                  |
- *                                 |                |                                                                                  |
- *                                 v                v                                                                           +------+----------------+
- * +-------------------------------+---+  +---------+------------------------------------------------------+                    |                       |
- * |                                   |  |                                                                |                    | security-manager-cmd  |
- * |             CYNAGORA              |  | +----------------------------+ +-----------------------------+ |                    |                       |
- * |                                   |  | |                            | |                             | |                    | id redpesk-service-id |
- * |                                   |  | |          SMACK             | |         SELINUX             | |                    |                       |
- * |                                   |  | |                            | |                             | |                    |                       |
- * |     id  * * perm123 yes forever   |  | |                            | |     install semodule        | |                    | path /tmp/toto tmp    |
- * |                                   |  | |   /etc/smack/accesses.d/   | |                             | |                    |                       |
- * |                                   |  | |                            | |  ==> redpesk-service-id     | |                    |                       |
- * |                                   |  | |                            | |                             | |                    | permission perm123    |
- * |                                   |  | |  app-redpesk-service-id1   | |   +--------------------+    | |                    |                       |
- * |                                   |  | |                            | |                             | |                    |                       |
- * |                                   |  | |                            | | /usr/share/security-manager/| |                    | install               |
- * |                                   |  | |  app-redpesk-service-id2   | | selinux-policy/             | |                    |                       |
- * |                                   |  | |                            | |                             | |                    |                       |
- * |                                   |  | |                            | | redpesk-service-id.te       | |                    | uninstall             |
- * |                                   |  | |                            | |                             | |                    |                       |
- * |                                   |  | |                            | | redpesk-service-id.if       | |                    |                       |
- * |                                   |  | |                            | |                             | |                    | clean                 |
- * |                                   |  | |                            | | redpesk-service-id.fc       | |                    |                       |
- * |                                   |  | |                            | |                             | |                    |                       |
- * |                                   |  | |                            | | redpesk-service-id.pp       | |                    | display               |
- * |                                   |  | |                            | |                             | |                    |                       |
- * |                                   |  | +----------------------------+ +-----------------------------+ |                    |                       |
- * +-----------------------------------+  +----------------------------------------------------------------+                    +-----------------------+
-*/
-
-
+ */
 
 #include "security-manager.h"
 

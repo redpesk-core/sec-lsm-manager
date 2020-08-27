@@ -1,25 +1,45 @@
 # SECURITY-MANAGER
 
-
-The objective of this project is to redo the security-manager of Tyzen for AGL. The security context has evolved. In order to clearly define the need we want, I will start by reviewing the key points of the old security-manager.
-
-- Defining SMACK access rights on files
-- Define cynara rights
-- Manage users
-- A deamon that runs in the background and a library to interface with it
-- Stores information in a database
-
-The objective of our new security manager will be :
-
-- Be designed to accept several MACs : SMACK, SELinux; or not at all (token)
-- Being atomic (either set up everything or nothing)
-- To be activated by the socket
-- Simulation mode
-- Define cynagora rights effectively or to be requested at a later date
-- Define additional rules based on permissions
-- Without database
-
-
+```
+                                                                                       systemd-socket
+                                                                                              ^
+                       +---------------------------+            +----------------------+      |             +-----------------------------+
+                       |                           |            |                      |      |             |                             |
+                       | libsecurity-manager-core  +<-----------+  security-managerd   +<-----+-------------+ libsecurity-manager-client  |
+                       |                           |            |                      |                    |                             |
+                       +--------+----------------+-+            +----------------------+                    +-----------------------+-----+
+                                |                |                                                                                  ^
+                                |                |                                                                                  |
+                                |                |                                                                                  |
+      systemd-socket  <---------+                |                                                                                  |
+                                |                |                                                                                  |
+                                v                v                                                                           +------+----------------+
++-------------------------------+---+  +---------+------------------------------------------------------+                    |                       |
+|                                   |  |                                                                |                    | security-manager-cmd  |
+|             CYNAGORA              |  | +----------------------------+ +-----------------------------+ |                    |                       |
+|                                   |  | |                            | |                             | |                    | id redpesk-service-id |
+|                                   |  | |          SMACK             | |         SELINUX             | |                    |                       |
+|                                   |  | |                            | |                             | |                    |                       |
+|     id  * * perm123 yes forever   |  | |                            | |     install semodule        | |                    | path /tmp/toto tmp    |
+|                                   |  | |   /etc/smack/accesses.d/   | |                             | |                    |                       |
+|                                   |  | |                            | |  ==> redpesk-service-id     | |                    |                       |
+|                                   |  | |                            | |                             | |                    | permission perm123    |
+|                                   |  | |  app-redpesk-service-id1   | |   +--------------------+    | |                    |                       |
+|                                   |  | |                            | |                             | |                    |                       |
+|                                   |  | |                            | | /usr/share/security-manager/| |                    | install               |
+|                                   |  | |  app-redpesk-service-id2   | | selinux-policy/             | |                    |                       |
+|                                   |  | |                            | |                             | |                    |                       |
+|                                   |  | |                            | | redpesk-service-id.te       | |                    | uninstall             |
+|                                   |  | |                            | |                             | |                    |                       |
+|                                   |  | |                            | | redpesk-service-id.if       | |                    |                       |
+|                                   |  | |                            | |                             | |                    | clear                 |
+|                                   |  | |                            | | redpesk-service-id.fc       | |                    |                       |
+|                                   |  | |                            | |                             | |                    |                       |
+|                                   |  | |                            | | redpesk-service-id.pp       | |                    | display               |
+|                                   |  | |                            | |                             | |                    |                       |
+|                                   |  | +----------------------------+ +-----------------------------+ |                    |                       |
++-----------------------------------+  +----------------------------------------------------------------+                    +-----------------------+
+```
 
 ## Compile
 
