@@ -1,6 +1,5 @@
 [Unit]
 Description=Security Manager service
-#Requires=afm-system-setup.service
 
 [Service]
 #ExecStart=/usr/bin/security-managerd --user @USER@ --group @GROUP@ --make-db-dir --own-db-dir

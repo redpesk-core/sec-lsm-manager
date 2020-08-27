@@ -75,7 +75,7 @@ struct security_manager_server {
     /** is stopped ? */
     int stopped;
 
-    /** the admin socket */
+    /** the server socket */
     pollitem_t socket;
 };
 
@@ -216,7 +216,6 @@ static void send_error(client_t *cli, const char *errorstr) {
 static void send_display_security_manager_handle(client_t *cli) {
     if (cli->sm_handle.secure_app->id) {
         putx(cli, _string_, _id_, cli->sm_handle.secure_app->id, NULL);
-        flushw(cli);
     }
 
     for (size_t i = 0; i < cli->sm_handle.secure_app->paths.size; i++) {
@@ -272,7 +271,6 @@ static void onrequest(client_t *cli, unsigned count, const char *args[]) {
                 rc = security_manager_handle_clean(&(cli->sm_handle));
                 if (rc == 0) {
                     send_done(cli);
-                    flushw(cli);
                 } else {
                     send_error(cli, "security_manager_handle_clean");
                 }
@@ -283,7 +281,6 @@ static void onrequest(client_t *cli, unsigned count, const char *args[]) {
             if (ckarg(args[0], _display_, 1) && count == 1) {
                 send_display_security_manager_handle(cli);
                 send_done(cli);
-                flushw(cli);
                 return;
             }
             break;
@@ -291,8 +288,7 @@ static void onrequest(client_t *cli, unsigned count, const char *args[]) {
             if (ckarg(args[0], _id_, 1) && count == 2) {
                 rc = security_manager_handle_set_id(&(cli->sm_handle), args[1]);
                 if (rc == 0) {
-                    putx(cli, _done_, NULL);
-                    flushw(cli);
+                    send_done(cli);
                 } else if (rc == 1) {
                     send_error(cli, "id already set");
                 } else {
@@ -310,7 +306,6 @@ static void onrequest(client_t *cli, unsigned count, const char *args[]) {
                 return;
             }
             break;
-
         case 'l':
             if (ckarg(args[0], _log_, 1) && count <= 2) {
                 nextlog = security_manager_server_log;
@@ -336,7 +331,6 @@ static void onrequest(client_t *cli, unsigned count, const char *args[]) {
                 }
                 return;
             }
-
             if (ckarg(args[0], _permission_, 1) && count == 2) {
                 rc = security_manager_handle_add_permission(&(cli->sm_handle), args[1]);
                 if (rc == 0) {

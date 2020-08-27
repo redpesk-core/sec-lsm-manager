@@ -1,3 +1,6 @@
+[Unit]
+Description=security-manager socket
+
 [Socket]
 FileDescriptorName=security-manager
 ListenStream=@DEFAULT_SOCKET_DIR@/security-manager.socket

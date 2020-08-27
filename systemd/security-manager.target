@@ -1,4 +1,4 @@
 [Unit]
-Description=security-manager sockets
+Description=security-manager target
 DefaultDependencies=true
 

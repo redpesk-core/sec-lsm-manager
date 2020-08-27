@@ -167,7 +167,7 @@ enum path_type get_path_type(const char *path_type) {
         default:
             break;
     }
-    ERROR("Path type invalid");
+    ERROR("Path type invalid: %s", path_type);
     return type_none;
 }
 

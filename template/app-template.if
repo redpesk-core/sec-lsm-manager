@@ -20,21 +20,21 @@
 
 ########################################
 ## <summary>
-##	Allow the specified domain to install
+##    Allow the specified domain to install
 ##  application
 ## </summary>
 ## <param name="domain">
-##	<summary>
-##	Domain allowed access.
-##	</summary>
+##    <summary>
+##    Domain allowed access.
+##    </summary>
 ## </param>
 #
 interface(`~APP~_install',`
-	gen_require(`
-		type ~APP~_lib_t;
-	')
+    gen_require(`
+        type ~APP~_lib_t;
+    ')
 
-	allow $1 ~APP~_lib_t:dir manage_dir_perms;
+    allow $1 ~APP~_lib_t:dir manage_dir_perms;
     allow $1 ~APP~_lib_t:dir relabel_dir_perms;
 
     allow $1 ~APP~_lib_t:file manage_file_perms;
