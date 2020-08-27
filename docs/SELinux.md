@@ -205,8 +205,8 @@ type server_tmp_t;
 #### REQUIRE ####
 
 gen_require(`
-	type monopd_port_t;
-	type node_t;
+    type monopd_port_t;
+    type node_t;
 ')
 
 #### DOMAIN ####
