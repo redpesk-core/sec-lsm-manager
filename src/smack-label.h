@@ -24,11 +24,7 @@
 #ifndef SECURITY_MANAGER_SMACK_LABEL_H
 #define SECURITY_MANAGER_SMACK_LABEL_H
 
-#ifndef SIMULATE_MAC
 #include <sys/smack.h>
-#else
-#include "simulation/sys/smack.h"
-#endif
 
 #include "paths.h"
 

@@ -24,11 +24,8 @@
 #ifndef SECURITY_MANAGER_SELINUX_LABEL_H
 #define SECURITY_MANAGER_SELINUX_LABEL_H
 
-#ifndef SIMULATE_MAC
 #include <selinux/selinux.h>
 #include <semanage/semanage.h>
-#endif
-
 #include <stdbool.h>
 
 #include "paths.h"

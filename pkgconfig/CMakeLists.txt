@@ -1,7 +1,8 @@
 ###########################################################################
-# Copyright (C) 2018-2020 IoT.bzh Company
+# Copyright (C) 2018-2021 IoT.bzh Company
 #
 # Author: José Bollo <jose.bollo@iot.bzh>
+# Author: Arthur Guyader <arthur.guyader@iot.bzh>
 #
 # $RP_BEGIN_LICENSE$
 # Commercial License Usage
@@ -25,4 +26,4 @@
 configure_file(security-manager.pc.in security-manager.pc @ONLY)
 
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/security-manager.pc
-    DESTINATION ${LIBDIR}/pkgconfig)
+    DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR}/pkgconfig)

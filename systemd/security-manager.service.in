@@ -2,8 +2,7 @@
 Description=Security Manager service
 
 [Service]
-#ExecStart=/usr/bin/security-managerd --user @USER@ --group @GROUP@ --make-db-dir --own-db-dir
-ExecStart=/usr/bin/security-managerd -l
+ExecStart=/usr/bin/security-managerd --user @USER@ --group @GROUP@
 
 Type=notify
 

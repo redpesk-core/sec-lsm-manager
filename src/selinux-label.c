@@ -45,11 +45,9 @@ char public_app[] = "redpesk_public_t";
 
 /* see selinux-label.h */
 bool selinux_enabled() {
-#ifndef SIMULATE_MAC
     if (is_selinux_enabled() == 1) {
         return true;
     }
-#endif
     return false;
 }
 

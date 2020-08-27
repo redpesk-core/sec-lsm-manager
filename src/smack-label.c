@@ -47,12 +47,10 @@ char public_app[] = "_";
 /* see smack-label.h */
 int smack_enabled() {
     int rc = 0;
-#ifndef SIMULATE_MAC
     if (smack_smackfs_path() == NULL) {
         rc = 0;
     }
     rc = 1;
-#endif
 
     return rc;
 }

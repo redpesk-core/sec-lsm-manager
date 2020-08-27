@@ -26,11 +26,10 @@
 CONFIGURE_FILE(security-manager.service.in      security-manager.service @ONLY)
 CONFIGURE_FILE(security-manager.socket.in       security-manager.socket @ONLY)
 
-
 INSTALL(FILES
     ${CMAKE_CURRENT_BINARY_DIR}/security-manager.service
-    ${CMAKE_CURRENT_SOURCE_DIR}/security-manager.target
     ${CMAKE_CURRENT_BINARY_DIR}/security-manager.socket
+    ${CMAKE_CURRENT_SOURCE_DIR}/security-manager.target
     DESTINATION
     ${SYSTEMD_UNIT_DIR}
 )

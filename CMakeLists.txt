@@ -26,10 +26,10 @@
 cmake_minimum_required(VERSION 3.0)
 
 project(security-manager
-	DESCRIPTION "Security Manager (MAC)"
-	HOMEPAGE_URL ""
-	VERSION 0.1
-	LANGUAGES C
+    DESCRIPTION "Security Manager (MAC)"
+    HOMEPAGE_URL ""
+    VERSION 1.0
+    LANGUAGES C
 )
 
 include(FindPkgConfig)
@@ -38,48 +38,64 @@ include(CheckLibraryExists)
 include(GNUInstallDirs)
 include(CTest)
 
-###########################################################################
-# Define install directory
-
-SET(LIBDIR "${CMAKE_INSTALL_FULL_LIBDIR}" CACHE PATH "library dir")
-SET(BINDIR "${CMAKE_INSTALL_FULL_BINDIR}" CACHE PATH "binary dir")
-SET(INCLUDEDIR "${CMAKE_INSTALL_FULL_INCLUDEDIR}" CACHE PATH "include dir")
-SET(DATADIR "${CMAKE_INSTALL_FULL_DATADIR}" CACHE PATH "data dir")
-SET(SYSTEMD_UNIT_DIR "${CMAKE_INSTALL_FULL_LIBDIR}/systemd/system" CACHE PATH "systemd dir")
-
+##########################################################################
+# define socket and systemd directory
 
 if(NOT CMAKE_INSTALL_FULL_RUNSTATEDIR)
-	set(CMAKE_INSTALL_FULL_RUNSTATEDIR "${CMAKE_INSTALL_FULL_LOCALSTATEDIR}/run")
+    set(CMAKE_INSTALL_FULL_RUNSTATEDIR "${CMAKE_INSTALL_FULL_LOCALSTATEDIR}/run")
 endif()
 
-###########################################################################
+set(DEFAULT_SOCKET_DIR "${CMAKE_INSTALL_FULL_RUNSTATEDIR}"
+    CACHE PATH "directory path of the sockets")
+
+if(NOT SYSTEMD_UNIT_DIR)
+    set(SYSTEMD_UNIT_DIR ${CMAKE_INSTALL_FULL_LIBDIR}/systemd/system)
+endif()
+
+##########################################################################
 # possible settings
 
 set(SECURITY_MANAGER_VERSION ${PROJECT_VERSION})
 set(SECURITY_MANAGER_SOVERSION ${PROJECT_VERSION_MAJOR})
 
 option(WITH_SYSTEMD         "should include systemd compatibility" ON)
-option(WITH_SMACK           "should include smack compatibility" ON)
-option(WITH_SELINUX         "should include selinux compatibility" OFF)
+option(WITH_SMACK           "should include smack compatibility" OFF)
+option(WITH_SELINUX         "should include selinux compatibility" ON)
 
-option(SIMULATE_MAC		    "simulate mandatory access control" OFF)
-option(SIMULATE_CYNAGORA	"simulate cynagora" OFF)
+option(SIMULATE_CYNAGORA    "simulate cynagora" OFF)
 
-option(OPTIMIZE	"optimize" OFF)
-option(COMPILE_TEST	"compile test" OFF)
+option(FORTIFY              "fortify" OFF)
+option(COMPILE_TEST         "compile test" OFF)
+option(DEBUG                "debug" OFF)
 
+##########################################################################
+# check valid MAC
 
+if(WITH_SMACK)
+    if(WITH_SELINUX)
+        message( FATAL_ERROR "Choose only one MAC")
+    endif()
+    message("==> MAC = SMACK")
+elseif(WITH_SELINUX)
+    message("==> MAC = SELINUX")
+else()
+    message( FATAL_ERROR "Choose one MAC")
+endif()
+
+##########################################################################
+# define user and group
 
 set(USER  security-manager CACHE STRING "user of the daemon")
 set(GROUP security-manager CACHE STRING "group of the daemon")
 
-set(DEFAULT_SOCKET_DIR "${CMAKE_INSTALL_FULL_RUNSTATEDIR}"
-	CACHE PATH "directory path of the sockets")
+##########################################################################
+# define compile options
 
-
-option(DEVELOPEMENT         "use for developement process, need remove at the end !!!!" ON)
-
-###########################################################################
+if(DEBUG)
+    set(CMAKE_BUILD_TYPE "DEBUG")
+elseif()
+    set(CMAKE_BUILD_TYPE "RELEASE")
+endif()
 
 link_libraries(-Wl,--as-needed -Wl,--gc-sections -Wl,--no-undefined)
 
@@ -89,29 +105,43 @@ add_compile_options(-Werror=implicit-function-declaration)
 add_compile_options(-ffunction-sections -fdata-sections)
 #add_compile_options(-ffile-prefix-map=${CMAKE_SOURCE_DIR}=.)
 
+add_compile_definitions(_GNU_SOURCE)
+
+if(FORTIFY)
+    add_compile_definitions(_FORTIFY_SOURCE=2)
+    add_compile_options(-O3)
+    message("FORTIFY")
+endif()
+
+if(SIMULATE_CYNAGORA)
+    add_compile_definitions(SIMULATE_CYNAGORA)
+endif()
+
+
 ###########################################################################
+# Check libraries
 
 PKG_CHECK_MODULES(libcap REQUIRED libcap)
 
 if(WITH_SYSTEMD)
-	PKG_CHECK_MODULES(libsystemd REQUIRED libsystemd>=222)
-	add_subdirectory(systemd)
+    PKG_CHECK_MODULES(libsystemd REQUIRED libsystemd>=222)
+    add_subdirectory(systemd)
 endif()
 
-if(NOT SIMULATE_MAC)
-    if(WITH_SMACK)
-        PKG_CHECK_MODULES(libsmack REQUIRED libsmack)
-    endif()
+if(WITH_SMACK)
+    PKG_CHECK_MODULES(libsmack REQUIRED libsmack)
+endif()
 
-    if(WITH_SELINUX)
-        PKG_CHECK_MODULES(libselinux REQUIRED libselinux)
-		PKG_CHECK_MODULES(libsemanage REQUIRED libsemanage)
-    endif()
+if(WITH_SELINUX)
+    PKG_CHECK_MODULES(libselinux REQUIRED libselinux)
+    PKG_CHECK_MODULES(libsemanage REQUIRED libsemanage)
 endif()
 
 if(NOT SIMULATE_CYNAGORA)
     PKG_CHECK_MODULES(cynagora REQUIRED cynagora)
 endif()
+
+###########################################################################
 
 add_subdirectory(src)
 add_subdirectory(pkgconfig)

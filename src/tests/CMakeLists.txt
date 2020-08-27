@@ -26,7 +26,6 @@ cmake_minimum_required(VERSION 3.3)
 
 list(TRANSFORM LIBCORE_SOURCES PREPEND "../")
 
-
 set(TESTS_SOURCES
     tests.c
     test_utils.c
@@ -34,7 +33,6 @@ set(TESTS_SOURCES
     test_policies.c
     test_secure_app.c
 )
-
 
 add_executable(tests ${TESTS_SOURCES} ${LIBCORE_SOURCES})
 target_link_libraries(tests cunit)

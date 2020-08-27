@@ -24,8 +24,8 @@
 # $RP_END_LICENSE$
 ###########################################################################
 
-makefile=/usr/share/selinux/devel/Makefile
-selinuxPolicyDir=/usr/share/security-manager/selinux-policy/
+makefile=@SELINUX_MAKEFILE@
+selinuxPolicyDir=@SELINUX_POLICY_DIR@
 
 function compile {
     echo "make -f" $1 " -C " $2
