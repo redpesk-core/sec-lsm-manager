@@ -24,18 +24,24 @@
 
 cmake_minimum_required(VERSION 3.3)
 
-list(TRANSFORM LIBCORE_SOURCES PREPEND "../")
+PKG_CHECK_MODULES(CUnit REQUIRED cunit)
+
+list(TRANSFORM SERVER_SOURCES PREPEND "../")
 
 set(TESTS_SOURCES
     tests.c
     test_utils.c
     test_paths.c
-    test_policies.c
+    test_permissions.c
     test_secure_app.c
 )
 
-add_executable(tests ${TESTS_SOURCES} ${LIBCORE_SOURCES})
-target_link_libraries(tests cunit)
+if(WITH_SMACK)
+    set(TESTS_SOURCES ${TESTS_SOURCES} test_smack.c)
+endif()
+
+add_executable(tests ${TESTS_SOURCES} ${SERVER_SOURCES})
+target_link_libraries(tests cunit security-manager)
 add_test (tests ${CMAKE_CURRENT_BINARY_DIR}/tests)
 if(WITH_SMACK)
     target_compile_definitions(tests PRIVATE WITH_SMACK)

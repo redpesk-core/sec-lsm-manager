@@ -21,6 +21,4 @@
  * $RP_END_LICENSE$
  */
 
-void test_init_policies(void);
-void test_free_policies(void);
-void test_policies_add_policy(void);
+void test_smack_install(void);

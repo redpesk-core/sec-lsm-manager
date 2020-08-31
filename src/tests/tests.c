@@ -1,8 +1,9 @@
 #include <CUnit/Basic.h>
 
 #include "test_paths.h"
-#include "test_policies.h"
+#include "test_permissions.h"
 #include "test_secure_app.h"
+#include "test_smack.h"
 #include "test_utils.h"
 
 int main() {
@@ -30,13 +31,13 @@ int main() {
     if (paths_suite == NULL)
         goto error;
 
-    if (CU_add_test(paths_suite, "test init paths", test_init_paths) == NULL)
+    if (CU_add_test(paths_suite, "test init paths", test_init_path_set) == NULL)
         goto error;
 
-    if (CU_add_test(paths_suite, "test free paths", test_free_paths) == NULL)
+    if (CU_add_test(paths_suite, "test free paths", test_free_path_set) == NULL)
         goto error;
 
-    if (CU_add_test(paths_suite, "test paths add path", test_paths_add_path) == NULL)
+    if (CU_add_test(paths_suite, "test paths add path", test_path_set_add_path) == NULL)
         goto error;
 
     if (CU_add_test(paths_suite, "test valid path type", test_valid_path_type) == NULL)
@@ -52,13 +53,13 @@ int main() {
     if (paths_suite == NULL)
         goto error;
 
-    if (CU_add_test(policies_suite, "test init policies", test_init_policies) == NULL)
+    if (CU_add_test(policies_suite, "test init policies", test_init_permission_set) == NULL)
         goto error;
 
-    if (CU_add_test(policies_suite, "test free policies", test_free_policies) == NULL)
+    if (CU_add_test(policies_suite, "test free policies", test_free_permission_set) == NULL)
         goto error;
 
-    if (CU_add_test(policies_suite, "test paths add path", test_policies_add_policy) == NULL)
+    if (CU_add_test(policies_suite, "test paths add path", test_permission_set_add_permission) == NULL)
         goto error;
 
     CU_pSuite secure_app_suite = CU_add_suite("test_secure_app", NULL, NULL);
@@ -82,6 +83,14 @@ int main() {
 
     if (CU_add_test(secure_app_suite, "test destroy secure app", test_destroy_secure_app) == NULL)
         goto error;
+
+#ifdef WITH_SMACK
+    CU_pSuite smack_suite = CU_add_suite("test_smack", NULL, NULL);
+    if (secure_app_suite == NULL)
+        goto error;
+    if (CU_add_test(smack_suite, "test smack install", test_smack_install) == NULL)
+        goto error;
+#endif
 
     CU_basic_set_mode(CU_BRM_VERBOSE);
     CU_basic_run_tests();

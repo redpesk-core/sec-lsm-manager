@@ -29,28 +29,27 @@
 
 #include "../paths.h"
 
-void test_init_paths(void) {
-    CU_ASSERT_EQUAL(init_paths(NULL), -EINVAL);
-    paths_t paths;
-    CU_ASSERT_EQUAL(init_paths(&paths), 0);
-    CU_ASSERT_EQUAL(paths.paths, NULL);
-    CU_ASSERT_EQUAL(paths.size, 0);
-    free_paths(&paths);
+void test_init_path_set(void) {
+    path_set_t path_set;
+    CU_ASSERT_EQUAL(init_path_set(&path_set), 0);
+    CU_ASSERT_EQUAL(path_set.paths, NULL);
+    CU_ASSERT_EQUAL(path_set.size, 0);
+    free_path_set(&path_set);
 }
 
-void test_free_paths(void) {
-    paths_t paths;
-    CU_ASSERT_EQUAL(init_paths(&paths), 0);
-    CU_ASSERT_EQUAL(paths_add_path(&paths, "/test", type_data), 0);
-    free_paths(&paths);
-    CU_ASSERT_EQUAL(paths.paths, NULL);
-    CU_ASSERT_EQUAL(paths.size, 0);
+void test_free_path_set(void) {
+    path_set_t path_set;
+    CU_ASSERT_EQUAL(init_path_set(&path_set), 0);
+    CU_ASSERT_EQUAL(path_set_add_path(&path_set, "/test", type_data), 0);
+    free_path_set(&path_set);
+    CU_ASSERT_EQUAL(path_set.paths, NULL);
+    CU_ASSERT_EQUAL(path_set.size, 0);
 }
 
-void test_paths_add_path(void) {
-    paths_t paths;
-    CU_ASSERT_EQUAL(init_paths(&paths), 0);
-    CU_ASSERT_EQUAL(paths_add_path(&paths, "/test", type_data), 0);
+void test_path_set_add_path(void) {
+    path_set_t paths;
+    CU_ASSERT_EQUAL(init_path_set(&paths), 0);
+    CU_ASSERT_EQUAL(path_set_add_path(&paths, "/test", type_data), 0);
 
     CU_ASSERT_EQUAL(paths.size, 1);
     CU_ASSERT_STRING_EQUAL(paths.paths[0].path, "/test");
@@ -59,14 +58,14 @@ void test_paths_add_path(void) {
     while (i < 50) {
         char buf[50];
         sprintf(buf, "/test/n%d", i);
-        CU_ASSERT_EQUAL(paths_add_path(&paths, buf, type_conf), 0);
+        CU_ASSERT_EQUAL(path_set_add_path(&paths, buf, type_conf), 0);
         i++;
     }
     CU_ASSERT_STRING_EQUAL(paths.paths[0].path, "/test");
     CU_ASSERT_EQUAL(paths.paths[0].path_type, type_data);
     CU_ASSERT_STRING_EQUAL(paths.paths[41].path, "/test/n40");
     CU_ASSERT_EQUAL(paths.paths[41].path_type, type_conf);
-    free_paths(&paths);
+    free_path_set(&paths);
 }
 
 void test_valid_path_type(void) {

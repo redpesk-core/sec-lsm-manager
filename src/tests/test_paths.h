@@ -21,9 +21,9 @@
  * $RP_END_LICENSE$
  */
 
-void test_init_paths(void);
-void test_free_paths(void);
-void test_paths_add_path(void);
+void test_init_path_set(void);
+void test_free_path_set(void);
+void test_path_set_add_path(void);
 void test_valid_path_type(void);
 void test_get_path_type(void);
 void test_get_path_type_string(void);

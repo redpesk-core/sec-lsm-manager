@@ -34,10 +34,10 @@ void test_create_secure_app(void) {
     CU_ASSERT_EQUAL(create_secure_app(&secure_app), 0);
     CU_ASSERT_NOT_EQUAL(secure_app, NULL);
     CU_ASSERT_EQUAL(secure_app->id, NULL);
-    CU_ASSERT_EQUAL(secure_app->policies.policies, NULL);
-    CU_ASSERT_EQUAL(secure_app->policies.size, 0);
-    CU_ASSERT_EQUAL(secure_app->paths.paths, NULL);
-    CU_ASSERT_EQUAL(secure_app->paths.size, 0);
+    CU_ASSERT_EQUAL(secure_app->permission_set.permissions, NULL);
+    CU_ASSERT_EQUAL(secure_app->permission_set.size, 0);
+    CU_ASSERT_EQUAL(secure_app->path_set.paths, NULL);
+    CU_ASSERT_EQUAL(secure_app->path_set.size, 0);
     destroy_secure_app(secure_app);
 }
 
@@ -46,21 +46,15 @@ void test_secure_app_set_id(void) {
     CU_ASSERT_EQUAL(create_secure_app(&secure_app), 0);
     CU_ASSERT_EQUAL(secure_app_set_id(secure_app, "id"), 0);
     CU_ASSERT_STRING_EQUAL(secure_app->id, "id");
-    CU_ASSERT_EQUAL(secure_app_set_id(secure_app, "id2"), 1);
     destroy_secure_app(secure_app);
 }
 
 void test_secure_app_add_permission(void) {
     secure_app_t *secure_app = NULL;
     CU_ASSERT_EQUAL(create_secure_app(&secure_app), 0);
-    CU_ASSERT_EQUAL(secure_app_add_permission(secure_app, "perm"), -EINVAL);
-    CU_ASSERT_EQUAL(secure_app_set_id(secure_app, "id"), 0);
     CU_ASSERT_EQUAL(secure_app_add_permission(secure_app, "perm"), 0);
-    CU_ASSERT_EQUAL(secure_app->policies.size, 1);
-    CU_ASSERT_STRING_EQUAL(secure_app->policies.policies[0].k.client, "id");
-    CU_ASSERT_STRING_EQUAL(secure_app->policies.policies[0].k.permission, "perm");
-    CU_ASSERT_STRING_EQUAL(secure_app->policies.policies[0].v.value, AUTHORIZED);
-    CU_ASSERT_EQUAL(secure_app->policies.policies->v.expire, 0);
+    CU_ASSERT_EQUAL(secure_app->permission_set.size, 1);
+    CU_ASSERT_STRING_EQUAL(secure_app->permission_set.permissions[0], "perm");
     destroy_secure_app(secure_app);
 }
 
@@ -68,9 +62,9 @@ void test_secure_app_add_path(void) {
     secure_app_t *secure_app = NULL;
     CU_ASSERT_EQUAL(create_secure_app(&secure_app), 0);
     CU_ASSERT_EQUAL(secure_app_add_path(secure_app, "/tmp", type_conf), 0);
-    CU_ASSERT_EQUAL(secure_app->paths.size, 1);
-    CU_ASSERT_STRING_EQUAL(secure_app->paths.paths[0].path, "/tmp");
-    CU_ASSERT_EQUAL(secure_app->paths.paths[0].path_type, type_conf);
+    CU_ASSERT_EQUAL(secure_app->path_set.size, 1);
+    CU_ASSERT_STRING_EQUAL(secure_app->path_set.paths[0].path, "/tmp");
+    CU_ASSERT_EQUAL(secure_app->path_set.paths[0].path_type, type_conf);
     destroy_secure_app(secure_app);
 }
 
@@ -81,8 +75,8 @@ void test_free_secure_app(void) {
     CU_ASSERT_EQUAL(secure_app_add_path(secure_app, "/tmp", type_conf), 0);
     CU_ASSERT_EQUAL(secure_app_add_permission(secure_app, "perm"), 0);
     free_secure_app(secure_app);
-    CU_ASSERT_EQUAL(secure_app->paths.size, 0);
-    CU_ASSERT_EQUAL(secure_app->policies.size, 0);
+    CU_ASSERT_EQUAL(secure_app->path_set.size, 0);
+    CU_ASSERT_EQUAL(secure_app->permission_set.size, 0);
     CU_ASSERT_EQUAL(secure_app->id, NULL);
     destroy_secure_app(secure_app);
 }

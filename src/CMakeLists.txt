@@ -39,7 +39,6 @@ set(SERVER_SOURCES
     prot.c
     security-manager-protocol.c
     security-manager-server.c
-    main-security-managerd.c
 )
 
 if(WITH_SMACK)
@@ -85,7 +84,7 @@ install(FILES security-manager.h DESTINATION ${CMAKE_INSTALL_FULL_INCLUDEDIR})
 # build and install security-managerd
 #####################################
 
-add_executable(security-managerd ${SERVER_SOURCES})
+add_executable(security-managerd main-security-managerd.c ${SERVER_SOURCES})
 
 target_compile_definitions(security-managerd PRIVATE
     DEFAULT_SOCKET_DIR="${DEFAULT_SOCKET_DIR}"
