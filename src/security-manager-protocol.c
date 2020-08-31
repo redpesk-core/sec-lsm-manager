@@ -29,7 +29,7 @@
 
 const char _security_manager_[] = "security-manager", _done_[] = "done", _error_[] = "error", _log_[] = "log",
            _id_[] = "id", _permission_[] = "permission", _path_[] = "path", _install_[] = "install",
-           _uninstall_[] = "uninstall", _display_[] = "display", _clean_[] = "clean", _on_[] = "on", _off_[] = "off",
+           _uninstall_[] = "uninstall", _display_[] = "display", _clear_[] = "clear", _on_[] = "on", _off_[] = "off",
            _string_[] = "string";
 
 #if !defined(DEFAULT_SOCKET_SCHEME)

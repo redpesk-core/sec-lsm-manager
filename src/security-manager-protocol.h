@@ -26,7 +26,7 @@
 #define SECURITY_MANAGER_PROTOCOL_H
 
 extern const char _security_manager_[], _done_[], _error_[], _log_[], _id_[], _permission_[], _path_[], _install_[],
-    _uninstall_[], _display_[], _clean_[], _on_[], _off_[], _string_[];
+    _uninstall_[], _display_[], _clear_[], _on_[], _off_[], _string_[];
 
 /* predefined names */
 extern const char security_manager_default_socket_scheme[], security_manager_default_socket_dir[],

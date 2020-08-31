@@ -41,29 +41,28 @@
 /***********************/
 
 /**
- * @brief Initialize the fields 'id', 'policies' and 'paths'
+ * @brief Initialize the fields 'id', 'permission_set', 'path_set' and error_flag
  *
  * @param[in] secure_app handler
  * @return 0 in case of success or a negative -errno value
  */
-static int init_secure_app(secure_app_t *secure_app) {
-    if (!secure_app) {
-        ERROR("secure_app undefined");
-        return -EINVAL;
-    }
+__nonnull() static int init_secure_app(secure_app_t *secure_app) __wur {
+    CHECK_NO_NULL(secure_app, "secure_app");
 
     secure_app->id = NULL;
-    int rc = init_paths(&(secure_app->paths));
+    int rc = init_path_set(&(secure_app->path_set));
     if (rc < 0) {
-        ERROR("init_paths");
+        ERROR("init_path_set");
         return rc;
     }
 
-    rc = init_policies(&(secure_app->policies));
+    rc = init_permission_set(&(secure_app->permission_set));
     if (rc < 0) {
-        ERROR("init_policies");
+        ERROR("init_permission_set");
         return rc;
     }
+
+    secure_app->error_flag = false;
 
     return 0;
 }
@@ -93,13 +92,14 @@ int create_secure_app(secure_app_t **secure_app) {
 
 /* see secure-app.h */
 void free_secure_app(secure_app_t *secure_app) {
-    if (secure_app) {
-        free((void *)secure_app->id);
-        secure_app->id = NULL;
+    CHECK_NO_NULL_NO_RETURN(secure_app, "secure_app");
 
-        free_policies(&(secure_app->policies));
-        free_paths(&(secure_app->paths));
-    }
+    free((void *)secure_app->id);
+    secure_app->id = NULL;
+
+    free_permission_set(&(secure_app->permission_set));
+    free_path_set(&(secure_app->path_set));
+    secure_app->error_flag = false;
 }
 
 /* see secure-app.h */
@@ -114,8 +114,15 @@ void destroy_secure_app(secure_app_t *secure_app) {
 int secure_app_set_id(secure_app_t *secure_app, const char *id) {
     CHECK_NO_NULL(secure_app, "secure_app");
     CHECK_NO_NULL(id, "id");
+
+    if (secure_app->id) {
         ERROR("id already set");
         return -EINVAL;
+    }
+
+    if (secure_app->error_flag) {
+        ERROR("error flag has been raised");
+        return -EPERM;
     }
 
     secure_app->id = strdup(id);
@@ -129,23 +136,24 @@ int secure_app_set_id(secure_app_t *secure_app, const char *id) {
 
 /* see secure-app.h */
 int secure_app_add_permission(secure_app_t *secure_app, const char *permission) {
-    if (!secure_app) {
-        ERROR("secure_app undefined");
-        return -EINVAL;
-    } else if (!permission) {
-        ERROR("permission undefined");
-        return -EINVAL;
-    } else if (!secure_app->id) {
-        ERROR("secure_app id undefined");
-        return -EINVAL;
+    CHECK_NO_NULL(secure_app, "secure_app");
+    CHECK_NO_NULL(permission, "permission");
+
+    if (secure_app->error_flag) {
+        ERROR("error flag has been raised");
+        return -EPERM;
     }
 
-    cynagora_key_t k = {secure_app->id, INSERT_ALL, INSERT_ALL, permission};
-    cynagora_value_t v = {AUTHORIZED, 0};
+    for (size_t i = 0; i < secure_app->permission_set.size; i++) {
+        if (!strcmp(secure_app->permission_set.permissions[i], permission)) {
+            ERROR("permission already defined");
+            return -EINVAL;
+        }
+    }
 
-    int rc = policies_add_policy(&(secure_app->policies), &k, &v);
+    int rc = permission_set_add_permission(&(secure_app->permission_set), permission);
     if (rc < 0) {
-        ERROR("policies_add_policy");
+        ERROR("permission_set_add_permission");
         return rc;
     }
 
@@ -154,22 +162,38 @@ int secure_app_add_permission(secure_app_t *secure_app, const char *permission) 
 
 /* see secure-app.h */
 int secure_app_add_path(secure_app_t *secure_app, const char *path, enum path_type path_type) {
-    if (!secure_app) {
-        ERROR("secure_app undefined");
-        return -EINVAL;
-    } else if (!path) {
-        ERROR("path undefined");
-        return -EINVAL;
-    } else if (!valid_path_type(path_type)) {
+    CHECK_NO_NULL(secure_app, "secure_app");
+    CHECK_NO_NULL(path, "path");
+
+    if (!valid_path_type(path_type)) {
         ERROR("path_type invalid");
         return -EINVAL;
     }
 
-    int rc = paths_add_path(&(secure_app->paths), path, path_type);
+    if (secure_app->error_flag) {
+        ERROR("error flag has been raised");
+        return -EPERM;
+    }
+
+    for (size_t i = 0; i < secure_app->path_set.size; i++) {
+        if (!strcmp(secure_app->path_set.paths[i].path, path)) {
+            ERROR("path already defined");
+            return -EINVAL;
+        }
+    }
+
+    int rc = path_set_add_path(&(secure_app->path_set), path, path_type);
     if (rc < 0) {
-        ERROR("paths_add_path");
+        ERROR("path_set_add_path");
         return rc;
     }
 
     return 0;
+}
+
+/* see secure-app.h */
+void raise_error_flag(secure_app_t *secure_app) {
+    CHECK_NO_NULL_NO_RETURN(secure_app, "secure_app");
+
+    secure_app->error_flag = true;
 }

@@ -69,10 +69,10 @@ typedef struct path {
  * paths contains several path
  *
  */
-typedef struct paths {
+typedef struct path_set {
     path_t *paths;
     size_t size;
-} paths_t;
+} path_set_t;
 
 /**
  * @brief Initialize the fields 'size' and 'paths'
@@ -80,7 +80,7 @@ typedef struct paths {
  * @param[in] paths paths handler
  * @return int 0 in case of success or a negative -errno value
  */
-int init_paths(paths_t *paths) __wur;
+int init_path_set(path_set_t *path_set) __wur __nonnull();
 
 /**
  * @brief Free paths that have been added
@@ -88,7 +88,7 @@ int init_paths(paths_t *paths) __wur;
  *
  * @param[in] paths paths handler
  */
-void free_paths(paths_t *paths);
+void free_path_set(path_set_t *path_set) __nonnull();
 
 /**
  * @brief Add a path to paths
@@ -98,7 +98,7 @@ void free_paths(paths_t *paths);
  * @param path_type[in] The path_type to add
  * @return 0 in case of success or a negative -errno value
  */
-int paths_add_path(paths_t *paths, const char *path, enum path_type path_type) __wur;
+int path_set_add_path(path_set_t *path_set, const char *path, enum path_type path_type) __wur __nonnull();
 
 /**
  * @brief Check if path type is valid
@@ -111,10 +111,10 @@ bool valid_path_type(enum path_type path_type) __wur;
 /**
  * @brief Get the path type object associate to a string path type
  *
- * @param[in] path_type The string path type
+ * @param[in] path_type_string The string path type
  * @return enum path_type The enumaration associate
  */
-enum path_type get_path_type(const char *path_type);
+enum path_type get_path_type(const char *path_type_string) __wur __nonnull();
 
 /**
  * @brief Get the path type string associate to a enum path_type
@@ -122,6 +122,6 @@ enum path_type get_path_type(const char *path_type);
  * @param[in] path_type The path type enumaration
  * @return const char* The string associate
  */
-const char *get_path_type_string(enum path_type path_type);
+const char *get_path_type_string(enum path_type path_type) __wur;
 
 #endif

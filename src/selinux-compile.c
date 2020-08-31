@@ -25,6 +25,7 @@
 
 #include <errno.h>
 #include <signal.h>
+#include <stdlib.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
@@ -39,43 +40,11 @@
 int launch_compile() {
     int rc;
 
-    siginfo_t si;
-    char *argv[] = {NULL};
-    char *envp[] = {NULL};
-
-    rc = fork();  // Generate two process
-
-    if (rc == 0) {  // FIRST PROCESS ==> rc = 0
-        rc = execve(COMPILE_SCRIPT, argv, envp);
-        ERROR("can't execute %s %m", COMPILE_SCRIPT);
-        _exit(1);
-        return rc;
-    }
-
-    // OTHER PROCESS ==> rc != 0
-    if (rc < 0) {
-        rc = -errno;
-        ERROR("fork %m");
-        return rc;
-    }
-
-    rc = waitid(P_PID, (id_t)rc, &si, WEXITED);  // wait end exec
+    rc = system(COMPILE_SCRIPT);
 
     if (rc < 0) {
-        rc = -errno;
-        ERROR("waitid");
-        return rc;
+        ERROR("launch compile failed : %s", COMPILE_SCRIPT);
     }
 
-    if (si.si_code != CLD_EXITED) {
-        ERROR("unexpected termination status");
-        return -1;
-    }
-
-    if (si.si_status != 0) {
-        ERROR("child terminated with error code %d", si.si_status);
-        return -1;
-    }
-
-    return 0;
+    return rc;
 }

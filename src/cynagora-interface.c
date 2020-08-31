@@ -23,6 +23,10 @@
 
 #include "cynagora-interface.h"
 
+#define SELECT_ALL "#"
+#define INSERT_ALL "*"
+#define AUTHORIZED "yes"
+
 #include <errno.h>
 #include <string.h>
 
@@ -59,14 +63,9 @@ int cynagora_drop_policies(cynagora_t *cynagora, const char *client) {
 }
 
 /* see cynagora-interface.h */
-int cynagora_set_policies(cynagora_t *cynagora, const policies_t *policies) {
-    if (!cynagora) {
-        ERROR("cynagora undefined");
-        return -EINVAL;
-    } else if (!policies) {
-        ERROR("policies undefined");
-        return -EINVAL;
-    }
+int cynagora_set_policies(cynagora_t *cynagora, const char *client, const permission_set_t *permission_set) {
+    CHECK_NO_NULL(cynagora, "cynagora");
+    CHECK_NO_NULL(permission_set, "permission_set");
 
     // enter to modify policies cynagora
     int rc = cynagora_enter(cynagora);
@@ -76,10 +75,14 @@ int cynagora_set_policies(cynagora_t *cynagora, const policies_t *policies) {
     }
 
     size_t i = 0;
-    while (i < policies->size) {
-        rc = cynagora_set(cynagora, &(policies->policies[i].k), &(policies->policies[i].v));
+    cynagora_key_t k = {client, INSERT_ALL, INSERT_ALL, NULL};
+    cynagora_value_t v = {AUTHORIZED, 0};
+
+    while (i < permission_set->size) {
+        k.permission = permission_set->permissions[i];
+        rc = cynagora_set(cynagora, &k, &v);
         if (rc < 0) {
-            ERROR("cynagora_set : %s %s", -rc, strerror(-rc));
+            ERROR("cynagora_set : %d %s", -rc, strerror(-rc));
             break;
         }
         i++;

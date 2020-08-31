@@ -33,37 +33,28 @@
 char prefix_app[] = "App:";
 char suffix_lib[] = ":Lib";
 char suffix_conf[] = ":Conf";
-char suffix_exec[] = ":Exec";
+char suffix_exec[] = ":Exec";  // see label_exec before remove this line
 char suffix_icon[] = ":Icon";
 char suffix_data[] = ":Data";
 char suffix_http[] = ":Http";
 char user_home[] = "User:Home";
 char public_app[] = "_";
 
-/**********************/
-/*** PUBLIC METHODS ***/
-/**********************/
+/***********************/
+/*** PRIVATE METHODS ***/
+/***********************/
 
-/* see smack-label.h */
-int smack_enabled() {
-    int rc = 0;
-    if (smack_smackfs_path() == NULL) {
-        rc = 0;
-    }
-    rc = 1;
-
-    return rc;
-}
-
-/* see smack-label.h */
-int generate_label(char **label, const char *id, const char *prefix, const char *suffix) {
-    if (!id) {
-        ERROR("id undefined");
-        return -EINVAL;
-    } else if (!id && !prefix && !suffix) {
-        ERROR("id, prefix and suffix undefined");
-        return -EINVAL;
-    }
+/**
+ * @brief Generate smack label
+ *
+ * @param[out] label allocate and set the label
+ * @param[in] id The id of the application
+ * @param[in] prefix The prefix to add at the begin of the label
+ * @param[in] suffix The suffix to add at the end of the label
+ * @return 0 in case of success or a negative -errno value
+ */
+__nonnull((2)) static int generate_label(char **label, const char *id, const char *prefix, const char *suffix) __wur {
+    CHECK_NO_NULL(id, "id");
 
     size_t len_label = 0;
     size_t len_prefix = 0;
@@ -73,8 +64,7 @@ int generate_label(char **label, const char *id, const char *prefix, const char 
     if (prefix)
         len_prefix = strlen(prefix);
 
-    if (id)
-        len_id = strlen(id);
+    len_id = strlen(id);
 
     if (suffix)
         len_suffix = strlen(suffix);
@@ -92,8 +82,7 @@ int generate_label(char **label, const char *id, const char *prefix, const char 
     if (prefix)
         memcpy(*label, prefix, len_prefix);
 
-    if (id)
-        memcpy(*label + len_prefix, id, len_id);
+    memcpy(*label + len_prefix, id, len_id);
 
     if (suffix)
         memcpy(*label + len_prefix + len_id, suffix, len_suffix);
@@ -108,51 +97,77 @@ int generate_label(char **label, const char *id, const char *prefix, const char 
     return 0;
 }
 
+/**********************/
+/*** PUBLIC METHODS ***/
+/**********************/
+
 /* see smack-label.h */
-int get_path_type_info(enum path_type path_type, char **suffix, bool *is_executable, bool *is_transmute,
-                       bool *is_public) {
-    if (!valid_path_type(path_type)) {
-        ERROR("path_type invalid");
-        return -EINVAL;
+bool smack_enabled() {
+    if (smack_smackfs_path() == NULL) {
+        return false;
     }
+    return true;
+}
 
-    *is_executable = false;
-    *is_transmute = false;
-    *is_public = false;
-
-    switch (path_type) {
-        case type_conf:
-            *suffix = suffix_conf;
-            return 0;
-        case type_data:
-            *suffix = suffix_data;
-            *is_transmute = true;
-            return 0;
-        case type_exec:
-            *suffix = suffix_exec;
-            *is_executable = true;
-            return 0;
-        case type_http:
-            *suffix = suffix_http;
-            *is_transmute = true;
-            return 0;
-        case type_icon:
-            *suffix = suffix_icon;
-            return 0;
-        case type_id:
-            *suffix = "";
-            return 0;
-        case type_lib:
-            *suffix = suffix_lib;
-            return 0;
-        case type_public:
-            *is_public = true;
-            *suffix = NULL;
-            return 0;
-        default:
-            break;
+/* see smack-label.h */
+void free_path_type_definitions(path_type_definitions_t path_type_definitions[number_path_type]) {
+    for (int i = 1; i < number_path_type; i++) {
+        free(path_type_definitions[i].label);
     }
+}
 
-    ERROR("Path type invalid");
-    return -EINVAL;
+/* see smack-label.h */
+int init_path_type_definitions(path_type_definitions_t path_type_definitions[number_path_type], const char *id) {
+    CHECK_NO_NULL(id, "id");
+
+    int rc = 0;
+    // conf
+    if (generate_label(&path_type_definitions[type_conf].label, id, prefix_app, suffix_conf) < 0)
+        goto error;
+
+    // data
+    if (generate_label(&path_type_definitions[type_data].label, id, prefix_app, suffix_data) < 0)
+        goto error;
+
+    // exec
+    if (generate_label(&path_type_definitions[type_exec].label, id, prefix_app, suffix_exec) < 0)
+        goto error;
+
+    // http
+    if (generate_label(&path_type_definitions[type_http].label, id, prefix_app, suffix_http) < 0)
+        goto error;
+
+    // icon
+    if (generate_label(&path_type_definitions[type_icon].label, id, prefix_app, suffix_icon) < 0)
+        goto error;
+
+    // id
+    if (generate_label(&path_type_definitions[type_id].label, id, prefix_app, NULL) < 0)
+        goto error;
+
+    // lib
+    if (generate_label(&path_type_definitions[type_lib].label, id, prefix_app, suffix_lib) < 0)
+        goto error;
+
+    // public
+    if (generate_label(&path_type_definitions[type_public].label, public_app, NULL, NULL) < 0)
+        goto error;
+
+    // executable
+    path_type_definitions[type_exec].is_executable = true;
+
+    // transmute
+    path_type_definitions[type_data].is_transmute = true;
+    path_type_definitions[type_http].is_transmute = true;
+    path_type_definitions[type_id].is_transmute = true;
+    path_type_definitions[type_lib].is_transmute = true;
+    path_type_definitions[type_public].is_transmute = true;
+
+    goto ret;
+error:
+    free_path_type_definitions(path_type_definitions);
+    ERROR("allocation label");
+    rc = -ENOMEM;
+ret:
+    return rc;
 }

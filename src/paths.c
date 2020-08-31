@@ -52,66 +52,51 @@ __nonnull() static void free_path(path_t *path) {
 /**********************/
 
 /* see paths.h */
-int init_paths(paths_t *paths) {
-    if (!paths) {
-        ERROR("policies undefined");
-        return -EINVAL;
-    }
-    paths->size = 0;
-    paths->paths = NULL;
+int init_path_set(path_set_t *path_set) {
+    CHECK_NO_NULL(path_set, "path_set");
+
+    path_set->size = 0;
+    path_set->paths = NULL;
     return 0;
 }
 
 /* see paths.h */
-void free_paths(paths_t *paths) {
-    if (paths) {
-        for (size_t i = 0; i < paths->size; i++) {
-            free_path(paths->paths + i);
-        }
-        paths->size = 0;
-        free(paths->paths);
-        paths->paths = NULL;
+void free_path_set(path_set_t *path_set) {
+    CHECK_NO_NULL_NO_RETURN(path_set, "path_set");
+
+    for (size_t i = 0; i < path_set->size; i++) {
+        free_path(path_set->paths + i);
     }
+    path_set->size = 0;
+    free(path_set->paths);
+    path_set->paths = NULL;
 }
 
 /* see paths.h */
-int paths_add_path(paths_t *paths, const char *path, enum path_type path_type) {
-    if (!paths) {
-        ERROR("paths undefined");
-        return -EINVAL;
-    } else if (!path) {
-        ERROR("path undefined");
-        return -EINVAL;
-    } else if (!valid_path_type(path_type)) {
+int path_set_add_path(path_set_t *path_set, const char *path, enum path_type path_type) {
+    CHECK_NO_NULL(path_set, "path_set");
+    CHECK_NO_NULL(path, "path");
+
+    if (!valid_path_type(path_type)) {
         ERROR("invalid path type");
         return -EINVAL;
     }
 
-    if (paths->size == 0) {
-        paths->paths = (path_t *)malloc(sizeof(path_t));
-        if (paths->paths == NULL) {
-            ERROR("malloc path_t");
-            return -ENOMEM;
-        }
-    } else {
-        path_t *paths_tmp = (path_t *)realloc(paths->paths, sizeof(path_t) * (paths->size + 1));
-        if (paths_tmp == NULL) {
-            ERROR("realloc paths_t");
-            free_paths(paths);
-            return -ENOMEM;
-        }
-        paths->paths = paths_tmp;
+    path_t *path_set_tmp = (path_t *)realloc(path_set->paths, sizeof(path_t) * (path_set->size + 1));
+    if (path_set_tmp == NULL) {
+        ERROR("realloc path_set_t");
+        return -ENOMEM;
     }
+    path_set->paths = path_set_tmp;
 
-    paths->paths[paths->size].path = strdup(path);
-    if (paths->paths[paths->size].path == NULL) {
+    path_set->paths[path_set->size].path = strdup(path);
+    if (path_set->paths[path_set->size].path == NULL) {
         ERROR("strdup path");
-        free_paths(paths);
         return -ENOMEM;
     }
 
-    paths->paths[paths->size].path_type = path_type;
-    paths->size++;
+    path_set->paths[path_set->size].path_type = path_type;
+    path_set->size++;
 
     return 0;
 }
@@ -125,55 +110,52 @@ bool valid_path_type(enum path_type path_type) {
 }
 
 /* see paths.h */
-enum path_type get_path_type(const char *path_type) {
-    if (!path_type) {
-        ERROR("path_type undefined");
-        return type_none;
-    }
+enum path_type get_path_type(const char *path_type_string) {
+    CHECK_NO_NULL(path_type_string, "path_type");
 
-    switch (path_type[0]) {
+    switch (path_type_string[0]) {
         case 'c':
-            if (!strcmp(path_type, "conf")) {
+            if (!strcmp(path_type_string, "conf")) {
                 return type_conf;
             }
             break;
         case 'd':
-            if (!strcmp(path_type, "data")) {
+            if (!strcmp(path_type_string, "data")) {
                 return type_data;
             }
             break;
         case 'e':
-            if (!strcmp(path_type, "exec")) {
+            if (!strcmp(path_type_string, "exec")) {
                 return type_exec;
             }
             break;
         case 'h':
-            if (!strcmp(path_type, "http")) {
+            if (!strcmp(path_type_string, "http")) {
                 return type_http;
             }
             break;
         case 'i':
-            if (!strcmp(path_type, "icon")) {
+            if (!strcmp(path_type_string, "icon")) {
                 return type_icon;
             }
-            if (!strcmp(path_type, "id")) {
+            if (!strcmp(path_type_string, "id")) {
                 return type_id;
             }
             break;
         case 'l':
-            if (!strcmp(path_type, "lib")) {
+            if (!strcmp(path_type_string, "lib")) {
                 return type_lib;
             }
             break;
         case 'p':
-            if (!strcmp(path_type, "public")) {
+            if (!strcmp(path_type_string, "public")) {
                 return type_public;
             }
             break;
         default:
             break;
     }
-    ERROR("Path type invalid: %s", path_type);
+    ERROR("Path type invalid: %s", path_type_string);
     return type_none;
 }
 

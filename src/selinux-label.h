@@ -30,14 +30,9 @@
 
 #include "paths.h"
 
-extern char suffix_id[];
-extern char suffix_lib[];
-extern char suffix_conf[];
-extern char suffix_exec[];
-extern char suffix_icon[];
-extern char suffix_data[];
-extern char suffix_http[];
-extern char public_app[];
+typedef struct path_type_definitions {
+    char *label;
+} path_type_definitions_t;
 
 /**
  * @brief Check if selinux is enabled
@@ -48,23 +43,20 @@ extern char public_app[];
 bool selinux_enabled() __wur;
 
 /**
- * @brief Generate selinux label
+ * @brief Init differents labels for all path type
  *
- * @param[out] label Alloc and set the label
- * @param[in] id The id of the application
- * @param[in] suffix The suffix to add at the end of the label
+ * @param[in] path_type_definitions Array definition to complete
+ * @param[in] id to generate label of an application
+ *
  * @return 0 in case of success or a negative -errno value
  */
-int generate_label(char **label, const char *id, const char *suffix) __wur;
+int init_path_type_definitions(path_type_definitions_t path_type_definitions[number_path_type], const char *id) __wur
+    __nonnull((2));
 
 /**
- * @brief Get path type info in a selinux context
+ * @brief Free path type definition label
  *
- * @param[in] path_type The path type information
- * @param[out] suffix The suffix to choose
- * @param[out] is_public true if path is public
- * @return 0 in case of success or a negative -errno value
+ * @param[in] path_type_definitions Array definition to free
  */
-int get_path_type_info(enum path_type path_type, char **suffix, bool *is_public) __wur;
-
+void free_path_type_definitions(path_type_definitions_t path_type_definitions[number_path_type]) __nonnull();
 #endif

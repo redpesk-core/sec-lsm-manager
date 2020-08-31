@@ -31,7 +31,6 @@
 #include <unistd.h>
 
 #include "log.h"
-#include "smack-label.h"
 #include "utils.h"
 
 #define MAX_SMACK_LABEL_SIZE SMACK_LABEL_LEN
@@ -65,7 +64,6 @@ const char prefix_app_rules[] = "app-";
 
 typedef struct smack_handle {
     const char *id;
-    char *app_label;
     struct smack_accesses *smack_accesses;
 } smack_handle_t;
 
@@ -106,13 +104,6 @@ __nonnull() static int init_smack_handle(smack_handle_t *smack_handle, const cha
     if (!smack_handle->id) {
         rc = -errno;
         ERROR("strdup id %m");
-        return rc;
-    }
-
-    rc = generate_label(&(smack_handle->app_label), id, prefix_app, NULL);
-    if (rc < 0) {
-        ERROR("generate_label");
-        free_smack_handle(smack_handle);
         return rc;
     }
 
@@ -173,8 +164,8 @@ __nonnull() static int parse_line(char *line, const smack_handle_t *smack_handle
     line[strcspn(line, "\n")] = 0;
     while ((pos_str = strstr(line, REPLACE_APP))) {
         strcpy(after, pos_str + strlen(REPLACE_APP));  // save overwrite data
-        strcpy(pos_str, smack_handle->app_label);
-        strcpy(pos_str + strlen(smack_handle->app_label), after);
+        strcpy(pos_str, path_type_definitions[type_id].label);
+        strcpy(pos_str + strlen(path_type_definitions[type_id].label), after);
     }
 
     // check valid rule
@@ -228,7 +219,7 @@ __nonnull() static int parse_template_file(const char *smack_template_file, cons
     }
 
     while (rc >= 0 && fgets(line, MAX_SMACK_LABEL_SIZE, f)) {
-        rc = parse_line(line, smack_handle);
+        rc = parse_line(line, smack_handle, path_type_definitions);
     }
 
     if (rc < 0) {
@@ -397,7 +388,7 @@ int create_smack_rules(const secure_app_t *secure_app, path_type_definitions_t p
         return rc;
     }
 
-    rc = parse_template_file(smack_template_file, &smack_handle);
+    rc = parse_template_file(smack_template_file, &smack_handle, path_type_definitions);
     if (rc < 0) {
         ERROR("parse_template_file")
         free_smack_handle(&smack_handle);

@@ -27,6 +27,7 @@
 #include <sys/cdefs.h>
 
 #include "secure-app.h"
+#include "smack-label.h"
 
 /**
  * @brief Get the selinux template file

@@ -41,7 +41,7 @@
 #include "log.h"
 #include "pollitem.h"
 #include "prot.h"
-#include "security-manager-operation.h"
+#include "secure-app.h"
 #include "security-manager-protocol.h"
 #include "socket.h"
 #include "utils.h"
@@ -58,7 +58,8 @@ struct client {
     /** a protocol structure */
     prot_t *prot;
 
-    security_manager_handle_t sm_handle;
+    /** secure_app used by the client */
+    secure_app_t *secure_app;
 
     /** the version of the protocol used */
     unsigned version : 1;
@@ -71,6 +72,9 @@ struct client {
 
     /** polling callback */
     pollitem_t pollitem;
+
+    /** server of the client */
+    security_manager_server_t *security_manager_server;
 };
 
 /** structure for servers */
@@ -78,12 +82,28 @@ struct security_manager_server {
     /** the pollfd to use */
     int pollfd;
 
+    /** number of client */
+    int count;
+
     /** is stopped ? */
     int stopped;
+
+    /** cynagora client used by all client */
+    cynagora_t *cynagora_admin_client;
 
     /** the server socket */
     pollitem_t socket;
 };
+
+#ifdef WITH_SMACK
+#include "smack.h"
+static int (*install_mac)(const secure_app_t *secure_app) = install_smack;
+static int (*uninstall_mac)(const secure_app_t *secure_app) = uninstall_smack;
+#elif WITH_SELINUX
+#include "selinux.h"
+static int (*install_mac)(const secure_app_t *secure_app) = install_selinux;
+static int (*uninstall_mac)(const secure_app_t *secure_app) = uninstall_selinux;
+#endif
 
 /***********************/
 /*** PRIVATE METHODS ***/
@@ -221,6 +241,8 @@ __nonnull() static void send_done(client_t *cli) {
  */
 __nonnull((1)) static void send_error(client_t *cli, const char *errorstr) {
     CHECK_NO_NULL_NO_RETURN(cli, "cli");
+
+    raise_error_flag(cli->secure_app);
     putx(cli, _error_, errorstr, NULL);
     flushw(cli);
 }
@@ -230,19 +252,117 @@ __nonnull((1)) static void send_error(client_t *cli, const char *errorstr) {
  *
  * @param[in] cli client handler
  */
-static void send_display_security_manager_handle(client_t *cli) {
-    if (cli->sm_handle.secure_app->id) {
-        putx(cli, _string_, _id_, cli->sm_handle.secure_app->id, NULL);
+__nonnull() static int send_display_security_manager_handle(client_t *cli) __wur {
+    CHECK_NO_NULL(cli, "cli");
+
+    if (cli->secure_app->error_flag) {
+        ERROR("error flag has been raised, clear secure app");
+        return -EPERM;
     }
 
-    for (size_t i = 0; i < cli->sm_handle.secure_app->paths.size; i++) {
-        putx(cli, _string_, _path_, cli->sm_handle.secure_app->paths.paths[i].path,
-             cli->sm_handle.secure_app->paths.paths[i].path_type, NULL);
+    if (cli->secure_app->id) {
+        putx(cli, _string_, _id_, cli->secure_app->id, NULL);
     }
 
-    for (size_t i = 0; i < cli->sm_handle.secure_app->policies.size; i++) {
-        putx(cli, _string_, _permission_, cli->sm_handle.secure_app->policies.policies[i].k.permission, NULL);
+    for (size_t i = 0; i < cli->secure_app->path_set.size; i++) {
+        putx(cli, _string_, _path_, cli->secure_app->path_set.paths[i].path,
+             get_path_type_string(cli->secure_app->path_set.paths[i].path_type), NULL);
     }
+
+    for (size_t i = 0; i < cli->secure_app->permission_set.size; i++) {
+        putx(cli, _string_, _permission_, cli->secure_app->permission_set.permissions[i], NULL);
+    }
+
+    return 0;
+}
+
+/**
+ * @brief Update the policy (drop the old and set the new)
+ *
+ * @param[in] sm_handle security_manager_handle handler
+ * @return 0 in case of success or a negative -errno value
+ */
+__nonnull() static int update_policy(secure_app_t *secure_app, cynagora_t *cynagora_admin_client) __wur {
+    CHECK_NO_NULL(secure_app, "secure_app");
+    CHECK_NO_NULL(cynagora_admin_client, "cynagora_admin_client");
+
+    // drop old policies
+    int rc = cynagora_drop_policies(cynagora_admin_client, secure_app->id);
+    if (rc < 0) {
+        ERROR("cynagora_drop_policies");
+        return rc;
+    }
+
+    // apply new policies
+    rc = cynagora_set_policies(cynagora_admin_client, secure_app->id, &(secure_app->permission_set));
+    if (rc < 0) {
+        ERROR("cynagora_set_policies");
+        return rc;
+    }
+
+    return 0;
+}
+
+__nonnull() static int install(client_t *cli) __wur {
+    CHECK_NO_NULL(cli, "cli");
+    CHECK_NO_NULL(cli->secure_app, "secure_app");
+    CHECK_NO_NULL(cli->secure_app->id, "id");
+
+    if (cli->secure_app->error_flag) {
+        ERROR("error flag has been raised, clear secure app");
+        return -EPERM;
+    }
+
+    int rc = update_policy(cli->secure_app, cli->security_manager_server->cynagora_admin_client);
+    if (rc < 0) {
+        ERROR("update_policy");
+        return rc;
+    }
+
+    LOG("update_policy success");
+
+    rc = install_mac(cli->secure_app);
+    if (rc < 0) {
+        ERROR("install");
+        int rc2 = cynagora_drop_policies(cli->security_manager_server->cynagora_admin_client, cli->secure_app->id);
+        if (rc2 < 0) {
+            ERROR("cannot delete policy : %d %s", -rc2, strerror(-rc2));
+        }
+        return rc;
+    }
+
+    LOG("install success");
+
+    return 0;
+}
+
+__nonnull() static int uninstall(client_t *cli) __wur {
+    CHECK_NO_NULL(cli, "cli");
+    CHECK_NO_NULL(cli->secure_app, "secure_app");
+    CHECK_NO_NULL(cli->secure_app->id, "id");
+
+    if (cli->secure_app->error_flag) {
+        ERROR("error flag has been raised, clear secure app");
+        return -EPERM;
+    }
+
+    int rc = cynagora_drop_policies(cli->security_manager_server->cynagora_admin_client, cli->secure_app->id);
+
+    if (rc < 0) {
+        ERROR("cynagora_drop_policies : %d %s", -rc, strerror(-rc));
+        return rc;
+    }
+
+    rc = uninstall_mac(cli->secure_app);
+
+    if (rc < 0) {
+        ERROR("uninstall");
+        return rc;
+    }
+
+    LOG("uninstall success");
+
+    return 0;
 }
 
 /**
@@ -285,40 +405,41 @@ __nonnull((1)) static void onrequest(client_t *cli, unsigned count, const char *
 
     switch (args[0][0]) {
         case 'c':
-            if (ckarg(args[0], _clean_, 1) && count == 1) {
-                rc = security_manager_handle_clean(&(cli->sm_handle));
-                if (rc == 0) {
-                    send_done(cli);
-                } else {
-                    send_error(cli, "security_manager_handle_clean");
-                }
+            if (ckarg(args[0], _clear_, 1) && count == 1) {
+                free_secure_app(cli->secure_app);
+                send_done(cli);
                 return;
             }
             break;
         case 'd':
             if (ckarg(args[0], _display_, 1) && count == 1) {
-                send_display_security_manager_handle(cli);
-                send_done(cli);
+                rc = send_display_security_manager_handle(cli);
+                if (rc >= 0) {
+                    send_done(cli);
+                } else {
+                    ERROR("send_display_security_manager_handle : %d %s", -rc, strerror(-rc));
+                    send_error(cli, "send_display_security_manager_handle");
+                }
                 return;
             }
             break;
         case 'i':
             if (ckarg(args[0], _id_, 1) && count == 2) {
-                rc = security_manager_handle_set_id(&(cli->sm_handle), args[1]);
-                if (rc == 0) {
+                rc = secure_app_set_id(cli->secure_app, args[1]);
+                if (rc >= 0) {
                     send_done(cli);
-                } else if (rc == 1) {
-                    send_error(cli, "id already set");
                 } else {
+                    ERROR("security_manager_handle_set_id : %d %s", -rc, strerror(-rc));
                     send_error(cli, "security_manager_handle_set_id");
                 }
                 return;
             }
             if (ckarg(args[0], _install_, 1) && count == 1) {
-                rc = security_manager_handle_install(&(cli->sm_handle));
+                rc = install(cli);
                 if (rc >= 0) {
                     send_done(cli);
                 } else {
+                    ERROR("security_manager_handle_install : %d %s", -rc, strerror(-rc));
                     send_error(cli, "security_manager_handle_install");
                 }
                 return;
@@ -340,21 +461,23 @@ __nonnull((1)) static void onrequest(client_t *cli, unsigned count, const char *
             break;
         case 'p':
             if (ckarg(args[0], _path_, 1) && count == 3) {
-                rc = security_manager_handle_add_path(&(cli->sm_handle), args[1], get_path_type(args[2]));
-                if (rc == 0) {
+                rc = secure_app_add_path(cli->secure_app, args[1], get_path_type(args[2]));
+                if (rc >= 0) {
                     putx(cli, _done_, NULL);
                     flushw(cli);
                 } else {
+                    ERROR("security_manager_handle_add_path : %d %s", -rc, strerror(-rc));
                     send_error(cli, "security_manager_handle_add_path");
                 }
                 return;
             }
             if (ckarg(args[0], _permission_, 1) && count == 2) {
-                rc = security_manager_handle_add_permission(&(cli->sm_handle), args[1]);
-                if (rc == 0) {
+                rc = secure_app_add_permission(cli->secure_app, args[1]);
+                if (rc >= 0) {
                     putx(cli, _done_, NULL);
                     flushw(cli);
                 } else {
+                    ERROR("security_manager_handle_add_permission : %d %s", -rc, strerror(-rc));
                     send_error(cli, "security_manager_handle_add_permission");
                 }
                 return;
@@ -362,10 +485,11 @@ __nonnull((1)) static void onrequest(client_t *cli, unsigned count, const char *
             break;
         case 'u':
             if (ckarg(args[0], _uninstall_, 1) && count == 1) {
-                rc = security_manager_handle_uninstall(&(cli->sm_handle));
-                if (rc == 0) {
+                rc = uninstall(cli);
+                if (rc >= 0) {
                     send_done(cli);
                 } else {
+                    ERROR("security_manager_handle_uninstall : %d %s", -rc, strerror(-rc));
                     send_error(cli, "security_manager_handle_uninstall");
                 }
                 return;
@@ -382,12 +506,19 @@ __nonnull((1)) static void onrequest(client_t *cli, unsigned count, const char *
  */
 __nonnull((1)) static void destroy_client(client_t *cli, bool closefds) {
     CHECK_NO_NULL_NO_RETURN(cli, "cli");
+
+    cli->security_manager_server->count--;
+    if (!cli->security_manager_server->count) {
+        cynagora_disconnect(cli->security_manager_server->cynagora_admin_client);
+    }
+
     /* close protocol */
     if (closefds)
         close(cli->pollitem.fd);
 
     prot_destroy(cli->prot);
-    free_security_manager_handle(&(cli->sm_handle));
+    destroy_secure_app(cli->secure_app);
+    cli->secure_app = NULL;
     free(cli);
 }
 
@@ -440,7 +571,7 @@ terminate:
  * @param[in] fd file descriptor of client
  * @return 0 in case of success or a negative -errno value
  */
-static int create_client(client_t **pcli, int fd) {
+static int create_client(client_t **pcli, int fd, security_manager_server_t *server) __wur {
     int rc = 0;
 
     /* allocate the object */
@@ -453,11 +584,14 @@ static int create_client(client_t **pcli, int fd) {
     /* create protocol object */
     rc = prot_create(&((*pcli)->prot));
     if (rc < 0) {
+        ERROR("prot_create")
         goto error1;
     }
 
-    rc = init_security_manager_handle(&((*pcli)->sm_handle));
+    rc = create_secure_app(&((*pcli)->secure_app));
     if (rc < 0) {
+        ERROR("create_secure_app");
+        (*pcli)->secure_app = NULL;
         goto error2;
     }
 
@@ -468,6 +602,9 @@ static int create_client(client_t **pcli, int fd) {
     (*pcli)->pollitem.handler = on_client_event;
     (*pcli)->pollitem.closure = (*pcli);
     (*pcli)->pollitem.fd = fd;
+    (*pcli)->security_manager_server = server;
+
+    server->count++;
 
     goto ret;
 
@@ -493,6 +630,7 @@ static void on_server_event(pollitem_t *pollitem, uint32_t events, int pollfd) {
     struct sockaddr saddr;
     socklen_t slen;
     client_t *cli;
+    security_manager_server_t *server = (security_manager_server_t *)pollitem->closure;
 
     /* is it a hangup? it shouldn't! */
     if (events & EPOLLHUP) {
@@ -515,7 +653,7 @@ static void on_server_event(pollitem_t *pollitem, uint32_t events, int pollfd) {
     fcntl(fd, F_SETFL, O_NONBLOCK);
 
     /* create a client for the connection */
-    rc = create_client(&cli, fd);
+    rc = create_client(&cli, fd, server);
     if (rc < 0) {
         fprintf(stderr, "can't create client connection: %s\n", strerror(-rc));
         close(fd);
@@ -537,14 +675,16 @@ static void on_server_event(pollitem_t *pollitem, uint32_t events, int pollfd) {
 
 /* see security-manager-server.h */
 void security_manager_server_destroy(security_manager_server_t *server) {
-    if (server) {
-        if (server->pollfd >= 0)
-            close(server->pollfd);
-        if (server->socket.fd >= 0)
-            close(server->socket.fd);
-        free(server);
-        server = NULL;
-    }
+    CHECK_NO_NULL_NO_RETURN(server, "server");
+
+    if (server->pollfd >= 0)
+        close(server->pollfd);
+    if (server->socket.fd >= 0)
+        close(server->socket.fd);
+    free(server);
+    server = NULL;
+    cynagora_destroy(server->cynagora_admin_client);
+    server->cynagora_admin_client = NULL;
 }
 
 /* see security-manager-server.h */
@@ -593,6 +733,14 @@ int security_manager_server_create(security_manager_server_t **server, const cha
         ERROR("pollitem_add socket: %m");
         goto error;
     }
+
+    rc = cynagora_create(&((*server)->cynagora_admin_client), cynagora_Admin, 1, 0);
+    if (rc < 0) {
+        ERROR("cynagora_create");
+        (*server)->cynagora_admin_client = NULL;
+        goto error;
+    }
+
     goto ret;
 
 error:
@@ -606,6 +754,7 @@ void security_manager_server_stop(security_manager_server_t *server, int status)
     CHECK_NO_NULL_NO_RETURN(server, "server");
 
     server->stopped = status ?: INT_MIN;
+    cynagora_disconnect(server->cynagora_admin_client);
 }
 
 /* see security-manager-server.h */

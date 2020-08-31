@@ -31,7 +31,7 @@ set(SERVER_SOURCES
     log.c
     utils.c
     paths.c
-    policies.c
+    permissions.c
     cynagora-interface.c
     secure-app.c
     socket.c

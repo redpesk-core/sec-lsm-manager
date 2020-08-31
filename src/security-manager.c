@@ -37,7 +37,6 @@
 
 #include "log.h"
 #include "prot.h"
-#include "security-manager-operation.h"
 #include "security-manager-protocol.h"
 #include "socket.h"
 
@@ -225,7 +224,7 @@ __nonnull() static int get_reply(security_manager_t *security_manager) __wur {
     CHECK_NO_NULL(security_manager, "security_manager");
 
     prot_next(security_manager->prot);
-    rc = prot_get(security_manager->prot, &security_manager->reply.fields);
+    int rc = prot_get(security_manager->prot, &security_manager->reply.fields);
 
     security_manager->reply.count = rc;
     return rc;
@@ -246,7 +245,7 @@ __nonnull() static int wait_reply(security_manager_t *security_manager, bool blo
 
     for (;;) {
         /* get the next reply if any */
-        rc = get_reply(security_manager);
+        int rc = get_reply(security_manager);
         if (rc > 0)
             return rc;
 
@@ -264,6 +263,7 @@ __nonnull() static int wait_reply(security_manager_t *security_manager, bool blo
             }
         }
     }
+    return -1;
 }
 
 /**
@@ -275,8 +275,9 @@ __nonnull() static int wait_reply(security_manager_t *security_manager, bool blo
  */
 __nonnull() static int wait_any_reply(security_manager_t *security_manager) __wur {
     CHECK_NO_NULL(security_manager, "security_manager");
+
     for (;;) {
-        rc = wait_reply(security_manager, true);
+        int rc = wait_reply(security_manager, true);
         if (rc < 0)
             return rc;
         if (rc > 0)
@@ -296,9 +297,10 @@ __nonnull() static int wait_done_or_error(security_manager_t *security_manager) 
     CHECK_NO_NULL(security_manager, "security_manager");
 
     int rc = wait_any_reply(security_manager);
+
     if (rc > 0) {
         if (!strcmp(security_manager->reply.fields[0], _done_)) {
-            return rc;
+            return 0;
         } else if (!strcmp(security_manager->reply.fields[0], _error_)) {
             ERROR("%s", security_manager->reply.fields[1]);
             return -1;
@@ -528,7 +530,7 @@ int security_manager_clear(security_manager_t *security_manager) {
     if (rc < 0) {
         goto ret;
     }
-    rc = putxkv(security_manager, _clean_, NULL);
+    rc = putxkv(security_manager, _clear_, NULL);
     if (rc < 0) {
         goto ret;
     }
@@ -633,29 +635,29 @@ int security_manager_display(security_manager_t *security_manager) {
     }
 
     rc = wait_reply(security_manager, true);
-    printf("################## SECURE APP ##################\n");
 
-    while (rc > 2 && !strcmp(security_manager->reply.fields[0], _string_)) {
-        if (!strcmp(security_manager->reply.fields[1], _id_)) {
-            printf("id : %s\n", security_manager->reply.fields[2]);
+    if (rc > 2 && !strcmp(security_manager->reply.fields[0], _string_)) {
+        printf("################## SECURE APP ##################\n");
+
+        while (rc > 2 && !strcmp(security_manager->reply.fields[0], _string_)) {
+            if (!strcmp(security_manager->reply.fields[1], _id_)) {
+                printf("id : %s\n", security_manager->reply.fields[2]);
+            }
+
+            if (!strcmp(security_manager->reply.fields[1], _permission_)) {
+                printf("permission : %s\n", security_manager->reply.fields[2]);
+            }
+
+            if (!strcmp(security_manager->reply.fields[1], _path_) && rc > 3) {
+                printf("path : %s %s\n", security_manager->reply.fields[2], security_manager->reply.fields[3]);
+            }
+
+            rc = wait_reply(security_manager, true);
         }
 
-        if (!strcmp(security_manager->reply.fields[1], _permission_)) {
-            printf("permission : %s\n", security_manager->reply.fields[2]);
-        }
-
-        if (!strcmp(security_manager->reply.fields[1], _path_) && rc > 3) {
-            printf("path : %s %s\n", security_manager->reply.fields[2], security_manager->reply.fields[3]);
-        }
-
-        rc = wait_reply(security_manager, true);
-    }
-
-    printf("################################################\n");
-
-    if (rc < 0 && strcmp(security_manager->reply.fields[0], _done_)) {
-        ERROR("display not done");
-        goto ret;
+        printf("################################################\n");
+    } else if (rc > 0 && !strcmp(security_manager->reply.fields[0], _error_)) {
+        ERROR("%s", security_manager->reply.fields[1]);
     }
 
 ret:

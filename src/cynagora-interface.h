@@ -24,7 +24,13 @@
 #ifndef SECURITY_MANAGER_CYNAGORA_INTERFACE_H
 #define SECURITY_MANAGER_CYNAGORA_INTERFACE_H
 
-#include "policies.h"
+#include "permissions.h"
+
+#ifndef SIMULATE_CYNAGORA
+#include <cynagora.h>
+#else
+#include "simulation/cynagora/cynagora.h"
+#endif
 
 /**
  * @brief Drop old policies of cynagora for an id (client)
@@ -39,8 +45,10 @@ int cynagora_drop_policies(cynagora_t *cynagora, const char *client) __wur __non
  * @brief Define new permissions in cynagora
  *
  * @param[in] cynagora cynagora admin client
- * @param[in] policies array of policies_t
+ * @param[in] client id of the application
+ * @param[in] permission_set array of permission_set_t
  * @return 0 in case of success or a negative -errno value
  */
-int cynagora_set_policies(cynagora_t *cynagora, const policies_t *policies) __wur;
+int cynagora_set_policies(cynagora_t *cynagora, const char *client, const permission_set_t *permission_set) __wur
+    __nonnull();
 #endif

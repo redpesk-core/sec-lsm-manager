@@ -40,7 +40,6 @@
 #include <systemd/sd-daemon.h>
 #endif
 
-#include "security-manager-operation.h"
 #include "security-manager-protocol.h"
 #include "security-manager-server.h"
 

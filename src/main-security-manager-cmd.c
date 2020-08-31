@@ -82,11 +82,11 @@ static const char help_log_text[] =
     "  log on                  activates the logging\n"
     "\n";
 
-static const char help_clean_text[] =
+static const char help_clear_text[] =
     "\n"
-    "Command: clean\n"
+    "Command: clear\n"
     "\n"
-    "Clean the actual handle of application\n"
+    "Clear the actual handle of application\n"
     "\n";
 
 static const char help_id_text[] =
@@ -122,7 +122,6 @@ static const char help_permission_text[] =
     "Command: permission permission\n"
     "\n"
     "Add a permission for the application\n"
-    "WARNING : You need to set id before\n"
     "\n"
     "Example : permission urn:AGL:permission::partner:scope-platform\n"
     "\n";
@@ -145,7 +144,7 @@ static const char help_uninstall_text[] =
 
 static const char help__text[] =
     "\n"
-    "Commands are: log, clean, display, id, path, permission, install, uninstall, quit, help\n"
+    "Commands are: log, clear, display, id, path, permission, install, uninstall, quit, help\n"
     "Type 'help command' to get help on the command\n"
     "\n"
     "Example 'help log' to get help on log\n"
@@ -164,7 +163,7 @@ static const char help_help_text[] =
     "\n"
     "Gives help on the command.\n"
     "\n"
-    "Available commands: log, clean, display, id, path, permission, install, uninstall, quit, help\n"
+    "Available commands: log, clear, display, id, path, permission, install, uninstall, quit, help\n"
     "\n";
 
 static security_manager_t *security_manager = NULL;
@@ -174,7 +173,6 @@ static size_t bufill = 0;
 static int nstr = 0;
 static int echo = 0;
 static int last_status = 0;
-static int id_set = 0;
 
 int plink(int ac, char **av, int *used, int maxi) {
     int r = 0;
@@ -187,7 +185,7 @@ int plink(int ac, char **av, int *used, int maxi) {
     return r;
 }
 
-int do_clean(int ac, char **av) {
+int do_clear(int ac, char **av) {
     int uc, rc;
     int n = plink(ac, av, &uc, 1);
 
@@ -197,13 +195,12 @@ int do_clean(int ac, char **av) {
         return uc;
     }
 
-    last_status = rc = security_manager_clean(security_manager);
+    last_status = rc = security_manager_clear(security_manager);
 
     if (rc < 0) {
         ERROR("%s", strerror(-rc));
     } else {
-        id_set = 0;
-        LOG("clean success");
+        LOG("clear success");
     }
 
     return uc;
@@ -250,10 +247,10 @@ int do_id(int ac, char **av) {
 
     if (rc < 0) {
         ERROR("%s", strerror(-rc));
-    } else {
-        id_set = 1;
-        LOG("id %s", rc ? "set" : "already set");
+        return uc;
     }
+
+    LOG("id set");
 
     return uc;
 }
@@ -294,11 +291,6 @@ int do_permission(int ac, char **av) {
     int uc, rc;
     char *permission = NULL;
     int n = plink(ac, av, &uc, 2);
-
-    if (!id_set) {
-        LOG("set id before set permission");
-        return uc;
-    }
 
     if (n < 2) {
         ERROR("not enough arguments");
@@ -398,8 +390,8 @@ int do_help(int ac, char **av) {
         fprintf(stdout, "%s", help_quit_text);
     else if (ac > 1 && !strcmp(av[1], "help"))
         fprintf(stdout, "%s", help_help_text);
-    else if (ac > 1 && !strcmp(av[1], "clean"))
-        fprintf(stdout, "%s", help_clean_text);
+    else if (ac > 1 && !strcmp(av[1], "clear"))
+        fprintf(stdout, "%s", help_clear_text);
     else if (ac > 1 && !strcmp(av[1], "id"))
         fprintf(stdout, "%s", help_id_text);
     else if (ac > 1 && !strcmp(av[1], "path"))
@@ -424,8 +416,8 @@ int do_any(int ac, char **av) {
     if (!strcmp(av[0], "log"))
         return do_log(ac, av);
 
-    if (!strcmp(av[0], "clean"))
-        return do_clean(ac, av);
+    if (!strcmp(av[0], "clear"))
+        return do_clear(ac, av);
 
     if (!strcmp(av[0], "display"))
         return do_display(ac, av);
@@ -479,7 +471,6 @@ int main(int ac, char **av) {
     int version = 0;
     int error = 0;
     char *socket = NULL;
-    struct pollfd fds[2];
     char *p;
 
     setlinebuf(stdout);
@@ -540,27 +531,22 @@ int main(int ac, char **av) {
 
     fcntl(0, F_SETFL, O_NONBLOCK);
     bufill = 0;
-    fds[0].fd = 0;
-    fds[0].events = fds[1].events = POLLIN;
     for (;;) {
-        rc = poll(fds, 2, -1);
-        if (fds[0].revents & POLLIN) {
-            rc = (int)read(0, &buffer[bufill], sizeof buffer - bufill);
-            if (rc == 0)
-                break;
-            if (rc > 0) {
-                bufill += (size_t)rc;
-                while ((p = memchr(buffer, '\n', bufill))) {
-                    /* process one line */
-                    *p++ = 0;
-                    str[nstr = 0] = strtok(buffer, " \t");
-                    while (str[nstr]) str[++nstr] = strtok(NULL, " \t");
-                    do_all(nstr, str, 0);
-                    bufill -= (size_t)(p - buffer);
-                    if (!bufill)
-                        break;
-                    memmove(buffer, p, bufill);
-                }
+        rc = (int)read(0, &buffer[bufill], sizeof buffer - bufill);
+        if (rc == 0)
+            break;
+        if (rc > 0) {
+            bufill += (size_t)rc;
+            while ((p = memchr(buffer, '\n', bufill))) {
+                /* process one line */
+                *p++ = 0;
+                str[nstr = 0] = strtok(buffer, " \t");
+                while (str[nstr]) str[++nstr] = strtok(NULL, " \t");
+                do_all(nstr, str, 0);
+                bufill -= (size_t)(p - buffer);
+                if (!bufill)
+                    break;
+                memmove(buffer, p, bufill);
             }
         }
     }

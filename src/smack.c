@@ -133,7 +133,16 @@ __nonnull() static int label_exec(const char *path, const char *label) __wur {
         return 0;  // Check that it should not be restricted.
     }
 
-    int rc = set_smack(path, XATTR_NAME_SMACKEXEC, label);
+    // remove :Exec
+    char *label_no_exec = strdupa(label);
+    if (!label_no_exec) {
+        ERROR("strdupa");
+        return -ENOMEM;
+    }
+
+    label_no_exec[strlen(label_no_exec) - strlen(suffix_exec)] = 0;
+
+    int rc = set_smack(path, XATTR_NAME_SMACKEXEC, label_no_exec);
     if (rc < 0) {
         ERROR("set_smack(%s,%s,%s)", path, XATTR_NAME_SMACKEXEC, label);
         return rc;
@@ -188,49 +197,13 @@ __nonnull((1, 2)) static int label_path(const char *path, const char *label, int
  * @param[in] id the id of the application
  * @return 0 in case of success or a negative -errno value
  */
-static int smack_process_path(const path_t *path, const char *id) {
-    if (!path) {
-        ERROR("path undefined");
-        return -EINVAL;
-    } else if (!id) {
-        ERROR("id undefined");
-        return -EINVAL;
-    } else if (!valid_path_type(path->path_type)) {
-        ERROR("invalid path type");
-        return -EINVAL;
-    }
+__nonnull() static int smack_process_path(const path_t *path,
+                                          path_type_definitions_t path_type_definitions[number_path_type]) __wur {
+    CHECK_NO_NULL(path, "path");
 
-    int rc = 0;
-    bool is_executable = false;
-    bool is_transmute = false;
-    bool is_public = false;
-    char *suffix = NULL;
-
-    rc = get_path_type_info(path->path_type, &suffix, &is_executable, &is_transmute, &is_public);
-    if (rc < 0) {
-        ERROR("get_path_type_info");
-        return rc;
-    }
-
-    char *label = NULL;
-
-    if (!is_public) {
-        rc = generate_label(&label, id, prefix_app, suffix);
-        if (rc < 0) {
-            ERROR("generate_label");
-            return rc;
-        }
-    } else {
-        label = strdup(public_app);
-        if (!label) {
-            ERROR("strdup");
-            return -ENOMEM;
-        }
-    }
-
-    rc = label_path(path->path, label, is_executable, is_transmute);
-
-    free(label);
+    int rc = label_path(path->path, path_type_definitions[path->path_type].label,
+                        path_type_definitions[path->path_type].is_executable,
+                        path_type_definitions[path->path_type].is_transmute);
 
     if (rc < 0) {
         ERROR("label_path");
@@ -246,17 +219,15 @@ static int smack_process_path(const path_t *path, const char *id) {
  * @param[in] secure_app secure app handler
  * @return 0 in case of success or a negative -errno value
  */
-static int smack_process_paths(const secure_app_t *secure_app) {
-    if (!secure_app) {
-        ERROR("secure_app undefined");
-        return -EINVAL;
-    }
+__nonnull() static int smack_process_paths(const secure_app_t *secure_app,
+                                           path_type_definitions_t path_type_definitions[number_path_type]) __wur {
+    CHECK_NO_NULL(secure_app, "secure_app");
 
-    for (size_t i = 0; i < secure_app->paths.size; i++) {
-        int rc = smack_process_path(secure_app->paths.paths + i, secure_app->id);
+    for (size_t i = 0; i < secure_app->path_set.size; i++) {
+        int rc = smack_process_path(secure_app->path_set.paths + i, path_type_definitions);
         if (rc < 0) {
-            ERROR("smack_process_path((%s,%s),%s)", secure_app->paths.paths[i].path,
-                  get_path_type_string(secure_app->paths.paths[i].path_type), secure_app->id);
+            ERROR("smack_process_path((%s,%s),%s)", secure_app->path_set.paths[i].path,
+                  get_path_type_string(secure_app->path_set.paths[i].path_type), secure_app->id);
             return rc;
         }
     }
@@ -270,33 +241,39 @@ static int smack_process_paths(const secure_app_t *secure_app) {
 
 /* see smack.h */
 int install_smack(const secure_app_t *secure_app) {
-    if (!secure_app) {
-        ERROR("secure_app undefined");
-        return -EINVAL;
-    } else if (!secure_app->id) {
-        ERROR("id undefined");
-        return -EINVAL;
+    CHECK_NO_NULL(secure_app, "secure_app");
+
+    path_type_definitions_t path_type_definitions[number_path_type] = {0};
+    int rc = init_path_type_definitions(path_type_definitions, secure_app->id);
+    if (rc < 0) {
+        ERROR("init_path_type_definitions");
+        goto ret;
     }
 
-    int rc = create_smack_rules(secure_app, NULL, NULL);
+    rc = create_smack_rules(secure_app, path_type_definitions, NULL, NULL);
     if (rc < 0) {
         ERROR("create_smack_rules");
-        return rc;
+        goto end1;
     }
 
-    LOG("create_smack_rules success");
-
-    rc = smack_process_paths(secure_app);
+    rc = smack_process_paths(secure_app, path_type_definitions);
     if (rc < 0) {
         ERROR("smack_process_paths");
-        if (remove_smack_rules(secure_app, NULL) < 0) {
-            ERROR("remove_smack_rules");
-        }
-        return rc;
+        goto error2;
     }
 
-    LOG("smack_process_paths success");
-    return 0;
+    LOG("install smack success");
+
+    goto end1;
+
+error2:
+    if (remove_smack_rules(secure_app, NULL) < 0) {
+        ERROR("remove_smack_rules");
+    }
+end1:
+    free_path_type_definitions(path_type_definitions);
+ret:
+    return rc;
 }
 
 /* see smack.h */

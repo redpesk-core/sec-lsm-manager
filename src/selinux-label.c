@@ -39,34 +39,24 @@ char suffix_data[] = "_data_t";
 char suffix_http[] = "_http_t";
 char public_app[] = "redpesk_public_t";
 
-/**********************/
-/*** PUBLIC METHODS ***/
-/**********************/
+/***********************/
+/*** PRIVATE METHODS ***/
+/***********************/
 
-/* see selinux-label.h */
-bool selinux_enabled() {
-    if (is_selinux_enabled() == 1) {
-        return true;
-    }
-    return false;
-}
-
-/* see selinux-label.h */
-int generate_label(char **label, const char *id, const char *suffix) {
-    if (!id) {
-        ERROR("id undefined");
-        return -EINVAL;
-    } else if (!id && !suffix) {
-        ERROR("id and suffix undefined");
-        return -EINVAL;
-    }
-
+/**
+ * @brief Generate selinux label
+ *
+ * @param[out] label Alloc and set the label
+ * @param[in] id The id of the application
+ * @param[in] suffix The suffix to add at the end of the label
+ * @return 0 in case of success or a negative -errno value
+ */
+__nonnull((2)) static int generate_label(char **label, const char *id, const char *suffix) __wur {
     size_t len_label = 0;
     size_t len_id = 0;
     size_t len_suffix = 0;
 
-    if (id)
-        len_id = strlen(id);
+    len_id = strlen(id);
 
     if (suffix)
         len_suffix = strlen(suffix);
@@ -80,52 +70,77 @@ int generate_label(char **label, const char *id, const char *suffix) {
         return -ENOMEM;
     }
     memset(*label, 0, len_label + 1);
+    memcpy(*label, id, len_id);
 
-    if (id)
-        memcpy(*label, id, len_id);
     if (suffix)
         memcpy(*label + len_id, suffix, len_suffix);
 
     return 0;
 }
 
+/**********************/
+/*** PUBLIC METHODS ***/
+/**********************/
+
 /* see selinux-label.h */
-int get_path_type_info(enum path_type path_type, char **suffix, bool *is_public) {
-    if (!valid_path_type(path_type)) {
-        ERROR("path_type invalid");
-        return -EINVAL;
+bool selinux_enabled() {
+    if (is_selinux_enabled() == 1) {
+        return true;
     }
+    return false;
+}
 
-    *is_public = false;
-    switch (path_type) {
-        case type_conf:
-            *suffix = suffix_conf;
-            return 0;
-        case type_data:
-            *suffix = suffix_data;
-            return 0;
-        case type_exec:
-            *suffix = suffix_exec;
-            return 0;
-        case type_http:
-            *suffix = suffix_http;
-            return 0;
-        case type_icon:
-            *suffix = suffix_icon;
-            return 0;
-        case type_id:
-            *suffix = "_t";
-            return 0;
-        case type_lib:
-            *suffix = suffix_lib;
-            return 0;
-        case type_public:
-            *is_public = 1;
-            return 0;
-        default:
-            break;
+/* see selinux-label.h */
+void free_path_type_definitions(path_type_definitions_t path_type_definitions[number_path_type]) {
+    for (int i = 1; i < number_path_type; i++) {
+        free(path_type_definitions[i].label);
     }
+}
 
-    ERROR("Path type invalid");
-    return -EINVAL;
+/* see selinux-label.h */
+int init_path_type_definitions(path_type_definitions_t path_type_definitions[number_path_type], const char *id) {
+    CHECK_NO_NULL(id, "id");
+
+    int rc = 0;
+
+    // conf
+    if (generate_label(&path_type_definitions[type_conf].label, id, suffix_conf) < 0)
+        goto error;
+
+    // data
+    if (generate_label(&path_type_definitions[type_data].label, id, suffix_data) < 0)
+        goto error;
+
+    // exec
+    if (generate_label(&path_type_definitions[type_exec].label, id, suffix_exec) < 0)
+        goto error;
+
+    // http
+    if (generate_label(&path_type_definitions[type_http].label, id, suffix_http) < 0)
+        goto error;
+
+    // icon
+    if (generate_label(&path_type_definitions[type_icon].label, id, suffix_icon) < 0)
+        goto error;
+
+    // id
+    if (generate_label(&path_type_definitions[type_id].label, id, suffix_id) < 0)
+        goto error;
+
+    // lib
+    if (generate_label(&path_type_definitions[type_lib].label, id, suffix_lib) < 0)
+        goto error;
+
+    // public
+    if (generate_label(&path_type_definitions[type_public].label, public_app, NULL) < 0)
+        goto error;
+
+    goto ret;
+
+error:
+    free_path_type_definitions(path_type_definitions);
+    ERROR("allocation label");
+    rc = -ENOMEM;
+ret:
+    return rc;
 }

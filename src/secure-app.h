@@ -31,8 +31,9 @@
 
 typedef struct secure_app {
     const char *id;
-    policies_t policies;
-    paths_t paths;
+    permission_set_t permission_set;
+    path_set_t path_set;
+    bool error_flag;
 } secure_app_t;
 
 /**
@@ -89,5 +90,12 @@ int secure_app_add_permission(secure_app_t *secure_app, const char *permission) 
  * @return 0 in case of success or a negative -errno value
  */
 int secure_app_add_path(secure_app_t *secure_app, const char *path, enum path_type path_type) __wur __nonnull();
+
+/**
+ * @brief Set error_flag
+ * The secure_app can't be installed after
+ * You need to clear to return in create state
+ */
+void raise_error_flag(secure_app_t *secure_app) __nonnull();
 
 #endif

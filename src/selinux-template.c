@@ -123,7 +123,26 @@ __nonnull() static void free_selinux_module(selinux_module_t *selinux_module) {
     selinux_module->selinux_te_template_file = NULL;
     selinux_module->selinux_if_template_file = NULL;
 }
+
+__nonnull((2, 3, 4)) static int generate_path_module_file(char **dest, const char *selinux_rules_dir, const char *id,
+                                                          const char *extension) __wur {
+    CHECK_NO_NULL(selinux_rules_dir, "selinux_rules_dir");
+    CHECK_NO_NULL(id, "id");
+    CHECK_NO_NULL(extension, "extension");
+
+    size_t len = strlen(selinux_rules_dir) + strlen(id) + strlen(extension) + 1;
+
+    *dest = (char *)malloc(len);
+    if (!(*dest)) {
+        ERROR("malloc selinux_te_file");
+        return -ENOMEM;
     }
+    memset(*dest, 0, len);
+    strcpy(*dest, selinux_rules_dir);
+    strcat(*dest, id);
+    strcat(*dest, extension);
+
+    return 0;
 }
 
 /**
@@ -132,66 +151,42 @@ __nonnull() static void free_selinux_module(selinux_module_t *selinux_module) {
  * @param[in] selinux_module selinux_module handler
  * @return 0 in case of success or a negative -errno value
  */
-static int generate_path_module_files(selinux_module_t *selinux_module) {
-    if (!selinux_module->selinux_rules_dir) {
-        ERROR("selinux_rules_dir undefined");
-        return -EINVAL;
-    } else if (!selinux_module->id) {
-        ERROR("id undefined");
-        return -EINVAL;
+__nonnull() static int generate_path_module_files(selinux_module_t *selinux_module) __wur {
+    CHECK_NO_NULL(selinux_module, "selinux_module");
+
+    int rc = generate_path_module_file(&selinux_module->selinux_te_file, selinux_module->selinux_rules_dir,
+                                       selinux_module->id, TE_EXTENSION);
+    if (rc < 0) {
+        ERROR("generate_path_module_file");
+        goto error;
     }
 
-    size_t len = strlen(selinux_module->selinux_rules_dir) + strlen(selinux_module->id) + SIZE_EXTENSION + 1;
-
-    selinux_module->selinux_te_file = malloc(len);
-    if (!selinux_module->selinux_te_file) {
-        ERROR("malloc selinux_te_file");
-        free_path_module_files(selinux_module);
-        return -ENOMEM;
+    rc = generate_path_module_file(&selinux_module->selinux_fc_file, selinux_module->selinux_rules_dir,
+                                   selinux_module->id, FC_EXTENSION);
+    if (rc < 0) {
+        ERROR("generate_path_module_file");
+        goto error;
     }
-    memset(selinux_module->selinux_te_file, 0, len);
-    // te
-    strcpy(selinux_module->selinux_te_file, selinux_module->selinux_rules_dir);
-    strcat(selinux_module->selinux_te_file, selinux_module->id);
-    strcat(selinux_module->selinux_te_file, TE_EXTENSION);
 
-    selinux_module->selinux_fc_file = malloc(len);
-    if (!selinux_module->selinux_fc_file) {
-        ERROR("malloc selinux_fc_file");
-        free_path_module_files(selinux_module);
-        return -ENOMEM;
+    rc = generate_path_module_file(&selinux_module->selinux_if_file, selinux_module->selinux_rules_dir,
+                                   selinux_module->id, IF_EXTENSION);
+    if (rc < 0) {
+        ERROR("generate_path_module_file");
+        goto error;
     }
-    memset(selinux_module->selinux_fc_file, 0, len);
-    // fc
-    strcpy(selinux_module->selinux_fc_file, selinux_module->selinux_rules_dir);
-    strcat(selinux_module->selinux_fc_file, selinux_module->id);
-    strcat(selinux_module->selinux_fc_file, FC_EXTENSION);
 
-    selinux_module->selinux_if_file = malloc(len);
-    if (!selinux_module->selinux_if_file) {
-        ERROR("malloc selinux_if_file");
-        free_path_module_files(selinux_module);
-        return -ENOMEM;
+    rc = generate_path_module_file(&selinux_module->selinux_pp_file, selinux_module->selinux_rules_dir,
+                                   selinux_module->id, PP_EXTENSION);
+    if (rc < 0) {
+        ERROR("generate_path_module_file");
+        goto error;
     }
-    memset(selinux_module->selinux_if_file, 0, len);
-    // if
-    strcpy(selinux_module->selinux_if_file, selinux_module->selinux_rules_dir);
-    strcat(selinux_module->selinux_if_file, selinux_module->id);
-    strcat(selinux_module->selinux_if_file, IF_EXTENSION);
 
-    selinux_module->selinux_pp_file = malloc(len);
-    if (!selinux_module->selinux_pp_file) {
-        ERROR("malloc selinux_pp_file");
-        free_path_module_files(selinux_module);
-        return -ENOMEM;
-    }
-    memset(selinux_module->selinux_pp_file, 0, len);
-    // pp
-    strcpy(selinux_module->selinux_pp_file, selinux_module->selinux_rules_dir);
-    strcat(selinux_module->selinux_pp_file, selinux_module->id);
-    strcat(selinux_module->selinux_pp_file, PP_EXTENSION);
-
-    return 0;
+    goto ret;
+error:
+    free_path_module_files(selinux_module);
+ret:
+    return rc;
 }
 
 /**
@@ -199,14 +194,14 @@ static int generate_path_module_files(selinux_module_t *selinux_module) {
  *
  * @param[in] s String to parse
  */
-static void dash_to_underscore(char *s) {
-    if (s) {
-        while (*s) {
-            if (*s == '-') {
-                *s = '_';
-            }
-            s++;
+__nonnull() static void dash_to_underscore(char *s) {
+    CHECK_NO_NULL_NO_RETURN(s, "s");
+
+    while (*s) {
+        if (*s == '-') {
+            *s = '_';
         }
+        s++;
     }
 }
 
@@ -227,36 +222,44 @@ __nonnull((1, 2)) static int init_selinux_module(selinux_module_t *selinux_modul
     CHECK_NO_NULL(selinux_module, "selinux_module");
     CHECK_NO_NULL(id, "id");
 
+    int rc = 0;
     memset(selinux_module, 0, sizeof(*selinux_module));
 
+    // defined paths
     selinux_module->selinux_rules_dir = get_selinux_rules_dir(selinux_rules_dir);
     selinux_module->selinux_te_template_file = get_selinux_te_template_file(selinux_te_template_file);
     selinux_module->selinux_if_template_file = get_selinux_if_template_file(selinux_if_template_file);
 
+    // id
     selinux_module->id = strdup(id);
     if (selinux_module->id == NULL) {
         ERROR("strdup id");
-        free_selinux_module(selinux_module);
-        return -ENOMEM;
+        rc = -ENOMEM;
+        goto error;
     }
 
     // id with underscore
     selinux_module->selinux_id = strdup(id);
     if (selinux_module->selinux_id == NULL) {
         ERROR("strdup selinux id");
-        free_selinux_module(selinux_module);
-        return -ENOMEM;
+        rc = -ENOMEM;
+        goto error;
     }
     dash_to_underscore(selinux_module->selinux_id);
 
-    int rc = generate_path_module_files(selinux_module);
+    // path of the module that will be created
+    rc = generate_path_module_files(selinux_module);
     if (rc < 0) {
         ERROR("generate_path_module_files");
-        free_selinux_module(selinux_module);
-        return rc;
+        goto error;
     }
 
-    return 0;
+    goto end;
+
+error:
+    free_selinux_module(selinux_module);
+end:
+    return rc;
 }
 
 /**
@@ -425,6 +428,7 @@ __nonnull() static int generate_app_module_fc(const char *selinux_fc_file, const
     CHECK_NO_NULL(selinux_fc_file, "selinux_fc_file");
     CHECK_NO_NULL(paths, "paths");
     CHECK_NO_NULL(selinux_id, "selinux_id");
+
     int rc = 0;
     char line[MAX_LINE_SIZE_MODULE];
 
@@ -436,53 +440,45 @@ __nonnull() static int generate_app_module_fc(const char *selinux_fc_file, const
         goto ret;
     }
 
+    path_type_definitions_t path_type_definitions[number_path_type];
+
+    memset(path_type_definitions, 0, number_path_type * sizeof(path_type_definitions_t));
+    rc = init_path_type_definitions(path_type_definitions, selinux_id);  // init labels
+    if (rc < 0) {
+        ERROR("init_path_type_definitions");
+        goto error;
+    }
+
+    char *label = NULL;
+    const char *gen_context = " gen_context(system_u:object_r:";
+    const char *s0 = ",s0)\n";
+
     for (size_t i = 0; i < paths->size; i++) {
         LOG("Add path %s with type %s", paths->paths[i].path, get_path_type_string(paths->paths[i].path_type));
-        bool is_public = false;
-        char *suffix = NULL;
-        rc = get_path_type_info(paths->paths[i].path_type, &suffix, &is_public);
-
-        if (rc < 0) {
-            ERROR("get_path_type_info");
-            goto error;
-        }
-
-        char *label = NULL;
-        if (!is_public) {
-            rc = generate_label(&label, selinux_id, suffix);
-
-            if (rc < 0) {
-                ERROR("generate_label");
-                goto error;
-            }
-        } else {
-            label = public_app;
-        }
+        label = path_type_definitions[paths->paths[i].path_type].label;
 
         // Size path + size label + size begin gen_context + size end gen_context
-        if (strlen(paths->paths[i].path) + strlen(label) + 32 + 6 >= MAX_LINE_SIZE_MODULE) {
+        if (strlen(paths->paths[i].path) + strlen(label) + strlen(gen_context) + strlen(s0) >= MAX_LINE_SIZE_MODULE) {
             ERROR("too long");
-            free(label);
-            label = NULL;
-            goto error;
+            goto error2;
         }
 
+        memset(line, 0, MAX_LINE_SIZE_MODULE);
         strcpy(line, paths->paths[i].path);
-        strcat(line, " gen_context(system_u:object_r:");
+        strcat(line, gen_context);
         strcat(line, label);
-        strcat(line, ",s0)\n");
-
-        free(label);
-        label = NULL;
+        strcat(line, s0);
 
         rc = fputs(line, f_module_fc);
         if (rc < 0) {
             rc = -errno;
             ERROR("fputs %m");
-            goto error;
+            goto error2;
         }
     }
 
+error2:
+    free_path_type_definitions(path_type_definitions);
 error:
     rc = fclose(f_module_fc);
     if (rc < 0) {
@@ -509,32 +505,34 @@ __nonnull() static int generate_app_module_files(const selinux_module_t *selinux
                                     selinux_module->id, selinux_module->selinux_id);
     if (rc < 0) {
         ERROR("generate_app_module_te");
-        return rc;
+        goto ret;
     }
 
     rc = generate_app_module_if(selinux_module->selinux_if_template_file, selinux_module->selinux_if_file,
                                 selinux_module->id, selinux_module->selinux_id);
     if (rc < 0) {
         ERROR("generate_app_module_if");
-        if (remove_file(selinux_module->selinux_te_file) < 0) {
-            ERROR("remove te file");
-        }
-        return rc;
+        goto remove_te;
     }
 
-    rc = generate_app_module_fc(selinux_module->selinux_fc_file, &(secure_app->paths), selinux_module->selinux_id);
+    rc = generate_app_module_fc(selinux_module->selinux_fc_file, &(secure_app->path_set), selinux_module->selinux_id);
     if (rc < 0) {
         ERROR("generate_app_module_fc");
-        if (remove_file(selinux_module->selinux_te_file) < 0) {
-            ERROR("remove te file");
-        }
-        if (remove_file(selinux_module->selinux_if_file) < 0) {
-            ERROR("remove if file");
-        }
-        return rc;
+        goto remove_if;
     }
 
-    return 0;
+    goto ret;
+
+remove_if:
+    if (remove_file(selinux_module->selinux_if_file) < 0) {
+        ERROR("remove if file");
+    }
+remove_te:
+    if (remove_file(selinux_module->selinux_te_file) < 0) {
+        ERROR("remove te file");
+    }
+ret:
+    return rc;
 }
 
 /**
@@ -568,23 +566,25 @@ __nonnull() static int remove_app_module_files(const selinux_module_t *selinux_m
 
     int rc = remove_file(selinux_module->selinux_te_file);
     if (rc < 0) {
-        ERROR("remove_file");
-        return rc;
+        goto error;
     }
 
     rc = remove_file(selinux_module->selinux_if_file);
     if (rc < 0) {
-        ERROR("remove_file");
-        return rc;
+        goto error;
     }
 
     rc = remove_file(selinux_module->selinux_fc_file);
     if (rc < 0) {
-        ERROR("remove_file");
-        return rc;
+        goto error;
     }
 
-    return 0;
+    goto end;
+
+error:
+    ERROR("remove_file");
+end:
+    return rc;
 }
 
 /**
@@ -598,10 +598,16 @@ __nonnull() static int remove_pp_files(const selinux_module_t *selinux_module) _
 
     int rc = remove_file(selinux_module->selinux_pp_file);
     if (rc < 0) {
-        ERROR("remove_file");
-        return rc;
+        goto error;
     }
-    return 0;
+
+    goto end;
+
+error:
+    ERROR("remove_file");
+    goto end;
+end:
+    return rc;
 }
 
 /**
@@ -638,7 +644,8 @@ static int create_semanage_handle(semanage_handle_t **semanage_handle) __wur {
 
     if (semanage_handle == NULL) {
         ERROR("semanage_handle_create");
-        return -1;
+        rc = -1;
+        goto ret;
     }
 
     semanage_set_create_store(*semanage_handle, 1);
@@ -646,22 +653,24 @@ static int create_semanage_handle(semanage_handle_t **semanage_handle) __wur {
     rc = semanage_connect(*semanage_handle);
     if (rc < 0) {
         ERROR("semanage_connect");
-        if (destroy_semanage_handle(*semanage_handle) < 0) {
-            ERROR("destroy_semanage_handle");
-        }
-        return rc;
+
+        goto error;
     }
 
     rc = semanage_set_default_priority(*semanage_handle, 400);
     if (rc != 0) {
         ERROR("semanage_set_default_priority");
-        if (destroy_semanage_handle(*semanage_handle) < 0) {
-            ERROR("destroy_semanage_handle");
-        }
-        return rc;
+        goto error;
     }
 
-    return 0;
+    goto ret;
+
+error:
+    if (destroy_semanage_handle(*semanage_handle) < 0) {
+        ERROR("destroy_semanage_handle");
+    }
+ret:
+    return rc;
 }
 
 /**
@@ -677,15 +686,17 @@ __nonnull((1)) static int install_module(semanage_handle_t *semanage_handle, con
     int rc = semanage_module_install_file(semanage_handle, selinux_pp_file);
     if (rc < 0) {
         ERROR("semanage_module_install_file");
-        return rc;
+        goto end;
     }
 
     rc = semanage_commit(semanage_handle);
     if (rc < 0) {
         ERROR("semanage_commit");
-        return rc;
+        goto end;
     }
-    return 0;
+
+end:
+    return rc;
 }
 
 /**
@@ -699,25 +710,28 @@ __nonnull() static int remove_module(semanage_handle_t *semanage_handle, const c
     CHECK_NO_NULL(semanage_handle, "semanage_handle");
     CHECK_NO_NULL(module_name, "module_name");
 
-    char *module_name_ = strdup(module_name);  // semanage_module_remove take no const module name
-    if (module_name == NULL) {
-        ERROR("strdup");
-        return -ENOMEM;
+    char *module_name_ = strdupa(module_name);  // semanage_module_remove take no const module name
+    int rc = 0;
+    if (module_name_ == NULL) {
+        ERROR("strdupa");
+        rc = -ENOMEM;
+        goto end;
     }
 
-    int rc = semanage_module_remove(semanage_handle, module_name_);
-    free(module_name_);
+    rc = semanage_module_remove(semanage_handle, module_name_);
     if (rc < 0) {
         ERROR("semanage_module_remove");
-        return rc;
+        goto end;
     }
 
     rc = semanage_commit(semanage_handle);
     if (rc < 0) {
         ERROR("semanage_commit");
-        return rc;
+        goto end;
     }
-    return 0;
+
+end:
+    return rc;
 }
 
 /**
