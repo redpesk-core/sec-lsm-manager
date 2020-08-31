@@ -34,7 +34,7 @@
  * @return true if exists
  * @return false if not
  */
-bool check_file_exists(const char *path) __wur;
+bool check_file_exists(const char *path) __wur __nonnull();
 
 /**
  * @brief Check the type of a file
@@ -44,7 +44,7 @@ bool check_file_exists(const char *path) __wur;
  * @return true if good type
  * @return false if not
  */
-bool check_file_type(const char *path, const unsigned short type_file) __wur;
+bool check_file_type(const char *path, const unsigned short type_file) __wur __nonnull();
 
 /**
  * @brief Check if a file is executable by owner
@@ -53,7 +53,7 @@ bool check_file_type(const char *path, const unsigned short type_file) __wur;
  * @return true if executable
  * @return false if not
  */
-bool check_executable(const char *path) __wur;
+bool check_executable(const char *path) __wur __nonnull();
 
 /**
  * @brief Remove a file
@@ -61,6 +61,6 @@ bool check_executable(const char *path) __wur;
  * @param[in] file The path of the file
  * @return 0 in case of success or a negative -errno value
  */
-int remove_file(const char *file) __wur;
+int remove_file(const char *path) __wur __nonnull();
 
 #endif

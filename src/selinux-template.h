@@ -60,24 +60,24 @@ const char *get_selinux_rules_dir(const char *value) __wur;
  * @return 0 in case of success or a negative -errno value
  */
 int create_selinux_rules(const secure_app_t *secure_app, const char *selinux_te_template_file,
-                         const char *selinux_if_template_file, const char *selinux_rules_dir) __wur;
+                         const char *selinux_if_template_file, const char *selinux_rules_dir) __wur __nonnull((1));
 
 /**
  * @brief Check if the files of an application exists in the selinux rules directory
  *
  * @param[in] secure_app secure app handler
  * @param[in] selinux_rules_dir some value or NULL for getting default
- * @return 1 if exists, 0 if not or a negative -errno value
+ * @return true if exists, false if not
  */
-int check_module_files_exist(const secure_app_t *secure_app, const char *selinux_rules_dir) __wur;
+bool check_module_files_exist(const secure_app_t *secure_app, const char *selinux_rules_dir) __wur __nonnull((1));
 
 /**
  * @brief Check if module is in the policy
  *
  * @param[in] secure_app secure app handler
- * @return 1 if exists, 0 if not or a negative -errno value
+ * @return true if exists, false if not
  */
-int check_module_in_policy(const secure_app_t *secure_app) __wur;
+bool check_module_in_policy(const secure_app_t *secure_app) __wur __nonnull();
 
 /**
  * @brief Remove selinux rules (in the selinux rules directory and in the policy)
@@ -86,6 +86,6 @@ int check_module_in_policy(const secure_app_t *secure_app) __wur;
  * @param[in] selinux_rules_dir some value or NULL for getting default
  * @return 0 in case of success or a negative -errno value
  */
-int remove_selinux_rules(const secure_app_t *secure_app, const char *selinux_rules_dir) __wur;
+int remove_selinux_rules(const secure_app_t *secure_app, const char *selinux_rules_dir) __wur __nonnull((1));
 
 #endif

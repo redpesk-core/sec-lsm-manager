@@ -39,10 +39,7 @@
 
 /* see utils.h */
 bool check_file_exists(const char *path) {
-    if (!path) {
-        ERROR("path undefined");
-        return false;
-    }
+    CHECK_NO_NULL_RETURN_BOOL(path, "path");
 
     struct stat s;
     memset(&s, 0, sizeof(s));
@@ -56,13 +53,10 @@ bool check_file_exists(const char *path) {
 
 /* see utils.h */
 bool check_file_type(const char *path, const unsigned short file_type) {
+    CHECK_NO_NULL_RETURN_BOOL(path, "path");
+
     struct stat s;
     memset(&s, 0, sizeof(s));
-
-    if (!path) {
-        ERROR("path undefined");
-        return false;
-    }
 
     int rc = stat(path, &s) == -1;
     if (rc < 0) {
@@ -93,14 +87,11 @@ bool check_file_type(const char *path, const unsigned short file_type) {
 
 /* see utils.h */
 bool check_executable(const char *path) {
+    CHECK_NO_NULL_RETURN_BOOL(path, "path");
+
     struct stat s;
     memset(&s, 0, sizeof(s));
     int rc = 0;
-
-    if (!path) {
-        ERROR("path undefined");
-        return false;
-    }
 
     rc = stat(path, &s) == -1;
     if (rc < 0) {
@@ -115,15 +106,13 @@ bool check_executable(const char *path) {
 }
 
 /* see utils.h */
-int remove_file(const char *file) {
-    if (!file) {
-        ERROR("undefined file");
-        return -EINVAL;
-    }
-    int rc = remove(file);
+int remove_file(const char *path) {
+    CHECK_NO_NULL(path, "path");
+
+    int rc = remove(path);
     if (rc < 0) {
         rc = -errno;
-        ERROR("remove %s %m", file);
+        ERROR("remove %s %m", path);
         return rc;
     }
     return 0;

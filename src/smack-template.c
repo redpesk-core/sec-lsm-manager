@@ -78,17 +78,15 @@ typedef struct smack_handle {
  * The pointer is not free
  * @param[in] smack_handle smack_handle handler
  */
-static void free_smack_handle(smack_handle_t *smack_handle) {
-    if (smack_handle) {
-        if (smack_handle->smack_accesses) {
-            smack_accesses_free(smack_handle->smack_accesses);
-            smack_handle->smack_accesses = NULL;
-        }
-        free((void *)smack_handle->id);
-        smack_handle->id = NULL;
-        free((void *)smack_handle->app_label);
-        smack_handle->app_label = NULL;
+__nonnull() static void free_smack_handle(smack_handle_t *smack_handle) {
+    CHECK_NO_NULL_NO_RETURN(smack_handle, "smack_handle");
+
+    if (smack_handle->smack_accesses) {
+        smack_accesses_free(smack_handle->smack_accesses);
+        smack_handle->smack_accesses = NULL;
     }
+    free((void *)smack_handle->id);
+    smack_handle->id = NULL;
 }
 
 /**
@@ -98,11 +96,9 @@ static void free_smack_handle(smack_handle_t *smack_handle) {
  * @param[in] id id of application
  * @return 0 in case of success or a negative -errno value
  */
-static int init_smack_handle(smack_handle_t *smack_handle, const char *id) {
-    if (!id) {
-        ERROR("id undefined");
-        return -EINVAL;
-    }
+__nonnull() static int init_smack_handle(smack_handle_t *smack_handle, const char *id) __wur {
+    CHECK_NO_NULL(smack_handle, "smack_handle");
+    CHECK_NO_NULL(id, "id");
 
     int rc = 0;
     smack_handle->id = strdup(id);
@@ -136,11 +132,9 @@ static int init_smack_handle(smack_handle_t *smack_handle, const char *id) {
  * @param[in] line The line to parse
  * @return number of space in case of success or a negative -errno value
  */
-static int count_space(const char *line) {
-    if (!line) {
-        ERROR("line undefined");
-        return -EINVAL;
-    }
+__nonnull() static int count_space(const char *line) __wur {
+    CHECK_NO_NULL(line, "line");
+
     size_t len = strlen(line);
     int count = 0;
     for (size_t i = 0; i < len; i++) {
@@ -157,17 +151,12 @@ static int count_space(const char *line) {
  * @param[in] smack_handle smack_handle handler
  * @return 0 in case of success or a negative -errno value
  */
-static int parse_line(char *line, const smack_handle_t *smack_handle) {
-    if (!line) {
-        ERROR("line undefined");
-        return -EINVAL;
-    } else if (!smack_handle) {
-        ERROR("smack_handle undefined");
-        return -EINVAL;
-    } else if (!smack_handle->app_label) {
-        ERROR("app_label undefined");
-        return -EINVAL;
-    } else if (line[0] == SMACK_COMMENT_CHAR) {  // comment
+__nonnull() static int parse_line(char *line, const smack_handle_t *smack_handle,
+                                  path_type_definitions_t path_type_definitions[number_path_type]) __wur {
+    CHECK_NO_NULL(line, "line");
+    CHECK_NO_NULL(smack_handle, "smack_handle");
+
+    if (line[0] == SMACK_COMMENT_CHAR) {  // comment
         return 0;
     } else if (line[0] == '\n') {  // new line
         return 0;
@@ -223,14 +212,10 @@ static int parse_line(char *line, const smack_handle_t *smack_handle) {
  * @param[in] smack_handle smack_handle handler
  * @return 0 in case of success or a negative -errno value
  */
-static int parse_template_file(const char *smack_template_file, const smack_handle_t *smack_handle) {
-    if (!smack_template_file) {
-        ERROR("smack_template_file undefined");
-        return -EINVAL;
-    } else if (!smack_handle) {
-        ERROR("smack_handle undefined");
-        return -EINVAL;
-    }
+__nonnull() static int parse_template_file(const char *smack_template_file, const smack_handle_t *smack_handle,
+                                           path_type_definitions_t path_type_definitions[number_path_type]) __wur {
+    CHECK_NO_NULL(smack_template_file, "smack_template_file");
+    CHECK_NO_NULL(smack_handle, "smack_handle");
 
     int rc = 0;
     char line[MAX_SMACK_LABEL_SIZE];
@@ -264,14 +249,9 @@ static int parse_template_file(const char *smack_template_file, const smack_hand
  * @param[in] id id of the application
  * @return smack rules file path if success, NULL if error
  */
-static char *get_smack_rules_file_path(const char *smack_rules_dir, const char *id) {
-    if (!smack_rules_dir) {
-        ERROR("smack_rules_dir undefined");
-        return NULL;
-    } else if (!id) {
-        ERROR("id undefined");
-        return NULL;
-    }
+__nonnull() static char *get_smack_rules_file_path(const char *smack_rules_dir, const char *id) __wur {
+    CHECK_NO_NULL_RETURN_NULL(smack_rules_dir, "smack_rules_dir");
+    CHECK_NO_NULL_RETURN_NULL(id, "id");
 
     size_t len = strlen(smack_rules_dir) + strlen(prefix_app_rules) + strlen(id);
     char *file = (char *)malloc(len + 1);
@@ -295,14 +275,9 @@ static char *get_smack_rules_file_path(const char *smack_rules_dir, const char *
  * @param[in] smack_handle smack handle handler with some accesses added
  * @return 0 in case of success or a negative -errno value
  */
-static int apply_save_accesses_file(const char *smack_rules_dir, smack_handle_t *smack_handle) {
-    if (!smack_rules_dir) {
-        ERROR("smack_rules_dir undefined");
-        return -EINVAL;
-    } else if (!smack_handle) {
-        ERROR("smack_handle undefined");
-        return -EINVAL;
-    }
+__nonnull() static int apply_save_accesses_file(const char *smack_rules_dir, smack_handle_t *smack_handle) __wur {
+    CHECK_NO_NULL(smack_rules_dir, "smack_rules_dir");
+    CHECK_NO_NULL(smack_handle, "smack_handle");
 
     int rc = 0;
 
@@ -335,6 +310,8 @@ static int apply_save_accesses_file(const char *smack_rules_dir, smack_handle_t 
         goto end2;
     }
 
+    LOG("success store smack rules in %s", file);
+
 end2:
     if (close(fd)) {
         ERROR("close : %m");
@@ -351,11 +328,9 @@ end:
  * @param[in] file The path of the file to remove
  * @return 0 in case of success or a negative -errno value
  */
-static int remove_load_rules(const char *file) {
-    if (!file) {
-        ERROR("file undefined");
-        return -EINVAL;
-    }
+__nonnull() static int remove_load_rules(const char *file) __wur {
+    CHECK_NO_NULL(file, "file");
+
     int rc = 0;
     int fd = open(file, O_RDONLY);
     if (fd < 0) {
@@ -407,14 +382,9 @@ const char *get_smack_rules_dir(const char *value) {
 }
 
 /* see smack-template.h */
-int create_smack_rules(const secure_app_t *secure_app, const char *smack_template_file, const char *smack_rules_dir) {
-    if (!secure_app) {
-        ERROR("secure_app undefined");
-        return -EINVAL;
-    } else if (!secure_app->id) {
-        ERROR("id undefined");
-        return -EINVAL;
-    }
+int create_smack_rules(const secure_app_t *secure_app, path_type_definitions_t path_type_definitions[number_path_type],
+                       const char *smack_template_file, const char *smack_rules_dir) {
+    CHECK_NO_NULL(secure_app, "secure_app");
 
     smack_handle_t smack_handle = {0};
 
@@ -443,18 +413,14 @@ int create_smack_rules(const secure_app_t *secure_app, const char *smack_templat
 
     free_smack_handle(&smack_handle);
 
+    LOG("create_smack_rules success");
+
     return 0;
 }
 
 /* see smack-template.h */
 int remove_smack_rules(const secure_app_t *secure_app, const char *smack_rules_dir) {
-    if (!secure_app) {
-        ERROR("secure_app undefined");
-        return -EINVAL;
-    } else if (!secure_app->id) {
-        ERROR("id undefined");
-        return -EINVAL;
-    }
+    CHECK_NO_NULL(secure_app, "secure_app");
 
     int rc = 0;
     smack_rules_dir = get_smack_rules_dir(smack_rules_dir);
@@ -478,8 +444,6 @@ int remove_smack_rules(const secure_app_t *secure_app, const char *smack_rules_d
         ERROR("remove");
     }
 
-end2:
-    free(file);
 end:
     file = NULL;
     return rc;

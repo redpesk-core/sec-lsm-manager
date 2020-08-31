@@ -52,7 +52,7 @@ int create_secure_app(secure_app_t **secure_app) __wur;
  *
  * @param[in] secure_app handler
  */
-void free_secure_app(secure_app_t *secure_app);
+void free_secure_app(secure_app_t *secure_app) __nonnull();
 
 /**
  * @brief Destroy the secure app
@@ -60,7 +60,7 @@ void free_secure_app(secure_app_t *secure_app);
  *
  * @param[in] secure_app handler
  */
-void destroy_secure_app(secure_app_t *secure_app);
+void destroy_secure_app(secure_app_t *secure_app) __nonnull();
 
 /**
  * @brief Alloc and copy id in secure app
@@ -69,7 +69,7 @@ void destroy_secure_app(secure_app_t *secure_app);
  * @param[in] id The id to copy
  * @return 0 in case of success or a negative -errno value
  */
-int secure_app_set_id(secure_app_t *secure_app, const char *id) __wur;
+int secure_app_set_id(secure_app_t *secure_app, const char *id) __wur __nonnull();
 
 /**
  * @brief Add a new policy in policies field
@@ -78,7 +78,7 @@ int secure_app_set_id(secure_app_t *secure_app, const char *id) __wur;
  * @param[in] permission The permission to add
  * @return 0 in case of success or a negative -errno value
  */
-int secure_app_add_permission(secure_app_t *secure_app, const char *permission) __wur;
+int secure_app_add_permission(secure_app_t *secure_app, const char *permission) __wur __nonnull();
 
 /**
  * @brief Add a new path in paths field
@@ -88,6 +88,6 @@ int secure_app_add_permission(secure_app_t *secure_app, const char *permission) 
  * @param[in] path_type The path type to add
  * @return 0 in case of success or a negative -errno value
  */
-int secure_app_add_path(secure_app_t *secure_app, const char *path, enum path_type path_type) __wur;
+int secure_app_add_path(secure_app_t *secure_app, const char *path, enum path_type path_type) __wur __nonnull();
 
 #endif

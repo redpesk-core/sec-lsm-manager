@@ -104,21 +104,16 @@ void free_secure_app(secure_app_t *secure_app) {
 
 /* see secure-app.h */
 void destroy_secure_app(secure_app_t *secure_app) {
-    if (secure_app) {
-        free_secure_app(secure_app);
-        free(secure_app);
-    }
+    CHECK_NO_NULL_NO_RETURN(secure_app, "secure_app");
+
+    free_secure_app(secure_app);
+    free(secure_app);
 }
 
 /* see secure-app.h */
 int secure_app_set_id(secure_app_t *secure_app, const char *id) {
-    if (!secure_app) {
-        ERROR("secure_app is undefined");
-        return -EINVAL;
-    } else if (!id) {
-        ERROR("id undefined");
-        return -EINVAL;
-    } else if (secure_app->id) {
+    CHECK_NO_NULL(secure_app, "secure_app");
+    CHECK_NO_NULL(id, "id");
         ERROR("id already set");
         return -EINVAL;
     }

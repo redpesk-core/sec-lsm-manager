@@ -47,17 +47,10 @@
  * @param[in] value value of the extended attribute
  * @return 0 in case of success or a negative -errno value
  */
-static int set_smack(const char *path, const char *xattr, const char *value) {
-    if (!path) {
-        ERROR("path undefined");
-        return -EINVAL;
-    } else if (!xattr) {
-        ERROR("xattr undefined");
-        return -EINVAL;
-    } else if (!value) {
-        ERROR("value undefined");
-        return -EINVAL;
-    }
+__nonnull() static int set_smack(const char *path, const char *xattr, const char *value) __wur {
+    CHECK_NO_NULL(path, "path");
+    CHECK_NO_NULL(xattr, "xattr");
+    CHECK_NO_NULL(value, "value");
 
     int rc = lsetxattr(path, xattr, value, strlen(value), 0);
     if (rc < 0) {
@@ -78,14 +71,9 @@ static int set_smack(const char *path, const char *xattr, const char *value) {
  * @param[in] label The label to set
  * @return 0 in case of success or a negative -errno value
  */
-static int label_file(const char *path, const char *label) {
-    if (!path) {
-        ERROR("path undefined");
-        return -EINVAL;
-    } else if (!label) {
-        ERROR("label undefined");
-        return -EINVAL;
-    }
+__nonnull() static int label_file(const char *path, const char *label) __wur {
+    CHECK_NO_NULL(path, "path");
+    CHECK_NO_NULL(label, "label");
 
     if (!check_file_exists(path)) {
         LOG("%s not exist", path);
@@ -107,11 +95,8 @@ static int label_file(const char *path, const char *label) {
  * @param[in] path The path of the directory
  * @return 0 in case of success or a negative -errno value
  */
-static int label_dir_transmute(const char *path) {
-    if (!path) {
-        ERROR("path undefined");
-        return -EINVAL;
-    }
+__nonnull() static int label_dir_transmute(const char *path) __wur {
+    CHECK_NO_NULL(path, "path");
 
     if (!check_file_type(path, __S_IFDIR)) {
         LOG("%s not directory", path);
@@ -134,14 +119,9 @@ static int label_dir_transmute(const char *path) {
  * @param[in] label The label that will be used when exec
  * @return 0 in case of success or a negative -errno value
  */
-static int label_exec(const char *path, const char *label) {
-    if (!path) {
-        ERROR("path undefined");
-        return -EINVAL;
-    } else if (!label) {
-        ERROR("label undefined");
-        return -EINVAL;
-    }
+__nonnull() static int label_exec(const char *path, const char *label) __wur {
+    CHECK_NO_NULL(path, "path");
+    CHECK_NO_NULL(label, "label");
 
     if (!check_file_type(path, __S_IFREG)) {
         LOG("%s not regular file", path);
@@ -171,14 +151,10 @@ static int label_exec(const char *path, const char *label) {
  * @param[in] is_transmute The directory is transmute
  * @return 0 in case of success or a negative -errno value
  */
-static int label_path(const char *path, const char *label, int is_executable, int is_transmute) {
-    if (!path) {
-        ERROR("path undefined");
-        return -EINVAL;
-    } else if (!label) {
-        ERROR("label undefined");
-        return -EINVAL;
-    }
+__nonnull((1, 2)) static int label_path(const char *path, const char *label, int is_executable,
+                                        int is_transmute) __wur {
+    CHECK_NO_NULL(path, "path");
+    CHECK_NO_NULL(label, "label");
 
     int rc = label_file(path, label);
     if (rc < 0) {
@@ -189,7 +165,7 @@ static int label_path(const char *path, const char *label, int is_executable, in
     if (is_executable) {
         rc = label_exec(path, label);
         if (rc < 0) {
-            ERROR("label exec", rc);
+            ERROR("label exec");
             return rc;
         }
     }
@@ -197,7 +173,7 @@ static int label_path(const char *path, const char *label, int is_executable, in
     if (is_transmute) {
         rc = label_dir_transmute(path);
         if (rc < 0) {
-            ERROR("label dir", rc);
+            ERROR("label dir");
             return rc;
         }
     }
@@ -325,13 +301,7 @@ int install_smack(const secure_app_t *secure_app) {
 
 /* see smack.h */
 int uninstall_smack(const secure_app_t *secure_app) {
-    if (!secure_app) {
-        ERROR("secure_app undefined");
-        return -EINVAL;
-    } else if (!secure_app->id) {
-        ERROR("id undefined");
-        return -EINVAL;
-    }
+    CHECK_NO_NULL(secure_app, "secure_app");
 
     int rc = remove_smack_rules(secure_app, NULL);
     if (rc < 0) {

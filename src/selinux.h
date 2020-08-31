@@ -32,7 +32,7 @@
  * @param[in] secure_app The handle of secure app
  * @return 0 in case of success or a negative -errno value
  */
-int install_selinux(const secure_app_t *secure_app) __wur;
+int install_selinux(const secure_app_t *secure_app) __wur __nonnull();
 
 /**
  * @brief Uninstall a secure app for selinux
@@ -40,6 +40,6 @@ int install_selinux(const secure_app_t *secure_app) __wur;
  * @param[in] secure_app The handle of secure app
  * @return 0 in case of success or a negative -errno value
  */
-int uninstall_selinux(const secure_app_t *secure_app) __wur;
+int uninstall_selinux(const secure_app_t *secure_app) __wur __nonnull();
 
 #endif

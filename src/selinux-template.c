@@ -93,20 +93,17 @@ typedef struct selinux_module {
  *
  * @param[in] selinux_module selinux_module handler
  */
-static void free_path_module_files(selinux_module_t *selinux_module) {
-    if (selinux_module) {
-        free(selinux_module->selinux_pp_file);
-        selinux_module->selinux_pp_file = NULL;
+__nonnull() static void free_path_module_files(selinux_module_t *selinux_module) {
+    CHECK_NO_NULL_NO_RETURN(selinux_module, "selinux_module");
 
-        free(selinux_module->selinux_if_file);
-        selinux_module->selinux_if_file = NULL;
-
-        free(selinux_module->selinux_fc_file);
-        selinux_module->selinux_fc_file = NULL;
-
-        free(selinux_module->selinux_te_file);
-        selinux_module->selinux_te_file = NULL;
-    }
+    free(selinux_module->selinux_pp_file);
+    selinux_module->selinux_pp_file = NULL;
+    free(selinux_module->selinux_if_file);
+    selinux_module->selinux_if_file = NULL;
+    free(selinux_module->selinux_fc_file);
+    selinux_module->selinux_fc_file = NULL;
+    free(selinux_module->selinux_te_file);
+    selinux_module->selinux_te_file = NULL;
 }
 
 /**
@@ -114,16 +111,18 @@ static void free_path_module_files(selinux_module_t *selinux_module) {
  * The pointer is not free
  * @param[in] selinux_module selinux_module handler
  */
-static void free_selinux_module(selinux_module_t *selinux_module) {
-    if (selinux_module) {
-        free(selinux_module->id);
-        selinux_module->id = NULL;
-        free(selinux_module->selinux_id);
-        selinux_module->selinux_id = NULL;
-        free_path_module_files(selinux_module);
-        selinux_module->selinux_rules_dir = NULL;
-        selinux_module->selinux_te_template_file = NULL;
-        selinux_module->selinux_if_template_file = NULL;
+__nonnull() static void free_selinux_module(selinux_module_t *selinux_module) {
+    CHECK_NO_NULL_NO_RETURN(selinux_module, "selinux_module");
+
+    free(selinux_module->id);
+    selinux_module->id = NULL;
+    free(selinux_module->selinux_id);
+    selinux_module->selinux_id = NULL;
+    free_path_module_files(selinux_module);
+    selinux_module->selinux_rules_dir = NULL;
+    selinux_module->selinux_te_template_file = NULL;
+    selinux_module->selinux_if_template_file = NULL;
+}
     }
 }
 
@@ -221,15 +220,12 @@ static void dash_to_underscore(char *s) {
  * @param[in] selinux_rules_dir some value or NULL for getting default
  * @return 0 in case of success or a negative -errno value
  */
-static int init_selinux_module(selinux_module_t *selinux_module, const char *id, const char *selinux_te_template_file,
-                               const char *selinux_if_template_file, const char *selinux_rules_dir) {
-    if (!selinux_module) {
-        ERROR("selinux_module undefined");
-        return -EINVAL;
-    } else if (!id) {
-        ERROR("id undefined");
-        return -EINVAL;
-    }
+__nonnull((1, 2)) static int init_selinux_module(selinux_module_t *selinux_module, const char *id,
+                                                 const char *selinux_te_template_file,
+                                                 const char *selinux_if_template_file,
+                                                 const char *selinux_rules_dir) __wur {
+    CHECK_NO_NULL(selinux_module, "selinux_module");
+    CHECK_NO_NULL(id, "id");
 
     memset(selinux_module, 0, sizeof(*selinux_module));
 
@@ -271,17 +267,10 @@ static int init_selinux_module(selinux_module_t *selinux_module, const char *id,
  * @param[in] selinux_id The selinux id of the application
  * @return 0 in case of success or a negative -errno value
  */
-static int parse_line(const char *line, const char *id, const char *selinux_id) {
-    if (!line) {
-        ERROR("line undefined");
-        return -EINVAL;
-    } else if (!id) {
-        ERROR("id undefined");
-        return -EINVAL;
-    } else if (!selinux_id) {
-        ERROR("selinux_id undefined");
-        return -EINVAL;
-    }
+__nonnull() static int parse_line(const char *line, const char *id, const char *selinux_id) __wur {
+    CHECK_NO_NULL(line, "line");
+    CHECK_NO_NULL(id, "id");
+    CHECK_NO_NULL(selinux_id, "selinux_id");
 
     int rc = 0;
 
@@ -314,20 +303,12 @@ static int parse_line(const char *line, const char *id, const char *selinux_id) 
  * @param[in] selinux_id The selinux id of the application
  * @return 0 in case of success or a negative -errno value
  */
-static int template_to_module(const char *template, const char *module, const char *id, const char *selinux_id) {
-    if (!template) {
-        ERROR("template undefined");
-        return -EINVAL;
-    } else if (!module) {
-        ERROR("module undefined");
-        return -EINVAL;
-    } else if (!id) {
-        ERROR("id undefined");
-        return -EINVAL;
-    } else if (!selinux_id) {
-        ERROR("selinux_id undefined");
-        return -EINVAL;
-    }
+__nonnull() static int template_to_module(const char *template, const char *module, const char *id,
+                                          const char *selinux_id) __wur {
+    CHECK_NO_NULL(template, "template");
+    CHECK_NO_NULL(module, "module");
+    CHECK_NO_NULL(id, "id");
+    CHECK_NO_NULL(selinux_id, "selinux_id");
 
     int rc = 0;
     char line[MAX_LINE_SIZE_MODULE];
@@ -388,21 +369,12 @@ ret:
  * @param[in] selinux_id The selinux id of the application
  * @return 0 in case of success or a negative -errno value
  */
-static int generate_app_module_te(const char *selinux_te_template_file, const char *selinux_te_file, const char *id,
-                                  const char *selinux_id) {
-    if (!selinux_te_template_file) {
-        ERROR("selinux_te_template_file undefined");
-        return -EINVAL;
-    } else if (!selinux_te_file) {
-        ERROR("selinux_te_file undefined");
-        return -EINVAL;
-    } else if (!id) {
-        ERROR("id undefined");
-        return -EINVAL;
-    } else if (!selinux_id) {
-        ERROR("selinux_id undefined");
-        return -EINVAL;
-    }
+__nonnull() static int generate_app_module_te(const char *selinux_te_template_file, const char *selinux_te_file,
+                                              const char *id, const char *selinux_id) __wur {
+    CHECK_NO_NULL(selinux_te_template_file, "selinux_te_template_file");
+    CHECK_NO_NULL(selinux_te_file, "selinux_te_file");
+    CHECK_NO_NULL(id, "id");
+    CHECK_NO_NULL(selinux_id, "selinux_id");
 
     int rc = template_to_module(selinux_te_template_file, selinux_te_file, id, selinux_id);
 
@@ -423,21 +395,12 @@ static int generate_app_module_te(const char *selinux_te_template_file, const ch
  * @param[in] selinux_id The selinux id of the application
  * @return 0 in case of success or a negative -errno value
  */
-static int generate_app_module_if(const char *selinux_if_template_file, const char *selinux_if_file, const char *id,
-                                  const char *selinux_id) {
-    if (!selinux_if_template_file) {
-        ERROR("selinux_if_template_file undefined");
-        return -EINVAL;
-    } else if (!selinux_if_file) {
-        ERROR("selinux_if_file undefined");
-        return -EINVAL;
-    } else if (!id) {
-        ERROR("id undefined");
-        return -EINVAL;
-    } else if (!selinux_id) {
-        ERROR("selinux_id undefined");
-        return -EINVAL;
-    }
+__nonnull() static int generate_app_module_if(const char *selinux_if_template_file, const char *selinux_if_file,
+                                              const char *id, const char *selinux_id) __wur {
+    CHECK_NO_NULL(selinux_if_template_file, "selinux_if_template_file");
+    CHECK_NO_NULL(selinux_if_file, "selinux_if_file");
+    CHECK_NO_NULL(id, "id");
+    CHECK_NO_NULL(selinux_id, "selinux_id");
 
     int rc = template_to_module(selinux_if_template_file, selinux_if_file, id, selinux_id);
 
@@ -457,17 +420,11 @@ static int generate_app_module_if(const char *selinux_if_template_file, const ch
  * @param[in] selinux_id The selinux id of the application
  * @return 0 in case of success or a negative -errno value
  */
-static int generate_app_module_fc(const char *selinux_fc_file, const paths_t *paths, const char *selinux_id) {
-    if (!selinux_fc_file) {
-        ERROR("selinux_fc_file undefined");
-        return -EINVAL;
-    } else if (!paths) {
-        ERROR("paths undefined");
-        return -EINVAL;
-    } else if (!selinux_id) {
-        ERROR("selinux_id undefined");
-        return -EINVAL;
-    }
+__nonnull() static int generate_app_module_fc(const char *selinux_fc_file, const path_set_t *paths,
+                                              const char *selinux_id) __wur {
+    CHECK_NO_NULL(selinux_fc_file, "selinux_fc_file");
+    CHECK_NO_NULL(paths, "paths");
+    CHECK_NO_NULL(selinux_id, "selinux_id");
     int rc = 0;
     char line[MAX_LINE_SIZE_MODULE];
 
@@ -543,35 +500,10 @@ ret:
  * @param[in] secure_app secure app handler
  * @return 0 in case of success or a negative -errno value
  */
-static int generate_app_module_files(const selinux_module_t *selinux_module, const secure_app_t *secure_app) {
-    if (!selinux_module) {
-        ERROR("selinux_module undefined");
-        return -EINVAL;
-    } else if (!selinux_module->selinux_te_template_file) {
-        ERROR("selinux_te_template_file undefined");
-        return -EINVAL;
-    } else if (!selinux_module->selinux_te_file) {
-        ERROR("selinux_te_file undefined");
-        return -EINVAL;
-    } else if (!selinux_module->selinux_fc_file) {
-        ERROR("selinux_fc_file undefined");
-        return -EINVAL;
-    } else if (!selinux_module->selinux_if_template_file) {
-        ERROR("selinux_if_template_file undefined");
-        return -EINVAL;
-    } else if (!selinux_module->selinux_if_file) {
-        ERROR("selinux_if_file undefined");
-        return -EINVAL;
-    } else if (!selinux_module->id) {
-        ERROR("id undefined");
-        return -EINVAL;
-    } else if (!selinux_module->selinux_id) {
-        ERROR("selinux_id undefined");
-        return -EINVAL;
-    } else if (!secure_app) {
-        ERROR("secure_app undefined");
-        return -EINVAL;
-    }
+__nonnull() static int generate_app_module_files(const selinux_module_t *selinux_module,
+                                                 const secure_app_t *secure_app) __wur {
+    CHECK_NO_NULL(selinux_module, "selinux_module");
+    CHECK_NO_NULL(secure_app, "secure_app");
 
     int rc = generate_app_module_te(selinux_module->selinux_te_template_file, selinux_module->selinux_te_file,
                                     selinux_module->id, selinux_module->selinux_id);
@@ -612,7 +544,9 @@ static int generate_app_module_files(const selinux_module_t *selinux_module, con
  * @return true if all exist
  * @return false if not
  */
-static bool check_app_module_files_exists(const selinux_module_t *selinux_module) {
+__nonnull() static bool check_app_module_files_exists(const selinux_module_t *selinux_module) __wur {
+    CHECK_NO_NULL_RETURN_BOOL(selinux_module, "selinux_module");
+
     if (!check_file_exists(selinux_module->selinux_te_file))
         return false;
     if (!check_file_exists(selinux_module->selinux_fc_file))
@@ -629,20 +563,8 @@ static bool check_app_module_files_exists(const selinux_module_t *selinux_module
  * @param[in] selinux_module selinux module handler
  * @return 0 in case of success or a negative -errno value
  */
-static int remove_app_module_files(const selinux_module_t *selinux_module) {
-    if (!selinux_module) {
-        ERROR("selinux_module undefined");
-        return -EINVAL;
-    } else if (!selinux_module->selinux_te_file) {
-        ERROR("selinux_te_file undefined");
-        return -EINVAL;
-    } else if (!selinux_module->selinux_fc_file) {
-        ERROR("selinux_fc_file undefined");
-        return -EINVAL;
-    } else if (!selinux_module->selinux_if_file) {
-        ERROR("selinux_if_file undefined");
-        return -EINVAL;
-    }
+__nonnull() static int remove_app_module_files(const selinux_module_t *selinux_module) __wur {
+    CHECK_NO_NULL(selinux_module, "selinux_module");
 
     int rc = remove_file(selinux_module->selinux_te_file);
     if (rc < 0) {
@@ -671,14 +593,8 @@ static int remove_app_module_files(const selinux_module_t *selinux_module) {
  * @param[in] selinux_module selinux module handler
  * @return 0 in case of success or a negative -errno value
  */
-static int remove_pp_files(const selinux_module_t *selinux_module) {
-    if (!selinux_module) {
-        ERROR("selinux_module undefined");
-        return -EINVAL;
-    } else if (!selinux_module->selinux_pp_file) {
-        ERROR("selinux_pp_file undefined");
-        return -EINVAL;
-    }
+__nonnull() static int remove_pp_files(const selinux_module_t *selinux_module) __wur {
+    CHECK_NO_NULL(selinux_module, "selinux_module");
 
     int rc = remove_file(selinux_module->selinux_pp_file);
     if (rc < 0) {
@@ -694,11 +610,9 @@ static int remove_pp_files(const selinux_module_t *selinux_module) {
  * @param[in] semanage_handle semanage_handle handler
  * @return 0 in case of success or a negative -errno value
  */
-static int destroy_semanage_handle(semanage_handle_t *semanage_handle) {
-    if (!semanage_handle) {
-        ERROR("semanage_handle undefined");
-        return -EINVAL;
-    }
+__nonnull() static int destroy_semanage_handle(semanage_handle_t *semanage_handle) __wur {
+    CHECK_NO_NULL(semanage_handle, "semanage_handle");
+
     int rc = 0;
 
     if (semanage_is_connected(semanage_handle)) {
@@ -718,7 +632,7 @@ static int destroy_semanage_handle(semanage_handle_t *semanage_handle) {
  * @param[out] semanage_handle pointer semanage_handle handler
  * @return 0 in case of success or a negative -errno value
  */
-static int create_semanage_handle(semanage_handle_t **semanage_handle) {
+static int create_semanage_handle(semanage_handle_t **semanage_handle) __wur {
     int rc = 0;
     *semanage_handle = semanage_handle_create();
 
@@ -757,11 +671,8 @@ static int create_semanage_handle(semanage_handle_t **semanage_handle) {
  * @param[in] selinux_pp_file Path of the pp file
  * @return 0 in case of success or a negative -errno value
  */
-static int install_module(semanage_handle_t *semanage_handle, const char *selinux_pp_file) {
-    if (!semanage_handle) {
-        ERROR("semanage_handle undefined");
-        return -EINVAL;
-    }
+__nonnull((1)) static int install_module(semanage_handle_t *semanage_handle, const char *selinux_pp_file) __wur {
+    CHECK_NO_NULL(semanage_handle, "semanage_handle");
 
     int rc = semanage_module_install_file(semanage_handle, selinux_pp_file);
     if (rc < 0) {
@@ -784,11 +695,9 @@ static int install_module(semanage_handle_t *semanage_handle, const char *selinu
  * @param[in] module_name Module name in the selinux policy
  * @return 0 in case of success or a negative -errno value
  */
-static int remove_module(semanage_handle_t *semanage_handle, const char *module_name) {
-    if (!semanage_handle) {
-        ERROR("semanage_handle undefined");
-        return -EINVAL;
-    }
+__nonnull() static int remove_module(semanage_handle_t *semanage_handle, const char *module_name) __wur {
+    CHECK_NO_NULL(semanage_handle, "semanage_handle");
+    CHECK_NO_NULL(module_name, "module_name");
 
     char *module_name_ = strdup(module_name);  // semanage_module_remove take no const module name
     if (module_name == NULL) {
@@ -818,8 +727,12 @@ static int remove_module(semanage_handle_t *semanage_handle, const char *module_
  * @param[in] semanage_module_info_list semanage_module_info_list handler
  * @param[in] semanage_module_info_len semanage_module_info_len handler
  */
-static void free_module_info_list(semanage_handle_t *semanage_handle, semanage_module_info_t *semanage_module_info_list,
-                                  int semanage_module_info_len) {
+__nonnull() static void free_module_info_list(semanage_handle_t *semanage_handle,
+                                              semanage_module_info_t *semanage_module_info_list,
+                                              int semanage_module_info_len) {
+    CHECK_NO_NULL_NO_RETURN(semanage_handle, "semanage_handle");
+    CHECK_NO_NULL_NO_RETURN(semanage_module_info_list, "semanage_module_info_list");
+
     semanage_module_info_t *semanage_module_info = NULL;
     for (int i = 0; i < semanage_module_info_len; i++) {
         semanage_module_info = semanage_module_list_nth(semanage_module_info_list, i);
@@ -833,20 +746,16 @@ static void free_module_info_list(semanage_handle_t *semanage_handle, semanage_m
  *
  * @param[in] semanage_handle semanage_handle handler
  * @param[in] id name of the module
- * @return 1 if exists, 0 if not or a negative -errno value
+ * @return true if exists, false else
  */
-static int check_module(semanage_handle_t *semanage_handle, const char *id) {
-    if (!semanage_handle) {
-        ERROR("semanage_handle undefined");
-        return -EINVAL;
-    } else if (!id) {
-        ERROR("id undefined");
-        return -EINVAL;
-    }
+__nonnull() static bool check_module(semanage_handle_t *semanage_handle, const char *id) __wur {
+    CHECK_NO_NULL(semanage_handle, "semanage_handle");
+    CHECK_NO_NULL(id, "id");
 
     semanage_module_info_t *semanage_module_info = NULL;
     semanage_module_info_t *semanage_module_info_list = NULL;
     int semanage_module_info_len = 0;
+    bool ret = false;
 
     int rc = semanage_module_list(semanage_handle, &semanage_module_info_list, &semanage_module_info_len);
     if (rc < 0) {
@@ -860,16 +769,17 @@ static int check_module(semanage_handle_t *semanage_handle, const char *id) {
         rc = semanage_module_info_get_name(semanage_handle, semanage_module_info, &module_name);
         if (rc < 0) {
             ERROR("semanage_module_info_get_name");
-            break;
+            goto end;
         }
+
         if (!strcmp(module_name, id)) {
-            rc = 1;
-            break;
+            ret = true;
+            goto end;
         }
     }
 end:
     free_module_info_list(semanage_handle, semanage_module_info_list, semanage_module_info_len);
-    return rc;
+    return ret;
 }
 
 /**********************/
@@ -894,13 +804,7 @@ const char *get_selinux_rules_dir(const char *value) {
 /* see selinux-template.h */
 int create_selinux_rules(const secure_app_t *secure_app, const char *selinux_te_template_file,
                          const char *selinux_if_template_file, const char *selinux_rules_dir) {
-    if (!secure_app) {
-        ERROR("secure_app undefined");
-        return -EINVAL;
-    } else if (!secure_app->id) {
-        ERROR("id undefined");
-        return -EINVAL;
-    }
+    CHECK_NO_NULL(secure_app, "secure_app");
 
     selinux_module_t selinux_module;
     int rc = init_selinux_module(&selinux_module, secure_app->id, selinux_te_template_file, selinux_if_template_file,
@@ -958,67 +862,50 @@ ret:
 }
 
 /* see selinux-template.h */
-int check_module_files_exist(const secure_app_t *secure_app, const char *selinux_rules_dir) {
-    if (!secure_app) {
-        ERROR("secure_app undefined");
-        return -EINVAL;
-    } else if (!secure_app->id) {
-        ERROR("id undefined");
-        return -EINVAL;
-    }
+bool check_module_files_exist(const secure_app_t *secure_app, const char *selinux_rules_dir) {
+    CHECK_NO_NULL(secure_app, "secure_app");
 
     selinux_module_t selinux_module;
+    bool ret = false;
     int rc = init_selinux_module(&selinux_module, secure_app->id, NULL, NULL, selinux_rules_dir);
     if (rc < 0) {
         ERROR("init_selinux_module");
-        return rc;
+        goto end;
     }
 
-    rc = check_app_module_files_exists(&selinux_module);
+    ret = check_app_module_files_exists(&selinux_module);
 
     free_selinux_module(&selinux_module);
 
-    return rc;
+end:
+    return ret;
 }
 
 /* see selinux-template.h */
-int check_module_in_policy(const secure_app_t *secure_app) {
-    if (!secure_app) {
-        ERROR("secure_app undefined");
-        return -EINVAL;
-    } else if (!secure_app->id) {
-        ERROR("id undefined");
-        return -EINVAL;
-    }
+bool check_module_in_policy(const secure_app_t *secure_app) {
+    CHECK_NO_NULL(secure_app, "secure_app");
 
     semanage_handle_t *semanage_handle;
+    bool ret = false;
     int rc = create_semanage_handle(&semanage_handle);
     if (rc < 0) {
         ERROR("create_semanage_handle");
-        return rc;
+        goto end;
     }
 
-    rc = check_module(semanage_handle, secure_app->id);
-    if (rc < 0) {
-        ERROR("check_module");
-    }
+    ret = check_module(semanage_handle, secure_app->id);
 
     if (destroy_semanage_handle(semanage_handle) < 0) {
         ERROR("destroy_semanage_handle");
     }
 
-    return rc;
+end:
+    return ret;
 }
 
 /* see selinux-template.h */
 int remove_selinux_rules(const secure_app_t *secure_app, const char *selinux_rules_dir) {
-    if (!secure_app) {
-        ERROR("secure_app undefined");
-        return -EINVAL;
-    } else if (!secure_app->id) {
-        ERROR("id undefined");
-        return -EINVAL;
-    }
+    CHECK_NO_NULL(secure_app, "secure_app");
 
     // remove files
     selinux_module_t selinux_module;

@@ -42,7 +42,7 @@ typedef struct security_manager_handle security_manager_handle_t;
  *
  * @see security_manager_destroy
  */
-extern int security_manager_create(security_manager_t **security_manager, const char *socketspec);
+extern int security_manager_create(security_manager_t **security_manager, const char *socketspec) __wur;
 
 /**
  * @brief Destroy security_manager client handler and release its memory
@@ -51,7 +51,7 @@ extern int security_manager_create(security_manager_t **security_manager, const 
  *
  * @see security_manager_create
  */
-extern void security_manager_destroy(security_manager_t *security_manager);
+extern void security_manager_destroy(security_manager_t *security_manager) __nonnull();
 
 /**
  * Ask the security_manager client handler to disconnect from the server.
@@ -59,7 +59,7 @@ extern void security_manager_destroy(security_manager_t *security_manager);
  *
  * @param[in] security_manager security_manager client handler
  */
-extern void security_manager_disconnect(security_manager_t *security_manager);
+extern void security_manager_disconnect(security_manager_t *security_manager) __nonnull();
 
 /**
  * @brief Set id of security_manager client handler
@@ -68,7 +68,7 @@ extern void security_manager_disconnect(security_manager_t *security_manager);
  * @param[in] id The id to define
  * @return 0 in case of success or a negative -errno value
  */
-extern int security_manager_set_id(security_manager_t *security_manager, const char *id);
+extern int security_manager_set_id(security_manager_t *security_manager, const char *id) __nonnull() __wur;
 
 /**
  * @brief Add a path to security_manager client handler
@@ -78,25 +78,27 @@ extern int security_manager_set_id(security_manager_t *security_manager, const c
  * @param path_type The path_type to add
  * @return 0 in case of success or a negative -errno value
  */
-extern int security_manager_add_path(security_manager_t *security_manager, const char *path, const char *path_type);
+extern int security_manager_add_path(security_manager_t *security_manager, const char *path, const char *path_type)
+    __nonnull() __wur;
 
 /**
  * @brief Add a permission to security_manager client handler
- * You need to have set id before add a permission
  *
  * @param[in] security_manager security_manager client handler
  * @param[in] permission The permission to add
  * @return 0 in case of success or a negative -errno value
  */
-extern int security_manager_add_permission(security_manager_t *security_manager, const char *permission);
+extern int security_manager_add_permission(security_manager_t *security_manager, const char *permission)
+    __nonnull() __wur;
 
 /**
- * @brief Clean the security_manager client handler
+ * @brief Clear the security_manager client handler
+ * Return in the create state
  *
  * @param security_manager security_manager client handler
  * @return 0 in case of success or a negative -errno value
  */
-extern int security_manager_clean(security_manager_t *security_manager);
+extern int security_manager_clear(security_manager_t *security_manager) __nonnull() __wur;
 
 /**
  * @brief Install an application with all defined paramters in the security manager handle
@@ -105,7 +107,7 @@ extern int security_manager_clean(security_manager_t *security_manager);
  * @param[in] security_manager security_manager client handler
  * @return 0 in case of success or a negative -errno value
  */
-extern int security_manager_install(security_manager_t *security_manager);
+extern int security_manager_install(security_manager_t *security_manager) __nonnull() __wur;
 
 /**
  * @brief Uninstall an application (cynagora permissions, paths)
@@ -114,7 +116,7 @@ extern int security_manager_install(security_manager_t *security_manager);
  * @param[in] security_manager security_manager client handler
  * @return 0 in case of success or a negative -errno value
  */
-extern int security_manager_uninstall(security_manager_t *security_manager);
+extern int security_manager_uninstall(security_manager_t *security_manager) __nonnull() __wur;
 
 /**
  * @brief Query or set the logging of requests
@@ -125,7 +127,7 @@ extern int security_manager_uninstall(security_manager_t *security_manager);
  *
  * @return 0 if not logging, 1 if logging or a negative -errno value
  */
-extern int security_manager_log(security_manager_t *security_manager, int on, int off);
+extern int security_manager_log(security_manager_t *security_manager, int on, int off) __nonnull() __wur;
 
 /**
  * @brief Display the actual state security manager handle
@@ -133,6 +135,6 @@ extern int security_manager_log(security_manager_t *security_manager, int on, in
  * @param[in] security_manager security_manager client handler
  * @return 0 in case of success or a negative -errno value
  */
-extern int security_manager_display(security_manager_t *security_manager);
+extern int security_manager_display(security_manager_t *security_manager) __nonnull() __wur;
 
 #endif

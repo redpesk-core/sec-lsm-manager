@@ -34,13 +34,8 @@
 
 /* see cynagora-interface.h */
 int cynagora_drop_policies(cynagora_t *cynagora, const char *client) {
-    if (!cynagora) {
-        ERROR("cynagora undefined");
-        return -EINVAL;
-    } else if (!client) {
-        ERROR("client undefined");
-        return -EINVAL;
-    }
+    CHECK_NO_NULL(cynagora, "cynagora");
+    CHECK_NO_NULL(client, "client");
 
     // enter to modify policies cynagora
     int rc = cynagora_enter(cynagora);

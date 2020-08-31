@@ -30,7 +30,7 @@
  * @param msg The message to display
  * @param ... arguments
  */
-void log_function(const char *msg, ...);
+void log_function(const char *msg, ...) __attribute__((format(printf, 1, 2)));
 
 #define LOG(...) log_function(__VA_ARGS__);
 
@@ -42,8 +42,32 @@ void log_function(const char *msg, ...);
  * @param msg The message to display
  * @param ... arguments
  */
-void error_function(const char *file, const int line, const char *msg, ...);
+void error_function(const char *file, const int line, const char *msg, ...) __attribute__((format(printf, 3, 4)));
 
 #define ERROR(...) error_function(__FILE__, __LINE__, __VA_ARGS__);
+
+#define CHECK_NO_NULL(param, param_name)   \
+    if (!param) {                          \
+        ERROR("%s undefined", param_name); \
+        return -EINVAL;                    \
+    }
+
+#define CHECK_NO_NULL_RETURN_BOOL(param, param_name) \
+    if (!param) {                                    \
+        ERROR("%s undefined", param_name);           \
+        return false;                                \
+    }
+
+#define CHECK_NO_NULL_RETURN_NULL(param, param_name) \
+    if (!param) {                                    \
+        ERROR("%s undefined", param_name);           \
+        return false;                                \
+    }
+
+#define CHECK_NO_NULL_NO_RETURN(param, param_name) \
+    if (!param) {                                  \
+        ERROR("%s undefined", param_name);         \
+        return;                                    \
+    }
 
 #endif

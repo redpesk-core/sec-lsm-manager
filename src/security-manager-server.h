@@ -25,6 +25,8 @@
 #ifndef SECURITY_MANAGER_SERVER_H
 #define SECURITY_MANAGER_SERVER_H
 
+#include <sys/cdefs.h>
+
 typedef struct security_manager_server security_manager_server_t;
 
 /**
@@ -42,7 +44,8 @@ extern int security_manager_server_log;
  *
  * @see security_manager_server_destroy
  */
-extern int security_manager_server_create(security_manager_server_t **server, const char *security_manager_socket_spec);
+extern int security_manager_server_create(security_manager_server_t **server,
+                                          const char *security_manager_socket_spec) __wur;
 
 /**
  * @brief Destroy a created server and release its resources
@@ -51,7 +54,7 @@ extern int security_manager_server_create(security_manager_server_t **server, co
  *
  * @see security_manager_server_create
  */
-extern void security_manager_server_destroy(security_manager_server_t *server);
+extern void security_manager_server_destroy(security_manager_server_t *server) __nonnull();
 
 /**
  * @brief Start the security_manager server and returns only when stopped
@@ -62,7 +65,7 @@ extern void security_manager_server_destroy(security_manager_server_t *server);
  *
  * @see security_manager_server_stop
  */
-extern int security_manager_server_serve(security_manager_server_t *server);
+extern int security_manager_server_serve(security_manager_server_t *server) __nonnull() __wur;
 
 /**
  * @brief Stop the security_manager server
@@ -72,6 +75,6 @@ extern int security_manager_server_serve(security_manager_server_t *server);
  *
  * @see security_manager_server_serve
  */
-extern void security_manager_server_stop(security_manager_server_t *server, int status);
+extern void security_manager_server_stop(security_manager_server_t *server, int status) __nonnull();
 
 #endif

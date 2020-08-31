@@ -52,8 +52,8 @@ const char *get_smack_rules_dir(const char *value) __wur;
  * @param[in] smack_rules_dir some value or NULL for getting default
  * @return 0 in case of success or a negative -errno value
  */
-int create_smack_rules(const secure_app_t *secure_app, const char *smack_template_file,
-                       const char *smack_rules_dir) __wur;
+int create_smack_rules(const secure_app_t *secure_app, path_type_definitions_t path_type_definitions[number_path_type],
+                       const char *smack_template_file, const char *smack_rules_dir) __wur __nonnull((1));
 
 /**
  * @brief Remove smack rules
@@ -62,6 +62,6 @@ int create_smack_rules(const secure_app_t *secure_app, const char *smack_templat
  * @param[in] smack_rules_dir some value or NULL for getting default
  * @return 0 in case of success or a negative -errno value
  */
-int remove_smack_rules(const secure_app_t *secure_app, const char *smack_rules_dir) __wur;
+int remove_smack_rules(const secure_app_t *secure_app, const char *smack_rules_dir) __wur __nonnull((1));
 
 #endif

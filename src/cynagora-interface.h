@@ -33,7 +33,7 @@
  * @param[in] client the id of the application for which to remove permissions
  * @return 0 in case of success or a negative -errno value
  */
-int cynagora_drop_policies(cynagora_t *cynagora, const char *client) __wur;
+int cynagora_drop_policies(cynagora_t *cynagora, const char *client) __wur __nonnull();
 
 /**
  * @brief Define new permissions in cynagora

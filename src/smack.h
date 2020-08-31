@@ -32,7 +32,7 @@
  * @param[in] secure_app secure app handler
  * @return 0 in case of success or a negative -errno value
  */
-int install_smack(const secure_app_t *secure_app) __wur;
+int install_smack(const secure_app_t *secure_app) __wur __nonnull();
 
 /**
  * @brief Uninstall a secure app for smack
@@ -40,5 +40,5 @@ int install_smack(const secure_app_t *secure_app) __wur;
  * @param[in] secure_app secure app handler
  * @return 0 in case of success or a negative -errno value
  */
-int uninstall_smack(const secure_app_t *secure_app) __wur;
+int uninstall_smack(const secure_app_t *secure_app) __wur __nonnull();
 #endif

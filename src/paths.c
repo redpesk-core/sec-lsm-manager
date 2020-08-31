@@ -39,12 +39,12 @@
  *
  * @param[in] path path handler
  */
-static void free_path(path_t *path) {
-    if (path) {
-        free(path->path);
-        path->path = NULL;
-        path->path_type = type_none;
-    }
+__nonnull() static void free_path(path_t *path) {
+    CHECK_NO_NULL_NO_RETURN(path, "path");
+
+    free(path->path);
+    path->path = NULL;
+    path->path_type = type_none;
 }
 
 /**********************/

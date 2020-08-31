@@ -21,11 +21,18 @@
  * $RP_END_LICENSE$
  */
 
+#ifndef SECURITY_MANAGER_SELINUX_COMPILE_H
+#define SECURITY_MANAGER_SELINUX_COMPILE_H
+
 #define COMPILE_SCRIPT "/usr/share/security-manager/script/build-module.sh"
+
+#include <sys/cdefs.h>
 
 /**
  * @brief Launch COMPILE_SCRIPT
  *
  * @return 0 in case of success or a negative -errno value
  */
-int launch_compile();
+int launch_compile() __wur;
+
+#endif

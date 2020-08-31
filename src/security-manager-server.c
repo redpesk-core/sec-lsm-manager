@@ -96,9 +96,10 @@ struct security_manager_server {
  * @param[in] count count of fields
  * @param[in] fields the fields
  */
-static void dolog(client_t *cli, int c2s, unsigned count, const char *fields[]) {
-    static const char dir[2] = {'>', '<'};
+__nonnull((1)) static void dolog(client_t *cli, int c2s, unsigned count, const char *fields[]) {
+    CHECK_NO_NULL_NO_RETURN(cli, "cli");
 
+    static const char dir[2] = {'>', '<'};
     unsigned i;
 
     fprintf(stderr, "%p%c%c%s", cli, dir[!c2s], dir[!c2s], "server");
@@ -115,7 +116,10 @@ static void dolog(client_t *cli, int c2s, unsigned count, const char *fields[]) 
  * @return true if matching
  * @return false if not
  */
-static bool ckarg(const char *arg, const char *value, unsigned offset) {
+__nonnull() static bool ckarg(const char *arg, const char *value, unsigned offset) __wur {
+    CHECK_NO_NULL(arg, "arg");
+    CHECK_NO_NULL(value, "value");
+
     while (arg[offset])
         if (arg[offset] == value[offset])
             offset++;
@@ -130,7 +134,9 @@ static bool ckarg(const char *arg, const char *value, unsigned offset) {
  * @param[in] cli client handler
  * @return 0 in case of success or a negative -errno value
  */
-static int flushw(client_t *cli) {
+__nonnull() static int flushw(client_t *cli) __wur {
+    CHECK_NO_NULL(cli, "cli");
+
     int rc;
     struct pollfd pfd;
 
@@ -161,7 +167,9 @@ static int flushw(client_t *cli) {
  * @param[in] ... strings to send or NULL
  * @return 0 in case of success or a negative -errno value
  */
-static int putx(client_t *cli, ...) {
+__nonnull((1)) static int putx(client_t *cli, ...) __wur {
+    CHECK_NO_NULL(cli, "cli");
+
     const char *p, *fields[MAX_PUTX_ITEMS];
     unsigned n;
     va_list l;
@@ -198,7 +206,9 @@ static int putx(client_t *cli, ...) {
  *
  * @param[in] cli client handler
  */
-static void send_done(client_t *cli) {
+__nonnull() static void send_done(client_t *cli) {
+    CHECK_NO_NULL_NO_RETURN(cli, "cli");
+
     putx(cli, _done_, NULL);
     flushw(cli);
 }
@@ -209,7 +219,8 @@ static void send_done(client_t *cli) {
  * @param[in] cli client handler
  * @param[in] errorstr string error to send
  */
-static void send_error(client_t *cli, const char *errorstr) {
+__nonnull((1)) static void send_error(client_t *cli, const char *errorstr) {
+    CHECK_NO_NULL_NO_RETURN(cli, "cli");
     putx(cli, _error_, errorstr, NULL);
     flushw(cli);
 }
@@ -241,9 +252,10 @@ static void send_display_security_manager_handle(client_t *cli) {
  * @param[in] count The number or arguments
  * @param[in] args Arguments
  */
-static void onrequest(client_t *cli, unsigned count, const char *args[]) {
-    int nextlog;
-    int rc;
+__nonnull((1)) static void onrequest(client_t *cli, unsigned count, const char *args[]) {
+    CHECK_NO_NULL_NO_RETURN(cli, "cli");
+
+    int nextlog, rc;
 
     /* just ignore empty lines */
     if (count == 0)
@@ -368,7 +380,8 @@ static void onrequest(client_t *cli, unsigned count, const char *args[]) {
  * @param[in] cli client handler
  * @param[in] closefds if true close pollitem fd
  */
-static void destroy_client(client_t *cli, bool closefds) {
+__nonnull((1)) static void destroy_client(client_t *cli, bool closefds) {
+    CHECK_NO_NULL_NO_RETURN(cli, "cli");
     /* close protocol */
     if (closefds)
         close(cli->pollitem.fd);
@@ -535,7 +548,7 @@ void security_manager_server_destroy(security_manager_server_t *server) {
 }
 
 /* see security-manager-server.h */
-int security_manager_server_create(security_manager_server_t **server, const char *socket_spec) {
+int security_manager_server_create(security_manager_server_t **server, const char *socket_spec) __wur {
     LOG("security_manager_server_create");
     mode_t um;
     int rc = 0;
@@ -590,11 +603,15 @@ ret:
 
 /* see security-manager-server.h */
 void security_manager_server_stop(security_manager_server_t *server, int status) {
+    CHECK_NO_NULL_NO_RETURN(server, "server");
+
     server->stopped = status ?: INT_MIN;
 }
 
 /* see security-manager-server.h */
-int security_manager_server_serve(security_manager_server_t *server) {
+int security_manager_server_serve(security_manager_server_t *server) __wur {
+    CHECK_NO_NULL(server, "server");
+
     /* process inputs */
     server->stopped = 0;
     while (!server->stopped) {

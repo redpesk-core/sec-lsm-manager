@@ -78,7 +78,9 @@ struct security_manager {
  *
  * @return  0 in case of success or a negative -errno value
  */
-static int flushw(security_manager_t *security_manager) {
+__nonnull() static int flushw(security_manager_t *security_manager) __wur {
+    CHECK_NO_NULL(security_manager, "security_manager");
+
     int rc;
     struct pollfd pfd;
 
@@ -111,7 +113,10 @@ static int flushw(security_manager_t *security_manager) {
  * @param[in] count the count of fields
  * @return 0 on success or a negative error code
  */
-static int send_reply(security_manager_t *security_manager, const char **fields, int count) {
+__nonnull() static int send_reply(security_manager_t *security_manager, const char **fields, int count) __wur {
+    CHECK_NO_NULL(security_manager, "security_manager");
+    CHECK_NO_NULL(fields, "fields");
+
     int rc, trial, i;
     prot_t *prot;
 
@@ -159,7 +164,11 @@ static int send_reply(security_manager_t *security_manager, const char **fields,
  *
  * @return  0 in case of success or a negative -errno value
  */
-static int putxkv(security_manager_t *security_manager, const char *command, const char *optarg, ...) {
+__nonnull((1, 2)) static int putxkv(security_manager_t *security_manager, const char *command, const char *optarg,
+                                    ...) __wur {
+    CHECK_NO_NULL(security_manager, "security_manager");
+    CHECK_NO_NULL(command, "command");
+
     int nf, rc;
     const char *fields[8] = {0};
 
@@ -190,7 +199,9 @@ static int putxkv(security_manager_t *security_manager, const char *command, con
  *
  * @return  0 in case of success or a negative -errno value
  */
-static int wait_input(security_manager_t *security_manager) {
+__nonnull() static int wait_input(security_manager_t *security_manager) __wur {
+    CHECK_NO_NULL(security_manager, "security_manager");
+
     int rc;
     struct pollfd pfd;
 
@@ -210,8 +221,8 @@ static int wait_input(security_manager_t *security_manager) {
  * @return  the count of field of the reply (can be 0)
  *          or -EAGAIN if there is no reply
  */
-static int get_reply(security_manager_t *security_manager) {
-    int rc;
+__nonnull() static int get_reply(security_manager_t *security_manager) __wur {
+    CHECK_NO_NULL(security_manager, "security_manager");
 
     prot_next(security_manager->prot);
     rc = prot_get(security_manager->prot, &security_manager->reply.fields);
@@ -230,8 +241,8 @@ static int get_reply(security_manager_t *security_manager) {
  *          or -EAGAIN if nothing and block == false
  *          or -EPIPE if broken link
  */
-static int wait_reply(security_manager_t *security_manager, bool block) {
-    int rc;
+__nonnull() static int wait_reply(security_manager_t *security_manager, bool block) __wur {
+    CHECK_NO_NULL(security_manager, "security_manager");
 
     for (;;) {
         /* get the next reply if any */
@@ -262,8 +273,8 @@ static int wait_reply(security_manager_t *security_manager, bool block) {
  *
  * @return  0 in case of success or a negative -errno value
  */
-static int wait_any_reply(security_manager_t *security_manager) {
-    int rc;
+__nonnull() static int wait_any_reply(security_manager_t *security_manager) __wur {
+    CHECK_NO_NULL(security_manager, "security_manager");
     for (;;) {
         rc = wait_reply(security_manager, true);
         if (rc < 0)
@@ -281,7 +292,9 @@ static int wait_any_reply(security_manager_t *security_manager) {
  * @return  0 in case of success or a negative -errno value
  *          -ECANCELED when received an error status
  */
-static int wait_done_or_error(security_manager_t *security_manager) {
+__nonnull() static int wait_done_or_error(security_manager_t *security_manager) __wur {
+    CHECK_NO_NULL(security_manager, "security_manager");
+
     int rc = wait_any_reply(security_manager);
     if (rc > 0) {
         if (!strcmp(security_manager->reply.fields[0], _done_)) {
@@ -301,7 +314,9 @@ static int wait_done_or_error(security_manager_t *security_manager) {
  *
  * @param[in] security_manager  the handler of the client
  */
-static void disconnection(security_manager_t *security_manager) {
+__nonnull() static void disconnection(security_manager_t *security_manager) __wur {
+    CHECK_NO_NULL_NO_RETURN(security_manager, "security_manager");
+
     if (security_manager->fd >= 0) {
         close(security_manager->fd);
         security_manager->fd = -1;
@@ -315,7 +330,9 @@ static void disconnection(security_manager_t *security_manager) {
  *
  * @return  0 in case of success or a negative -errno value
  */
-static int connection(security_manager_t *security_manager) {
+__nonnull() static int connection(security_manager_t *security_manager) __wur {
+    CHECK_NO_NULL(security_manager, "security_manager");
+
     int rc;
 
     /* init the client */
@@ -348,7 +365,9 @@ static int connection(security_manager_t *security_manager) {
  *
  * @return  0 in case of success or a negative -errno value
  */
-static int ensure_opened(security_manager_t *security_manager) {
+__nonnull() static int ensure_opened(security_manager_t *security_manager) __wur {
+    CHECK_NO_NULL(security_manager, "security_manager");
+
     if (security_manager->fd >= 0 && write(security_manager->fd, NULL, 0) < 0)
         disconnection(security_manager);
     return security_manager->fd < 0 ? connection(security_manager) : 0;
@@ -399,35 +418,28 @@ int security_manager_create(security_manager_t **security_manager, const char *s
 
 /* see security-manager.h */
 void security_manager_destroy(security_manager_t *security_manager) {
-    if (security_manager) {
-        disconnection(security_manager);
-        if (security_manager->prot)
-            prot_destroy(security_manager->prot);
-        free(security_manager->socketspec);
-        security_manager->socketspec = NULL;
-        free(security_manager);
-        security_manager = NULL;
-    }
+    CHECK_NO_NULL_NO_RETURN(security_manager, "security_manager");
+
+    disconnection(security_manager);
+    if (security_manager->prot)
+        prot_destroy(security_manager->prot);
+    free(security_manager->socketspec);
+    security_manager->socketspec = NULL;
+    free(security_manager);
+    security_manager = NULL;
 }
 
 /* see security-manager.h */
 void security_manager_disconnect(security_manager_t *security_manager) {
-    if (!security_manager) {
-        ERROR("security_manager undefined");
-        return;
-    }
+    CHECK_NO_NULL_NO_RETURN(security_manager, "security_manager");
+
     disconnection(security_manager);
 }
 
 /* see security-manager.h */
 int security_manager_set_id(security_manager_t *security_manager, const char *id) {
-    if (!security_manager) {
-        ERROR("security_manager undefined");
-        return -EINVAL;
-    } else if (!id) {
-        ERROR("id undefined");
-        return -EINVAL;
-    }
+    CHECK_NO_NULL(security_manager, "security_manager");
+    CHECK_NO_NULL(id, "id");
 
     if (security_manager->synclock)
         return -EBUSY;
@@ -453,16 +465,9 @@ ret:
 
 /* see security-manager.h */
 int security_manager_add_path(security_manager_t *security_manager, const char *path, const char *path_type) {
-    if (!security_manager) {
-        ERROR("security_manager undefined");
-        return -EINVAL;
-    } else if (!path) {
-        ERROR("path undefined");
-        return -EINVAL;
-    } else if (!path_type) {
-        ERROR("path_type invalid");
-        return -EINVAL;
-    }
+    CHECK_NO_NULL(security_manager, "security_manager");
+    CHECK_NO_NULL(path, "path");
+    CHECK_NO_NULL(path_type, "path_type");
 
     if (security_manager->synclock)
         return -EBUSY;
@@ -486,13 +491,8 @@ ret:
 
 /* see security-manager.h */
 int security_manager_add_permission(security_manager_t *security_manager, const char *permission) {
-    if (!security_manager) {
-        ERROR("security_manager undefined");
-        return -EINVAL;
-    } else if (!permission) {
-        ERROR("permission undefined");
-        return -EINVAL;
-    }
+    CHECK_NO_NULL(security_manager, "security_manager");
+    CHECK_NO_NULL(permission, "permission");
 
     if (security_manager->synclock)
         return -EBUSY;
@@ -516,11 +516,8 @@ ret:
 }
 
 /* see security-manager.h */
-int security_manager_clean(security_manager_t *security_manager) {
-    if (!security_manager) {
-        ERROR("security_manager undefined");
-        return -EINVAL;
-    }
+int security_manager_clear(security_manager_t *security_manager) {
+    CHECK_NO_NULL(security_manager, "security_manager");
 
     if (security_manager->synclock)
         return -EBUSY;
@@ -545,10 +542,7 @@ ret:
 
 /* see security-manager.h */
 int security_manager_install(security_manager_t *security_manager) {
-    if (!security_manager) {
-        ERROR("security_manager undefined");
-        return -EINVAL;
-    }
+    CHECK_NO_NULL(security_manager, "security_manager");
 
     if (security_manager->synclock)
         return -EBUSY;
@@ -573,10 +567,7 @@ ret:
 
 /* see security-manager.h */
 int security_manager_uninstall(security_manager_t *security_manager) {
-    if (!security_manager) {
-        ERROR("security_manager undefined");
-        return -EINVAL;
-    }
+    CHECK_NO_NULL(security_manager, "security_manager");
 
     if (security_manager->synclock)
         return -EBUSY;
@@ -601,10 +592,7 @@ ret:
 
 /* see security-manager.h */
 int security_manager_log(security_manager_t *security_manager, int on, int off) {
-    if (!security_manager) {
-        ERROR("security_manager undefined");
-        return -EINVAL;
-    }
+    CHECK_NO_NULL(security_manager, "security_manager");
 
     if (security_manager->synclock)
         return -EBUSY;
@@ -626,10 +614,7 @@ int security_manager_log(security_manager_t *security_manager, int on, int off) 
 
 /* see security-manager.h */
 int security_manager_display(security_manager_t *security_manager) {
-    if (!security_manager) {
-        ERROR("security_manager undefined");
-        return -EINVAL;
-    }
+    CHECK_NO_NULL(security_manager, "security_manager");
 
     if (security_manager->synclock)
         return -EBUSY;

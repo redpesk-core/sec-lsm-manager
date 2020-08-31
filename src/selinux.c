@@ -36,11 +36,8 @@
  * @param[in] path The path of the file
  * @return 0 in case of success or a negative -errno value
  */
-static int restorecon(const char *path) {
-    if (!path) {
-        ERROR("path undefined");
-        return -EINVAL;
-    }
+__nonnull() static int restorecon(const char *path) __wur {
+    CHECK_NO_NULL(path, "path");
 
     int rc = selinux_restorecon(path, SELINUX_RESTORECON_SET_SPECFILE_CTX);
     if (rc < 0) {
@@ -58,11 +55,8 @@ static int restorecon(const char *path) {
  * @param[in] paths paths handler
  * @return 0 in case of success or a negative -errno value
  */
-static int apply_selinux_label(const paths_t *paths) {
-    if (!paths) {
-        ERROR("paths undefined");
-        return -EINVAL;
-    }
+__nonnull() static int apply_selinux_label(const path_set_t *paths) __wur {
+    CHECK_NO_NULL(paths, "paths");
 
     for (size_t i = 0; i < paths->size; i++) {
         if (check_file_exists(paths->paths[i].path)) {
@@ -83,40 +77,28 @@ static int apply_selinux_label(const paths_t *paths) {
 
 /* see selinux.h */
 int install_selinux(const secure_app_t *secure_app) {
-    if (!secure_app) {
-        ERROR("secure_app undefined");
-        return -EINVAL;
-    }
+    CHECK_NO_NULL(secure_app, "secure_app");
 
     // ################## CREATE ##################
     int rc = create_selinux_rules(secure_app, NULL, NULL, NULL);
-
     if (rc < 0) {
         ERROR("create_selinux_rules");
         return rc;
     }
 
     // ############### CHECK AFTER ###############
-    rc = check_module_files_exist(secure_app, NULL);
-    if (rc < 0) {
-        ERROR("check_module_files_exist");
-        return rc;
-    } else if (rc != 1) {
+    if (!check_module_files_exist(secure_app, NULL)) {
         ERROR("module files not exist");
-        return -1;
+        return -ENOENT;
     }
 
-    rc = check_module_in_policy(secure_app);
-    if (rc < 0) {
-        ERROR("check_module_in_policy");
-        return rc;
-    } else if (rc != 1) {
+    if (!check_module_in_policy(secure_app)) {
         ERROR("module not in the policy");
-        return -1;
+        return -ENOENT;
     }
 
     // force label
-    rc = apply_selinux_label(&(secure_app->paths));
+    rc = apply_selinux_label(&(secure_app->path_set));
     if (rc < 0) {
         ERROR("apply_selinux_label");
         return rc;
@@ -127,28 +109,21 @@ int install_selinux(const secure_app_t *secure_app) {
 
 /* see selinux.h */
 int uninstall_selinux(const secure_app_t *secure_app) {
-    if (!secure_app) {
-        ERROR("secure_app undefined");
-        return -EINVAL;
-    }
+    CHECK_NO_NULL(secure_app, "secure_app");
 
     // ############### CHECK BEFORE ###############
-    int rc = check_module_files_exist(secure_app, NULL);
-    if (rc < 0) {
-        ERROR("check_module_files_exist");
-    } else if (rc != 1) {
+    if (!check_module_files_exist(secure_app, NULL)) {
         ERROR("module files not exist");
+        return -ENOENT;
     }
 
-    rc = check_module_in_policy(secure_app);
-    if (rc < 0) {
-        ERROR("check_module_in_policy");
-    } else if (rc != 1) {
+    if (!check_module_in_policy(secure_app)) {
         ERROR("module not in the policy");
+        return -ENOENT;
     }
 
     // ################## REMOVE ##################
-    rc = remove_selinux_rules(secure_app, NULL);
+    int rc = remove_selinux_rules(secure_app, NULL);
 
     if (rc < 0) {
         ERROR("remove_selinux_rules");
@@ -156,20 +131,12 @@ int uninstall_selinux(const secure_app_t *secure_app) {
     }
 
     // ############### CHECK AFTER ###############
-    rc = check_module_files_exist(secure_app, NULL);
-    if (rc < 0) {
-        ERROR("check_module_files_exist");
-        return rc;
-    } else if (rc != 0) {
+    if (check_module_files_exist(secure_app, NULL)) {
         ERROR("module files exist");
         return -1;
     }
 
-    rc = check_module_in_policy(secure_app);
-    if (rc < 0) {
-        ERROR("check_module_in_policy");
-        return rc;
-    } else if (rc != 0) {
+    if (check_module_in_policy(secure_app)) {
         ERROR("module in the policy");
         return -1;
     }
