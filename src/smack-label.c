@@ -54,8 +54,6 @@ char public_app[] = "_";
  * @return 0 in case of success or a negative -errno value
  */
 __nonnull((2)) static int generate_label(char **label, const char *id, const char *prefix, const char *suffix) __wur {
-    CHECK_NO_NULL(id, "id");
-
     size_t len_label = 0;
     size_t len_prefix = 0;
     size_t len_id = 0;
@@ -111,15 +109,15 @@ bool smack_enabled() {
 
 /* see smack-label.h */
 void free_path_type_definitions(path_type_definitions_t path_type_definitions[number_path_type]) {
-    for (int i = 1; i < number_path_type; i++) {
-        free(path_type_definitions[i].label);
+    if (path_type_definitions) {
+        for (int i = 1; i < number_path_type; i++) {
+            free(path_type_definitions[i].label);
+        }
     }
 }
 
 /* see smack-label.h */
 int init_path_type_definitions(path_type_definitions_t path_type_definitions[number_path_type], const char *id) {
-    CHECK_NO_NULL(id, "id");
-
     int rc = 0;
     // conf
     if (generate_label(&path_type_definitions[type_conf].label, id, prefix_app, suffix_conf) < 0)

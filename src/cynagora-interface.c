@@ -38,9 +38,6 @@
 
 /* see cynagora-interface.h */
 int cynagora_drop_policies(cynagora_t *cynagora, const char *client) {
-    CHECK_NO_NULL(cynagora, "cynagora");
-    CHECK_NO_NULL(client, "client");
-
     // enter to modify policies cynagora
     int rc = cynagora_enter(cynagora);
     if (rc < 0) {
@@ -64,9 +61,6 @@ int cynagora_drop_policies(cynagora_t *cynagora, const char *client) {
 
 /* see cynagora-interface.h */
 int cynagora_set_policies(cynagora_t *cynagora, const char *client, const permission_set_t *permission_set) {
-    CHECK_NO_NULL(cynagora, "cynagora");
-    CHECK_NO_NULL(permission_set, "permission_set");
-
     // enter to modify policies cynagora
     int rc = cynagora_enter(cynagora);
     if (rc < 0) {

@@ -37,8 +37,6 @@
  * @return 0 in case of success or a negative -errno value
  */
 __nonnull() static int restorecon(const char *path) __wur {
-    CHECK_NO_NULL(path, "path");
-
     int rc = selinux_restorecon(path, SELINUX_RESTORECON_SET_SPECFILE_CTX);
     if (rc < 0) {
         rc = -errno;
@@ -56,8 +54,6 @@ __nonnull() static int restorecon(const char *path) __wur {
  * @return 0 in case of success or a negative -errno value
  */
 __nonnull() static int apply_selinux_label(const path_set_t *paths) __wur {
-    CHECK_NO_NULL(paths, "paths");
-
     for (size_t i = 0; i < paths->size; i++) {
         if (check_file_exists(paths->paths[i].path)) {
             int rc = restorecon(paths->paths[i].path);
@@ -77,8 +73,6 @@ __nonnull() static int apply_selinux_label(const path_set_t *paths) __wur {
 
 /* see selinux.h */
 int install_selinux(const secure_app_t *secure_app) {
-    CHECK_NO_NULL(secure_app, "secure_app");
-
     // ################## CREATE ##################
     int rc = create_selinux_rules(secure_app, NULL, NULL, NULL);
     if (rc < 0) {
@@ -109,8 +103,6 @@ int install_selinux(const secure_app_t *secure_app) {
 
 /* see selinux.h */
 int uninstall_selinux(const secure_app_t *secure_app) {
-    CHECK_NO_NULL(secure_app, "secure_app");
-
     // ############### CHECK BEFORE ###############
     if (!check_module_files_exist(secure_app, NULL)) {
         ERROR("module files not exist");

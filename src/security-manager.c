@@ -40,6 +40,18 @@
 #include "security-manager-protocol.h"
 #include "socket.h"
 
+#define CHECK_NO_NULL(param, param_name)   \
+    if (!param) {                          \
+        ERROR("%s undefined", param_name); \
+        return -EINVAL;                    \
+    }
+
+#define CHECK_NO_NULL_NO_RETURN(param, param_name) \
+    if (!param) {                                  \
+        ERROR("%s undefined", param_name);         \
+        return;                                    \
+    }
+
 /**
  * structure recording a client
  */
@@ -78,8 +90,6 @@ struct security_manager {
  * @return  0 in case of success or a negative -errno value
  */
 __nonnull() static int flushw(security_manager_t *security_manager) __wur {
-    CHECK_NO_NULL(security_manager, "security_manager");
-
     int rc;
     struct pollfd pfd;
 
@@ -113,9 +123,6 @@ __nonnull() static int flushw(security_manager_t *security_manager) __wur {
  * @return 0 on success or a negative error code
  */
 __nonnull() static int send_reply(security_manager_t *security_manager, const char **fields, int count) __wur {
-    CHECK_NO_NULL(security_manager, "security_manager");
-    CHECK_NO_NULL(fields, "fields");
-
     int rc, trial, i;
     prot_t *prot;
 
@@ -165,9 +172,6 @@ __nonnull() static int send_reply(security_manager_t *security_manager, const ch
  */
 __nonnull((1, 2)) static int putxkv(security_manager_t *security_manager, const char *command, const char *optarg,
                                     ...) __wur {
-    CHECK_NO_NULL(security_manager, "security_manager");
-    CHECK_NO_NULL(command, "command");
-
     int nf, rc;
     const char *fields[8] = {0};
 
@@ -199,8 +203,6 @@ __nonnull((1, 2)) static int putxkv(security_manager_t *security_manager, const 
  * @return  0 in case of success or a negative -errno value
  */
 __nonnull() static int wait_input(security_manager_t *security_manager) __wur {
-    CHECK_NO_NULL(security_manager, "security_manager");
-
     int rc;
     struct pollfd pfd;
 
@@ -221,8 +223,6 @@ __nonnull() static int wait_input(security_manager_t *security_manager) __wur {
  *          or -EAGAIN if there is no reply
  */
 __nonnull() static int get_reply(security_manager_t *security_manager) __wur {
-    CHECK_NO_NULL(security_manager, "security_manager");
-
     prot_next(security_manager->prot);
     int rc = prot_get(security_manager->prot, &security_manager->reply.fields);
 
@@ -241,8 +241,6 @@ __nonnull() static int get_reply(security_manager_t *security_manager) __wur {
  *          or -EPIPE if broken link
  */
 __nonnull() static int wait_reply(security_manager_t *security_manager, bool block) __wur {
-    CHECK_NO_NULL(security_manager, "security_manager");
-
     for (;;) {
         /* get the next reply if any */
         int rc = get_reply(security_manager);
@@ -274,8 +272,6 @@ __nonnull() static int wait_reply(security_manager_t *security_manager, bool blo
  * @return  0 in case of success or a negative -errno value
  */
 __nonnull() static int wait_any_reply(security_manager_t *security_manager) __wur {
-    CHECK_NO_NULL(security_manager, "security_manager");
-
     for (;;) {
         int rc = wait_reply(security_manager, true);
         if (rc < 0)
@@ -294,8 +290,6 @@ __nonnull() static int wait_any_reply(security_manager_t *security_manager) __wu
  *          -ECANCELED when received an error status
  */
 __nonnull() static int wait_done_or_error(security_manager_t *security_manager) __wur {
-    CHECK_NO_NULL(security_manager, "security_manager");
-
     int rc = wait_any_reply(security_manager);
 
     if (rc > 0) {
@@ -317,8 +311,6 @@ __nonnull() static int wait_done_or_error(security_manager_t *security_manager) 
  * @param[in] security_manager  the handler of the client
  */
 __nonnull() static void disconnection(security_manager_t *security_manager) __wur {
-    CHECK_NO_NULL_NO_RETURN(security_manager, "security_manager");
-
     if (security_manager->fd >= 0) {
         close(security_manager->fd);
         security_manager->fd = -1;
@@ -333,8 +325,6 @@ __nonnull() static void disconnection(security_manager_t *security_manager) __wu
  * @return  0 in case of success or a negative -errno value
  */
 __nonnull() static int connection(security_manager_t *security_manager) __wur {
-    CHECK_NO_NULL(security_manager, "security_manager");
-
     int rc;
 
     /* init the client */
@@ -368,8 +358,6 @@ __nonnull() static int connection(security_manager_t *security_manager) __wur {
  * @return  0 in case of success or a negative -errno value
  */
 __nonnull() static int ensure_opened(security_manager_t *security_manager) __wur {
-    CHECK_NO_NULL(security_manager, "security_manager");
-
     if (security_manager->fd >= 0 && write(security_manager->fd, NULL, 0) < 0)
         disconnection(security_manager);
     return security_manager->fd < 0 ? connection(security_manager) : 0;

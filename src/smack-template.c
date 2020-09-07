@@ -77,14 +77,14 @@ typedef struct smack_handle {
  * @param[in] smack_handle smack_handle handler
  */
 __nonnull() static void free_smack_handle(smack_handle_t *smack_handle) {
-    CHECK_NO_NULL_NO_RETURN(smack_handle, "smack_handle");
-
-    if (smack_handle->smack_accesses) {
-        smack_accesses_free(smack_handle->smack_accesses);
-        smack_handle->smack_accesses = NULL;
+    if (smack_handle) {
+        if (smack_handle->smack_accesses) {
+            smack_accesses_free(smack_handle->smack_accesses);
+            smack_handle->smack_accesses = NULL;
+        }
+        free((void *)smack_handle->id);
+        smack_handle->id = NULL;
     }
-    free((void *)smack_handle->id);
-    smack_handle->id = NULL;
 }
 
 /**
@@ -95,9 +95,6 @@ __nonnull() static void free_smack_handle(smack_handle_t *smack_handle) {
  * @return 0 in case of success or a negative -errno value
  */
 __nonnull() static int init_smack_handle(smack_handle_t *smack_handle, const char *id) __wur {
-    CHECK_NO_NULL(smack_handle, "smack_handle");
-    CHECK_NO_NULL(id, "id");
-
     int rc = 0;
     smack_handle->id = strdup(id);
 
@@ -124,8 +121,6 @@ __nonnull() static int init_smack_handle(smack_handle_t *smack_handle, const cha
  * @return number of space in case of success or a negative -errno value
  */
 __nonnull() static int count_space(const char *line) __wur {
-    CHECK_NO_NULL(line, "line");
-
     size_t len = strlen(line);
     int count = 0;
     for (size_t i = 0; i < len; i++) {
@@ -144,9 +139,6 @@ __nonnull() static int count_space(const char *line) __wur {
  */
 __nonnull() static int parse_line(char *line, const smack_handle_t *smack_handle,
                                   path_type_definitions_t path_type_definitions[number_path_type]) __wur {
-    CHECK_NO_NULL(line, "line");
-    CHECK_NO_NULL(smack_handle, "smack_handle");
-
     if (line[0] == SMACK_COMMENT_CHAR) {  // comment
         return 0;
     } else if (line[0] == '\n') {  // new line
@@ -205,9 +197,6 @@ __nonnull() static int parse_line(char *line, const smack_handle_t *smack_handle
  */
 __nonnull() static int parse_template_file(const char *smack_template_file, const smack_handle_t *smack_handle,
                                            path_type_definitions_t path_type_definitions[number_path_type]) __wur {
-    CHECK_NO_NULL(smack_template_file, "smack_template_file");
-    CHECK_NO_NULL(smack_handle, "smack_handle");
-
     int rc = 0;
     char line[MAX_SMACK_LABEL_SIZE];
     FILE *f = fopen(smack_template_file, "r");
@@ -241,9 +230,6 @@ __nonnull() static int parse_template_file(const char *smack_template_file, cons
  * @return smack rules file path if success, NULL if error
  */
 __nonnull() static char *get_smack_rules_file_path(const char *smack_rules_dir, const char *id) __wur {
-    CHECK_NO_NULL_RETURN_NULL(smack_rules_dir, "smack_rules_dir");
-    CHECK_NO_NULL_RETURN_NULL(id, "id");
-
     size_t len = strlen(smack_rules_dir) + strlen(prefix_app_rules) + strlen(id);
     char *file = (char *)malloc(len + 1);
     if (!file) {
@@ -267,9 +253,6 @@ __nonnull() static char *get_smack_rules_file_path(const char *smack_rules_dir, 
  * @return 0 in case of success or a negative -errno value
  */
 __nonnull() static int apply_save_accesses_file(const char *smack_rules_dir, smack_handle_t *smack_handle) __wur {
-    CHECK_NO_NULL(smack_rules_dir, "smack_rules_dir");
-    CHECK_NO_NULL(smack_handle, "smack_handle");
-
     int rc = 0;
 
     if (smack_enabled()) {
@@ -320,8 +303,6 @@ end:
  * @return 0 in case of success or a negative -errno value
  */
 __nonnull() static int remove_load_rules(const char *file) __wur {
-    CHECK_NO_NULL(file, "file");
-
     int rc = 0;
     int fd = open(file, O_RDONLY);
     if (fd < 0) {
@@ -375,8 +356,6 @@ const char *get_smack_rules_dir(const char *value) {
 /* see smack-template.h */
 int create_smack_rules(const secure_app_t *secure_app, path_type_definitions_t path_type_definitions[number_path_type],
                        const char *smack_template_file, const char *smack_rules_dir) {
-    CHECK_NO_NULL(secure_app, "secure_app");
-
     smack_handle_t smack_handle = {0};
 
     smack_template_file = get_smack_template_file(smack_template_file);
@@ -411,8 +390,6 @@ int create_smack_rules(const secure_app_t *secure_app, path_type_definitions_t p
 
 /* see smack-template.h */
 int remove_smack_rules(const secure_app_t *secure_app, const char *smack_rules_dir) {
-    CHECK_NO_NULL(secure_app, "secure_app");
-
     int rc = 0;
     smack_rules_dir = get_smack_rules_dir(smack_rules_dir);
     char *file = get_smack_rules_file_path(smack_rules_dir, secure_app->id);

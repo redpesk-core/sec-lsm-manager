@@ -47,8 +47,6 @@
  * @return 0 in case of success or a negative -errno value
  */
 __nonnull() static int init_secure_app(secure_app_t *secure_app) __wur {
-    CHECK_NO_NULL(secure_app, "secure_app");
-
     secure_app->id = NULL;
     int rc = init_path_set(&(secure_app->path_set));
     if (rc < 0) {
@@ -92,29 +90,24 @@ int create_secure_app(secure_app_t **secure_app) {
 
 /* see secure-app.h */
 void free_secure_app(secure_app_t *secure_app) {
-    CHECK_NO_NULL_NO_RETURN(secure_app, "secure_app");
+    if (secure_app) {
+        free((void *)secure_app->id);
+        secure_app->id = NULL;
 
-    free((void *)secure_app->id);
-    secure_app->id = NULL;
-
-    free_permission_set(&(secure_app->permission_set));
-    free_path_set(&(secure_app->path_set));
-    secure_app->error_flag = false;
+        free_permission_set(&(secure_app->permission_set));
+        free_path_set(&(secure_app->path_set));
+        secure_app->error_flag = false;
+    }
 }
 
 /* see secure-app.h */
 void destroy_secure_app(secure_app_t *secure_app) {
-    CHECK_NO_NULL_NO_RETURN(secure_app, "secure_app");
-
     free_secure_app(secure_app);
     free(secure_app);
 }
 
 /* see secure-app.h */
 int secure_app_set_id(secure_app_t *secure_app, const char *id) {
-    CHECK_NO_NULL(secure_app, "secure_app");
-    CHECK_NO_NULL(id, "id");
-
     if (secure_app->id) {
         ERROR("id already set");
         return -EINVAL;
@@ -136,9 +129,6 @@ int secure_app_set_id(secure_app_t *secure_app, const char *id) {
 
 /* see secure-app.h */
 int secure_app_add_permission(secure_app_t *secure_app, const char *permission) {
-    CHECK_NO_NULL(secure_app, "secure_app");
-    CHECK_NO_NULL(permission, "permission");
-
     if (secure_app->error_flag) {
         ERROR("error flag has been raised");
         return -EPERM;
@@ -162,9 +152,6 @@ int secure_app_add_permission(secure_app_t *secure_app, const char *permission) 
 
 /* see secure-app.h */
 int secure_app_add_path(secure_app_t *secure_app, const char *path, enum path_type path_type) {
-    CHECK_NO_NULL(secure_app, "secure_app");
-    CHECK_NO_NULL(path, "path");
-
     if (!valid_path_type(path_type)) {
         ERROR("path_type invalid");
         return -EINVAL;
@@ -192,8 +179,4 @@ int secure_app_add_path(secure_app_t *secure_app, const char *path, enum path_ty
 }
 
 /* see secure-app.h */
-void raise_error_flag(secure_app_t *secure_app) {
-    CHECK_NO_NULL_NO_RETURN(secure_app, "secure_app");
-
-    secure_app->error_flag = true;
-}
+void raise_error_flag(secure_app_t *secure_app) { secure_app->error_flag = true; }

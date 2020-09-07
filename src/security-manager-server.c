@@ -117,8 +117,6 @@ static int (*uninstall_mac)(const secure_app_t *secure_app) = uninstall_selinux;
  * @param[in] fields the fields
  */
 __nonnull((1)) static void dolog(client_t *cli, int c2s, unsigned count, const char *fields[]) {
-    CHECK_NO_NULL_NO_RETURN(cli, "cli");
-
     static const char dir[2] = {'>', '<'};
     unsigned i;
 
@@ -137,9 +135,6 @@ __nonnull((1)) static void dolog(client_t *cli, int c2s, unsigned count, const c
  * @return false if not
  */
 __nonnull() static bool ckarg(const char *arg, const char *value, unsigned offset) __wur {
-    CHECK_NO_NULL(arg, "arg");
-    CHECK_NO_NULL(value, "value");
-
     while (arg[offset])
         if (arg[offset] == value[offset])
             offset++;
@@ -155,8 +150,6 @@ __nonnull() static bool ckarg(const char *arg, const char *value, unsigned offse
  * @return 0 in case of success or a negative -errno value
  */
 __nonnull() static int flushw(client_t *cli) __wur {
-    CHECK_NO_NULL(cli, "cli");
-
     int rc;
     struct pollfd pfd;
 
@@ -188,8 +181,6 @@ __nonnull() static int flushw(client_t *cli) __wur {
  * @return 0 in case of success or a negative -errno value
  */
 __nonnull((1)) static int putx(client_t *cli, ...) __wur {
-    CHECK_NO_NULL(cli, "cli");
-
     const char *p, *fields[MAX_PUTX_ITEMS];
     unsigned n;
     va_list l;
@@ -227,8 +218,6 @@ __nonnull((1)) static int putx(client_t *cli, ...) __wur {
  * @param[in] cli client handler
  */
 __nonnull() static void send_done(client_t *cli) {
-    CHECK_NO_NULL_NO_RETURN(cli, "cli");
-
     putx(cli, _done_, NULL);
     flushw(cli);
 }
@@ -240,8 +229,6 @@ __nonnull() static void send_done(client_t *cli) {
  * @param[in] errorstr string error to send
  */
 __nonnull((1)) static void send_error(client_t *cli, const char *errorstr) {
-    CHECK_NO_NULL_NO_RETURN(cli, "cli");
-
     raise_error_flag(cli->secure_app);
     putx(cli, _error_, errorstr, NULL);
     flushw(cli);
@@ -253,8 +240,6 @@ __nonnull((1)) static void send_error(client_t *cli, const char *errorstr) {
  * @param[in] cli client handler
  */
 __nonnull() static int send_display_security_manager_handle(client_t *cli) __wur {
-    CHECK_NO_NULL(cli, "cli");
-
     if (cli->secure_app->error_flag) {
         ERROR("error flag has been raised, clear secure app");
         return -EPERM;
@@ -283,9 +268,6 @@ __nonnull() static int send_display_security_manager_handle(client_t *cli) __wur
  * @return 0 in case of success or a negative -errno value
  */
 __nonnull() static int update_policy(secure_app_t *secure_app, cynagora_t *cynagora_admin_client) __wur {
-    CHECK_NO_NULL(secure_app, "secure_app");
-    CHECK_NO_NULL(cynagora_admin_client, "cynagora_admin_client");
-
     // drop old policies
     int rc = cynagora_drop_policies(cynagora_admin_client, secure_app->id);
     if (rc < 0) {
@@ -304,10 +286,6 @@ __nonnull() static int update_policy(secure_app_t *secure_app, cynagora_t *cynag
 }
 
 __nonnull() static int install(client_t *cli) __wur {
-    CHECK_NO_NULL(cli, "cli");
-    CHECK_NO_NULL(cli->secure_app, "secure_app");
-    CHECK_NO_NULL(cli->secure_app->id, "id");
-
     if (cli->secure_app->error_flag) {
         ERROR("error flag has been raised, clear secure app");
         return -EPERM;
@@ -337,10 +315,6 @@ __nonnull() static int install(client_t *cli) __wur {
 }
 
 __nonnull() static int uninstall(client_t *cli) __wur {
-    CHECK_NO_NULL(cli, "cli");
-    CHECK_NO_NULL(cli->secure_app, "secure_app");
-    CHECK_NO_NULL(cli->secure_app->id, "id");
-
     if (cli->secure_app->error_flag) {
         ERROR("error flag has been raised, clear secure app");
         return -EPERM;
@@ -373,8 +347,6 @@ __nonnull() static int uninstall(client_t *cli) __wur {
  * @param[in] args Arguments
  */
 __nonnull((1)) static void onrequest(client_t *cli, unsigned count, const char *args[]) {
-    CHECK_NO_NULL_NO_RETURN(cli, "cli");
-
     int nextlog, rc;
 
     /* just ignore empty lines */
@@ -505,8 +477,6 @@ __nonnull((1)) static void onrequest(client_t *cli, unsigned count, const char *
  * @param[in] closefds if true close pollitem fd
  */
 __nonnull((1)) static void destroy_client(client_t *cli, bool closefds) {
-    CHECK_NO_NULL_NO_RETURN(cli, "cli");
-
     cli->security_manager_server->count--;
     if (!cli->security_manager_server->count) {
         cynagora_disconnect(cli->security_manager_server->cynagora_admin_client);
@@ -675,8 +645,6 @@ static void on_server_event(pollitem_t *pollitem, uint32_t events, int pollfd) {
 
 /* see security-manager-server.h */
 void security_manager_server_destroy(security_manager_server_t *server) {
-    CHECK_NO_NULL_NO_RETURN(server, "server");
-
     if (server->pollfd >= 0)
         close(server->pollfd);
     if (server->socket.fd >= 0)
@@ -751,16 +719,12 @@ ret:
 
 /* see security-manager-server.h */
 void security_manager_server_stop(security_manager_server_t *server, int status) {
-    CHECK_NO_NULL_NO_RETURN(server, "server");
-
     server->stopped = status ?: INT_MIN;
     cynagora_disconnect(server->cynagora_admin_client);
 }
 
 /* see security-manager-server.h */
 int security_manager_server_serve(security_manager_server_t *server) __wur {
-    CHECK_NO_NULL(server, "server");
-
     /* process inputs */
     server->stopped = 0;
     while (!server->stopped) {

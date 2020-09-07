@@ -92,15 +92,15 @@ bool selinux_enabled() {
 
 /* see selinux-label.h */
 void free_path_type_definitions(path_type_definitions_t path_type_definitions[number_path_type]) {
-    for (int i = 1; i < number_path_type; i++) {
-        free(path_type_definitions[i].label);
+    if (path_type_definitions) {
+        for (int i = 1; i < number_path_type; i++) {
+            free(path_type_definitions[i].label);
+        }
     }
 }
 
 /* see selinux-label.h */
 int init_path_type_definitions(path_type_definitions_t path_type_definitions[number_path_type], const char *id) {
-    CHECK_NO_NULL(id, "id");
-
     int rc = 0;
 
     // conf

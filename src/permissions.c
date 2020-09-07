@@ -29,8 +29,6 @@
 
 /* see permissions.h */
 int init_permission_set(permission_set_t *permission_set) {
-    CHECK_NO_NULL(permission_set, "permission_set");
-
     permission_set->size = 0;
     permission_set->permissions = NULL;
     return 0;
@@ -38,18 +36,15 @@ int init_permission_set(permission_set_t *permission_set) {
 
 /* see permissions.h */
 void free_permission_set(permission_set_t *permission_set) {
-    CHECK_NO_NULL_NO_RETURN(permission_set, "permission_set");
-
-    permission_set->size = 0;
-    free(permission_set->permissions);
-    permission_set->permissions = NULL;
+    if (permission_set) {
+        permission_set->size = 0;
+        free(permission_set->permissions);
+        permission_set->permissions = NULL;
+    }
 }
 
 /* see permissions.h */
 int permission_set_add_permission(permission_set_t *permission_set, const char *permission) {
-    CHECK_NO_NULL(permission_set, "permission_set");
-    CHECK_NO_NULL(permission, "permission");
-
     char **permissions_tmp = (char **)realloc(permission_set->permissions, (permission_set->size + 1) * sizeof(char *));
     if (permissions_tmp == NULL) {
         ERROR("realloc char**");

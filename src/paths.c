@@ -40,11 +40,11 @@
  * @param[in] path path handler
  */
 __nonnull() static void free_path(path_t *path) {
-    CHECK_NO_NULL_NO_RETURN(path, "path");
-
-    free(path->path);
-    path->path = NULL;
-    path->path_type = type_none;
+    if (path) {
+        free(path->path);
+        path->path = NULL;
+        path->path_type = type_none;
+    }
 }
 
 /**********************/
@@ -53,8 +53,6 @@ __nonnull() static void free_path(path_t *path) {
 
 /* see paths.h */
 int init_path_set(path_set_t *path_set) {
-    CHECK_NO_NULL(path_set, "path_set");
-
     path_set->size = 0;
     path_set->paths = NULL;
     return 0;
@@ -62,21 +60,18 @@ int init_path_set(path_set_t *path_set) {
 
 /* see paths.h */
 void free_path_set(path_set_t *path_set) {
-    CHECK_NO_NULL_NO_RETURN(path_set, "path_set");
-
-    for (size_t i = 0; i < path_set->size; i++) {
-        free_path(path_set->paths + i);
+    if (path_set) {
+        for (size_t i = 0; i < path_set->size; i++) {
+            free_path(path_set->paths + i);
+        }
+        path_set->size = 0;
+        free(path_set->paths);
+        path_set->paths = NULL;
     }
-    path_set->size = 0;
-    free(path_set->paths);
-    path_set->paths = NULL;
 }
 
 /* see paths.h */
 int path_set_add_path(path_set_t *path_set, const char *path, enum path_type path_type) {
-    CHECK_NO_NULL(path_set, "path_set");
-    CHECK_NO_NULL(path, "path");
-
     if (!valid_path_type(path_type)) {
         ERROR("invalid path type");
         return -EINVAL;
@@ -111,8 +106,6 @@ bool valid_path_type(enum path_type path_type) {
 
 /* see paths.h */
 enum path_type get_path_type(const char *path_type_string) {
-    CHECK_NO_NULL(path_type_string, "path_type");
-
     switch (path_type_string[0]) {
         case 'c':
             if (!strcmp(path_type_string, "conf")) {
