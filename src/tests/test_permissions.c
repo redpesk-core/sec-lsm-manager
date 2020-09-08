@@ -17,35 +17,43 @@
 
 #include "test_permissions.h"
 
-#include <CUnit/Basic.h>
-#include <sys/stat.h>
-#include <unistd.h>
+#include <check.h>
 
 #include "../permissions.h"
+#include "tests.h"
 
-void test_init_permission_set(void) {
+START_TEST(test_init_permission_set) {
     permission_set_t permission_set;
-    CU_ASSERT_EQUAL(init_permission_set(&permission_set), 0);
-    CU_ASSERT_EQUAL(permission_set.permissions, NULL);
-    CU_ASSERT_EQUAL(permission_set.size, 0);
+    ck_assert_int_eq(init_permission_set(&permission_set), 0);
+    ck_assert_ptr_eq(permission_set.permissions, NULL);
+    ck_assert_int_eq((int)permission_set.size, 0);
     free_permission_set(&permission_set);
 }
+END_TEST
 
-void test_free_permission_set(void) {
+START_TEST(test_free_permission_set) {
     permission_set_t permission_set;
-    CU_ASSERT_EQUAL(init_permission_set(&permission_set), 0);
-    CU_ASSERT_EQUAL(permission_set_add_permission(&permission_set, "perm"), 0);
+    ck_assert_int_eq(init_permission_set(&permission_set), 0);
+    ck_assert_int_eq(permission_set_add_permission(&permission_set, "perm"), 0);
     free_permission_set(&permission_set);
-    CU_ASSERT_EQUAL(permission_set.permissions, NULL);
-    CU_ASSERT_EQUAL(permission_set.size, 0);
+    ck_assert_ptr_eq(permission_set.permissions, NULL);
+    ck_assert_int_eq((int)permission_set.size, 0);
 }
+END_TEST
 
-void test_permission_set_add_permission(void) {
+START_TEST(test_permission_set_add_permission) {
     permission_set_t permission_set;
-    CU_ASSERT_EQUAL(init_permission_set(&permission_set), 0);
-    CU_ASSERT_EQUAL(permission_set_add_permission(&permission_set, "perm"), 0);
+    ck_assert_int_eq(init_permission_set(&permission_set), 0);
+    ck_assert_int_eq(permission_set_add_permission(&permission_set, "perm"), 0);
 
-    CU_ASSERT_EQUAL(permission_set.size, 1);
-    CU_ASSERT_STRING_EQUAL(permission_set.permissions[0], "perm");
+    ck_assert_int_eq((int)permission_set.size, 1);
+    ck_assert_str_eq(permission_set.permissions[0], "perm");
     free_permission_set(&permission_set);
+}
+END_TEST
+
+void tests_permissions(void) {
+    addtest(test_init_permission_set);
+    addtest(test_free_permission_set);
+    addtest(test_permission_set_add_permission);
 }

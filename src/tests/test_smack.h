@@ -21,4 +21,4 @@
  * $RP_END_LICENSE$
  */
 
-void test_smack_install(void);
+void tests_smack(void);

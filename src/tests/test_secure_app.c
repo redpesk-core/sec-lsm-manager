@@ -23,69 +23,83 @@
 
 #include "test_secure_app.h"
 
-#include <CUnit/Basic.h>
-#include <sys/stat.h>
-#include <unistd.h>
+#include <check.h>
 
 #include "../secure-app.h"
+#include "tests.h"
 
-void test_create_secure_app(void) {
+START_TEST(test_create_secure_app) {
     secure_app_t *secure_app = NULL;
-    CU_ASSERT_EQUAL(create_secure_app(&secure_app), 0);
-    CU_ASSERT_NOT_EQUAL(secure_app, NULL);
-    CU_ASSERT_EQUAL(secure_app->id, NULL);
-    CU_ASSERT_EQUAL(secure_app->permission_set.permissions, NULL);
-    CU_ASSERT_EQUAL(secure_app->permission_set.size, 0);
-    CU_ASSERT_EQUAL(secure_app->path_set.paths, NULL);
-    CU_ASSERT_EQUAL(secure_app->path_set.size, 0);
+    ck_assert_int_eq(create_secure_app(&secure_app), 0);
+    ck_assert_ptr_ne(secure_app, NULL);
+    ck_assert_ptr_eq(secure_app->id, NULL);
+    ck_assert_ptr_eq(secure_app->permission_set.permissions, NULL);
+    ck_assert_int_eq((int)secure_app->permission_set.size, 0);
+    ck_assert_ptr_eq(secure_app->path_set.paths, NULL);
+    ck_assert_int_eq((int)secure_app->path_set.size, 0);
     destroy_secure_app(secure_app);
 }
+END_TEST
 
-void test_secure_app_set_id(void) {
+START_TEST(test_secure_app_set_id) {
     secure_app_t *secure_app = NULL;
-    CU_ASSERT_EQUAL(create_secure_app(&secure_app), 0);
-    CU_ASSERT_EQUAL(secure_app_set_id(secure_app, "id"), 0);
-    CU_ASSERT_STRING_EQUAL(secure_app->id, "id");
+    ck_assert_int_eq(create_secure_app(&secure_app), 0);
+    ck_assert_int_eq(secure_app_set_id(secure_app, "id"), 0);
+    ck_assert_str_eq(secure_app->id, "id");
     destroy_secure_app(secure_app);
 }
+END_TEST
 
-void test_secure_app_add_permission(void) {
+START_TEST(test_secure_app_add_permission) {
     secure_app_t *secure_app = NULL;
-    CU_ASSERT_EQUAL(create_secure_app(&secure_app), 0);
-    CU_ASSERT_EQUAL(secure_app_add_permission(secure_app, "perm"), 0);
-    CU_ASSERT_EQUAL(secure_app->permission_set.size, 1);
-    CU_ASSERT_STRING_EQUAL(secure_app->permission_set.permissions[0], "perm");
+    ck_assert_int_eq(create_secure_app(&secure_app), 0);
+    ck_assert_int_eq(secure_app_add_permission(secure_app, "perm"), 0);
+    ck_assert_int_eq((int)secure_app->permission_set.size, 1);
+    ck_assert_str_eq(secure_app->permission_set.permissions[0], "perm");
     destroy_secure_app(secure_app);
 }
+END_TEST
 
-void test_secure_app_add_path(void) {
+START_TEST(test_secure_app_add_path) {
     secure_app_t *secure_app = NULL;
-    CU_ASSERT_EQUAL(create_secure_app(&secure_app), 0);
-    CU_ASSERT_EQUAL(secure_app_add_path(secure_app, "/tmp", type_conf), 0);
-    CU_ASSERT_EQUAL(secure_app->path_set.size, 1);
-    CU_ASSERT_STRING_EQUAL(secure_app->path_set.paths[0].path, "/tmp");
-    CU_ASSERT_EQUAL(secure_app->path_set.paths[0].path_type, type_conf);
+    ck_assert_int_eq(create_secure_app(&secure_app), 0);
+    ck_assert_int_eq(secure_app_add_path(secure_app, "/tmp", type_conf), 0);
+    ck_assert_int_eq((int)secure_app->path_set.size, 1);
+    ck_assert_str_eq(secure_app->path_set.paths[0].path, "/tmp");
+    ck_assert_int_eq((int)secure_app->path_set.paths[0].path_type, (int)type_conf);
     destroy_secure_app(secure_app);
 }
+END_TEST
 
-void test_free_secure_app(void) {
+START_TEST(test_free_secure_app) {
     secure_app_t *secure_app = NULL;
-    CU_ASSERT_EQUAL(create_secure_app(&secure_app), 0);
-    CU_ASSERT_EQUAL(secure_app_set_id(secure_app, "id"), 0);
-    CU_ASSERT_EQUAL(secure_app_add_path(secure_app, "/tmp", type_conf), 0);
-    CU_ASSERT_EQUAL(secure_app_add_permission(secure_app, "perm"), 0);
+    ck_assert_int_eq(create_secure_app(&secure_app), 0);
+    ck_assert_int_eq(secure_app_set_id(secure_app, "id"), 0);
+    ck_assert_int_eq(secure_app_add_path(secure_app, "/tmp", type_conf), 0);
+    ck_assert_int_eq(secure_app_add_permission(secure_app, "perm"), 0);
     free_secure_app(secure_app);
-    CU_ASSERT_EQUAL(secure_app->path_set.size, 0);
-    CU_ASSERT_EQUAL(secure_app->permission_set.size, 0);
-    CU_ASSERT_EQUAL(secure_app->id, NULL);
+    ck_assert_int_eq((int)secure_app->path_set.size, 0);
+    ck_assert_int_eq((int)secure_app->permission_set.size, 0);
+    ck_assert_ptr_eq(secure_app->id, NULL);
     destroy_secure_app(secure_app);
 }
+END_TEST
 
-void test_destroy_secure_app(void) {
+START_TEST(test_destroy_secure_app) {
     secure_app_t *secure_app = NULL;
-    CU_ASSERT_EQUAL(create_secure_app(&secure_app), 0);
-    CU_ASSERT_EQUAL(secure_app_set_id(secure_app, "id"), 0);
-    CU_ASSERT_EQUAL(secure_app_add_path(secure_app, "/tmp", type_conf), 0);
-    CU_ASSERT_EQUAL(secure_app_add_permission(secure_app, "perm"), 0);
+    ck_assert_int_eq(create_secure_app(&secure_app), 0);
+    ck_assert_int_eq(secure_app_set_id(secure_app, "id"), 0);
+    ck_assert_int_eq(secure_app_add_path(secure_app, "/tmp", type_conf), 0);
+    ck_assert_int_eq(secure_app_add_permission(secure_app, "perm"), 0);
     destroy_secure_app(secure_app);
+}
+END_TEST
+
+void tests_secure_app(void) {
+    addtest(test_create_secure_app);
+    addtest(test_secure_app_set_id);
+    addtest(test_secure_app_add_permission);
+    addtest(test_secure_app_add_path);
+    addtest(test_free_secure_app);
+    addtest(test_destroy_secure_app);
 }

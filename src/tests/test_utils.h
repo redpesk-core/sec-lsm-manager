@@ -21,7 +21,4 @@
  * $RP_END_LICENSE$
  */
 
-void test_check_file_exists(void);
-void test_check_file_type(void);
-void test_check_executable(void);
-void test_remove_file(void);
+void tests_utils(void);

@@ -15,6 +15,4 @@
  * limitations under the License.
  */
 
-void test_init_permission_set(void);
-void test_free_permission_set(void);
-void test_permission_set_add_permission(void);
+void tests_permissions(void);

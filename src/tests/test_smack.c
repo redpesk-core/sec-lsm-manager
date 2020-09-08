@@ -17,10 +17,11 @@
 
 #include "test_smack.h"
 
-#include <CUnit/Basic.h>
+#include <check.h>
 #include <fcntl.h>
 #include <linux/xattr.h>
 #include <stdbool.h>
+#include <stdio.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/xattr.h>
@@ -28,6 +29,7 @@
 
 #include "../security-manager.h"
 #include "../utils.h"
+#include "tests.h"
 
 #if !defined(DEFAULT_TESTS_DIR)
 #define DEFAULT_TESTS_DIR "/tmp/tests/"
@@ -54,9 +56,9 @@ static bool compare_xattr(const char *path, const char *xattr, const char *value
     return false;
 }
 
-void test_smack_install(void) {
+START_TEST(test_smack_install) {
     security_manager_t *security_manager = NULL;
-    CU_ASSERT_EQUAL(security_manager_create(&security_manager, NULL), 0);
+    ck_assert_int_eq(security_manager_create(&security_manager, NULL), 0);
 
     char data_dir[100] = DEFAULT_TESTS_DIR;
     strcat(data_dir, "data/");
@@ -82,53 +84,53 @@ void test_smack_install(void) {
     strcat(public_file, "public/");
     strcat(public_file, "public_file");
 
-    CU_ASSERT_EQUAL(mkdir(DEFAULT_TESTS_DIR, 0770), 0);
-    CU_ASSERT_EQUAL(mkdir(data_dir, 0770), 0);
-    CU_ASSERT_EQUAL(mkdir(exec_dir, 0770), 0);
-    CU_ASSERT_EQUAL(mkdir(id_dir, 0770), 0);
-    CU_ASSERT_EQUAL(mkdir(public_dir, 0770), 0);
-    CU_ASSERT_EQUAL(create_file(data_file, 0770), true);
-    CU_ASSERT_EQUAL(create_file(exec_file, 0770), true);
-    CU_ASSERT_EQUAL(create_file(id_file, 0770), true);
-    CU_ASSERT_EQUAL(create_file(public_file, 0770), true);
+    ck_assert_int_eq(mkdir(DEFAULT_TESTS_DIR, 0770), 0);
+    ck_assert_int_eq(mkdir(data_dir, 0770), 0);
+    ck_assert_int_eq(mkdir(exec_dir, 0770), 0);
+    ck_assert_int_eq(mkdir(id_dir, 0770), 0);
+    ck_assert_int_eq(mkdir(public_dir, 0770), 0);
+    ck_assert_int_eq(create_file(data_file, 0770), true);
+    ck_assert_int_eq(create_file(exec_file, 0770), true);
+    ck_assert_int_eq(create_file(id_file, 0770), true);
+    ck_assert_int_eq(create_file(public_file, 0770), true);
 
-    CU_ASSERT_EQUAL(security_manager_add_path(security_manager, data_dir, "data"), 0);
-    CU_ASSERT_EQUAL(security_manager_add_path(security_manager, data_file, "data"), 0);
-    CU_ASSERT_EQUAL(security_manager_add_path(security_manager, exec_dir, "exec"), 0);
-    CU_ASSERT_EQUAL(security_manager_add_path(security_manager, exec_file, "exec"), 0);
-    CU_ASSERT_EQUAL(security_manager_add_path(security_manager, id_dir, "id"), 0);
-    CU_ASSERT_EQUAL(security_manager_add_path(security_manager, id_file, "id"), 0);
-    CU_ASSERT_EQUAL(security_manager_add_path(security_manager, public_dir, "public"), 0);
-    CU_ASSERT_EQUAL(security_manager_add_path(security_manager, public_file, "public"), 0);
+    ck_assert_int_eq(security_manager_add_path(security_manager, data_dir, "data"), 0);
+    ck_assert_int_eq(security_manager_add_path(security_manager, data_file, "data"), 0);
+    ck_assert_int_eq(security_manager_add_path(security_manager, exec_dir, "exec"), 0);
+    ck_assert_int_eq(security_manager_add_path(security_manager, exec_file, "exec"), 0);
+    ck_assert_int_eq(security_manager_add_path(security_manager, id_dir, "id"), 0);
+    ck_assert_int_eq(security_manager_add_path(security_manager, id_file, "id"), 0);
+    ck_assert_int_eq(security_manager_add_path(security_manager, public_dir, "public"), 0);
+    ck_assert_int_eq(security_manager_add_path(security_manager, public_file, "public"), 0);
 
-    CU_ASSERT_EQUAL(security_manager_add_permission(security_manager, "perm1"), 0);
-    CU_ASSERT_EQUAL(security_manager_add_permission(security_manager, "perm2"), 0);
+    ck_assert_int_eq(security_manager_add_permission(security_manager, "perm1"), 0);
+    ck_assert_int_eq(security_manager_add_permission(security_manager, "perm2"), 0);
 
-    CU_ASSERT_EQUAL(security_manager_set_id(security_manager, "testid"), 0);
+    ck_assert_int_eq(security_manager_set_id(security_manager, "testid"), 0);
 
-    CU_ASSERT_EQUAL(security_manager_install(security_manager), 0);
+    ck_assert_int_eq(security_manager_install(security_manager), 0);
 
-    CU_ASSERT_EQUAL(check_file_exists("/etc/smack/accesses.d/app-testid"), true);
+    ck_assert_int_eq(check_file_exists("/etc/smack/accesses.d/app-testid"), true);
 
-    CU_ASSERT_EQUAL(compare_xattr(data_dir, XATTR_NAME_SMACK, "App:testid:Data"), true);
-    CU_ASSERT_EQUAL(compare_xattr(data_dir, XATTR_NAME_SMACKTRANSMUTE, "TRUE"), true);
+    ck_assert_int_eq(compare_xattr(data_dir, XATTR_NAME_SMACK, "App:testid:Data"), true);
+    ck_assert_int_eq(compare_xattr(data_dir, XATTR_NAME_SMACKTRANSMUTE, "TRUE"), true);
 
-    CU_ASSERT_EQUAL(compare_xattr(data_file, XATTR_NAME_SMACK, "App:testid:Data"), true);
+    ck_assert_int_eq(compare_xattr(data_file, XATTR_NAME_SMACK, "App:testid:Data"), true);
 
-    CU_ASSERT_EQUAL(compare_xattr(exec_dir, XATTR_NAME_SMACK, "App:testid:Exec"), true);
+    ck_assert_int_eq(compare_xattr(exec_dir, XATTR_NAME_SMACK, "App:testid:Exec"), true);
 
-    CU_ASSERT_EQUAL(compare_xattr(exec_file, XATTR_NAME_SMACK, "App:testid:Exec"), true);
-    CU_ASSERT_EQUAL(compare_xattr(exec_file, XATTR_NAME_SMACKEXEC, "App:testid"), true);
+    ck_assert_int_eq(compare_xattr(exec_file, XATTR_NAME_SMACK, "App:testid:Exec"), true);
+    ck_assert_int_eq(compare_xattr(exec_file, XATTR_NAME_SMACKEXEC, "App:testid"), true);
 
-    CU_ASSERT_EQUAL(compare_xattr(id_dir, XATTR_NAME_SMACK, "App:testid"), true);
-    CU_ASSERT_EQUAL(compare_xattr(id_dir, XATTR_NAME_SMACKTRANSMUTE, "TRUE"), true);
+    ck_assert_int_eq(compare_xattr(id_dir, XATTR_NAME_SMACK, "App:testid"), true);
+    ck_assert_int_eq(compare_xattr(id_dir, XATTR_NAME_SMACKTRANSMUTE, "TRUE"), true);
 
-    CU_ASSERT_EQUAL(compare_xattr(id_file, XATTR_NAME_SMACK, "App:testid"), true);
+    ck_assert_int_eq(compare_xattr(id_file, XATTR_NAME_SMACK, "App:testid"), true);
 
-    CU_ASSERT_EQUAL(compare_xattr(public_dir, XATTR_NAME_SMACK, "_"), true);
-    CU_ASSERT_EQUAL(compare_xattr(public_dir, XATTR_NAME_SMACKTRANSMUTE, "TRUE"), true);
+    ck_assert_int_eq(compare_xattr(public_dir, XATTR_NAME_SMACK, "_"), true);
+    ck_assert_int_eq(compare_xattr(public_dir, XATTR_NAME_SMACKTRANSMUTE, "TRUE"), true);
 
-    CU_ASSERT_EQUAL(compare_xattr(public_file, XATTR_NAME_SMACK, "_"), true);
+    ck_assert_int_eq(compare_xattr(public_file, XATTR_NAME_SMACK, "_"), true);
 
     remove(data_file);
     remove(exec_file);
@@ -140,3 +142,6 @@ void test_smack_install(void) {
     rmdir(public_dir);
     rmdir(DEFAULT_TESTS_DIR);
 }
+END_TEST
+
+void tests_smack(void) { addtest(test_smack_install); }

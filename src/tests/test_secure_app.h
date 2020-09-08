@@ -21,9 +21,4 @@
  * $RP_END_LICENSE$
  */
 
-void test_create_secure_app(void);
-void test_secure_app_set_id(void);
-void test_secure_app_add_permission(void);
-void test_secure_app_add_path(void);
-void test_free_secure_app(void);
-void test_destroy_secure_app(void);
+void tests_secure_app(void);

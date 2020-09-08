@@ -23,61 +23,68 @@
 
 #include "test_utils.h"
 
-#include <CUnit/Basic.h>
+#include <check.h>
+#include <errno.h>
+#include <linux/stat.h>
+#include <stdio.h>
 #include <sys/stat.h>
 #include <unistd.h>
 
 #include "../utils.h"
+#include "tests.h"
 
-void test_check_file_exists(void) {
-    char *path = NULL;
-    CU_ASSERT_EQUAL(check_file_exists(path), false)
-    path = "test.txt";
-    CU_ASSERT_EQUAL(check_file_exists(path), false)
+START_TEST(test_check_file_exists) {
+    char *path = "test.txt";
+    ck_assert_int_eq((int)check_file_exists(path), 0);
     FILE *fp = fopen(path, "w");
     fclose(fp);
-    CU_ASSERT_EQUAL(check_file_exists(path), true);
+    ck_assert_int_eq((int)check_file_exists(path), 1);
     remove(path);
 }
+END_TEST
 
-void test_check_file_type(void) {
-    char *path = NULL;
-    CU_ASSERT_EQUAL(check_file_type(path, S_IFREG), false);
-    path = "test";
-    CU_ASSERT_EQUAL(check_file_type(path, S_IFREG), false);
+START_TEST(test_check_file_type) {
+    char *path = "test";
+    ck_assert_int_eq((int)check_file_type(path, S_IFREG), 0);
     FILE *fp = fopen(path, "w");
     fclose(fp);
-    CU_ASSERT_EQUAL(check_file_type(path, 123), false);
-    CU_ASSERT_EQUAL(check_file_type(path, S_IFDIR), false);
-    CU_ASSERT_EQUAL(check_file_type(path, S_IFREG), true);
+    ck_assert_int_eq((int)check_file_type(path, 123), 0);
+    ck_assert_int_eq((int)check_file_type(path, S_IFDIR), 0);
+    ck_assert_int_eq((int)check_file_type(path, S_IFREG), 1);
     remove(path);
     mkdir(path, 0700);
-    CU_ASSERT_EQUAL(check_file_type(path, S_IFREG), false);
-    CU_ASSERT_EQUAL(check_file_type(path, S_IFDIR), true);
+    ck_assert_int_eq((int)check_file_type(path, S_IFREG), 0);
+    ck_assert_int_eq((int)check_file_type(path, S_IFDIR), 1);
     rmdir(path);
 }
+END_TEST
 
-void test_check_executable(void) {
-    char *path = NULL;
-    CU_ASSERT_EQUAL(check_executable(path), false);
-    path = "test";
-    CU_ASSERT_EQUAL(check_executable(path), false);
+START_TEST(test_check_executable) {
+    char *path = "test";
+    ck_assert_int_eq((int)check_executable(path), 0);
     FILE *fp = fopen(path, "w");
     fclose(fp);
-    CU_ASSERT_EQUAL(check_executable(path), false);
+    ck_assert_int_eq((int)check_executable(path), 0);
     chmod(path, 0700);
-    CU_ASSERT_EQUAL(check_executable(path), true);
+    ck_assert_int_eq((int)check_executable(path), 1);
     remove(path);
     mkdir(path, 0700);
-    CU_ASSERT_EQUAL(check_executable(path), true);
+    ck_assert_int_eq((int)check_executable(path), 1);
     rmdir(path);
 }
+END_TEST
 
-void test_remove_file(void) {
-    char *path = NULL;
-    CU_ASSERT_EQUAL(remove_file(path), -EINVAL);
-    path = "test";
+START_TEST(test_remove_file) {
+    char *path = "test";
     FILE *fp = fopen(path, "w");
     fclose(fp);
-    CU_ASSERT_EQUAL(remove_file(path), 0);
+    ck_assert_int_eq(remove_file(path), 0);
+}
+END_TEST
+
+void tests_utils(void) {
+    addtest(test_check_file_exists);
+    addtest(test_check_file_type);
+    addtest(test_check_executable);
+    addtest(test_remove_file);
 }

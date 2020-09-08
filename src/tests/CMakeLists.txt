@@ -24,7 +24,11 @@
 
 cmake_minimum_required(VERSION 3.3)
 
-PKG_CHECK_MODULES(CUnit REQUIRED cunit)
+PKG_CHECK_MODULES(check REQUIRED check)
+
+if(NOT check_FOUND)
+    message( FATAL_ERROR "libcheck required")
+endif()
 
 list(TRANSFORM SERVER_SOURCES PREPEND "../")
 
@@ -41,8 +45,13 @@ if(WITH_SMACK)
 endif()
 
 add_executable(tests ${TESTS_SOURCES} ${SERVER_SOURCES})
-target_link_libraries(tests cunit security-manager)
+target_link_libraries(tests security-manager)
+target_link_libraries(tests ${check_LDFLAGS} ${check_LINK_LIBRARIES})
+target_include_directories(tests PRIVATE ${check_INCLUDE_DIRS})
+target_compile_options(tests PRIVATE ${check_CFLAGS})
+
 add_test (tests ${CMAKE_CURRENT_BINARY_DIR}/tests)
+
 if(WITH_SMACK)
     target_compile_definitions(tests PRIVATE WITH_SMACK)
     target_link_libraries(tests ${libsmack_LDFLAGS} ${libsmack_LINK_LIBRARIES})
