@@ -4,11 +4,11 @@ Description=security-manager socket
 [Socket]
 FileDescriptorName=security-manager
 ListenStream=@DEFAULT_SOCKET_DIR@/security-manager.socket
-#SocketUser=@USER@
-#SocketGroup=@GROUP@
-SocketMode=0777
-#SmackLabelIPIn=@
-#SmackLabelIPOut=@
+SocketUser=@USER@
+SocketGroup=@GROUP@
+SocketMode=0660
+SmackLabelIPIn=@
+SmackLabelIPOut=@
 
 Service=security-manager.service
 

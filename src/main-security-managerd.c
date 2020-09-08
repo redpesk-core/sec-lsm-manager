@@ -61,7 +61,10 @@
 #define DEFAULT_SYSTEMD_SOCKET "sd:" DEFAULT_SYSTEMD_NAME
 #endif
 
+#define DELIM_GROUPS ","
+
 #define _GROUP_ 'g'
+#define _GROUPS_ 'G'
 #define _HELP_ 'h'
 #define _LOG_ 'l'
 #define _MAKESOCKDIR_ 'M'
@@ -75,6 +78,7 @@
 static const char shortopts[] = "d:g:hi:lmMOoS:u:v";
 
 static const struct option longopts[] = {{"group", 1, NULL, _GROUP_},
+                                         {"groups", 1, NULL, _GROUPS_},
                                          {"help", 0, NULL, _HELP_},
                                          {"log", 0, NULL, _LOG_},
                                          {"make-socket-dir", 0, NULL, _MAKESOCKDIR_},
@@ -91,6 +95,7 @@ static const char helptxt[] =
     "otpions:\n"
     "    -u, --user xxx        set the user\n"
     "    -g, --group xxx       set the group\n"
+    "    -G  --groups xxx,yyy  set additional groups"
     "    -l, --log             activate log of transactions\n"
     "\n"
     "    -S, --socketdir xxx   set the base directory xxx for sockets\n"
@@ -121,11 +126,15 @@ int main(int ac, char **av) {
     const char *socketdir = NULL;
     const char *user = NULL;
     const char *group = NULL;
+    char *groups = NULL;
+    char *g = NULL;
     struct passwd *pw;
     struct group *gr;
     cap_t caps = {0};
     security_manager_server_t *server;
     char *spec_socket;
+    gid_t gids[10] = {0};
+    size_t number_groups = 0;
 
     setlinebuf(stdout);
     setlinebuf(stderr);
@@ -139,6 +148,9 @@ int main(int ac, char **av) {
         switch (opt) {
             case _GROUP_:
                 group = optarg;
+                break;
+            case _GROUPS_:
+                groups = optarg;
                 break;
             case _HELP_:
                 help = 1;
@@ -221,6 +233,22 @@ int main(int ac, char **av) {
             gid = (int)pw->pw_gid;
         }
     }
+    if (groups) {
+        g = strtok(groups, DELIM_GROUPS);
+        while (g != NULL && number_groups < 10) {
+            gid = isid(g);
+            if (gid < 0) {
+                gr = getgrnam(g);
+                if (gr == NULL) {
+                    fprintf(stderr, "can not find group '%s'\n", g);
+                    return -1;
+                }
+                gids[number_groups] = gr->gr_gid;
+                number_groups++;
+            }
+            g = strtok(NULL, DELIM_GROUPS);
+        }
+    }
     if (group) {
         gid = isid(group);
         if (gid < 0) {
@@ -242,6 +270,13 @@ int main(int ac, char **av) {
     }
 
     /* drop privileges */
+    if (number_groups > 0) {
+        rc = setgroups(number_groups, gids);
+        if (rc < 0) {
+            fprintf(stderr, "can not change groups: %m\n");
+            return -1;
+        }
+    }
     if (gid >= 0) {
         rc = setgid((gid_t)gid);
         if (rc < 0) {

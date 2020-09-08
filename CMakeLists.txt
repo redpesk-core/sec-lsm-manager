@@ -87,6 +87,7 @@ endif()
 
 set(USER  security-manager CACHE STRING "user of the daemon")
 set(GROUP security-manager CACHE STRING "group of the daemon")
+set(CYNAGORA_GROUP cynagora CACHE STRING "group of the daemon")
 
 ##########################################################################
 # define compile options

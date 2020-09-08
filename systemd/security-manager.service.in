@@ -2,7 +2,7 @@
 Description=Security Manager service
 
 [Service]
-ExecStart=/usr/bin/security-managerd --user @USER@ --group @GROUP@
+ExecStart=/usr/bin/security-managerd --user @USER@ --group @GROUP@ --groups @CYNAGORA_GROUP@
 
 Type=notify
 
