@@ -33,6 +33,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/capability.h>
+#include <sys/prctl.h>
 #include <sys/stat.h>
 #include <unistd.h>
 
@@ -130,11 +131,12 @@ int main(int ac, char **av) {
     char *g = NULL;
     struct passwd *pw;
     struct group *gr;
-    cap_t caps = {0};
     security_manager_server_t *server;
     char *spec_socket;
     gid_t gids[10] = {0};
     size_t number_groups = 0;
+    cap_value_t cap_vector[3] = {CAP_MAC_ADMIN, CAP_DAC_OVERRIDE, CAP_MAC_OVERRIDE};
+    cap_t cap = {0};
 
     setlinebuf(stdout);
     setlinebuf(stderr);
@@ -269,6 +271,9 @@ int main(int ac, char **av) {
         }
     }
 
+    // set flag to keep caps after setuid
+    prctl(PR_SET_KEEPCAPS, 1);
+
     /* drop privileges */
     if (number_groups > 0) {
         rc = setgroups(number_groups, gids);
@@ -291,8 +296,19 @@ int main(int ac, char **av) {
             return -1;
         }
     }
-    cap_clear(caps);
-    rc = cap_set_proc(caps);
+
+    // set capabilities
+    cap = cap_init();
+    cap_set_flag(cap, CAP_PERMITTED, 3, cap_vector, CAP_SET);
+    cap_set_flag(cap, CAP_EFFECTIVE, 3, cap_vector, CAP_SET);
+
+    if (cap_set_proc(cap) != 0) {
+        fprintf(stderr, "can not change cap: %m\n");
+        return -1;
+    }
+
+    // unset flag
+    prctl(PR_SET_KEEPCAPS, 0);
 
     /* initialize server */
     setvbuf(stderr, NULL, _IOLBF, 1000);

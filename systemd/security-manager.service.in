@@ -12,6 +12,9 @@ Restart=always
 
 Sockets=security-manager.socket
 
+CapabilityBoundingSet=~
+AmbientCapabilities=~
+
 #NoNewPrivileges=true
 
 [Install]
