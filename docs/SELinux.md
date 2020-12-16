@@ -106,7 +106,7 @@ The name of the application is **server** and it is stored in /opt/server/server
 #!/usr/bin/python3
 
 __author__ = "Arthur Guyader"
-__copyright__ = "Copyright (C) 2020 'IoT.bzh'"
+__copyright__ = "Copyright (C) 2020 'IoT.bzh Company'"
 __license__ = "Apache 2.0"
 __version__ = "1.0"
 __maintainer__ = "Arthur Guyader"
@@ -167,21 +167,27 @@ So first we need to create a type enforcement file :
 
 ```
 ###########################################################################
-# Copyright 2020 IoT.bzh
+# Copyright 2020 IoT.bzh Company
 #
-# author: Arthur Guyader <arthur.guyader@iot.bzh>
+# Author: Arthur Guyader <arthur.guyader@iot.bzh>
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
+# $RP_BEGIN_LICENSE$
+# Commercial License Usage
+#  Licensees holding valid commercial IoT.bzh licenses may use this file in
+#  accordance with the commercial license agreement provided with the
+#  Software or, alternatively, in accordance with the terms contained in
+#  a written agreement between you and The IoT.bzh Company. For licensing terms
+#  and conditions see https://www.iot.bzh/terms-conditions. For further
+#  information use the contact form at https://www.iot.bzh/contact.
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# GNU General Public License Usage
+#  Alternatively, this file may be used under the terms of the GNU General
+#  Public license version 3. This license is as published by the Free Software
+#  Foundation and appearing in the file LICENSE.GPLv3 included in the packaging
+#  of this file. Please review the following information to ensure the GNU
+#  General Public License requirements will be met
+#  https://www.gnu.org/licenses/gpl-3.0.html.
+# $RP_END_LICENSE$
 ###########################################################################
 
 
@@ -263,21 +269,27 @@ We also need to have the good label on our file /opt/server/server.py :
 
 ```
 ###########################################################################
-# Copyright 2020 IoT.bzh
+# Copyright 2020 IoT.bzh Company
 #
-# author: Arthur Guyader <arthur.guyader@iot.bzh>
+# Author: Arthur Guyader <arthur.guyader@iot.bzh>
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
+# $RP_BEGIN_LICENSE$
+# Commercial License Usage
+#  Licensees holding valid commercial IoT.bzh licenses may use this file in
+#  accordance with the commercial license agreement provided with the
+#  Software or, alternatively, in accordance with the terms contained in
+#  a written agreement between you and The IoT.bzh Company. For licensing terms
+#  and conditions see https://www.iot.bzh/terms-conditions. For further
+#  information use the contact form at https://www.iot.bzh/contact.
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# GNU General Public License Usage
+#  Alternatively, this file may be used under the terms of the GNU General
+#  Public license version 3. This license is as published by the Free Software
+#  Foundation and appearing in the file LICENSE.GPLv3 included in the packaging
+#  of this file. Please review the following information to ensure the GNU
+#  General Public License requirements will be met
+#  https://www.gnu.org/licenses/gpl-3.0.html.
+# $RP_END_LICENSE$
 ###########################################################################
 
 
@@ -300,21 +312,27 @@ Finally, we need to define an interface to say how we will interact with our app
 
 ```
 ###########################################################################
-# Copyright 2020 IoT.bzh
+# Copyright 2020 IoT.bzh Company
 #
-# author: Arthur Guyader <arthur.guyader@iot.bzh>
+# Author: Arthur Guyader <arthur.guyader@iot.bzh>
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
+# $RP_BEGIN_LICENSE$
+# Commercial License Usage
+#  Licensees holding valid commercial IoT.bzh licenses may use this file in
+#  accordance with the commercial license agreement provided with the
+#  Software or, alternatively, in accordance with the terms contained in
+#  a written agreement between you and The IoT.bzh Company. For licensing terms
+#  and conditions see https://www.iot.bzh/terms-conditions. For further
+#  information use the contact form at https://www.iot.bzh/contact.
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# GNU General Public License Usage
+#  Alternatively, this file may be used under the terms of the GNU General
+#  Public license version 3. This license is as published by the Free Software
+#  Foundation and appearing in the file LICENSE.GPLv3 included in the packaging
+#  of this file. Please review the following information to ensure the GNU
+#  General Public License requirements will be met
+#  https://www.gnu.org/licenses/gpl-3.0.html.
+# $RP_END_LICENSE$
 ###########################################################################
 
 interface(`server_domtrans',`
@@ -351,21 +369,27 @@ So let's create a type enforcement to do that :
 
 ```
 ###########################################################################
-# Copyright 2020 IoT.bzh
+# Copyright 2020 IoT.bzh Company
 #
-# author: Arthur Guyader <arthur.guyader@iot.bzh>
+# Author: Arthur Guyader <arthur.guyader@iot.bzh>
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
+# $RP_BEGIN_LICENSE$
+# Commercial License Usage
+#  Licensees holding valid commercial IoT.bzh licenses may use this file in
+#  accordance with the commercial license agreement provided with the
+#  Software or, alternatively, in accordance with the terms contained in
+#  a written agreement between you and The IoT.bzh Company. For licensing terms
+#  and conditions see https://www.iot.bzh/terms-conditions. For further
+#  information use the contact form at https://www.iot.bzh/contact.
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# GNU General Public License Usage
+#  Alternatively, this file may be used under the terms of the GNU General
+#  Public license version 3. This license is as published by the Free Software
+#  Foundation and appearing in the file LICENSE.GPLv3 included in the packaging
+#  of this file. Please review the following information to ensure the GNU
+#  General Public License requirements will be met
+#  https://www.gnu.org/licenses/gpl-3.0.html.
+# $RP_END_LICENSE$
 ###########################################################################
 
 policy_module(mystaff, 0.1)
