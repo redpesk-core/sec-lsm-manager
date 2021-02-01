@@ -106,7 +106,7 @@ The name of the application is **server** and it is stored in /opt/server/server
 #!/usr/bin/python3
 
 __author__ = "Arthur Guyader"
-__copyright__ = "Copyright (C) 2020 'IoT.bzh Company'"
+__copyright__ = "Copyright (C) 2020-2021 'IoT.bzh Company'"
 __license__ = "Apache 2.0"
 __version__ = "1.0"
 __maintainer__ = "Arthur Guyader"
@@ -167,7 +167,7 @@ So first we need to create a type enforcement file :
 
 ```
 ###########################################################################
-# Copyright 2020 IoT.bzh Company
+# Copyright 2020-2021 IoT.bzh Company
 #
 # Author: Arthur Guyader <arthur.guyader@iot.bzh>
 #
@@ -269,7 +269,7 @@ We also need to have the good label on our file /opt/server/server.py :
 
 ```
 ###########################################################################
-# Copyright 2020 IoT.bzh Company
+# Copyright 2020-2021 IoT.bzh Company
 #
 # Author: Arthur Guyader <arthur.guyader@iot.bzh>
 #
@@ -312,7 +312,7 @@ Finally, we need to define an interface to say how we will interact with our app
 
 ```
 ###########################################################################
-# Copyright 2020 IoT.bzh Company
+# Copyright 2020-2021 IoT.bzh Company
 #
 # Author: Arthur Guyader <arthur.guyader@iot.bzh>
 #
@@ -369,7 +369,7 @@ So let's create a type enforcement to do that :
 
 ```
 ###########################################################################
-# Copyright 2020 IoT.bzh Company
+# Copyright 2020-2021 IoT.bzh Company
 #
 # Author: Arthur Guyader <arthur.guyader@iot.bzh>
 #
