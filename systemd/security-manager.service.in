@@ -12,8 +12,7 @@ Restart=always
 
 Sockets=security-manager.socket
 
-CapabilityBoundingSet=~
-AmbientCapabilities=~
+CapabilityBoundingSet=CAP_MAC_ADMIN CAP_DAC_OVERRIDE CAP_MAC_OVERRIDE CAP_SETUID CAP_SETGID
 
 #NoNewPrivileges=true
 
