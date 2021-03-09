@@ -22,17 +22,17 @@
  * $RP_END_LICENSE$
  */
 
-#ifndef SECURITY_MANAGER_SERVER_H
-#define SECURITY_MANAGER_SERVER_H
+#ifndef SEC_LSM_MANAGER_SERVER_H
+#define SEC_LSM_MANAGER_SERVER_H
 
 #include <sys/cdefs.h>
 
-typedef struct security_manager_server security_manager_server_t;
+typedef struct sec_lsm_manager_server sec_lsm_manager_server_t;
 
 /**
  * @brief Boolean flag telling whether the server logs or not its received commands
  */
-extern int security_manager_server_log;
+extern int sec_lsm_manager_server_log;
 
 /**
  * @brief Create a security manager server
@@ -42,39 +42,39 @@ extern int security_manager_server_log;
  *
  * @return 0 on success or a negative value
  *
- * @see security_manager_server_destroy
+ * @see sec_lsm_manager_server_destroy
  */
-extern int security_manager_server_create(security_manager_server_t **server,
-                                          const char *security_manager_socket_spec) __wur;
+extern int sec_lsm_manager_server_create(sec_lsm_manager_server_t **server,
+                                         const char *sec_lsm_manager_socket_spec) __wur;
 
 /**
  * @brief Destroy a created server and release its resources
  *
  * @param[in] server the handler of the server
  *
- * @see security_manager_server_create
+ * @see sec_lsm_manager_server_create
  */
-extern void security_manager_server_destroy(security_manager_server_t *server) __nonnull();
+extern void sec_lsm_manager_server_destroy(sec_lsm_manager_server_t *server) __nonnull();
 
 /**
- * @brief Start the security_manager server and returns only when stopped
+ * @brief Start the sec_lsm_manager server and returns only when stopped
  *
  * @param[in] server the handler of the server
  *
  * @return 0 on success or a negative value
  *
- * @see security_manager_server_stop
+ * @see sec_lsm_manager_server_stop
  */
-extern int security_manager_server_serve(security_manager_server_t *server) __nonnull() __wur;
+extern int sec_lsm_manager_server_serve(sec_lsm_manager_server_t *server) __nonnull() __wur;
 
 /**
- * @brief Stop the security_manager server
+ * @brief Stop the sec_lsm_manager server
  *
  * @param[in] server the handler of the server
- * @param[in] status the status that the function security_manager_server_serve should return
+ * @param[in] status the status that the function sec_lsm_manager_server_serve should return
  *
- * @see security_manager_server_serve
+ * @see sec_lsm_manager_server_serve
  */
-extern void security_manager_server_stop(security_manager_server_t *server, int status) __nonnull();
+extern void sec_lsm_manager_server_stop(sec_lsm_manager_server_t *server, int status) __nonnull();
 
 #endif

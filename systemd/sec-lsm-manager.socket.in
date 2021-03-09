@@ -1,0 +1,20 @@
+[Unit]
+Description=@CMAKE_PROJECT_NAME@ socket
+
+[Socket]
+FileDescriptorName=@CMAKE_PROJECT_NAME@
+ListenStream=@DEFAULT_SOCKET_DIR@/@CMAKE_PROJECT_NAME@.socket
+SocketUser=@USER@
+SocketGroup=@GROUP@
+SocketMode=0660
+SmackLabelIPIn=@
+SmackLabelIPOut=@
+
+Service=@CMAKE_PROJECT_NAME@.service
+
+[Unit]
+Wants=@CMAKE_PROJECT_NAME@.target
+Before=@CMAKE_PROJECT_NAME@.target
+
+[Install]
+WantedBy=sockets.target

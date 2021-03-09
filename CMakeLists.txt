@@ -25,8 +25,8 @@
 
 cmake_minimum_required(VERSION 3.0)
 
-project(security-manager
-    DESCRIPTION "Security Manager (MAC)"
+project(sec-lsm-manager
+    DESCRIPTION "Security LSM Manager"
     HOMEPAGE_URL ""
     VERSION 1.0
     LANGUAGES C
@@ -55,8 +55,8 @@ endif()
 ##########################################################################
 # possible settings
 
-set(SECURITY_MANAGER_VERSION ${PROJECT_VERSION})
-set(SECURITY_MANAGER_SOVERSION ${PROJECT_VERSION_MAJOR})
+set(SEC_LSM_MANAGER_VERSION ${PROJECT_VERSION})
+set(SEC_LSM_MANAGER_SOVERSION ${PROJECT_VERSION_MAJOR})
 
 option(WITH_SYSTEMD         "should include systemd compatibility" ON)
 option(WITH_SMACK           "should include smack compatibility" OFF)
@@ -85,8 +85,8 @@ endif()
 ##########################################################################
 # define user and group
 
-set(USER  security-manager CACHE STRING "user of the daemon")
-set(GROUP security-manager CACHE STRING "group of the daemon")
+set(USER  ${CMAKE_PROJECT_NAME} CACHE STRING "user of the daemon")
+set(GROUP ${CMAKE_PROJECT_NAME} CACHE STRING "group of the daemon")
 set(CYNAGORA_GROUP cynagora CACHE STRING "group of the daemon")
 
 ##########################################################################

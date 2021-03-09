@@ -37,8 +37,8 @@ set(SERVER_SOURCES
     socket.c
     pollitem.c
     prot.c
-    security-manager-protocol.c
-    security-manager-server.c
+    ${CMAKE_PROJECT_NAME}-protocol.c
+    ${CMAKE_PROJECT_NAME}-server.c
 )
 
 if(WITH_SMACK)
@@ -60,79 +60,79 @@ set(LIBCLI_SOURCES
     socket.c
     log.c
     paths.c
-    security-manager-protocol.c
-    security-manager.c
+    ${CMAKE_PROJECT_NAME}-protocol.c
+    ${CMAKE_PROJECT_NAME}.c
 )
 
 ##############################################
-# build and install libsecurity-manager-client
+# build and install libsec-lsm-manager-client
 ##############################################
 
-add_library(security-manager SHARED ${LIBCLI_SOURCES})
+add_library(${CMAKE_PROJECT_NAME} SHARED ${LIBCLI_SOURCES})
 
-set_target_properties(security-manager PROPERTIES
-    VERSION ${SECURITY_MANAGER_VERSION}
-    SOVERSION ${SECURITY_MANAGER_SOVERSION}
-    LINK_FLAGS -Wl,--version-script=${CMAKE_CURRENT_SOURCE_DIR}/export-security-manager.map
+set_target_properties(${CMAKE_PROJECT_NAME} PROPERTIES
+    VERSION ${SEC_LSM_MANAGER_VERSION}
+    SOVERSION ${SEC_LSM_MANAGER_SOVERSION}
+    LINK_FLAGS -Wl,--version-script=${CMAKE_CURRENT_SOURCE_DIR}/export-${CMAKE_PROJECT_NAME}.map
 )
 
-install(TARGETS security-manager LIBRARY DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR})
-install(FILES security-manager.h DESTINATION ${CMAKE_INSTALL_FULL_INCLUDEDIR})
+install(TARGETS ${CMAKE_PROJECT_NAME} LIBRARY DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR})
+install(FILES ${CMAKE_PROJECT_NAME}.h DESTINATION ${CMAKE_INSTALL_FULL_INCLUDEDIR})
 
 
 #####################################
-# build and install security-managerd
+# build and install sec-lsm-managerd
 #####################################
 
-add_executable(security-managerd main-security-managerd.c ${SERVER_SOURCES})
+add_executable(${CMAKE_PROJECT_NAME}d main-${CMAKE_PROJECT_NAME}d.c ${SERVER_SOURCES})
 
-target_compile_definitions(security-managerd PRIVATE
+target_compile_definitions(${CMAKE_PROJECT_NAME}d PRIVATE
     DEFAULT_SOCKET_DIR="${DEFAULT_SOCKET_DIR}"
 )
 
-target_link_libraries(security-managerd cap)
+target_link_libraries(${CMAKE_PROJECT_NAME}d cap)
 
 if(WITH_SMACK)
-    target_compile_definitions(security-managerd PRIVATE WITH_SMACK)
-    target_link_libraries(security-managerd ${libsmack_LDFLAGS} ${libsmack_LINK_LIBRARIES})
-    target_include_directories(security-managerd PRIVATE ${libsmack_INCLUDE_DIRS})
-    target_compile_options(security-managerd PRIVATE ${libsmack_CFLAGS})
+    target_compile_definitions(${CMAKE_PROJECT_NAME}d PRIVATE WITH_SMACK)
+    target_link_libraries(${CMAKE_PROJECT_NAME}d ${libsmack_LDFLAGS} ${libsmack_LINK_LIBRARIES})
+    target_include_directories(${CMAKE_PROJECT_NAME}d PRIVATE ${libsmack_INCLUDE_DIRS})
+    target_compile_options(${CMAKE_PROJECT_NAME}d PRIVATE ${libsmack_CFLAGS})
 elseif(WITH_SELINUX)
-    target_compile_definitions(security-managerd PRIVATE WITH_SELINUX)
-    target_link_libraries(security-managerd ${libselinux_LDFLAGS} ${libselinux_LINK_LIBRARIES})
-    target_include_directories(security-managerd PRIVATE ${libselinux_INCLUDE_DIRS})
-    target_compile_options(security-managerd PRIVATE ${libselinux_CFLAGS})
-    target_link_libraries(security-managerd ${libsemanage_LDFLAGS} ${libsemanage_LINK_LIBRARIES})
-    target_include_directories(security-managerd PRIVATE ${libsemanage_INCLUDE_DIRS})
-    target_compile_options(security-managerd PRIVATE ${libsemanage_CFLAGS})
+    target_compile_definitions(${CMAKE_PROJECT_NAME}d PRIVATE WITH_SELINUX)
+    target_link_libraries(${CMAKE_PROJECT_NAME}d ${libselinux_LDFLAGS} ${libselinux_LINK_LIBRARIES})
+    target_include_directories(${CMAKE_PROJECT_NAME}d PRIVATE ${libselinux_INCLUDE_DIRS})
+    target_compile_options(${CMAKE_PROJECT_NAME}d PRIVATE ${libselinux_CFLAGS})
+    target_link_libraries(${CMAKE_PROJECT_NAME}d ${libsemanage_LDFLAGS} ${libsemanage_LINK_LIBRARIES})
+    target_include_directories(${CMAKE_PROJECT_NAME}d PRIVATE ${libsemanage_INCLUDE_DIRS})
+    target_compile_options(${CMAKE_PROJECT_NAME}d PRIVATE ${libsemanage_CFLAGS})
 endif()
 
 if(NOT SIMULATE_CYNAGORA)
-    target_link_libraries(security-managerd ${cynagora_LDFLAGS} ${libselinux_LINK_LIBRARIES})
-    target_include_directories(security-managerd PRIVATE ${cynagora_INCLUDE_DIRS})
-    target_compile_options(security-managerd PRIVATE ${cynagora_CFLAGS})
+    target_link_libraries(${CMAKE_PROJECT_NAME}d ${cynagora_LDFLAGS} ${libselinux_LINK_LIBRARIES})
+    target_include_directories(${CMAKE_PROJECT_NAME}d PRIVATE ${cynagora_INCLUDE_DIRS})
+    target_compile_options(${CMAKE_PROJECT_NAME}d PRIVATE ${cynagora_CFLAGS})
 endif()
 
 if(WITH_SYSTEMD)
-    target_compile_definitions(security-managerd PRIVATE WITH_SYSTEMD)
-    target_link_libraries(security-managerd ${libsystemd_LDFLAGS} ${libsystemd_LINK_LIBRARIES})
-    target_include_directories(security-managerd PRIVATE ${libsystemd_INCLUDE_DIRS})
-    target_compile_options(security-managerd PRIVATE ${libsystemd_CFLAGS})
+    target_compile_definitions(${CMAKE_PROJECT_NAME}d PRIVATE WITH_SYSTEMD)
+    target_link_libraries(${CMAKE_PROJECT_NAME}d ${libsystemd_LDFLAGS} ${libsystemd_LINK_LIBRARIES})
+    target_include_directories(${CMAKE_PROJECT_NAME}d PRIVATE ${libsystemd_INCLUDE_DIRS})
+    target_compile_options(${CMAKE_PROJECT_NAME}d PRIVATE ${libsystemd_CFLAGS})
 endif()
 
-install(TARGETS security-managerd
+install(TARGETS ${CMAKE_PROJECT_NAME}d
     RUNTIME DESTINATION ${CMAKE_INSTALL_FULL_BINDIR})
 
 
 ###########################################
-# build and install security-manager-cmd
+# build and install sec-lsm-manager-cmd
 ###########################################
 
-add_executable(security-manager-cmd main-security-manager-cmd.c log.c utils.c)
+add_executable(${CMAKE_PROJECT_NAME}-cmd main-${CMAKE_PROJECT_NAME}-cmd.c log.c utils.c)
 
-target_link_libraries(security-manager-cmd security-manager)
+target_link_libraries(${CMAKE_PROJECT_NAME}-cmd ${CMAKE_PROJECT_NAME})
 
-install(TARGETS security-manager-cmd
+install(TARGETS ${CMAKE_PROJECT_NAME}-cmd
         RUNTIME DESTINATION ${CMAKE_INSTALL_FULL_BINDIR})
 
 ##############

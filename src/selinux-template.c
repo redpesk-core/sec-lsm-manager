@@ -39,7 +39,7 @@
 #define REPLACE_ID "~ID~"
 
 #if !defined(DEFAULT_TEMPLATE_DIR)
-#define DEFAULT_TEMPLATE_DIR "/usr/share/security-manager/"
+#define DEFAULT_TEMPLATE_DIR "/usr/share/sec-lsm-manager/"
 #endif
 
 #define SIZE_EXTENSION 3
@@ -65,7 +65,7 @@
 #endif
 
 #if !defined(DEFAULT_SELINUX_RULES_DIR)
-#define DEFAULT_SELINUX_RULES_DIR "/usr/share/security-manager/selinux-policy/"
+#define DEFAULT_SELINUX_RULES_DIR "/usr/share/sec-lsm-manager/selinux-policy/"
 #endif
 
 const char default_selinux_rules_dir[] = DEFAULT_SELINUX_RULES_DIR;

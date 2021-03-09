@@ -22,15 +22,15 @@
  * $RP_END_LICENSE$
  */
 
-#ifndef SECURITY_MANAGER_PROTOCOL_H
-#define SECURITY_MANAGER_PROTOCOL_H
+#ifndef SEC_LSM_MANAGER_PROTOCOL_H
+#define SEC_LSM_MANAGER_PROTOCOL_H
 
-extern const char _security_manager_[], _done_[], _error_[], _log_[], _id_[], _permission_[], _path_[], _install_[],
+extern const char _sec_lsm_manager_[], _done_[], _error_[], _log_[], _id_[], _permission_[], _path_[], _install_[],
     _uninstall_[], _display_[], _clear_[], _on_[], _off_[], _string_[];
 
 /* predefined names */
-extern const char security_manager_default_socket_scheme[], security_manager_default_socket_dir[],
-    security_manager_default_socket_base[], security_manager_default_socket_spec[];
+extern const char sec_lsm_manager_default_socket_scheme[], sec_lsm_manager_default_socket_dir[],
+    sec_lsm_manager_default_socket_base[], sec_lsm_manager_default_socket_spec[];
 
 /**
  * @brief Get the socket specification
@@ -38,6 +38,6 @@ extern const char security_manager_default_socket_scheme[], security_manager_def
  * @param[in] value some value or NULL for getting default
  * @return the socket specification
  */
-extern const char *security_manager_get_socket(const char *value);
+extern const char *sec_lsm_manager_get_socket(const char *value);
 
 #endif

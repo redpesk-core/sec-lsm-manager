@@ -40,7 +40,7 @@
 #define SMACK_COMMENT_CHAR '#'
 
 #if !defined(DEFAULT_TEMPLATE_DIR)
-#define DEFAULT_TEMPLATE_DIR "/usr/share/security-manager/"
+#define DEFAULT_TEMPLATE_DIR "/usr/share/sec-lsm-manager/"
 #endif
 
 #if !defined(DEFAULT_TEMPLATE_FILE)

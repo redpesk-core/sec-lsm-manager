@@ -1,6 +1,6 @@
 {
 global:
-    security_manager_*;
+    sec_lsm_manager_*;
 local:
     *;
 };

@@ -35,7 +35,7 @@
 #include <unistd.h>
 
 #include "log.h"
-#include "security-manager.h"
+#include "sec-lsm-manager.h"
 #include "utils.h"
 
 #define DEFAULT_CACHE_SIZE 5000
@@ -55,7 +55,7 @@ static const struct option longopts[] = {{"echo", 0, NULL, _ECHO_},
 
 static const char helptxt[] =
     "\n"
-    "usage: security-manager-cmd [options]... [action [arguments]]\n"
+    "usage: sec-lsm-manager-cmd [options]... [action [arguments]]\n"
     "\n"
     "otpions:\n"
     "    -s, --socket xxx      set the base xxx for sockets\n"
@@ -63,12 +63,12 @@ static const char helptxt[] =
     "    -h, --help            print this help and exit\n"
     "    -v, --version         print the version and exit\n"
     "\n"
-    "When action is given, security-manager-cmd performs the action and exits.\n"
-    "Otherwise security-manager-cmd continuously read its input to get the actions.\n"
-    "For a list of actions type 'security-manager-cmd help'.\n"
+    "When action is given, sec-lsm-manager-cmd performs the action and exits.\n"
+    "Otherwise sec-lsm-manager-cmd continuously read its input to get the actions.\n"
+    "For a list of actions type 'sec-lsm-manager-cmd help'.\n"
     "\n";
 
-static const char versiontxt[] = "security-manager-cmd version 0.1\n";
+static const char versiontxt[] = "sec-lsm-manager-cmd version 0.1\n";
 
 static const char help_log_text[] =
     "\n"
@@ -166,7 +166,7 @@ static const char help_help_text[] =
     "Available commands: log, clear, display, id, path, permission, install, uninstall, quit, help\n"
     "\n";
 
-static security_manager_t *security_manager = NULL;
+static sec_lsm_manager_t *sec_lsm_manager = NULL;
 static char buffer[4000] = {0};
 static char *str[40] = {0};
 static size_t bufill = 0;
@@ -195,7 +195,7 @@ int do_clear(int ac, char **av) {
         return uc;
     }
 
-    last_status = rc = security_manager_clear(security_manager);
+    last_status = rc = sec_lsm_manager_clear(sec_lsm_manager);
 
     if (rc < 0) {
         ERROR("%s", strerror(-rc));
@@ -216,7 +216,7 @@ int do_display(int ac, char **av) {
         return uc;
     }
 
-    last_status = rc = security_manager_display(security_manager);
+    last_status = rc = sec_lsm_manager_display(sec_lsm_manager);
 
     if (rc < 0) {
         ERROR("%s", strerror(-rc));
@@ -243,7 +243,7 @@ int do_id(int ac, char **av) {
     }
 
     id = av[1];
-    last_status = rc = security_manager_set_id(security_manager, id);
+    last_status = rc = sec_lsm_manager_set_id(sec_lsm_manager, id);
 
     if (rc < 0) {
         ERROR("%s", strerror(-rc));
@@ -276,7 +276,7 @@ int do_path(int ac, char **av) {
     path = av[1];
     path_type = av[2];
 
-    last_status = rc = security_manager_add_path(security_manager, path, path_type);
+    last_status = rc = sec_lsm_manager_add_path(sec_lsm_manager, path, path_type);
 
     if (rc < 0) {
         ERROR("%s", strerror(-rc));
@@ -306,7 +306,7 @@ int do_permission(int ac, char **av) {
 
     permission = av[1];
 
-    last_status = rc = security_manager_add_permission(security_manager, permission);
+    last_status = rc = sec_lsm_manager_add_permission(sec_lsm_manager, permission);
     if (rc < 0) {
         ERROR("%s", strerror(-rc));
     } else {
@@ -326,7 +326,7 @@ int do_install(int ac, char **av) {
         return uc;
     }
 
-    last_status = rc = security_manager_install(security_manager);
+    last_status = rc = sec_lsm_manager_install(sec_lsm_manager);
 
     if (rc < 0) {
         ERROR("%s", strerror(-rc));
@@ -347,7 +347,7 @@ int do_uninstall(int ac, char **av) {
         return uc;
     }
 
-    last_status = rc = security_manager_uninstall(security_manager);
+    last_status = rc = sec_lsm_manager_uninstall(sec_lsm_manager);
 
     if (rc < 0) {
         ERROR("%s", strerror(-rc));
@@ -372,7 +372,7 @@ int do_log(int ac, char **av) {
         }
     }
 
-    last_status = rc = security_manager_log(security_manager, on, off);
+    last_status = rc = sec_lsm_manager_log(sec_lsm_manager, on, off);
 
     if (rc < 0) {
         ERROR("%s", strerror(-rc));
@@ -516,13 +516,13 @@ int main(int ac, char **av) {
 
     /* initialize server */
     signal(SIGPIPE, SIG_IGN); /* avoid SIGPIPE! */
-    rc = security_manager_create(&security_manager, socket);
+    rc = sec_lsm_manager_create(&sec_lsm_manager, socket);
     if (rc < 0) {
         fprintf(stderr, "initialization failed: %s\n", strerror(-rc));
         return 1;
     }
 
-    LOG("security_manager_create success");
+    LOG("sec_lsm_manager_create success");
 
     if (optind < ac) {
         do_all(ac - optind, av + optind, 1);

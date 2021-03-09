@@ -21,8 +21,8 @@
  * $RP_END_LICENSE$
  */
 
-#ifndef SECURITY_MANAGER_UTILS_H
-#define SECURITY_MANAGER_UTILS_H
+#ifndef SEC_LSM_MANAGER_UTILS_H
+#define SEC_LSM_MANAGER_UTILS_H
 
 #include <stdbool.h>
 #include <sys/types.h>

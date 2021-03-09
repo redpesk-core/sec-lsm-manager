@@ -27,7 +27,7 @@
 #include <sys/xattr.h>
 #include <unistd.h>
 
-#include "../security-manager.h"
+#include "../sec-lsm-manager.h"
 #include "../utils.h"
 #include "tests.h"
 
@@ -57,8 +57,8 @@ static bool compare_xattr(const char *path, const char *xattr, const char *value
 }
 
 START_TEST(test_smack_install) {
-    security_manager_t *security_manager = NULL;
-    ck_assert_int_eq(security_manager_create(&security_manager, NULL), 0);
+    sec_lsm_manager_t *sec_lsm_manager = NULL;
+    ck_assert_int_eq(sec_lsm_manager_create(&sec_lsm_manager, NULL), 0);
 
     char data_dir[100] = DEFAULT_TESTS_DIR;
     strcat(data_dir, "data/");
@@ -94,21 +94,21 @@ START_TEST(test_smack_install) {
     ck_assert_int_eq(create_file(id_file, 0770), true);
     ck_assert_int_eq(create_file(public_file, 0770), true);
 
-    ck_assert_int_eq(security_manager_add_path(security_manager, data_dir, "data"), 0);
-    ck_assert_int_eq(security_manager_add_path(security_manager, data_file, "data"), 0);
-    ck_assert_int_eq(security_manager_add_path(security_manager, exec_dir, "exec"), 0);
-    ck_assert_int_eq(security_manager_add_path(security_manager, exec_file, "exec"), 0);
-    ck_assert_int_eq(security_manager_add_path(security_manager, id_dir, "id"), 0);
-    ck_assert_int_eq(security_manager_add_path(security_manager, id_file, "id"), 0);
-    ck_assert_int_eq(security_manager_add_path(security_manager, public_dir, "public"), 0);
-    ck_assert_int_eq(security_manager_add_path(security_manager, public_file, "public"), 0);
+    ck_assert_int_eq(sec_lsm_manager_add_path(sec_lsm_manager, data_dir, "data"), 0);
+    ck_assert_int_eq(sec_lsm_manager_add_path(sec_lsm_manager, data_file, "data"), 0);
+    ck_assert_int_eq(sec_lsm_manager_add_path(sec_lsm_manager, exec_dir, "exec"), 0);
+    ck_assert_int_eq(sec_lsm_manager_add_path(sec_lsm_manager, exec_file, "exec"), 0);
+    ck_assert_int_eq(sec_lsm_manager_add_path(sec_lsm_manager, id_dir, "id"), 0);
+    ck_assert_int_eq(sec_lsm_manager_add_path(sec_lsm_manager, id_file, "id"), 0);
+    ck_assert_int_eq(sec_lsm_manager_add_path(sec_lsm_manager, public_dir, "public"), 0);
+    ck_assert_int_eq(sec_lsm_manager_add_path(sec_lsm_manager, public_file, "public"), 0);
 
-    ck_assert_int_eq(security_manager_add_permission(security_manager, "perm1"), 0);
-    ck_assert_int_eq(security_manager_add_permission(security_manager, "perm2"), 0);
+    ck_assert_int_eq(sec_lsm_manager_add_permission(sec_lsm_manager, "perm1"), 0);
+    ck_assert_int_eq(sec_lsm_manager_add_permission(sec_lsm_manager, "perm2"), 0);
 
-    ck_assert_int_eq(security_manager_set_id(security_manager, "testid"), 0);
+    ck_assert_int_eq(sec_lsm_manager_set_id(sec_lsm_manager, "testid"), 0);
 
-    ck_assert_int_eq(security_manager_install(security_manager), 0);
+    ck_assert_int_eq(sec_lsm_manager_install(sec_lsm_manager), 0);
 
     ck_assert_int_eq(check_file_exists("/etc/smack/accesses.d/app-testid"), true);
 

@@ -45,7 +45,7 @@ if(WITH_SMACK)
 endif()
 
 add_executable(tests ${TESTS_SOURCES} ${SERVER_SOURCES})
-target_link_libraries(tests security-manager)
+target_link_libraries(tests sec-lsm-manager)
 target_link_libraries(tests ${check_LDFLAGS} ${check_LINK_LIBRARIES})
 target_include_directories(tests PRIVATE ${check_INCLUDE_DIRS})
 target_compile_options(tests PRIVATE ${check_CFLAGS})

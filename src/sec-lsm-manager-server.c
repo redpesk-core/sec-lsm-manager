@@ -22,7 +22,7 @@
  * $RP_END_LICENSE$
  */
 
-#include "security-manager-server.h"
+#include "sec-lsm-manager-server.h"
 
 #include <errno.h>
 #include <fcntl.h>
@@ -41,8 +41,8 @@
 #include "log.h"
 #include "pollitem.h"
 #include "prot.h"
+#include "sec-lsm-manager-protocol.h"
 #include "secure-app.h"
-#include "security-manager-protocol.h"
 #include "socket.h"
 #include "utils.h"
 
@@ -51,7 +51,7 @@ typedef struct client client_t;
 #define MAX_PUTX_ITEMS 15
 
 /** should log? */
-int security_manager_server_log = 0;
+int sec_lsm_manager_server_log = 0;
 
 /** structure that represents a client */
 struct client {
@@ -74,11 +74,11 @@ struct client {
     pollitem_t pollitem;
 
     /** server of the client */
-    security_manager_server_t *security_manager_server;
+    sec_lsm_manager_server_t *sec_lsm_manager_server;
 };
 
 /** structure for servers */
-struct security_manager_server {
+struct sec_lsm_manager_server {
     /** the pollfd to use */
     int pollfd;
 
@@ -199,7 +199,7 @@ __nonnull((1)) static int putx(client_t *cli, ...) __wur {
     va_end(l);
 
     /* emit the log */
-    if (security_manager_server_log)
+    if (sec_lsm_manager_server_log)
         dolog(cli, 0, n, fields);
 
     /* send now */
@@ -239,7 +239,7 @@ __nonnull((1)) static void send_error(client_t *cli, const char *errorstr) {
  *
  * @param[in] cli client handler
  */
-__nonnull() static int send_display_security_manager_handle(client_t *cli) __wur {
+__nonnull() static int send_display_sec_lsm_manager_handle(client_t *cli) __wur {
     if (cli->secure_app->error_flag) {
         ERROR("error flag has been raised, clear secure app");
         return -EPERM;
@@ -264,7 +264,7 @@ __nonnull() static int send_display_security_manager_handle(client_t *cli) __wur
 /**
  * @brief Update the policy (drop the old and set the new)
  *
- * @param[in] sm_handle security_manager_handle handler
+ * @param[in] sm_handle sec_lsm_manager_handle handler
  * @return 0 in case of success or a negative -errno value
  */
 __nonnull() static int update_policy(secure_app_t *secure_app, cynagora_t *cynagora_admin_client) __wur {
@@ -291,7 +291,7 @@ __nonnull() static int install(client_t *cli) __wur {
         return -EPERM;
     }
 
-    int rc = update_policy(cli->secure_app, cli->security_manager_server->cynagora_admin_client);
+    int rc = update_policy(cli->secure_app, cli->sec_lsm_manager_server->cynagora_admin_client);
     if (rc < 0) {
         ERROR("update_policy");
         return rc;
@@ -302,7 +302,7 @@ __nonnull() static int install(client_t *cli) __wur {
     rc = install_mac(cli->secure_app);
     if (rc < 0) {
         ERROR("install");
-        int rc2 = cynagora_drop_policies(cli->security_manager_server->cynagora_admin_client, cli->secure_app->id);
+        int rc2 = cynagora_drop_policies(cli->sec_lsm_manager_server->cynagora_admin_client, cli->secure_app->id);
         if (rc2 < 0) {
             ERROR("cannot delete policy : %d %s", -rc2, strerror(-rc2));
         }
@@ -320,7 +320,7 @@ __nonnull() static int uninstall(client_t *cli) __wur {
         return -EPERM;
     }
 
-    int rc = cynagora_drop_policies(cli->security_manager_server->cynagora_admin_client, cli->secure_app->id);
+    int rc = cynagora_drop_policies(cli->sec_lsm_manager_server->cynagora_admin_client, cli->secure_app->id);
 
     if (rc < 0) {
         ERROR("cynagora_drop_policies : %d %s", -rc, strerror(-rc));
@@ -354,12 +354,12 @@ __nonnull((1)) static void onrequest(client_t *cli, unsigned count, const char *
         return;
 
     /* emit the log */
-    if (security_manager_server_log)
+    if (sec_lsm_manager_server_log)
         dolog(cli, 1, count, args);
 
     /* version hand-shake */
     if (!cli->version) {
-        if (ckarg(args[0], _security_manager_, 0)) {
+        if (ckarg(args[0], _sec_lsm_manager_, 0)) {
             if (count < 2 || !ckarg(args[1], "1", 0)) {
                 send_error(cli, "invalid");
                 if (!cli->relax)
@@ -385,12 +385,12 @@ __nonnull((1)) static void onrequest(client_t *cli, unsigned count, const char *
             break;
         case 'd':
             if (ckarg(args[0], _display_, 1) && count == 1) {
-                rc = send_display_security_manager_handle(cli);
+                rc = send_display_sec_lsm_manager_handle(cli);
                 if (rc >= 0) {
                     send_done(cli);
                 } else {
-                    ERROR("send_display_security_manager_handle : %d %s", -rc, strerror(-rc));
-                    send_error(cli, "send_display_security_manager_handle");
+                    ERROR("send_display_sec_lsm_manager_handle : %d %s", -rc, strerror(-rc));
+                    send_error(cli, "send_display_sec_lsm_manager_handle");
                 }
                 return;
             }
@@ -401,8 +401,8 @@ __nonnull((1)) static void onrequest(client_t *cli, unsigned count, const char *
                 if (rc >= 0) {
                     send_done(cli);
                 } else {
-                    ERROR("security_manager_handle_set_id : %d %s", -rc, strerror(-rc));
-                    send_error(cli, "security_manager_handle_set_id");
+                    ERROR("sec_lsm_manager_handle_set_id : %d %s", -rc, strerror(-rc));
+                    send_error(cli, "sec_lsm_manager_handle_set_id");
                 }
                 return;
             }
@@ -411,15 +411,15 @@ __nonnull((1)) static void onrequest(client_t *cli, unsigned count, const char *
                 if (rc >= 0) {
                     send_done(cli);
                 } else {
-                    ERROR("security_manager_handle_install : %d %s", -rc, strerror(-rc));
-                    send_error(cli, "security_manager_handle_install");
+                    ERROR("sec_lsm_manager_handle_install : %d %s", -rc, strerror(-rc));
+                    send_error(cli, "sec_lsm_manager_handle_install");
                 }
                 return;
             }
             break;
         case 'l':
             if (ckarg(args[0], _log_, 1) && count <= 2) {
-                nextlog = security_manager_server_log;
+                nextlog = sec_lsm_manager_server_log;
                 if (count == 2) {
                     if (!ckarg(args[1], _on_, 0) && !ckarg(args[1], _off_, 0))
                         break;
@@ -427,7 +427,7 @@ __nonnull((1)) static void onrequest(client_t *cli, unsigned count, const char *
                 }
                 putx(cli, _done_, nextlog ? _on_ : _off_, NULL);
                 flushw(cli);
-                security_manager_server_log = nextlog;
+                sec_lsm_manager_server_log = nextlog;
                 return;
             }
             break;
@@ -438,8 +438,8 @@ __nonnull((1)) static void onrequest(client_t *cli, unsigned count, const char *
                     putx(cli, _done_, NULL);
                     flushw(cli);
                 } else {
-                    ERROR("security_manager_handle_add_path : %d %s", -rc, strerror(-rc));
-                    send_error(cli, "security_manager_handle_add_path");
+                    ERROR("sec_lsm_manager_handle_add_path : %d %s", -rc, strerror(-rc));
+                    send_error(cli, "sec_lsm_manager_handle_add_path");
                 }
                 return;
             }
@@ -449,8 +449,8 @@ __nonnull((1)) static void onrequest(client_t *cli, unsigned count, const char *
                     putx(cli, _done_, NULL);
                     flushw(cli);
                 } else {
-                    ERROR("security_manager_handle_add_permission : %d %s", -rc, strerror(-rc));
-                    send_error(cli, "security_manager_handle_add_permission");
+                    ERROR("sec_lsm_manager_handle_add_permission : %d %s", -rc, strerror(-rc));
+                    send_error(cli, "sec_lsm_manager_handle_add_permission");
                 }
                 return;
             }
@@ -461,8 +461,8 @@ __nonnull((1)) static void onrequest(client_t *cli, unsigned count, const char *
                 if (rc >= 0) {
                     send_done(cli);
                 } else {
-                    ERROR("security_manager_handle_uninstall : %d %s", -rc, strerror(-rc));
-                    send_error(cli, "security_manager_handle_uninstall");
+                    ERROR("sec_lsm_manager_handle_uninstall : %d %s", -rc, strerror(-rc));
+                    send_error(cli, "sec_lsm_manager_handle_uninstall");
                 }
                 return;
             }
@@ -477,9 +477,9 @@ __nonnull((1)) static void onrequest(client_t *cli, unsigned count, const char *
  * @param[in] closefds if true close pollitem fd
  */
 __nonnull((1)) static void destroy_client(client_t *cli, bool closefds) {
-    cli->security_manager_server->count--;
-    if (!cli->security_manager_server->count) {
-        cynagora_disconnect(cli->security_manager_server->cynagora_admin_client);
+    cli->sec_lsm_manager_server->count--;
+    if (!cli->sec_lsm_manager_server->count) {
+        cynagora_disconnect(cli->sec_lsm_manager_server->cynagora_admin_client);
     }
 
     /* close protocol */
@@ -541,7 +541,7 @@ terminate:
  * @param[in] fd file descriptor of client
  * @return 0 in case of success or a negative -errno value
  */
-static int create_client(client_t **pcli, int fd, security_manager_server_t *server) __wur {
+static int create_client(client_t **pcli, int fd, sec_lsm_manager_server_t *server) __wur {
     int rc = 0;
 
     /* allocate the object */
@@ -572,7 +572,7 @@ static int create_client(client_t **pcli, int fd, security_manager_server_t *ser
     (*pcli)->pollitem.handler = on_client_event;
     (*pcli)->pollitem.closure = (*pcli);
     (*pcli)->pollitem.fd = fd;
-    (*pcli)->security_manager_server = server;
+    (*pcli)->sec_lsm_manager_server = server;
 
     server->count++;
 
@@ -600,7 +600,7 @@ static void on_server_event(pollitem_t *pollitem, uint32_t events, int pollfd) {
     struct sockaddr saddr;
     socklen_t slen;
     client_t *cli;
-    security_manager_server_t *server = (security_manager_server_t *)pollitem->closure;
+    sec_lsm_manager_server_t *server = (sec_lsm_manager_server_t *)pollitem->closure;
 
     /* is it a hangup? it shouldn't! */
     if (events & EPOLLHUP) {
@@ -643,8 +643,8 @@ static void on_server_event(pollitem_t *pollitem, uint32_t events, int pollfd) {
 /*** PUBLIC METHODS ***/
 /**********************/
 
-/* see security-manager-server.h */
-void security_manager_server_destroy(security_manager_server_t *server) {
+/* see sec-lsm-manager-server.h */
+void sec_lsm_manager_server_destroy(sec_lsm_manager_server_t *server) {
     if (server->pollfd >= 0)
         close(server->pollfd);
     if (server->socket.fd >= 0)
@@ -655,19 +655,19 @@ void security_manager_server_destroy(security_manager_server_t *server) {
     server->cynagora_admin_client = NULL;
 }
 
-/* see security-manager-server.h */
-int security_manager_server_create(security_manager_server_t **server, const char *socket_spec) __wur {
-    LOG("security_manager_server_create");
+/* see sec-lsm-manager-server.h */
+int sec_lsm_manager_server_create(sec_lsm_manager_server_t **server, const char *socket_spec) __wur {
+    LOG("sec_lsm_manager_server_create");
     mode_t um;
     int rc = 0;
     /* allocate the structure */
-    *server = (security_manager_server_t *)malloc(sizeof(security_manager_server_t));
+    *server = (sec_lsm_manager_server_t *)malloc(sizeof(sec_lsm_manager_server_t));
     if (*server == NULL) {
-        ERROR("malloc security_manager_server_t failed");
+        ERROR("malloc sec_lsm_manager_server_t failed");
         rc = -ENOMEM;
         goto ret;
     }
-    memset(*server, 0, sizeof(security_manager_server_t));
+    memset(*server, 0, sizeof(sec_lsm_manager_server_t));
 
     /* create the polling fd */
     (*server)->socket.fd = -1;
@@ -679,7 +679,7 @@ int security_manager_server_create(security_manager_server_t **server, const cha
     }
 
     /* create the admin server socket */
-    socket_spec = security_manager_get_socket(socket_spec);
+    socket_spec = sec_lsm_manager_get_socket(socket_spec);
 
     LOG("socket = %s", socket_spec);
 
@@ -712,19 +712,19 @@ int security_manager_server_create(security_manager_server_t **server, const cha
     goto ret;
 
 error:
-    security_manager_server_destroy(*server);
+    sec_lsm_manager_server_destroy(*server);
 ret:
     return rc;
 }
 
-/* see security-manager-server.h */
-void security_manager_server_stop(security_manager_server_t *server, int status) {
+/* see sec-lsm-manager-server.h */
+void sec_lsm_manager_server_stop(sec_lsm_manager_server_t *server, int status) {
     server->stopped = status ?: INT_MIN;
     cynagora_disconnect(server->cynagora_admin_client);
 }
 
-/* see security-manager-server.h */
-int security_manager_server_serve(security_manager_server_t *server) __wur {
+/* see sec-lsm-manager-server.h */
+int sec_lsm_manager_server_serve(sec_lsm_manager_server_t *server) __wur {
     /* process inputs */
     server->stopped = 0;
     while (!server->stopped) {

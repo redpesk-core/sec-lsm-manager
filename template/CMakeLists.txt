@@ -23,9 +23,9 @@
 ###########################################################################
 
 if(WITH_SMACK)
-    INSTALL(FILES "app-template.smack" DESTINATION ${CMAKE_INSTALL_FULL_DATADIR}/security-manager/)
+    INSTALL(FILES "app-template.smack" DESTINATION ${CMAKE_INSTALL_FULL_DATADIR}/${CMAKE_PROJECT_NAME}/)
 elseif(WITH_SELINUX)
-    INSTALL(FILES "app-template.te" DESTINATION ${CMAKE_INSTALL_FULL_DATADIR}/security-manager/)
-    INSTALL(FILES "app-template.if" DESTINATION ${CMAKE_INSTALL_FULL_DATADIR}/security-manager/)
-    INSTALL(DIRECTORY DESTINATION ${CMAKE_INSTALL_FULL_DATADIR}/security-manager/selinux-policy/)
+    INSTALL(FILES "app-template.te" DESTINATION ${CMAKE_INSTALL_FULL_DATADIR}/${CMAKE_PROJECT_NAME}/)
+    INSTALL(FILES "app-template.if" DESTINATION ${CMAKE_INSTALL_FULL_DATADIR}/${CMAKE_PROJECT_NAME}/)
+    INSTALL(DIRECTORY DESTINATION ${CMAKE_INSTALL_FULL_DATADIR}/${CMAKE_PROJECT_NAME}/selinux-policy/)
 endif()

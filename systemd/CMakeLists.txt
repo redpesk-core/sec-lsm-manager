@@ -23,13 +23,13 @@
 ###########################################################################
 
 
-CONFIGURE_FILE(security-manager.service.in      security-manager.service @ONLY)
-CONFIGURE_FILE(security-manager.socket.in       security-manager.socket @ONLY)
+CONFIGURE_FILE(${CMAKE_PROJECT_NAME}.service.in      ${CMAKE_PROJECT_NAME}.service @ONLY)
+CONFIGURE_FILE(${CMAKE_PROJECT_NAME}.socket.in       ${CMAKE_PROJECT_NAME}.socket @ONLY)
 
 INSTALL(FILES
-    ${CMAKE_CURRENT_BINARY_DIR}/security-manager.service
-    ${CMAKE_CURRENT_BINARY_DIR}/security-manager.socket
-    ${CMAKE_CURRENT_SOURCE_DIR}/security-manager.target
+    ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_PROJECT_NAME}.service
+    ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_PROJECT_NAME}.socket
+    ${CMAKE_CURRENT_SOURCE_DIR}/${CMAKE_PROJECT_NAME}.target
     DESTINATION
     ${SYSTEMD_UNIT_DIR}
 )

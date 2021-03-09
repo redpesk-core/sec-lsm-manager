@@ -21,8 +21,8 @@
  * $RP_END_LICENSE$
  */
 
-#ifndef SECURITY_MANAGER_SECURE_APP_H
-#define SECURITY_MANAGER_SECURE_APP_H
+#ifndef SEC_LSM_MANAGER_SECURE_APP_H
+#define SEC_LSM_MANAGER_SECURE_APP_H
 
 #include <sys/types.h>
 

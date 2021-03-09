@@ -23,7 +23,7 @@
 # $RP_END_LICENSE$
 ###########################################################################
 
-configure_file(security-manager.pc.in security-manager.pc @ONLY)
+configure_file(${CMAKE_PROJECT_NAME}.pc.in ${CMAKE_PROJECT_NAME}.pc @ONLY)
 
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/security-manager.pc
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_PROJECT_NAME}.pc
     DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR}/pkgconfig)

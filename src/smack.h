@@ -21,8 +21,8 @@
  * $RP_END_LICENSE$
  */
 
-#ifndef SECURITY_MANAGER_SMACK_H
-#define SECURITY_MANAGER_SMACK_H
+#ifndef SEC_LSM_MANAGER_SMACK_H
+#define SEC_LSM_MANAGER_SMACK_H
 
 #include "secure-app.h"
 

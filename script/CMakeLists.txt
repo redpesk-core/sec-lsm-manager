@@ -25,14 +25,14 @@
 if(WITH_SELINUX)
 
     set(SELINUX_MAKEFILE "/usr/share/selinux/devel/Makefile")
-    set(SELINUX_POLICY_DIR "/usr/share/security-manager/selinux-policy/")
+    set(SELINUX_POLICY_DIR "/usr/share/${CMAKE_PROJECT_NAME}/selinux-policy/")
 
     CONFIGURE_FILE(build-module.sh.in      build-module.sh @ONLY)
 
     INSTALL(PROGRAMS
         ${CMAKE_CURRENT_BINARY_DIR}/build-module.sh
         DESTINATION
-        ${CMAKE_INSTALL_FULL_DATADIR}/security-manager/script/
+        ${CMAKE_INSTALL_FULL_DATADIR}/${CMAKE_PROJECT_NAME}/script/
     )
 
 endif()

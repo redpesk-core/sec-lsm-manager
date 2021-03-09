@@ -21,120 +21,119 @@
  *  https://www.gnu.org/licenses/gpl-3.0.html.
  * $RP_END_LICENSE$
  */
-#ifndef SECURITY_MANAGER_H
-#define SECURITY_MANAGER_H
+#ifndef SEC_LSM_MANAGER_H
+#define SEC_LSM_MANAGER_H
 
 #include <stdint.h>
 
-typedef struct security_manager security_manager_t;
-typedef struct security_manager_handle security_manager_handle_t;
+typedef struct sec_lsm_manager sec_lsm_manager_t;
+typedef struct sec_lsm_manager_handle sec_lsm_manager_handle_t;
 
 /**
- * @brief Create a client for server security_manager
+ * @brief Create a client for server sec_lsm_manager
  * The client is created but not connected. The connection is made on need.
  *
- * @param[in] security_manager   pointer to security_manager client handler
+ * @param[in] sec_lsm_manager   pointer to sec_lsm_manager client handler
  * @param[in] socketspec specification of the socket to connect to or NULL for
  *                   using the default
  *
- * @return 0 in case of success and in that case *security_manager is filled
- *         a negative -errno value and *security_manager is set to NULL
+ * @return 0 in case of success and in that case *sec_lsm_manager is filled
+ *         a negative -errno value and *sec_lsm_manager is set to NULL
  *
- * @see security_manager_destroy
+ * @see sec_lsm_manager_destroy
  */
-extern int security_manager_create(security_manager_t **security_manager, const char *socketspec) __wur;
+extern int sec_lsm_manager_create(sec_lsm_manager_t **sec_lsm_manager, const char *socketspec) __wur;
 
 /**
- * @brief Destroy security_manager client handler and release its memory
+ * @brief Destroy sec_lsm_manager client handler and release its memory
  *
- * @param[in] security_manager security_manager client handler
+ * @param[in] sec_lsm_manager sec_lsm_manager client handler
  *
- * @see security_manager_create
+ * @see sec_lsm_manager_create
  */
-extern void security_manager_destroy(security_manager_t *security_manager) __nonnull();
+extern void sec_lsm_manager_destroy(sec_lsm_manager_t *sec_lsm_manager) __nonnull();
 
 /**
- * Ask the security_manager client handler to disconnect from the server.
+ * Ask the sec_lsm_manager client handler to disconnect from the server.
  * The client will reconnect if needed.
  *
- * @param[in] security_manager security_manager client handler
+ * @param[in] sec_lsm_manager sec_lsm_manager client handler
  */
-extern void security_manager_disconnect(security_manager_t *security_manager) __nonnull();
+extern void sec_lsm_manager_disconnect(sec_lsm_manager_t *sec_lsm_manager) __nonnull();
 
 /**
- * @brief Set id of security_manager client handler
+ * @brief Set id of sec_lsm_manager client handler
  *
- * @param[in] security_manager security_manager client handler
+ * @param[in] sec_lsm_manager sec_lsm_manager client handler
  * @param[in] id The id to define
  * @return 0 in case of success or a negative -errno value
  */
-extern int security_manager_set_id(security_manager_t *security_manager, const char *id) __nonnull() __wur;
+extern int sec_lsm_manager_set_id(sec_lsm_manager_t *sec_lsm_manager, const char *id) __nonnull() __wur;
 
 /**
- * @brief Add a path to security_manager client handler
+ * @brief Add a path to sec_lsm_manager client handler
  *
- * @param security_manager security_manager client handler
+ * @param sec_lsm_manager sec_lsm_manager client handler
  * @param path The path to add
  * @param path_type The path_type to add
  * @return 0 in case of success or a negative -errno value
  */
-extern int security_manager_add_path(security_manager_t *security_manager, const char *path, const char *path_type)
+extern int sec_lsm_manager_add_path(sec_lsm_manager_t *sec_lsm_manager, const char *path, const char *path_type)
     __nonnull() __wur;
 
 /**
- * @brief Add a permission to security_manager client handler
+ * @brief Add a permission to sec_lsm_manager client handler
  *
- * @param[in] security_manager security_manager client handler
+ * @param[in] sec_lsm_manager sec_lsm_manager client handler
  * @param[in] permission The permission to add
  * @return 0 in case of success or a negative -errno value
  */
-extern int security_manager_add_permission(security_manager_t *security_manager, const char *permission)
-    __nonnull() __wur;
+extern int sec_lsm_manager_add_permission(sec_lsm_manager_t *sec_lsm_manager, const char *permission) __nonnull() __wur;
 
 /**
- * @brief Clear the security_manager client handler
+ * @brief Clear the sec_lsm_manager client handler
  * Return in the create state
  *
- * @param security_manager security_manager client handler
+ * @param sec_lsm_manager sec_lsm_manager client handler
  * @return 0 in case of success or a negative -errno value
  */
-extern int security_manager_clear(security_manager_t *security_manager) __nonnull() __wur;
+extern int sec_lsm_manager_clear(sec_lsm_manager_t *sec_lsm_manager) __nonnull() __wur;
 
 /**
  * @brief Install an application with all defined paramters in the security manager handle
  * You need at least to set the id
  *
- * @param[in] security_manager security_manager client handler
+ * @param[in] sec_lsm_manager sec_lsm_manager client handler
  * @return 0 in case of success or a negative -errno value
  */
-extern int security_manager_install(security_manager_t *security_manager) __nonnull() __wur;
+extern int sec_lsm_manager_install(sec_lsm_manager_t *sec_lsm_manager) __nonnull() __wur;
 
 /**
  * @brief Uninstall an application (cynagora permissions, paths)
  * You need at least to set the id
  *
- * @param[in] security_manager security_manager client handler
+ * @param[in] sec_lsm_manager sec_lsm_manager client handler
  * @return 0 in case of success or a negative -errno value
  */
-extern int security_manager_uninstall(security_manager_t *security_manager) __nonnull() __wur;
+extern int sec_lsm_manager_uninstall(sec_lsm_manager_t *sec_lsm_manager) __nonnull() __wur;
 
 /**
  * @brief Query or set the logging of requests
  *
- * @param[in] security_manager  security_manager client handler
+ * @param[in] sec_lsm_manager  sec_lsm_manager client handler
  * @param[in] on                should set on
  * @param[in] off               should set off
  *
  * @return 0 if not logging, 1 if logging or a negative -errno value
  */
-extern int security_manager_log(security_manager_t *security_manager, int on, int off) __nonnull() __wur;
+extern int sec_lsm_manager_log(sec_lsm_manager_t *sec_lsm_manager, int on, int off) __nonnull() __wur;
 
 /**
  * @brief Display the actual state security manager handle
  *
- * @param[in] security_manager security_manager client handler
+ * @param[in] sec_lsm_manager sec_lsm_manager client handler
  * @return 0 in case of success or a negative -errno value
  */
-extern int security_manager_display(security_manager_t *security_manager) __nonnull() __wur;
+extern int sec_lsm_manager_display(sec_lsm_manager_t *sec_lsm_manager) __nonnull() __wur;
 
 #endif

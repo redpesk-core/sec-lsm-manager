@@ -21,8 +21,8 @@
  * $RP_END_LICENSE$
  */
 
-#ifndef SECURITY_MANAGER_LOG_H
-#define SECURITY_MANAGER_LOG_H
+#ifndef SEC_LSM_MANAGER_LOG_H
+#define SEC_LSM_MANAGER_LOG_H
 
 /**
  * @brief Log (>>) a message and arguments

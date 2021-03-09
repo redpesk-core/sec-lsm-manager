@@ -21,8 +21,8 @@
  * $RP_END_LICENSE$
  */
 
-#ifndef SECURITY_MANAGER_PATHS_H
-#define SECURITY_MANAGER_PATHS_H
+#ifndef SEC_LSM_MANAGER_PATHS_H
+#define SEC_LSM_MANAGER_PATHS_H
 
 #include <stdbool.h>
 #include <stddef.h>

@@ -21,10 +21,10 @@
  * $RP_END_LICENSE$
  */
 
-#ifndef SECURITY_MANAGER_SELINUX_COMPILE_H
-#define SECURITY_MANAGER_SELINUX_COMPILE_H
+#ifndef SEC_LSM_MANAGER_SELINUX_COMPILE_H
+#define SEC_LSM_MANAGER_SELINUX_COMPILE_H
 
-#define COMPILE_SCRIPT "/usr/share/security-manager/script/build-module.sh"
+#define COMPILE_SCRIPT "/usr/share/sec-lsm-manager/script/build-module.sh"
 
 #include <sys/cdefs.h>
 

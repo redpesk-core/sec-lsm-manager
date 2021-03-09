@@ -41,21 +41,21 @@
 #include <systemd/sd-daemon.h>
 #endif
 
-#include "security-manager-protocol.h"
-#include "security-manager-server.h"
+#include "sec-lsm-manager-protocol.h"
+#include "sec-lsm-manager-server.h"
 
-#if !defined(DEFAULT_SECURITY_MANAGER_USER)
-#define DEFAULT_SECURITY_MANAGER_USER NULL
+#if !defined(DEFAULT_SEC_LSM_MANAGER_USER)
+#define DEFAULT_SEC_LSM_MANAGER_USER NULL
 #endif
-#if !defined(DEFAULT_SECURITY_MANAGER_GROUP)
-#define DEFAULT_SECURITY_MANAGER_GROUP NULL
+#if !defined(DEFAULT_SEC_LSM_MANAGER_GROUP)
+#define DEFAULT_SEC_LSM_MANAGER_GROUP NULL
 #endif
 #if !defined(DEFAULT_LOCKFILE)
-#define DEFAULT_LOCKFILE ".security-manager-lock"
+#define DEFAULT_LOCKFILE ".sec-lsm-manager-lock"
 #endif
 
 #if !defined(DEFAULT_SYSTEMD_NAME)
-#define DEFAULT_SYSTEMD_NAME "security-manager"
+#define DEFAULT_SYSTEMD_NAME "sec-lsm-manager"
 #endif
 
 #if !defined(DEFAULT_SYSTEMD_SOCKET)
@@ -91,7 +91,7 @@ static const struct option longopts[] = {{"group", 1, NULL, _GROUP_},
 
 static const char helptxt[] =
     "\n"
-    "usage: security-managerd [options]...\n"
+    "usage: sec-lsm-managerd [options]...\n"
     "\n"
     "otpions:\n"
     "    -u, --user xxx        set the user\n"
@@ -108,7 +108,7 @@ static const char helptxt[] =
     "    -v, --version         print the version and exit\n"
     "\n";
 
-static const char versiontxt[] = "security-managerd version 0.1\n";
+static const char versiontxt[] = "sec-lsm-managerd version 0.1\n";
 
 static int isid(const char *text);
 static int ensure_directory(const char *path, int uid, int gid);
@@ -131,7 +131,7 @@ int main(int ac, char **av) {
     char *g = NULL;
     struct passwd *pw;
     struct group *gr;
-    security_manager_server_t *server;
+    sec_lsm_manager_server_t *server;
     char *spec_socket;
     gid_t gids[10] = {0};
     size_t number_groups = 0;
@@ -183,7 +183,7 @@ int main(int ac, char **av) {
 
     /* handles help, version, error */
     if (help) {
-        fprintf(stdout, helptxt, security_manager_default_socket_dir);
+        fprintf(stdout, helptxt, sec_lsm_manager_default_socket_dir);
         return 0;
     }
     if (version) {
@@ -194,9 +194,9 @@ int main(int ac, char **av) {
         return 1;
 
     /* set the defaults */
-    socketdir = socketdir ?: security_manager_default_socket_dir;
-    user = user ?: DEFAULT_SECURITY_MANAGER_USER;
-    group = group ?: DEFAULT_SECURITY_MANAGER_GROUP;
+    socketdir = socketdir ?: sec_lsm_manager_default_socket_dir;
+    user = user ?: DEFAULT_SEC_LSM_MANAGER_USER;
+    group = group ?: DEFAULT_SEC_LSM_MANAGER_GROUP;
 
     /* compute socket specs */
     spec_socket = 0;
@@ -215,8 +215,8 @@ int main(int ac, char **av) {
     }
 #endif
     if (!spec_socket)
-        rc = asprintf(&spec_socket, "%s:%s/%s", security_manager_default_socket_scheme, socketdir,
-                      security_manager_default_socket_base);
+        rc = asprintf(&spec_socket, "%s:%s/%s", sec_lsm_manager_default_socket_scheme, socketdir,
+                      sec_lsm_manager_default_socket_base);
     if (!spec_socket) {
         fprintf(stderr, "can't make socket paths\n");
         return 1;
@@ -312,10 +312,10 @@ int main(int ac, char **av) {
 
     /* initialize server */
     setvbuf(stderr, NULL, _IOLBF, 1000);
-    security_manager_server_log = (bool)flog;
-    printf("[smd] LOG : %d\n", security_manager_server_log);
+    sec_lsm_manager_server_log = (bool)flog;
+    printf("[smd] LOG : %d\n", sec_lsm_manager_server_log);
     signal(SIGPIPE, SIG_IGN); /* avoid SIGPIPE! */
-    rc = security_manager_server_create(&server, spec_socket);
+    rc = sec_lsm_manager_server_create(&server, spec_socket);
     if (rc < 0) {
         fprintf(stderr, "can't initialize server: %m\n");
         return 1;
@@ -327,7 +327,7 @@ int main(int ac, char **av) {
 #endif
 
     /* serve */
-    rc = security_manager_server_serve(server);
+    rc = sec_lsm_manager_server_serve(server);
     return rc ? 3 : 0;
 }
 

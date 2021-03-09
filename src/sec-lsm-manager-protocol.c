@@ -22,12 +22,12 @@
  * $RP_END_LICENSE$
  */
 
-#include "security-manager-protocol.h"
+#include "sec-lsm-manager-protocol.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 
-const char _security_manager_[] = "security-manager", _done_[] = "done", _error_[] = "error", _log_[] = "log",
+const char _sec_lsm_manager_[] = "sec-lsm-manager", _done_[] = "done", _error_[] = "error", _log_[] = "log",
            _id_[] = "id", _permission_[] = "permission", _path_[] = "path", _install_[] = "install",
            _uninstall_[] = "uninstall", _display_[] = "display", _clear_[] = "clear", _on_[] = "on", _off_[] = "off",
            _string_[] = "string";
@@ -43,19 +43,19 @@ const char _security_manager_[] = "security-manager", _done_[] = "done", _error_
 #define DEF_PREFIX DEFAULT_SOCKET_SCHEME ":" DEFAULT_SOCKET_DIR "/"
 
 #if !defined(DEFAULT_SOCKET_BASE)
-#define DEFAULT_SOCKET_BASE "security-manager.socket"
+#define DEFAULT_SOCKET_BASE "sec-lsm-manager.socket"
 #endif
 
 #if !defined(DEFAULT_SOCKET_SPEC)
 #define DEFAULT_SOCKET_SPEC DEF_PREFIX DEFAULT_SOCKET_BASE
 #endif
 
-const char security_manager_default_socket_scheme[] = DEFAULT_SOCKET_SCHEME,
-           security_manager_default_socket_dir[] = DEFAULT_SOCKET_DIR,
-           security_manager_default_socket_base[] = DEFAULT_SOCKET_BASE,
-           security_manager_default_socket_spec[] = DEFAULT_SOCKET_SPEC;
+const char sec_lsm_manager_default_socket_scheme[] = DEFAULT_SOCKET_SCHEME,
+           sec_lsm_manager_default_socket_dir[] = DEFAULT_SOCKET_DIR,
+           sec_lsm_manager_default_socket_base[] = DEFAULT_SOCKET_BASE,
+           sec_lsm_manager_default_socket_spec[] = DEFAULT_SOCKET_SPEC;
 
-/* see security-manager-protocol.h */
-const char *security_manager_get_socket(const char *value) {
-    return value ?: secure_getenv("SECURITY_MANAGER_SOCKET") ?: security_manager_default_socket_spec;
+/* see sec-lsm-manager-protocol.h */
+const char *sec_lsm_manager_get_socket(const char *value) {
+    return value ?: secure_getenv("SEC_LSM_MANAGER_SOCKET") ?: sec_lsm_manager_default_socket_spec;
 }

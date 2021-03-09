@@ -21,8 +21,8 @@
  * $RP_END_LICENSE$
  */
 
-#ifndef SECURITY_MANAGER_SELINUX_LABEL_H
-#define SECURITY_MANAGER_SELINUX_LABEL_H
+#ifndef SEC_LSM_MANAGER_SELINUX_LABEL_H
+#define SEC_LSM_MANAGER_SELINUX_LABEL_H
 
 #include <selinux/selinux.h>
 #include <semanage/semanage.h>

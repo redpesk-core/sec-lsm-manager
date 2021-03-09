@@ -1,4 +1,4 @@
-# SECURITY-MANAGER
+# SEC-LSM-MANAGER
 
 
 The objective of this project is to remake the security-manager of Tyzen for AGL. The security context has evolved. In order to clearly define the need we want, I will start by reviewing the key points of the old security-manager.

@@ -20,8 +20,8 @@
  *  https://www.gnu.org/licenses/gpl-3.0.html.
  * $RP_END_LICENSE$
  */
-#ifndef SECURITY_MANAGER_PROT_H
-#define SECURITY_MANAGER_PROT_H
+#ifndef SEC_LSM_MANAGER_PROT_H
+#define SEC_LSM_MANAGER_PROT_H
 /******************************************************************************/
 /******************************************************************************/
 /* IMPLEMENTATION OF THE PROTOCOL                                             */

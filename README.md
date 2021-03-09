@@ -1,11 +1,11 @@
-# SECURITY-MANAGER
+# SEC-LSM-MANAGER
 
 ```
                                                                                        systemd-socket
                                                                                               ^
                        +---------------------------+            +----------------------+      |             +-----------------------------+
                        |                           |            |                      |      |             |                             |
-                       | libsecurity-manager-core  +<-----------+  security-managerd   +<-----+-------------+ libsecurity-manager-client  |
+                       |  libsec-lsm-manager-core  +<-----------+   sec-lsm-managerd   +<-----+-------------+  libsec-lsm-manager-client  |
                        |                           |            |                      |                    |                             |
                        +--------+----------------+-+            +----------------------+                    +-----------------------+-----+
                                 |                |                                                                                  ^
@@ -15,7 +15,7 @@
                                 |                |                                                                                  |
                                 v                v                                                                           +------+----------------+
 +-------------------------------+---+  +---------+------------------------------------------------------+                    |                       |
-|                                   |  |                                                                |                    | security-manager-cmd  |
+|                                   |  |                                                                |                    | sec-lsm-manager-cmd   |
 |             CYNAGORA              |  | +----------------------------+ +-----------------------------+ |                    |                       |
 |                                   |  | |                            | |                             | |                    | id redpesk-service-id |
 |                                   |  | |          SMACK             | |         SELINUX             | |                    |                       |
@@ -26,7 +26,7 @@
 |                                   |  | |                            | |                             | |                    | permission perm123    |
 |                                   |  | |  app-redpesk-service-id1   | |   +--------------------+    | |                    |                       |
 |                                   |  | |                            | |                             | |                    |                       |
-|                                   |  | |                            | | /usr/share/security-manager/| |                    | install               |
+|                                   |  | |                            | | /usr/share/sec-lsm-manager/ | |                    | install               |
 |                                   |  | |  app-redpesk-service-id2   | | selinux-policy/             | |                    |                       |
 |                                   |  | |                            | |                             | |                    |                       |
 |                                   |  | |                            | | redpesk-service-id.te       | |                    | uninstall             |
