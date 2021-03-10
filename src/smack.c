@@ -47,7 +47,7 @@
  * @param[in] value value of the extended attribute
  * @return 0 in case of success or a negative -errno value
  */
-__nonnull() static int set_smack(const char *path, const char *xattr, const char *value) __wur {
+__nonnull() __wur static int set_smack(const char *path, const char *xattr, const char *value) {
     int rc = lsetxattr(path, xattr, value, strlen(value), 0);
     if (rc < 0) {
         rc = -errno;
@@ -67,7 +67,7 @@ __nonnull() static int set_smack(const char *path, const char *xattr, const char
  * @param[in] label The label to set
  * @return 0 in case of success or a negative -errno value
  */
-__nonnull() static int label_file(const char *path, const char *label) __wur {
+__nonnull() __wur static int label_file(const char *path, const char *label) {
     if (!check_file_exists(path)) {
         LOG("%s not exist", path);
         return -1;
@@ -88,7 +88,7 @@ __nonnull() static int label_file(const char *path, const char *label) __wur {
  * @param[in] path The path of the directory
  * @return 0 in case of success or a negative -errno value
  */
-__nonnull() static int label_dir_transmute(const char *path) __wur {
+__nonnull() __wur static int label_dir_transmute(const char *path) {
     if (!check_file_type(path, __S_IFDIR)) {
         LOG("%s not directory", path);
         return 0;
@@ -110,7 +110,7 @@ __nonnull() static int label_dir_transmute(const char *path) __wur {
  * @param[in] label The label that will be used when exec
  * @return 0 in case of success or a negative -errno value
  */
-__nonnull() static int label_exec(const char *path, const char *label) __wur {
+__nonnull() __wur static int label_exec(const char *path, const char *label) {
     if (!check_file_type(path, __S_IFREG)) {
         LOG("%s not regular file", path);
         return 0;
@@ -148,8 +148,8 @@ __nonnull() static int label_exec(const char *path, const char *label) __wur {
  * @param[in] is_transmute The directory is transmute
  * @return 0 in case of success or a negative -errno value
  */
-__nonnull((1, 2)) static int label_path(const char *path, const char *label, int is_executable,
-                                        int is_transmute) __wur {
+__nonnull((1, 2)) __wur
+    static int label_path(const char *path, const char *label, int is_executable, int is_transmute) {
     int rc = label_file(path, label);
     if (rc < 0) {
         ERROR("label file");
@@ -182,8 +182,8 @@ __nonnull((1, 2)) static int label_path(const char *path, const char *label, int
  * @param[in] id the id of the application
  * @return 0 in case of success or a negative -errno value
  */
-__nonnull() static int smack_process_path(const path_t *path,
-                                          path_type_definitions_t path_type_definitions[number_path_type]) __wur {
+__nonnull() __wur
+    static int smack_process_path(const path_t *path, path_type_definitions_t path_type_definitions[number_path_type]) {
     int rc = label_path(path->path, path_type_definitions[path->path_type].label,
                         path_type_definitions[path->path_type].is_executable,
                         path_type_definitions[path->path_type].is_transmute);
@@ -202,8 +202,8 @@ __nonnull() static int smack_process_path(const path_t *path,
  * @param[in] secure_app secure app handler
  * @return 0 in case of success or a negative -errno value
  */
-__nonnull() static int smack_process_paths(const secure_app_t *secure_app,
-                                           path_type_definitions_t path_type_definitions[number_path_type]) __wur {
+__nonnull() __wur static int smack_process_paths(const secure_app_t *secure_app,
+                                                 path_type_definitions_t path_type_definitions[number_path_type]) {
     for (size_t i = 0; i < secure_app->path_set.size; i++) {
         int rc = smack_process_path(secure_app->path_set.paths + i, path_type_definitions);
         if (rc < 0) {

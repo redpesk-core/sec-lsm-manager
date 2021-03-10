@@ -124,8 +124,8 @@ __nonnull() static void free_selinux_module(selinux_module_t *selinux_module) {
     }
 }
 
-__nonnull((2, 3, 4)) static int generate_path_module_file(char **dest, const char *selinux_rules_dir, const char *id,
-                                                          const char *extension) __wur {
+__nonnull((2, 3, 4)) __wur static int generate_path_module_file(char **dest, const char *selinux_rules_dir,
+                                                                const char *id, const char *extension) {
     size_t len = strlen(selinux_rules_dir) + strlen(id) + strlen(extension) + 1;
 
     *dest = (char *)malloc(len);
@@ -147,7 +147,7 @@ __nonnull((2, 3, 4)) static int generate_path_module_file(char **dest, const cha
  * @param[in] selinux_module selinux_module handler
  * @return 0 in case of success or a negative -errno value
  */
-__nonnull() static int generate_path_module_files(selinux_module_t *selinux_module) __wur {
+__nonnull() __wur static int generate_path_module_files(selinux_module_t *selinux_module) {
     int rc = generate_path_module_file(&selinux_module->selinux_te_file, selinux_module->selinux_rules_dir,
                                        selinux_module->id, TE_EXTENSION);
     if (rc < 0) {
@@ -207,10 +207,10 @@ __nonnull() static void dash_to_underscore(char *s) {
  * @param[in] selinux_rules_dir some value or NULL for getting default
  * @return 0 in case of success or a negative -errno value
  */
-__nonnull((1, 2)) static int init_selinux_module(selinux_module_t *selinux_module, const char *id,
-                                                 const char *selinux_te_template_file,
-                                                 const char *selinux_if_template_file,
-                                                 const char *selinux_rules_dir) __wur {
+__nonnull((1, 2)) __wur
+    static int init_selinux_module(selinux_module_t *selinux_module, const char *id,
+                                   const char *selinux_te_template_file, const char *selinux_if_template_file,
+                                   const char *selinux_rules_dir) {
     int rc = 0;
     memset(selinux_module, 0, sizeof(*selinux_module));
 
@@ -259,7 +259,7 @@ end:
  * @param[in] selinux_id The selinux id of the application
  * @return 0 in case of success or a negative -errno value
  */
-__nonnull() static int parse_line(const char *line, const char *id, const char *selinux_id) __wur {
+__nonnull() __wur static int parse_line(const char *line, const char *id, const char *selinux_id) {
     int rc = 0;
 
     char *pos_str;
@@ -291,8 +291,8 @@ __nonnull() static int parse_line(const char *line, const char *id, const char *
  * @param[in] selinux_id The selinux id of the application
  * @return 0 in case of success or a negative -errno value
  */
-__nonnull() static int template_to_module(const char *template, const char *module, const char *id,
-                                          const char *selinux_id) __wur {
+__nonnull() __wur
+    static int template_to_module(const char *template, const char *module, const char *id, const char *selinux_id) {
     int rc = 0;
     char line[MAX_LINE_SIZE_MODULE];
 
@@ -352,8 +352,8 @@ ret:
  * @param[in] selinux_id The selinux id of the application
  * @return 0 in case of success or a negative -errno value
  */
-__nonnull() static int generate_app_module_te(const char *selinux_te_template_file, const char *selinux_te_file,
-                                              const char *id, const char *selinux_id) __wur {
+__nonnull() __wur static int generate_app_module_te(const char *selinux_te_template_file, const char *selinux_te_file,
+                                                    const char *id, const char *selinux_id) {
     int rc = template_to_module(selinux_te_template_file, selinux_te_file, id, selinux_id);
 
     if (rc < 0) {
@@ -373,8 +373,8 @@ __nonnull() static int generate_app_module_te(const char *selinux_te_template_fi
  * @param[in] selinux_id The selinux id of the application
  * @return 0 in case of success or a negative -errno value
  */
-__nonnull() static int generate_app_module_if(const char *selinux_if_template_file, const char *selinux_if_file,
-                                              const char *id, const char *selinux_id) __wur {
+__nonnull() __wur static int generate_app_module_if(const char *selinux_if_template_file, const char *selinux_if_file,
+                                                    const char *id, const char *selinux_id) {
     int rc = template_to_module(selinux_if_template_file, selinux_if_file, id, selinux_id);
 
     if (rc < 0) {
@@ -393,8 +393,8 @@ __nonnull() static int generate_app_module_if(const char *selinux_if_template_fi
  * @param[in] selinux_id The selinux id of the application
  * @return 0 in case of success or a negative -errno value
  */
-__nonnull() static int generate_app_module_fc(const char *selinux_fc_file, const path_set_t *paths,
-                                              const char *selinux_id) __wur {
+__nonnull() __wur
+    static int generate_app_module_fc(const char *selinux_fc_file, const path_set_t *paths, const char *selinux_id) {
     int rc = 0;
     char line[MAX_LINE_SIZE_MODULE];
 
@@ -462,8 +462,8 @@ ret:
  * @param[in] secure_app secure app handler
  * @return 0 in case of success or a negative -errno value
  */
-__nonnull() static int generate_app_module_files(const selinux_module_t *selinux_module,
-                                                 const secure_app_t *secure_app) __wur {
+__nonnull() __wur
+    static int generate_app_module_files(const selinux_module_t *selinux_module, const secure_app_t *secure_app) {
     int rc = generate_app_module_te(selinux_module->selinux_te_template_file, selinux_module->selinux_te_file,
                                     selinux_module->id, selinux_module->selinux_id);
     if (rc < 0) {
@@ -505,7 +505,7 @@ ret:
  * @return true if all exist
  * @return false if not
  */
-__nonnull() static bool check_app_module_files_exists(const selinux_module_t *selinux_module) __wur {
+__nonnull() __wur static bool check_app_module_files_exists(const selinux_module_t *selinux_module) {
     if (!check_file_exists(selinux_module->selinux_te_file))
         return false;
     if (!check_file_exists(selinux_module->selinux_fc_file))
@@ -522,7 +522,7 @@ __nonnull() static bool check_app_module_files_exists(const selinux_module_t *se
  * @param[in] selinux_module selinux module handler
  * @return 0 in case of success or a negative -errno value
  */
-__nonnull() static int remove_app_module_files(const selinux_module_t *selinux_module) __wur {
+__nonnull() __wur static int remove_app_module_files(const selinux_module_t *selinux_module) {
     int rc = remove_file(selinux_module->selinux_te_file);
     if (rc < 0) {
         goto error;
@@ -552,7 +552,7 @@ end:
  * @param[in] selinux_module selinux module handler
  * @return 0 in case of success or a negative -errno value
  */
-__nonnull() static int remove_pp_files(const selinux_module_t *selinux_module) __wur {
+__nonnull() __wur static int remove_pp_files(const selinux_module_t *selinux_module) {
     int rc = remove_file(selinux_module->selinux_pp_file);
     if (rc < 0) {
         goto error;
@@ -573,7 +573,7 @@ end:
  * @param[in] semanage_handle semanage_handle handler
  * @return 0 in case of success or a negative -errno value
  */
-__nonnull() static int destroy_semanage_handle(semanage_handle_t *semanage_handle) __wur {
+__nonnull() __wur static int destroy_semanage_handle(semanage_handle_t *semanage_handle) {
     int rc = 0;
 
     if (semanage_is_connected(semanage_handle)) {
@@ -593,7 +593,7 @@ __nonnull() static int destroy_semanage_handle(semanage_handle_t *semanage_handl
  * @param[out] semanage_handle pointer semanage_handle handler
  * @return 0 in case of success or a negative -errno value
  */
-static int create_semanage_handle(semanage_handle_t **semanage_handle) __wur {
+__wur static int create_semanage_handle(semanage_handle_t **semanage_handle) {
     int rc = 0;
     *semanage_handle = semanage_handle_create();
 
@@ -635,7 +635,7 @@ ret:
  * @param[in] selinux_pp_file Path of the pp file
  * @return 0 in case of success or a negative -errno value
  */
-__nonnull((1)) static int install_module(semanage_handle_t *semanage_handle, const char *selinux_pp_file) __wur {
+__nonnull((1)) __wur static int install_module(semanage_handle_t *semanage_handle, const char *selinux_pp_file) {
     int rc = semanage_module_install_file(semanage_handle, selinux_pp_file);
     if (rc < 0) {
         ERROR("semanage_module_install_file");
@@ -659,7 +659,7 @@ end:
  * @param[in] module_name Module name in the selinux policy
  * @return 0 in case of success or a negative -errno value
  */
-__nonnull() static int remove_module(semanage_handle_t *semanage_handle, const char *module_name) __wur {
+__nonnull() __wur static int remove_module(semanage_handle_t *semanage_handle, const char *module_name) {
     char *module_name_ = strdupa(module_name);  // semanage_module_remove take no const module name
     int rc = 0;
     if (module_name_ == NULL) {
@@ -709,7 +709,7 @@ __nonnull() static void free_module_info_list(semanage_handle_t *semanage_handle
  * @param[in] id name of the module
  * @return true if exists, false else
  */
-__nonnull() static bool check_module(semanage_handle_t *semanage_handle, const char *id) __wur {
+__nonnull() __wur static bool check_module(semanage_handle_t *semanage_handle, const char *id) {
     semanage_module_info_t *semanage_module_info = NULL;
     semanage_module_info_t *semanage_module_info_list = NULL;
     int semanage_module_info_len = 0;

@@ -46,7 +46,7 @@
  * @param[in] secure_app handler
  * @return 0 in case of success or a negative -errno value
  */
-__nonnull() static int init_secure_app(secure_app_t *secure_app) __wur {
+__nonnull() __wur static int init_secure_app(secure_app_t *secure_app) {
     secure_app->id = NULL;
     int rc = init_path_set(&(secure_app->path_set));
     if (rc < 0) {

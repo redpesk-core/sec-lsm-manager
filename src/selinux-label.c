@@ -51,7 +51,7 @@ char public_app[] = "redpesk_public_t";
  * @param[in] suffix The suffix to add at the end of the label
  * @return 0 in case of success or a negative -errno value
  */
-__nonnull((2)) static int generate_label(char **label, const char *id, const char *suffix) __wur {
+__nonnull((2)) __wur static int generate_label(char **label, const char *id, const char *suffix) {
     size_t len_label = 0;
     size_t len_id = 0;
     size_t len_suffix = 0;

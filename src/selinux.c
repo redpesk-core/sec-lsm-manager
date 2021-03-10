@@ -36,7 +36,7 @@
  * @param[in] path The path of the file
  * @return 0 in case of success or a negative -errno value
  */
-__nonnull() static int restorecon(const char *path) __wur {
+__nonnull() __wur static int restorecon(const char *path) {
     int rc = selinux_restorecon(path, SELINUX_RESTORECON_SET_SPECFILE_CTX);
     if (rc < 0) {
         rc = -errno;
@@ -53,7 +53,7 @@ __nonnull() static int restorecon(const char *path) __wur {
  * @param[in] paths paths handler
  * @return 0 in case of success or a negative -errno value
  */
-__nonnull() static int apply_selinux_label(const path_set_t *paths) __wur {
+__nonnull() __wur static int apply_selinux_label(const path_set_t *paths) {
     for (size_t i = 0; i < paths->size; i++) {
         if (check_file_exists(paths->paths[i].path)) {
             int rc = restorecon(paths->paths[i].path);

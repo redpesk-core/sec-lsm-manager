@@ -134,7 +134,7 @@ __nonnull((1)) static void dolog(client_t *cli, int c2s, unsigned count, const c
  * @return true if matching
  * @return false if not
  */
-__nonnull() static bool ckarg(const char *arg, const char *value, unsigned offset) __wur {
+__nonnull() __wur static bool ckarg(const char *arg, const char *value, unsigned offset) {
     while (arg[offset])
         if (arg[offset] == value[offset])
             offset++;
@@ -149,7 +149,7 @@ __nonnull() static bool ckarg(const char *arg, const char *value, unsigned offse
  * @param[in] cli client handler
  * @return 0 in case of success or a negative -errno value
  */
-__nonnull() static int flushw(client_t *cli) __wur {
+__nonnull() __wur static int flushw(client_t *cli) {
     int rc;
     struct pollfd pfd;
 
@@ -180,7 +180,7 @@ __nonnull() static int flushw(client_t *cli) __wur {
  * @param[in] ... strings to send or NULL
  * @return 0 in case of success or a negative -errno value
  */
-__nonnull((1)) static int putx(client_t *cli, ...) __wur {
+__nonnull((1)) __wur static int putx(client_t *cli, ...) {
     const char *p, *fields[MAX_PUTX_ITEMS];
     unsigned n;
     va_list l;
@@ -239,7 +239,7 @@ __nonnull((1)) static void send_error(client_t *cli, const char *errorstr) {
  *
  * @param[in] cli client handler
  */
-__nonnull() static int send_display_sec_lsm_manager_handle(client_t *cli) __wur {
+__nonnull() __wur static int send_display_sec_lsm_manager_handle(client_t *cli) {
     if (cli->secure_app->error_flag) {
         ERROR("error flag has been raised, clear secure app");
         return -EPERM;
@@ -267,7 +267,7 @@ __nonnull() static int send_display_sec_lsm_manager_handle(client_t *cli) __wur 
  * @param[in] sm_handle sec_lsm_manager_handle handler
  * @return 0 in case of success or a negative -errno value
  */
-__nonnull() static int update_policy(secure_app_t *secure_app, cynagora_t *cynagora_admin_client) __wur {
+__nonnull() __wur static int update_policy(secure_app_t *secure_app, cynagora_t *cynagora_admin_client) {
     // drop old policies
     int rc = cynagora_drop_policies(cynagora_admin_client, secure_app->id);
     if (rc < 0) {
@@ -285,7 +285,7 @@ __nonnull() static int update_policy(secure_app_t *secure_app, cynagora_t *cynag
     return 0;
 }
 
-__nonnull() static int install(client_t *cli) __wur {
+__nonnull() __wur static int install(client_t *cli) {
     if (cli->secure_app->error_flag) {
         ERROR("error flag has been raised, clear secure app");
         return -EPERM;
@@ -314,7 +314,7 @@ __nonnull() static int install(client_t *cli) __wur {
     return 0;
 }
 
-__nonnull() static int uninstall(client_t *cli) __wur {
+__nonnull() __wur static int uninstall(client_t *cli) {
     if (cli->secure_app->error_flag) {
         ERROR("error flag has been raised, clear secure app");
         return -EPERM;
@@ -541,7 +541,7 @@ terminate:
  * @param[in] fd file descriptor of client
  * @return 0 in case of success or a negative -errno value
  */
-static int create_client(client_t **pcli, int fd, sec_lsm_manager_server_t *server) __wur {
+__wur static int create_client(client_t **pcli, int fd, sec_lsm_manager_server_t *server) {
     int rc = 0;
 
     /* allocate the object */
@@ -656,7 +656,7 @@ void sec_lsm_manager_server_destroy(sec_lsm_manager_server_t *server) {
 }
 
 /* see sec-lsm-manager-server.h */
-int sec_lsm_manager_server_create(sec_lsm_manager_server_t **server, const char *socket_spec) __wur {
+__wur int sec_lsm_manager_server_create(sec_lsm_manager_server_t **server, const char *socket_spec) {
     LOG("sec_lsm_manager_server_create");
     mode_t um;
     int rc = 0;
@@ -724,7 +724,7 @@ void sec_lsm_manager_server_stop(sec_lsm_manager_server_t *server, int status) {
 }
 
 /* see sec-lsm-manager-server.h */
-int sec_lsm_manager_server_serve(sec_lsm_manager_server_t *server) __wur {
+__wur int sec_lsm_manager_server_serve(sec_lsm_manager_server_t *server) {
     /* process inputs */
     server->stopped = 0;
     while (!server->stopped) {

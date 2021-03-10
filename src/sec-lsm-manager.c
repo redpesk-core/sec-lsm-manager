@@ -89,7 +89,7 @@ struct sec_lsm_manager {
  *
  * @return  0 in case of success or a negative -errno value
  */
-__nonnull() static int flushw(sec_lsm_manager_t *sec_lsm_manager) __wur {
+__nonnull() __wur static int flushw(sec_lsm_manager_t *sec_lsm_manager) {
     int rc;
     struct pollfd pfd;
 
@@ -122,7 +122,7 @@ __nonnull() static int flushw(sec_lsm_manager_t *sec_lsm_manager) __wur {
  * @param[in] count the count of fields
  * @return 0 on success or a negative error code
  */
-__nonnull() static int send_reply(sec_lsm_manager_t *sec_lsm_manager, const char **fields, int count) __wur {
+__nonnull() __wur static int send_reply(sec_lsm_manager_t *sec_lsm_manager, const char **fields, int count) {
     int rc, trial, i;
     prot_t *prot;
 
@@ -170,8 +170,8 @@ __nonnull() static int send_reply(sec_lsm_manager_t *sec_lsm_manager, const char
  *
  * @return  0 in case of success or a negative -errno value
  */
-__nonnull((1, 2)) static int putxkv(sec_lsm_manager_t *sec_lsm_manager, const char *command, const char *optarg,
-                                    ...) __wur {
+__nonnull((1, 2)) __wur
+    static int putxkv(sec_lsm_manager_t *sec_lsm_manager, const char *command, const char *optarg, ...) {
     int nf, rc;
     const char *fields[8] = {0};
 
@@ -202,7 +202,7 @@ __nonnull((1, 2)) static int putxkv(sec_lsm_manager_t *sec_lsm_manager, const ch
  *
  * @return  0 in case of success or a negative -errno value
  */
-__nonnull() static int wait_input(sec_lsm_manager_t *sec_lsm_manager) __wur {
+__nonnull() __wur static int wait_input(sec_lsm_manager_t *sec_lsm_manager) {
     int rc;
     struct pollfd pfd;
 
@@ -222,7 +222,7 @@ __nonnull() static int wait_input(sec_lsm_manager_t *sec_lsm_manager) __wur {
  * @return  the count of field of the reply (can be 0)
  *          or -EAGAIN if there is no reply
  */
-__nonnull() static int get_reply(sec_lsm_manager_t *sec_lsm_manager) __wur {
+__nonnull() __wur static int get_reply(sec_lsm_manager_t *sec_lsm_manager) {
     prot_next(sec_lsm_manager->prot);
     int rc = prot_get(sec_lsm_manager->prot, &sec_lsm_manager->reply.fields);
 
@@ -240,7 +240,7 @@ __nonnull() static int get_reply(sec_lsm_manager_t *sec_lsm_manager) __wur {
  *          or -EAGAIN if nothing and block == false
  *          or -EPIPE if broken link
  */
-__nonnull() static int wait_reply(sec_lsm_manager_t *sec_lsm_manager, bool block) __wur {
+__nonnull() __wur static int wait_reply(sec_lsm_manager_t *sec_lsm_manager, bool block) {
     for (;;) {
         /* get the next reply if any */
         int rc = get_reply(sec_lsm_manager);
@@ -271,7 +271,7 @@ __nonnull() static int wait_reply(sec_lsm_manager_t *sec_lsm_manager, bool block
  *
  * @return  0 in case of success or a negative -errno value
  */
-__nonnull() static int wait_any_reply(sec_lsm_manager_t *sec_lsm_manager) __wur {
+__nonnull() __wur static int wait_any_reply(sec_lsm_manager_t *sec_lsm_manager) {
     for (;;) {
         int rc = wait_reply(sec_lsm_manager, true);
         if (rc < 0)
@@ -289,7 +289,7 @@ __nonnull() static int wait_any_reply(sec_lsm_manager_t *sec_lsm_manager) __wur 
  * @return  0 in case of success or a negative -errno value
  *          -ECANCELED when received an error status
  */
-__nonnull() static int wait_done_or_error(sec_lsm_manager_t *sec_lsm_manager) __wur {
+__nonnull() __wur static int wait_done_or_error(sec_lsm_manager_t *sec_lsm_manager) {
     int rc = wait_any_reply(sec_lsm_manager);
 
     if (rc > 0) {
@@ -310,7 +310,7 @@ __nonnull() static int wait_done_or_error(sec_lsm_manager_t *sec_lsm_manager) __
  *
  * @param[in] sec_lsm_manager  the handler of the client
  */
-__nonnull() static void disconnection(sec_lsm_manager_t *sec_lsm_manager) __wur {
+__nonnull() static void disconnection(sec_lsm_manager_t *sec_lsm_manager) {
     if (sec_lsm_manager->fd >= 0) {
         close(sec_lsm_manager->fd);
         sec_lsm_manager->fd = -1;
@@ -324,7 +324,7 @@ __nonnull() static void disconnection(sec_lsm_manager_t *sec_lsm_manager) __wur 
  *
  * @return  0 in case of success or a negative -errno value
  */
-__nonnull() static int connection(sec_lsm_manager_t *sec_lsm_manager) __wur {
+__nonnull() __wur static int connection(sec_lsm_manager_t *sec_lsm_manager) {
     int rc;
 
     /* init the client */
@@ -357,7 +357,7 @@ __nonnull() static int connection(sec_lsm_manager_t *sec_lsm_manager) __wur {
  *
  * @return  0 in case of success or a negative -errno value
  */
-__nonnull() static int ensure_opened(sec_lsm_manager_t *sec_lsm_manager) __wur {
+__nonnull() __wur static int ensure_opened(sec_lsm_manager_t *sec_lsm_manager) {
     if (sec_lsm_manager->fd >= 0 && write(sec_lsm_manager->fd, NULL, 0) < 0)
         disconnection(sec_lsm_manager);
     return sec_lsm_manager->fd < 0 ? connection(sec_lsm_manager) : 0;

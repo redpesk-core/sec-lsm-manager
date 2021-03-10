@@ -53,7 +53,7 @@ char public_app[] = "_";
  * @param[in] suffix The suffix to add at the end of the label
  * @return 0 in case of success or a negative -errno value
  */
-__nonnull((2)) static int generate_label(char **label, const char *id, const char *prefix, const char *suffix) __wur {
+__nonnull((2)) __wur static int generate_label(char **label, const char *id, const char *prefix, const char *suffix) {
     size_t len_label = 0;
     size_t len_prefix = 0;
     size_t len_id = 0;
