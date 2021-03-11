@@ -239,7 +239,7 @@ __nonnull((1)) static void send_error(client_t *cli, const char *errorstr) {
  *
  * @param[in] cli client handler
  */
-__nonnull() __wur static int send_display_sec_lsm_manager_handle(client_t *cli) {
+__nonnull() __wur static int send_display_secure_app(client_t *cli) {
     if (cli->secure_app->error_flag) {
         ERROR("error flag has been raised, clear secure app");
         return -EPERM;
@@ -385,12 +385,12 @@ __nonnull((1)) static void onrequest(client_t *cli, unsigned count, const char *
             break;
         case 'd':
             if (ckarg(args[0], _display_, 1) && count == 1) {
-                rc = send_display_sec_lsm_manager_handle(cli);
+                rc = send_display_secure_app(cli);
                 if (rc >= 0) {
                     send_done(cli);
                 } else {
-                    ERROR("send_display_sec_lsm_manager_handle : %d %s", -rc, strerror(-rc));
-                    send_error(cli, "send_display_sec_lsm_manager_handle");
+                    ERROR("send_display_secure_app : %d %s", -rc, strerror(-rc));
+                    send_error(cli, "send_display_secure_app");
                 }
                 return;
             }
