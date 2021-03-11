@@ -64,6 +64,8 @@
 
 #define DELIM_GROUPS ","
 
+#define CAP_COUNT (sizeof cap_vector / sizeof cap_vector[0])
+
 #define _GROUP_ 'g'
 #define _GROUPS_ 'G'
 #define _HELP_ 'h'
@@ -135,7 +137,8 @@ int main(int ac, char **av) {
     char *spec_socket;
     gid_t gids[10] = {0};
     size_t number_groups = 0;
-    cap_value_t cap_vector[3] = {CAP_MAC_ADMIN, CAP_DAC_OVERRIDE, CAP_MAC_OVERRIDE};
+    cap_value_t cap_vector[] = {CAP_MAC_ADMIN,       CAP_DAC_OVERRIDE, CAP_MAC_OVERRIDE, CAP_SYS_ADMIN,
+                                CAP_DAC_READ_SEARCH, CAP_SETFCAP,      CAP_FOWNER};
     cap_t cap = {0};
 
     setlinebuf(stdout);
@@ -299,12 +302,20 @@ int main(int ac, char **av) {
 
     // set capabilities
     cap = cap_init();
-    cap_set_flag(cap, CAP_PERMITTED, 3, cap_vector, CAP_SET);
-    cap_set_flag(cap, CAP_EFFECTIVE, 3, cap_vector, CAP_SET);
+    cap_set_flag(cap, CAP_EFFECTIVE, CAP_COUNT, cap_vector, CAP_SET);
+    cap_set_flag(cap, CAP_PERMITTED, CAP_COUNT, cap_vector, CAP_SET);
+    cap_set_flag(cap, CAP_INHERITABLE, CAP_COUNT, cap_vector, CAP_SET);
 
     if (cap_set_proc(cap) != 0) {
         fprintf(stderr, "can not change cap: %m\n");
         return -1;
+    }
+
+    for (size_t i = 0; i < CAP_COUNT; i++) {
+        if (cap_set_ambient(cap_vector[i], CAP_SET) != 0) {
+            fprintf(stderr, "can not change cap amb: %m\n");
+            return -1;
+        }
     }
 
     // unset flag
