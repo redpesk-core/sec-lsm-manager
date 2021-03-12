@@ -77,6 +77,13 @@ int path_set_add_path(path_set_t *path_set, const char *path, enum path_type pat
         return -EINVAL;
     }
 
+    size_t path_len = strlen(path);
+
+    if (path_len < 2) {
+        ERROR("invalid path");
+        return -EINVAL;
+    }
+
     path_t *path_set_tmp = (path_t *)realloc(path_set->paths, sizeof(path_t) * (path_set->size + 1));
     if (path_set_tmp == NULL) {
         ERROR("realloc path_set_t");
@@ -88,6 +95,12 @@ int path_set_add_path(path_set_t *path_set, const char *path, enum path_type pat
     if (path_set->paths[path_set->size].path == NULL) {
         ERROR("strdup path");
         return -ENOMEM;
+    }
+
+    char *new_path = path_set->paths[path_set->size].path;
+
+    if (new_path[path_len - 1] == '/') {
+        new_path[path_len - 1] = '\0';
     }
 
     path_set->paths[path_set->size].path_type = path_type;
