@@ -416,7 +416,7 @@ __nonnull() __wur
     }
 
     char *label = NULL;
-    const char *gen_context = " gen_context(system_u:object_r:";
+    const char *end_regex_and_gen_context = "(/.*)? gen_context(system_u:object_r:";
     const char *s0 = ",s0)\n";
 
     for (size_t i = 0; i < paths->size; i++) {
@@ -424,14 +424,15 @@ __nonnull() __wur
         label = path_type_definitions[paths->paths[i].path_type].label;
 
         // Size path + size label + size begin gen_context + size end gen_context
-        if (strlen(paths->paths[i].path) + strlen(label) + strlen(gen_context) + strlen(s0) >= MAX_LINE_SIZE_MODULE) {
+        if ((strlen(paths->paths[i].path) + strlen(label) + strlen(end_regex_and_gen_context) + strlen(s0)) >=
+            MAX_LINE_SIZE_MODULE) {
             ERROR("too long");
             goto error2;
         }
 
         memset(line, 0, MAX_LINE_SIZE_MODULE);
         strcpy(line, paths->paths[i].path);
-        strcat(line, gen_context);
+        strcat(line, end_regex_and_gen_context);
         strcat(line, label);
         strcat(line, s0);
 
