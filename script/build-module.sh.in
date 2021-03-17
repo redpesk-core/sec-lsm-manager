@@ -28,9 +28,15 @@ makefile=@SELINUX_MAKEFILE@
 selinuxPolicyDir=@SELINUX_POLICY_DIR@
 
 function compile {
-    echo "make -f" $1 " -C " $2
-    make -f $1 -C $2
+    echo "make -f" $1 " -C " $2 $3
+    make -f $1 -C $2 $3
     exit $?
 }
 
-compile ${makefile} ${selinuxPolicyDir}
+if [[ "$1" =~ ^[a-zA-Z0-9_-]+$ ]]
+then
+    compile ${makefile} ${selinuxPolicyDir} "$1.pp"
+else
+    echo "Please enter valid module name"
+    exit -1
+fi

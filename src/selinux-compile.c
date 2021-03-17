@@ -37,14 +37,34 @@
 /**********************/
 
 /* see selinux-compile.h */
-int launch_compile() {
-    int rc;
+int launch_compile(const char *id) {
+    int rc = 0;
+    pid_t pid = 0;
+    int status = 0;
 
-    rc = system(COMPILE_SCRIPT);
-
-    if (rc < 0) {
-        ERROR("launch compile failed : %s", COMPILE_SCRIPT);
+    pid = vfork();
+    if (pid == 0) {
+        LOG("Launch : %s %s", COMPILE_SCRIPT_NAME, id);
+        execl(COMPILE_SCRIPT, COMPILE_SCRIPT_NAME, id, NULL);
+        _exit(EXIT_FAILURE);
     }
 
-    return rc;
+    if (pid < 0) {
+        ERROR("launch compile failed : %s", COMPILE_SCRIPT);
+        return -1;
+    }
+
+    rc = waitpid(pid, &status, 0);
+
+    if (rc == -1) {
+        ERROR("error wait pid");
+        return rc;
+    }
+
+    if (!WIFEXITED(status)) {
+        ERROR("error during compile : %d", WEXITSTATUS(status));
+        return -1;
+    }
+
+    return 0;
 }

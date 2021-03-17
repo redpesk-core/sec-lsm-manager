@@ -786,7 +786,7 @@ int create_selinux_rules(const secure_app_t *secure_app, const char *selinux_te_
     }
 
     // fc, if, te generated
-    rc = launch_compile();
+    rc = launch_compile(secure_app->id);
     if (rc < 0) {
         ERROR("launch_compile");
         goto error3;

@@ -24,7 +24,9 @@
 #ifndef SEC_LSM_MANAGER_SELINUX_COMPILE_H
 #define SEC_LSM_MANAGER_SELINUX_COMPILE_H
 
-#define COMPILE_SCRIPT "/usr/share/sec-lsm-manager/script/build-module.sh"
+#define COMPILE_SCRIPT_PATH "/usr/share/sec-lsm-manager/script/"
+#define COMPILE_SCRIPT_NAME "build-module.sh"
+#define COMPILE_SCRIPT COMPILE_SCRIPT_PATH COMPILE_SCRIPT_NAME
 
 #include <sys/cdefs.h>
 
@@ -33,6 +35,6 @@
  *
  * @return 0 in case of success or a negative -errno value
  */
-int launch_compile() __wur;
+int launch_compile(const char* id) __wur;
 
 #endif
