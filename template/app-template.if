@@ -23,11 +23,10 @@
 ###########################################################################
 
 
-
 ########################################
 ## <summary>
-##    Allow the specified domain to install
-##  application
+##    Allow the specified domain to
+##    manage ~APP~ files perms
 ## </summary>
 ## <param name="domain">
 ##    <summary>
@@ -35,14 +34,17 @@
 ##    </summary>
 ## </param>
 #
-interface(`~APP~_install',`
+interface(`manage_~APP~_file_dir_perms',`
     gen_require(`
+        type ~APP~_t;
         type ~APP~_lib_t;
+        type ~APP~_conf_t;
+        type ~APP~_exec_t;
+        type ~APP~_icon_t;
+        type ~APP~_data_t;
+        type ~APP~_http_t;
     ')
 
-    allow $1 ~APP~_lib_t:dir manage_dir_perms;
-    allow $1 ~APP~_lib_t:dir relabel_dir_perms;
-
-    allow $1 ~APP~_lib_t:file manage_file_perms;
-    allow $1 ~APP~_lib_t:file relabel_file_perms;
+    allow $1 {~APP~_t ~APP~_lib_t ~APP~_conf_t ~APP~_exec_t ~APP~_icon_t ~APP~_data_t ~APP~_http_t}:dir manage_dir_perms;
+    allow $1 {~APP~_t ~APP~_lib_t ~APP~_conf_t ~APP~_exec_t ~APP~_icon_t ~APP~_data_t ~APP~_http_t}:file manage_file_perms;
 ')
