@@ -44,6 +44,8 @@ __nonnull() __wur static int restorecon(const char *path) {
         return rc;
     }
 
+    LOG("success restorecon %s", path);
+
     return 0;
 }
 
@@ -86,10 +88,14 @@ int install_selinux(const secure_app_t *secure_app) {
         return -ENOENT;
     }
 
+    LOG("success check files exist");
+
     if (!check_module_in_policy(secure_app)) {
         ERROR("module not in the policy");
         return -ENOENT;
     }
+
+    LOG("success check module in policy");
 
     // force label
     rc = apply_selinux_label(&(secure_app->path_set));
@@ -97,6 +103,8 @@ int install_selinux(const secure_app_t *secure_app) {
         ERROR("apply_selinux_label");
         return rc;
     }
+
+    LOG("success apply selinux label");
 
     return 0;
 }
@@ -122,16 +130,22 @@ int uninstall_selinux(const secure_app_t *secure_app) {
         return rc;
     }
 
+    LOG("success remove selinux module and files");
+
     // ############### CHECK AFTER ###############
     if (check_module_files_exist(secure_app, NULL)) {
         ERROR("module files exist");
         return -1;
     }
 
+    LOG("success check files removed");
+
     if (check_module_in_policy(secure_app)) {
         ERROR("module in the policy");
         return -1;
     }
+
+    LOG("success check module removed");
 
     return 0;
 }

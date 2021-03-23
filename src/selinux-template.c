@@ -485,6 +485,8 @@ __nonnull() __wur
         goto remove_if;
     }
 
+    LOG("success generate selinux module files");
+
     goto ret;
 
 remove_if:
@@ -785,12 +787,16 @@ int create_selinux_rules(const secure_app_t *secure_app, const char *selinux_te_
         goto end2;
     }
 
+    LOG("success generate selinux files module");
+
     // fc, if, te generated
     rc = launch_compile(secure_app->id);
     if (rc < 0) {
         ERROR("launch_compile");
         goto error3;
     }
+
+    LOG("success compile selinux module");
 
     // pp generated
 
@@ -800,6 +806,8 @@ int create_selinux_rules(const secure_app_t *secure_app, const char *selinux_te_
         ERROR("install_module");
         goto error4;
     }
+
+    LOG("success install module");
 
     goto end2;
 
@@ -872,6 +880,8 @@ int remove_selinux_rules(const secure_app_t *secure_app, const char *selinux_rul
         goto end;
     }
 
+    LOG("success remove selinux files");
+
     // remove module in policy
     semanage_handle_t *semanage_handle;
     rc = create_semanage_handle(&semanage_handle);
@@ -884,6 +894,8 @@ int remove_selinux_rules(const secure_app_t *secure_app, const char *selinux_rul
         ERROR("remove_module");
         goto end2;
     }
+
+    LOG("success remove selinux module");
 
     goto end2;
 
