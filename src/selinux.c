@@ -37,7 +37,7 @@
  * @return 0 in case of success or a negative -errno value
  */
 __nonnull() __wur static int restorecon(const char *path) {
-    int rc = selinux_restorecon(path, SELINUX_RESTORECON_SET_SPECFILE_CTX);
+    int rc = selinux_restorecon(path, SELINUX_RESTORECON_SET_SPECFILE_CTX | SELINUX_RESTORECON_IGNORE_DIGEST);
     if (rc < 0) {
         rc = -errno;
         ERROR("selinux_restorecon");
