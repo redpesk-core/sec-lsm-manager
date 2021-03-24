@@ -41,16 +41,19 @@ set(SERVER_SOURCES
     ${CMAKE_PROJECT_NAME}-server.c
 )
 
-if(WITH_SMACK)
-    set(SERVER_SOURCES ${SERVER_SOURCES} smack-label.c smack-template.c smack.c)
-endif()
-if(WITH_SELINUX)
-    set(SERVER_SOURCES ${SERVER_SOURCES} selinux-label.c selinux.c selinux-template.c selinux-compile.c)
+if(SIMULATE_CYNAGORA)
+    set(SERVER_SOURCES ${SERVER_SOURCES} simulation/cynagora/cynagora.c)
 endif()
 
-if(SIMULATE_CYNAGORA)
-    set(SERVER_SOURCES ${CORE_SOURCES} simulation/cynagora/cynagora.c)
+if(WITH_SMACK)
+    set(SERVER_SOURCES_SMACK ${SERVER_SOURCES} smack-label.c smack-template.c smack.c)
 endif()
+
+if(WITH_SELINUX)
+    set(SERVER_SOURCES_SELINUX ${SERVER_SOURCES} selinux-label.c selinux.c selinux-template.c selinux-compile.c)
+endif()
+
+
 
 ##########################################################################
 # define client sources
@@ -80,49 +83,80 @@ install(TARGETS ${CMAKE_PROJECT_NAME} LIBRARY DESTINATION ${CMAKE_INSTALL_FULL_L
 install(FILES ${CMAKE_PROJECT_NAME}.h DESTINATION ${CMAKE_INSTALL_FULL_INCLUDEDIR})
 
 
-#####################################
-# build and install sec-lsm-managerd
-#####################################
+#######################################################################
+# build and install sec-lsm-manager-smackd and sec-lsm-manager-selinuxd
+#######################################################################
 
-add_executable(${CMAKE_PROJECT_NAME}d main-${CMAKE_PROJECT_NAME}d.c ${SERVER_SOURCES})
 
-target_compile_definitions(${CMAKE_PROJECT_NAME}d PRIVATE
+function(build_daemon_for_mac MAC_NAME)
+
+    if(${MAC_NAME} STREQUAL "smack")
+        add_executable(${CMAKE_PROJECT_NAME}-${MAC_NAME}d main-${CMAKE_PROJECT_NAME}d.c ${SERVER_SOURCES_SMACK})
+        target_compile_definitions(${CMAKE_PROJECT_NAME}-${MAC_NAME}d PRIVATE WITH_SMACK)
+        target_link_libraries(${CMAKE_PROJECT_NAME}-${MAC_NAME}d ${libsmack_LDFLAGS} ${libsmack_LINK_LIBRARIES})
+        target_include_directories(${CMAKE_PROJECT_NAME}-${MAC_NAME}d PRIVATE ${libsmack_INCLUDE_DIRS})
+        target_compile_options(${CMAKE_PROJECT_NAME}-${MAC_NAME}d PRIVATE ${libsmack_CFLAGS})
+    endif()
+
+    if(${MAC_NAME} STREQUAL "selinux")
+        add_executable(${CMAKE_PROJECT_NAME}-${MAC_NAME}d main-${CMAKE_PROJECT_NAME}d.c ${SERVER_SOURCES_SELINUX})
+        target_compile_definitions(${CMAKE_PROJECT_NAME}-${MAC_NAME}d PRIVATE WITH_SELINUX)
+        target_link_libraries(${CMAKE_PROJECT_NAME}-${MAC_NAME}d ${libselinux_LDFLAGS} ${libselinux_LINK_LIBRARIES})
+        target_include_directories(${CMAKE_PROJECT_NAME}-${MAC_NAME}d PRIVATE ${libselinux_INCLUDE_DIRS})
+        target_compile_options(${CMAKE_PROJECT_NAME}-${MAC_NAME}d PRIVATE ${libselinux_CFLAGS})
+        target_link_libraries(${CMAKE_PROJECT_NAME}-${MAC_NAME}d ${libsemanage_LDFLAGS} ${libsemanage_LINK_LIBRARIES})
+        target_include_directories(${CMAKE_PROJECT_NAME}-${MAC_NAME}d PRIVATE ${libsemanage_INCLUDE_DIRS})
+        target_compile_options(${CMAKE_PROJECT_NAME}-${MAC_NAME}d PRIVATE ${libsemanage_CFLAGS})
+    endif()
+
+    target_compile_definitions(${CMAKE_PROJECT_NAME}-${MAC_NAME}d PRIVATE
     DEFAULT_SOCKET_DIR="${DEFAULT_SOCKET_DIR}"
-)
+    )
 
-target_link_libraries(${CMAKE_PROJECT_NAME}d cap)
+    target_link_libraries(${CMAKE_PROJECT_NAME}-${MAC_NAME}d cap)
+
+    if(NOT SIMULATE_CYNAGORA)
+        target_link_libraries(${CMAKE_PROJECT_NAME}-${MAC_NAME}d ${cynagora_LDFLAGS} ${libselinux_LINK_LIBRARIES})
+        target_include_directories(${CMAKE_PROJECT_NAME}-${MAC_NAME}d PRIVATE ${cynagora_INCLUDE_DIRS})
+        target_compile_options(${CMAKE_PROJECT_NAME}-${MAC_NAME}d PRIVATE ${cynagora_CFLAGS})
+    endif()
+
+    if(WITH_SYSTEMD)
+        target_compile_definitions(${CMAKE_PROJECT_NAME}-${MAC_NAME}d PRIVATE WITH_SYSTEMD)
+        target_link_libraries(${CMAKE_PROJECT_NAME}-${MAC_NAME}d ${libsystemd_LDFLAGS} ${libsystemd_LINK_LIBRARIES})
+        target_include_directories(${CMAKE_PROJECT_NAME}-${MAC_NAME}d PRIVATE ${libsystemd_INCLUDE_DIRS})
+        target_compile_options(${CMAKE_PROJECT_NAME}-${MAC_NAME}d PRIVATE ${libsystemd_CFLAGS})
+    endif()
+
+    install(TARGETS ${CMAKE_PROJECT_NAME}-${MAC_NAME}d
+        RUNTIME DESTINATION ${CMAKE_INSTALL_FULL_BINDIR})
+
+endfunction()
+
+if(WITH_SMACK)
+    build_daemon_for_mac("smack")
+endif()
+
+if(WITH_SELINUX)
+    build_daemon_for_mac("selinux")
+endif()
+
+####################################
+# build and install sec-lsm-managerd
+####################################
+
+add_executable(${CMAKE_PROJECT_NAME}d main-${CMAKE_PROJECT_NAME}d-setup.c)
 
 if(WITH_SMACK)
     target_compile_definitions(${CMAKE_PROJECT_NAME}d PRIVATE WITH_SMACK)
-    target_link_libraries(${CMAKE_PROJECT_NAME}d ${libsmack_LDFLAGS} ${libsmack_LINK_LIBRARIES})
-    target_include_directories(${CMAKE_PROJECT_NAME}d PRIVATE ${libsmack_INCLUDE_DIRS})
-    target_compile_options(${CMAKE_PROJECT_NAME}d PRIVATE ${libsmack_CFLAGS})
-elseif(WITH_SELINUX)
+endif()
+
+if(WITH_SELINUX)
     target_compile_definitions(${CMAKE_PROJECT_NAME}d PRIVATE WITH_SELINUX)
-    target_link_libraries(${CMAKE_PROJECT_NAME}d ${libselinux_LDFLAGS} ${libselinux_LINK_LIBRARIES})
-    target_include_directories(${CMAKE_PROJECT_NAME}d PRIVATE ${libselinux_INCLUDE_DIRS})
-    target_compile_options(${CMAKE_PROJECT_NAME}d PRIVATE ${libselinux_CFLAGS})
-    target_link_libraries(${CMAKE_PROJECT_NAME}d ${libsemanage_LDFLAGS} ${libsemanage_LINK_LIBRARIES})
-    target_include_directories(${CMAKE_PROJECT_NAME}d PRIVATE ${libsemanage_INCLUDE_DIRS})
-    target_compile_options(${CMAKE_PROJECT_NAME}d PRIVATE ${libsemanage_CFLAGS})
-endif()
-
-if(NOT SIMULATE_CYNAGORA)
-    target_link_libraries(${CMAKE_PROJECT_NAME}d ${cynagora_LDFLAGS} ${libselinux_LINK_LIBRARIES})
-    target_include_directories(${CMAKE_PROJECT_NAME}d PRIVATE ${cynagora_INCLUDE_DIRS})
-    target_compile_options(${CMAKE_PROJECT_NAME}d PRIVATE ${cynagora_CFLAGS})
-endif()
-
-if(WITH_SYSTEMD)
-    target_compile_definitions(${CMAKE_PROJECT_NAME}d PRIVATE WITH_SYSTEMD)
-    target_link_libraries(${CMAKE_PROJECT_NAME}d ${libsystemd_LDFLAGS} ${libsystemd_LINK_LIBRARIES})
-    target_include_directories(${CMAKE_PROJECT_NAME}d PRIVATE ${libsystemd_INCLUDE_DIRS})
-    target_compile_options(${CMAKE_PROJECT_NAME}d PRIVATE ${libsystemd_CFLAGS})
 endif()
 
 install(TARGETS ${CMAKE_PROJECT_NAME}d
     RUNTIME DESTINATION ${CMAKE_INSTALL_FULL_BINDIR})
-
 
 ###########################################
 # build and install sec-lsm-manager-cmd

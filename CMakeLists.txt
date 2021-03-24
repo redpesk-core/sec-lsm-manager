@@ -71,10 +71,9 @@ option(DEBUG                "debug" OFF)
 ##########################################################################
 # check valid MAC
 
-if(WITH_SMACK)
-    if(WITH_SELINUX)
-        message( FATAL_ERROR "Choose only one MAC")
-    endif()
+if(WITH_SMACK AND WITH_SELINUX)
+    message("==> MAC = SMACK & SELINUX")
+elseif(WITH_SMACK)
     message("==> MAC = SMACK")
 elseif(WITH_SELINUX)
     message("==> MAC = SELINUX")
