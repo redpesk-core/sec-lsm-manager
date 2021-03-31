@@ -24,9 +24,15 @@
 #ifndef SEC_LSM_MANAGER_SELINUX_COMPILE_H
 #define SEC_LSM_MANAGER_SELINUX_COMPILE_H
 
-#define COMPILE_SCRIPT_PATH "/usr/share/sec-lsm-manager/script/"
+#if !defined(COMPILE_SCRIPT_DIR)
+#define COMPILE_SCRIPT_DIR "/usr/share/sec-lsm-manager/script"
+#endif
+
+#if !defined(COMPILE_SCRIPT_NAME)
 #define COMPILE_SCRIPT_NAME "build-module.sh"
-#define COMPILE_SCRIPT COMPILE_SCRIPT_PATH COMPILE_SCRIPT_NAME
+#endif
+
+#define COMPILE_SCRIPT COMPILE_SCRIPT_DIR "/" COMPILE_SCRIPT_NAME
 
 #include <sys/cdefs.h>
 

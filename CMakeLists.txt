@@ -39,20 +39,6 @@ include(GNUInstallDirs)
 include(CTest)
 
 ##########################################################################
-# define socket and systemd directory
-
-if(NOT CMAKE_INSTALL_FULL_RUNSTATEDIR)
-    set(CMAKE_INSTALL_FULL_RUNSTATEDIR "${CMAKE_INSTALL_FULL_LOCALSTATEDIR}/run")
-endif()
-
-set(DEFAULT_SOCKET_DIR "${CMAKE_INSTALL_FULL_RUNSTATEDIR}"
-    CACHE PATH "directory path of the sockets")
-
-if(NOT SYSTEMD_UNIT_DIR)
-    set(SYSTEMD_UNIT_DIR ${CMAKE_INSTALL_FULL_LIBDIR}/systemd/system)
-endif()
-
-##########################################################################
 # possible settings
 
 set(SEC_LSM_MANAGER_VERSION ${PROJECT_VERSION})
@@ -60,13 +46,49 @@ set(SEC_LSM_MANAGER_SOVERSION ${PROJECT_VERSION_MAJOR})
 
 option(WITH_SYSTEMD         "should include systemd compatibility" ON)
 option(WITH_SMACK           "should include smack compatibility" OFF)
-option(WITH_SELINUX         "should include selinux compatibility" ON)
+option(WITH_SELINUX         "should include selinux compatibility" OFF)
 
+option(WITH_SIMULATION      "simulate cynagora, smack and selinux" OFF)
 option(SIMULATE_CYNAGORA    "simulate cynagora" OFF)
+option(SIMULATE_SMACK       "simulate smack" OFF)
+option(SIMULATE_SELINUX     "simulate selinux" OFF)
 
 option(FORTIFY              "fortify" OFF)
 option(COMPILE_TEST         "compile test" OFF)
 option(DEBUG                "debug" OFF)
+
+##########################################################################
+# define user and group
+
+set(USER  ${CMAKE_PROJECT_NAME} CACHE STRING "user of the daemon")
+set(GROUP ${CMAKE_PROJECT_NAME} CACHE STRING "group of the daemon")
+set(CYNAGORA_GROUP cynagora CACHE STRING "group of the daemon")
+
+##########################################################################
+# define variables
+
+set(SEC_LSM_MANAGER_DATADIR         "${CMAKE_INSTALL_FULL_DATADIR}/${CMAKE_PROJECT_NAME}")
+set(SEC_LSM_MANAGER_SOCKET_NAME     "sec-lsm-manager.socket")
+
+# SELINUX
+
+set(SELINUX_MAKEFILE                "${CMAKE_INSTALL_FULL_DATADIR}/selinux/devel/Makefile")
+set(SELINUX_RULES_DIR               "${SEC_LSM_MANAGER_DATADIR}/selinux-policy")
+set(COMPILE_SCRIPT_DIR              "${SEC_LSM_MANAGER_DATADIR}/script")
+set(COMPILE_SCRIPT_NAME             "build-module.sh")
+set(TE_TEMPLATE_FILE                "app-template.te")
+set(IF_TEMPLATE_FILE                "app-template.if")
+
+set(SELINUX_FS_PATH                 "/sys/fs/selinux")
+set(SIMULATION_SELINUX_POLICY_DIR   "${SEC_LSM_MANAGER_DATADIR}/selinux-simulation")
+
+# SMACK
+
+set(TEMPLATE_FILE                   "app-template.smack")
+
+set(SMACK_FS_PATH                   "/sys/fs/smackfs")
+set(DEFAULT_SMACK_RULES_DIR         "/etc/smack/accesses.d")
+set(SIMULATION_SMACK_RULES_DIR      "${SEC_LSM_MANAGER_DATADIR}/smack-simulation")
 
 ##########################################################################
 # check valid MAC
@@ -82,11 +104,77 @@ else()
 endif()
 
 ##########################################################################
-# define user and group
+# define compile definition variable
 
-set(USER  ${CMAKE_PROJECT_NAME} CACHE STRING "user of the daemon")
-set(GROUP ${CMAKE_PROJECT_NAME} CACHE STRING "group of the daemon")
-set(CYNAGORA_GROUP cynagora CACHE STRING "group of the daemon")
+if(WITH_SIMULATION)
+    set(SIMULATE_SMACK      ON)
+    set(SIMULATE_SELINUX    ON)
+    set(SIMULATE_CYNAGORA   ON)
+endif()
+
+message("########################### VARIABLES ###########################\n")
+
+function(add_compile_definitions_and_print args)
+    add_compile_definitions(${args})
+    message("${args}")
+endfunction()
+
+
+add_compile_definitions_and_print(SEC_LSM_MANAGER_DATADIR="${SEC_LSM_MANAGER_DATADIR}")
+add_compile_definitions_and_print(SEC_LSM_MANAGER_SOCKET_NAME="${SEC_LSM_MANAGER_SOCKET_NAME}")
+
+# CYNAGORA
+
+if(SIMULATE_CYNAGORA)
+    add_compile_definitions_and_print(SIMULATE_CYNAGORA)
+endif()
+
+# SMACK
+
+if(WITH_SMACK)
+    add_compile_definitions_and_print(TEMPLATE_FILE="${TEMPLATE_FILE}")
+    add_compile_definitions_and_print(SMACK_FS_PATH="${SMACK_FS_PATH}")
+    if(SIMULATE_SMACK)
+        add_compile_definitions_and_print(SIMULATE_SMACK)
+        add_compile_definitions_and_print(SMACK_RULES_DIR="${SIMULATION_SMACK_RULES_DIR}")
+    else()
+        add_compile_definitions_and_print(SMACK_RULES_DIR="${DEFAULT_SMACK_RULES_DIR}")
+    endif()
+endif()
+
+# SELINUX
+
+if(WITH_SELINUX)
+    add_compile_definitions_and_print(SELINUX_RULES_DIR="${SELINUX_RULES_DIR}")
+    add_compile_definitions_and_print(TE_TEMPLATE_FILE="${TE_TEMPLATE_FILE}")
+    add_compile_definitions_and_print(IF_TEMPLATE_FILE="${IF_TEMPLATE_FILE}")
+    add_compile_definitions_and_print(SELINUX_FS_PATH="${SELINUX_FS_PATH}")
+    if(SIMULATE_SELINUX)
+        add_compile_definitions_and_print(SIMULATE_SELINUX)
+        add_compile_definitions_and_print(SIMULATION_SELINUX_POLICY_DIR="${SIMULATION_SELINUX_POLICY_DIR}")
+    endif()
+endif()
+
+message("\n#################################################################")
+
+##########################################################################
+# define sockets, binaries and systemd directory
+
+if(NOT CMAKE_INSTALL_FULL_RUNSTATEDIR)
+    set(CMAKE_INSTALL_FULL_RUNSTATEDIR "${CMAKE_INSTALL_FULL_LOCALSTATEDIR}/run")
+endif()
+
+set(SOCKET_DIR "${CMAKE_INSTALL_FULL_RUNSTATEDIR}" CACHE PATH "directory path of the sockets")
+add_compile_definitions(SEC_LSM_MANAGER_SOCKET_DIR="${SOCKET_DIR}")
+
+
+set(BINARY_DIR "${CMAKE_INSTALL_FULL_BINDIR}" CACHE PATH "directory path of binaries")
+add_compile_definitions(BINARY_DIR="${BINARY_DIR}")
+
+if(NOT SYSTEMD_UNIT_DIR)
+    set(SYSTEMD_UNIT_DIR ${CMAKE_INSTALL_FULL_LIBDIR}/systemd/system)
+endif()
+add_compile_definitions(SYSTEMD_NAME="${CMAKE_PROJECT_NAME}")
 
 ##########################################################################
 # define compile options
@@ -114,10 +202,6 @@ if(FORTIFY)
     message("FORTIFY")
 endif()
 
-if(SIMULATE_CYNAGORA)
-    add_compile_definitions(SIMULATE_CYNAGORA)
-endif()
-
 
 ###########################################################################
 # Check libraries
@@ -129,11 +213,11 @@ if(WITH_SYSTEMD)
     add_subdirectory(systemd)
 endif()
 
-if(WITH_SMACK)
+if((NOT SIMULATE_SMACK) AND WITH_SMACK)
     PKG_CHECK_MODULES(libsmack REQUIRED libsmack)
 endif()
 
-if(WITH_SELINUX)
+if((NOT SIMULATE_SELINUX) AND WITH_SELINUX)
     PKG_CHECK_MODULES(libselinux REQUIRED libselinux)
     PKG_CHECK_MODULES(libsemanage REQUIRED libsemanage)
 endif()

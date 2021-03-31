@@ -38,8 +38,6 @@
 #include "sec-lsm-manager.h"
 #include "utils.h"
 
-#define DEFAULT_CACHE_SIZE 5000
-
 #define _ECHO_ 'e'
 #define _HELP_ 'h'
 #define _SOCKET_ 's'

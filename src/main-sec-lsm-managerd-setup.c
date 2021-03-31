@@ -29,41 +29,54 @@
 #include <sys/statfs.h>
 #include <unistd.h>
 
-#ifndef BYNARY_PATH
-#define BYNARY_PATH "/usr/bin/"
+#if !defined(BINARY_DIR)
+#define BINARY_DIR "/usr/bin"
 #endif
 
-#ifdef WITH_SELINUX
-#ifndef SELINUX_BYNARY_NAME
+#if defined(WITH_SELINUX)
+
+#if !defined(SELINUX_FS_PATH)
+#define SELINUX_FS_PATH "/sys/fs/selinux"
+#endif
+
+#if !defined(SELINUX_BYNARY_NAME)
 #define SELINUX_BYNARY_NAME "sec-lsm-manager-selinuxd"
 #endif
-#define SELINUX_BYNARY BYNARY_PATH SELINUX_BYNARY_NAME
-#define SELINUX_PATH "/sys/fs/selinux/"
+
+#define SELINUX_BYNARY BINARY_DIR "/" SELINUX_BYNARY_NAME
+
 #endif
 
-#ifdef WITH_SMACK
-#ifndef SMACK_BYNARY_NAME
+#if defined(WITH_SMACK)
+
+#if !defined(SMACK_FS_PATH)
+#define SMACK_FS_PATH "/sys/fs/smackfs"
+#endif
+
+#if !defined(SMACK_BYNARY_NAME)
 #define SMACK_BYNARY_NAME "sec-lsm-manager-smackd"
 #endif
-#define SMACK_BYNARY BYNARY_PATH SMACK_BYNARY_NAME
-#define SMACK_PATH "/sys/fs/smackfs/"
+
+#define SMACK_BYNARY BINARY_DIR "/" SMACK_BYNARY_NAME
+
 #endif
 
 bool mac_enable(const char *path) {
+    (void)path;
+#if !defined(SIMULATE_SMACK) && !defined(SIMULATE_SELINUX)
     struct statfs sf;
-
-    if (!statfs(path, &sf)) {
-        return true;
+    if (statfs(path, &sf)) {
+        return false;
     }
-
-    return false;
+#endif
+    return true;
 }
 
 int main(int argc, char **argv, char **envp) {
     int rc = 0;
-
+    (void)(argc);
 #ifdef WITH_SELINUX
-    if (mac_enable(SELINUX_PATH)) {
+    if (mac_enable(SELINUX_FS_PATH)) {
         fprintf(stdout, ">> Launch %s\n", SELINUX_BYNARY);
         argv[0] = SELINUX_BYNARY;
         rc = execve(argv[0], argv, envp);
@@ -71,7 +84,7 @@ int main(int argc, char **argv, char **envp) {
     }
 #endif
 #ifdef WITH_SMACK
-    if (mac_enable(SMACK_PATH)) {
+    if (mac_enable(SMACK_FS_PATH)) {
         fprintf(stdout, ">> Launch %s\n", SMACK_BYNARY);
         argv[0] = SMACK_BYNARY;
         rc = execve(argv[0], argv, envp);

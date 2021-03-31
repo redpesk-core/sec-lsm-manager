@@ -30,7 +30,7 @@ extern const char _sec_lsm_manager_[], _done_[], _error_[], _log_[], _id_[], _pe
 
 /* predefined names */
 extern const char sec_lsm_manager_default_socket_scheme[], sec_lsm_manager_default_socket_dir[],
-    sec_lsm_manager_default_socket_base[], sec_lsm_manager_default_socket_spec[];
+    sec_lsm_manager_default_socket_name[], sec_lsm_manager_default_socket[];
 
 /**
  * @brief Get the socket specification

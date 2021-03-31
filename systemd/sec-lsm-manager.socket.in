@@ -3,7 +3,7 @@ Description=@CMAKE_PROJECT_NAME@ socket
 
 [Socket]
 FileDescriptorName=@CMAKE_PROJECT_NAME@
-ListenStream=@DEFAULT_SOCKET_DIR@/@CMAKE_PROJECT_NAME@.socket
+ListenStream=@SOCKET_DIR@/@CMAKE_PROJECT_NAME@.socket
 SocketUser=@USER@
 SocketGroup=@GROUP@
 SocketMode=0660

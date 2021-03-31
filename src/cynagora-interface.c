@@ -23,9 +23,17 @@
 
 #include "cynagora-interface.h"
 
-#define SELECT_ALL "#"
-#define INSERT_ALL "*"
-#define AUTHORIZED "yes"
+#if !defined(CYNAGORA_SELECT_ALL)
+#define CYNAGORA_SELECT_ALL "#"
+#endif
+
+#if !defined(CYNAGORA_INSERT_ALL)
+#define CYNAGORA_INSERT_ALL "*"
+#endif
+
+#if !defined(CYNAGORA_AUTHORIZED)
+#define CYNAGORA_AUTHORIZED "yes"
+#endif
 
 #include <errno.h>
 #include <string.h>
@@ -45,7 +53,7 @@ int cynagora_drop_policies(cynagora_t *cynagora, const char *client) {
         return rc;
     }
 
-    cynagora_key_t key = {client, SELECT_ALL, SELECT_ALL, SELECT_ALL};
+    cynagora_key_t key = {client, CYNAGORA_SELECT_ALL, CYNAGORA_SELECT_ALL, CYNAGORA_SELECT_ALL};
     rc = cynagora_drop(cynagora, &key);
     if (rc < 0) {
         ERROR("cynagora_drop : %d %s", -rc, strerror(-rc));
@@ -69,8 +77,8 @@ int cynagora_set_policies(cynagora_t *cynagora, const char *client, const permis
     }
 
     size_t i = 0;
-    cynagora_key_t k = {client, INSERT_ALL, INSERT_ALL, NULL};
-    cynagora_value_t v = {AUTHORIZED, 0};
+    cynagora_key_t k = {client, CYNAGORA_INSERT_ALL, CYNAGORA_INSERT_ALL, NULL};
+    cynagora_value_t v = {CYNAGORA_AUTHORIZED, 0};
 
     while (i < permission_set->size) {
         k.permission = permission_set->permissions[i];

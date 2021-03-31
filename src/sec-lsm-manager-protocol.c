@@ -32,30 +32,30 @@ const char _sec_lsm_manager_[] = "sec-lsm-manager", _done_[] = "done", _error_[]
            _uninstall_[] = "uninstall", _display_[] = "display", _clear_[] = "clear", _on_[] = "on", _off_[] = "off",
            _string_[] = "string";
 
-#if !defined(DEFAULT_SOCKET_SCHEME)
-#define DEFAULT_SOCKET_SCHEME "unix"
+#if !defined(SEC_LSM_MANAGER_SOCKET_SCHEME)
+#define SEC_LSM_MANAGER_SOCKET_SCHEME "unix"
 #endif
 
-#if !defined(DEFAULT_SOCKET_DIR)
-#define DEFAULT_SOCKET_DIR "/var/run/"
+#if !defined(SEC_LSM_MANAGER_SOCKET_DIR)
+#define SEC_LSM_MANAGER_SOCKET_DIR "/var/run"
 #endif
 
-#define DEF_PREFIX DEFAULT_SOCKET_SCHEME ":" DEFAULT_SOCKET_DIR "/"
+#define PREFIX SEC_LSM_MANAGER_SOCKET_SCHEME ":" SEC_LSM_MANAGER_SOCKET_DIR "/"
 
-#if !defined(DEFAULT_SOCKET_BASE)
-#define DEFAULT_SOCKET_BASE "sec-lsm-manager.socket"
+#if !defined(SEC_LSM_MANAGER_SOCKET_NAME)
+#define SEC_LSM_MANAGER_SOCKET_NAME "sec-lsm-manager.socket"
 #endif
 
-#if !defined(DEFAULT_SOCKET_SPEC)
-#define DEFAULT_SOCKET_SPEC DEF_PREFIX DEFAULT_SOCKET_BASE
+#if !defined(SEC_LSM_MANAGER_SOCKET)
+#define SEC_LSM_MANAGER_SOCKET PREFIX SEC_LSM_MANAGER_SOCKET_NAME
 #endif
 
-const char sec_lsm_manager_default_socket_scheme[] = DEFAULT_SOCKET_SCHEME,
-           sec_lsm_manager_default_socket_dir[] = DEFAULT_SOCKET_DIR,
-           sec_lsm_manager_default_socket_base[] = DEFAULT_SOCKET_BASE,
-           sec_lsm_manager_default_socket_spec[] = DEFAULT_SOCKET_SPEC;
+const char sec_lsm_manager_default_socket_scheme[] = SEC_LSM_MANAGER_SOCKET_SCHEME,
+           sec_lsm_manager_default_socket_dir[] = SEC_LSM_MANAGER_SOCKET_DIR,
+           sec_lsm_manager_default_socket_name[] = SEC_LSM_MANAGER_SOCKET_NAME,
+           sec_lsm_manager_default_socket[] = SEC_LSM_MANAGER_SOCKET;
 
 /* see sec-lsm-manager-protocol.h */
 const char *sec_lsm_manager_get_socket(const char *value) {
-    return value ?: secure_getenv("SEC_LSM_MANAGER_SOCKET") ?: sec_lsm_manager_default_socket_spec;
+    return value ?: secure_getenv("SEC_LSM_MANAGER_SOCKET") ?: sec_lsm_manager_default_socket;
 }

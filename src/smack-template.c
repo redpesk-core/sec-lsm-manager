@@ -39,24 +39,24 @@
 
 #define SMACK_COMMENT_CHAR '#'
 
-#if !defined(DEFAULT_TEMPLATE_DIR)
-#define DEFAULT_TEMPLATE_DIR "/usr/share/sec-lsm-manager/"
+#if !defined(SEC_LSM_MANAGER_DATADIR)
+#define SEC_LSM_MANAGER_DATADIR "/usr/share/sec-lsm-manager"
 #endif
 
-#if !defined(DEFAULT_TEMPLATE_FILE)
-#define DEFAULT_TEMPLATE_FILE "app-template.smack"
+#if !defined(TEMPLATE_FILE)
+#define TEMPLATE_FILE "app-template.smack"
 #endif
 
-#if !defined(DEFAULT_SMACK_TEMPLATE_FILE)
-#define DEFAULT_SMACK_TEMPLATE_FILE DEFAULT_TEMPLATE_DIR DEFAULT_TEMPLATE_FILE
+#if !defined(SMACK_TEMPLATE_FILE)
+#define SMACK_TEMPLATE_FILE SEC_LSM_MANAGER_DATADIR "/" TEMPLATE_FILE
 #endif
 
-#if !defined(DEFAULT_SMACK_RULES_DIR)
-#define DEFAULT_SMACK_RULES_DIR "/etc/smack/accesses.d/"
+#if !defined(SMACK_RULES_DIR)
+#define SMACK_RULES_DIR "/etc/smack/accesses.d"
 #endif
 
-const char default_smack_template_file[] = DEFAULT_SMACK_TEMPLATE_FILE;
-const char default_smack_rules_dir[] = DEFAULT_SMACK_RULES_DIR;
+const char default_smack_template_file[] = SMACK_TEMPLATE_FILE;
+const char default_smack_rules_dir[] = SMACK_RULES_DIR;
 
 const char prefix_app_rules[] = "app-";
 
@@ -230,7 +230,7 @@ __nonnull() __wur static int parse_template_file(const char *smack_template_file
  * @return smack rules file path if success, NULL if error
  */
 __nonnull() __wur static char *get_smack_rules_file_path(const char *smack_rules_dir, const char *id) {
-    size_t len = strlen(smack_rules_dir) + strlen(prefix_app_rules) + strlen(id);
+    size_t len = strlen(smack_rules_dir) + 1 + strlen(prefix_app_rules) + strlen(id);
     char *file = (char *)malloc(len + 1);
     if (!file) {
         ERROR("malloc");
@@ -239,6 +239,7 @@ __nonnull() __wur static char *get_smack_rules_file_path(const char *smack_rules
     memset(file, 0, len + 1);
 
     strcpy(file, smack_rules_dir);
+    strcat(file, "/");
     strcat(file, prefix_app_rules);
     strcat(file, id);
 

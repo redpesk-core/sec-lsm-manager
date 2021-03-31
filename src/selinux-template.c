@@ -38,8 +38,8 @@
 #define REPLACE_APP "~APP~"
 #define REPLACE_ID "~ID~"
 
-#if !defined(DEFAULT_TEMPLATE_DIR)
-#define DEFAULT_TEMPLATE_DIR "/usr/share/sec-lsm-manager/"
+#if !defined(SEC_LSM_MANAGER_DATADIR)
+#define SEC_LSM_MANAGER_DATADIR "/usr/share/sec-lsm-manager"
 #endif
 
 #define SIZE_EXTENSION 3
@@ -48,29 +48,29 @@
 #define IF_EXTENSION ".if"
 #define PP_EXTENSION ".pp"
 
-#if !defined(DEFAULT_TE_TEMPLATE_FILE)
-#define DEFAULT_TE_TEMPLATE_FILE "app-template.te"
+#if !defined(TE_TEMPLATE_FILE)
+#define TE_TEMPLATE_FILE "app-template.te"
 #endif
 
-#if !defined(DEFAULT_IF_TEMPLATE_FILE)
-#define DEFAULT_IF_TEMPLATE_FILE "app-template.if"
+#if !defined(IF_TEMPLATE_FILE)
+#define IF_TEMPLATE_FILE "app-template.if"
 #endif
 
-#if !defined(DEFAULT_SELINUX_TE_TEMPLATE_FILE)
-#define DEFAULT_SELINUX_TE_TEMPLATE_FILE DEFAULT_TEMPLATE_DIR DEFAULT_TE_TEMPLATE_FILE
+#if !defined(SELINUX_TE_TEMPLATE_FILE)
+#define SELINUX_TE_TEMPLATE_FILE SEC_LSM_MANAGER_DATADIR "/" TE_TEMPLATE_FILE
 #endif
 
-#if !defined(DEFAULT_SELINUX_IF_TEMPLATE_FILE)
-#define DEFAULT_SELINUX_IF_TEMPLATE_FILE DEFAULT_TEMPLATE_DIR DEFAULT_IF_TEMPLATE_FILE
+#if !defined(SELINUX_IF_TEMPLATE_FILE)
+#define SELINUX_IF_TEMPLATE_FILE SEC_LSM_MANAGER_DATADIR "/" IF_TEMPLATE_FILE
 #endif
 
-#if !defined(DEFAULT_SELINUX_RULES_DIR)
-#define DEFAULT_SELINUX_RULES_DIR "/usr/share/sec-lsm-manager/selinux-policy/"
+#if !defined(SELINUX_RULES_DIR)
+#define SELINUX_RULES_DIR SEC_LSM_MANAGER_DATADIR "/selinux-policy"
 #endif
 
-const char default_selinux_rules_dir[] = DEFAULT_SELINUX_RULES_DIR;
-const char default_selinux_te_template_file[] = DEFAULT_SELINUX_TE_TEMPLATE_FILE;
-const char default_selinux_if_template_file[] = DEFAULT_SELINUX_IF_TEMPLATE_FILE;
+const char default_selinux_rules_dir[] = SELINUX_RULES_DIR;
+const char default_selinux_te_template_file[] = SELINUX_TE_TEMPLATE_FILE;
+const char default_selinux_if_template_file[] = SELINUX_IF_TEMPLATE_FILE;
 
 typedef struct selinux_module {
     char *id;                              // my-id
@@ -126,7 +126,7 @@ __nonnull() static void free_selinux_module(selinux_module_t *selinux_module) {
 
 __nonnull((2, 3, 4)) __wur static int generate_path_module_file(char **dest, const char *selinux_rules_dir,
                                                                 const char *id, const char *extension) {
-    size_t len = strlen(selinux_rules_dir) + strlen(id) + strlen(extension) + 1;
+    size_t len = strlen(selinux_rules_dir) + 1 + strlen(id) + strlen(extension) + 1;
 
     *dest = (char *)malloc(len);
     if (!(*dest)) {
@@ -135,6 +135,7 @@ __nonnull((2, 3, 4)) __wur static int generate_path_module_file(char **dest, con
     }
     memset(*dest, 0, len);
     strcpy(*dest, selinux_rules_dir);
+    strcpy(*dest, "/");
     strcat(*dest, id);
     strcat(*dest, extension);
 
@@ -759,7 +760,7 @@ const char *get_selinux_if_template_file(const char *value) {
 
 /* see selinux-template.h */
 const char *get_selinux_rules_dir(const char *value) {
-    return value ?: secure_getenv("SELINUX_RULES_DIR") ?: DEFAULT_SELINUX_RULES_DIR;
+    return value ?: secure_getenv("SELINUX_RULES_DIR") ?: default_selinux_rules_dir;
 }
 
 /* see selinux-template.h */

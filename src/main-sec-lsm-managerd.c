@@ -44,22 +44,19 @@
 #include "sec-lsm-manager-protocol.h"
 #include "sec-lsm-manager-server.h"
 
-#if !defined(DEFAULT_SEC_LSM_MANAGER_USER)
-#define DEFAULT_SEC_LSM_MANAGER_USER NULL
+#if !defined(SEC_LSM_MANAGER_USER)
+#define SEC_LSM_MANAGER_USER NULL
 #endif
-#if !defined(DEFAULT_SEC_LSM_MANAGER_GROUP)
-#define DEFAULT_SEC_LSM_MANAGER_GROUP NULL
-#endif
-#if !defined(DEFAULT_LOCKFILE)
-#define DEFAULT_LOCKFILE ".sec-lsm-manager-lock"
+#if !defined(SEC_LSM_MANAGER_GROUP)
+#define SEC_LSM_MANAGER_GROUP NULL
 #endif
 
-#if !defined(DEFAULT_SYSTEMD_NAME)
-#define DEFAULT_SYSTEMD_NAME "sec-lsm-manager"
+#if !defined(SYSTEMD_NAME)
+#define SYSTEMD_NAME "sec-lsm-manager"
 #endif
 
-#if !defined(DEFAULT_SYSTEMD_SOCKET)
-#define DEFAULT_SYSTEMD_SOCKET "sd:" DEFAULT_SYSTEMD_NAME
+#if !defined(SYSTEMD_SOCKET)
+#define SYSTEMD_SOCKET "sd:" SYSTEMD_NAME
 #endif
 
 #define DELIM_GROUPS ","
@@ -198,8 +195,8 @@ int main(int ac, char **av) {
 
     /* set the defaults */
     socketdir = socketdir ?: sec_lsm_manager_default_socket_dir;
-    user = user ?: DEFAULT_SEC_LSM_MANAGER_USER;
-    group = group ?: DEFAULT_SEC_LSM_MANAGER_GROUP;
+    user = user ?: SEC_LSM_MANAGER_USER;
+    group = group ?: SEC_LSM_MANAGER_GROUP;
 
     /* compute socket specs */
     spec_socket = 0;
@@ -209,8 +206,8 @@ int main(int ac, char **av) {
         rc = sd_listen_fds_with_names(0, &names);
         if (rc >= 0 && names) {
             for (rc = 0; names[rc]; rc++) {
-                if (!strcmp(names[rc], DEFAULT_SYSTEMD_NAME))
-                    spec_socket = strdup(DEFAULT_SYSTEMD_SOCKET);
+                if (!strcmp(names[rc], SYSTEMD_NAME))
+                    spec_socket = strdup(SYSTEMD_SOCKET);
                 free(names[rc]);
             }
             free(names);
@@ -219,7 +216,7 @@ int main(int ac, char **av) {
 #endif
     if (!spec_socket)
         rc = asprintf(&spec_socket, "%s:%s/%s", sec_lsm_manager_default_socket_scheme, socketdir,
-                      sec_lsm_manager_default_socket_base);
+                      sec_lsm_manager_default_socket_name);
     if (!spec_socket) {
         fprintf(stderr, "can't make socket paths\n");
         return 1;

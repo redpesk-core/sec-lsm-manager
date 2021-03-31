@@ -22,17 +22,14 @@
 # $RP_END_LICENSE$
 ###########################################################################
 
-if(WITH_SELINUX)
+if((NOT SIMULATE_SELINUX) AND WITH_SELINUX)
 
-    set(SELINUX_MAKEFILE "/usr/share/selinux/devel/Makefile")
-    set(SELINUX_POLICY_DIR "/usr/share/${CMAKE_PROJECT_NAME}/selinux-policy/")
-
-    CONFIGURE_FILE(build-module.sh.in      build-module.sh @ONLY)
+    CONFIGURE_FILE(${COMPILE_SCRIPT_NAME}.in      ${COMPILE_SCRIPT_NAME} @ONLY)
 
     INSTALL(PROGRAMS
-        ${CMAKE_CURRENT_BINARY_DIR}/build-module.sh
+        ${CMAKE_CURRENT_BINARY_DIR}/${COMPILE_SCRIPT_NAME}
         DESTINATION
-        ${CMAKE_INSTALL_FULL_DATADIR}/${CMAKE_PROJECT_NAME}/script/
+        ${COMPILE_SCRIPT_DIR}
     )
 
 endif()
