@@ -24,7 +24,12 @@
 #include "selinux.h"
 
 #include <errno.h>
+
+#ifndef SIMULATE_SELINUX
 #include <selinux/restorecon.h>
+#else
+#include "simulation/selinux/selinux.h"
+#endif
 
 #include "log.h"
 #include "selinux-template.h"

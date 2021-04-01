@@ -39,7 +39,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#include "log.h"
+#include "../../log.h"
 
 typedef struct asreq asreq_t;
 typedef struct ascb ascb_t;

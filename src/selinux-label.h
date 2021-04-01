@@ -24,8 +24,13 @@
 #ifndef SEC_LSM_MANAGER_SELINUX_LABEL_H
 #define SEC_LSM_MANAGER_SELINUX_LABEL_H
 
+#ifndef SIMULATE_SELINUX
 #include <selinux/selinux.h>
 #include <semanage/semanage.h>
+#else
+#include "simulation/selinux/selinux.h"
+#endif
+
 #include <stdbool.h>
 
 #include "paths.h"
