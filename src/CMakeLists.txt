@@ -77,13 +77,20 @@ set(LIBCLI_SOURCES
     ${CMAKE_PROJECT_NAME}.c
 )
 
-##############################################
-# build and install libsec-lsm-manager-client
-##############################################
+######################################
+# build and install libsec-lsm-manager
+######################################
 
 message("\n[*] Create : lib${CMAKE_PROJECT_NAME}")
 
 add_library(${CMAKE_PROJECT_NAME} SHARED ${LIBCLI_SOURCES})
+
+if(WITH_SYSTEMD)
+    target_link_libraries(${CMAKE_PROJECT_NAME} ${libsystemd_LDFLAGS} ${libsystemd_LINK_LIBRARIES})
+    target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE ${libsystemd_INCLUDE_DIRS})
+    target_compile_options(${CMAKE_PROJECT_NAME} PRIVATE ${libsystemd_CFLAGS})
+    message("[-] Link : libsystemd")
+endif()
 
 set_target_properties(${CMAKE_PROJECT_NAME} PROPERTIES
     VERSION ${SEC_LSM_MANAGER_VERSION}
@@ -105,7 +112,6 @@ function(build_daemon_for_mac MAC_NAME)
     message("[*] Create : ${CMAKE_PROJECT_NAME}-${MAC_NAME}d")
     if(${MAC_NAME} STREQUAL "smack")
         add_executable(${CMAKE_PROJECT_NAME}-smackd main-${CMAKE_PROJECT_NAME}d.c ${SERVER_SOURCES_SMACK})
-        target_compile_definitions(${CMAKE_PROJECT_NAME}-smackd PRIVATE WITH_SMACK)
         if(NOT SIMULATE_SMACK)
             target_link_libraries(${CMAKE_PROJECT_NAME}-smackd ${libsmack_LDFLAGS} ${libsmack_LINK_LIBRARIES})
             target_include_directories(${CMAKE_PROJECT_NAME}-smackd PRIVATE ${libsmack_INCLUDE_DIRS})
@@ -116,7 +122,6 @@ function(build_daemon_for_mac MAC_NAME)
 
     if(${MAC_NAME} STREQUAL "selinux")
         add_executable(${CMAKE_PROJECT_NAME}-selinuxd main-${CMAKE_PROJECT_NAME}d.c ${SERVER_SOURCES_SELINUX})
-        target_compile_definitions(${CMAKE_PROJECT_NAME}-selinuxd PRIVATE WITH_SELINUX)
         if(NOT SIMULATE_SELINUX)
             target_link_libraries(${CMAKE_PROJECT_NAME}-selinuxd ${libselinux_LDFLAGS} ${libselinux_LINK_LIBRARIES})
             target_include_directories(${CMAKE_PROJECT_NAME}-selinuxd PRIVATE ${libselinux_INCLUDE_DIRS})
@@ -139,7 +144,6 @@ function(build_daemon_for_mac MAC_NAME)
     endif()
 
     if(WITH_SYSTEMD)
-        target_compile_definitions(${CMAKE_PROJECT_NAME}-${MAC_NAME}d PRIVATE WITH_SYSTEMD)
         target_link_libraries(${CMAKE_PROJECT_NAME}-${MAC_NAME}d ${libsystemd_LDFLAGS} ${libsystemd_LINK_LIBRARIES})
         target_include_directories(${CMAKE_PROJECT_NAME}-${MAC_NAME}d PRIVATE ${libsystemd_INCLUDE_DIRS})
         target_compile_options(${CMAKE_PROJECT_NAME}-${MAC_NAME}d PRIVATE ${libsystemd_CFLAGS})
@@ -169,12 +173,10 @@ message("[*] Create : ${CMAKE_PROJECT_NAME}d")
 add_executable(${CMAKE_PROJECT_NAME}d main-${CMAKE_PROJECT_NAME}d-setup.c)
 
 if(WITH_SMACK)
-    target_compile_definitions(${CMAKE_PROJECT_NAME}d PRIVATE WITH_SMACK)
     target_compile_definitions(${CMAKE_PROJECT_NAME}d PRIVATE SMACK_BYNARY_NAME="${CMAKE_PROJECT_NAME}-smackd")
 endif()
 
 if(WITH_SELINUX)
-    target_compile_definitions(${CMAKE_PROJECT_NAME}d PRIVATE WITH_SELINUX)
     target_compile_definitions(${CMAKE_PROJECT_NAME}d PRIVATE SELINUX_BYNARY_NAME="${CMAKE_PROJECT_NAME}-selinuxd")
 endif()
 

@@ -25,6 +25,18 @@
 #ifndef SEC_LSM_MANAGER_PROTOCOL_H
 #define SEC_LSM_MANAGER_PROTOCOL_H
 
+#define CHECK_NO_NULL(param, param_name)   \
+    if (!param) {                          \
+        ERROR("%s undefined", param_name); \
+        return -EINVAL;                    \
+    }
+
+#define CHECK_NO_NULL_NO_RETURN(param, param_name) \
+    if (!param) {                                  \
+        ERROR("%s undefined", param_name);         \
+        return;                                    \
+    }
+
 extern const char _sec_lsm_manager_[], _done_[], _error_[], _log_[], _id_[], _permission_[], _path_[], _install_[],
     _uninstall_[], _display_[], _clear_[], _on_[], _off_[], _string_[];
 

@@ -36,9 +36,8 @@ typedef struct permission_set {
  * @brief Initialize the fields 'size' and 'permissions'
  *
  * @param[in] permission_set The permission_set handler
- * @return 0 in case of success or a negative -errno value
  */
-int init_permission_set(permission_set_t *permission_set) __wur __nonnull();
+void init_permission_set(permission_set_t *permission_set) __nonnull();
 
 /**
  * @brief[in] Free permission_set that have been added

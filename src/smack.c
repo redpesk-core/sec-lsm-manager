@@ -121,7 +121,13 @@ __nonnull() __wur static int label_exec(const char *path, const char *label) {
         return 0;  // Check that it should not be restricted.
     }
 
-    // remove :Exec
+    char *test_exec = strstr(label, suffix_exec);
+    if (test_exec == NULL || strcmp(test_exec, suffix_exec)) {
+        ERROR("%s not end with %s", label, suffix_exec)
+        return -EINVAL;
+    }
+
+    // remove :Exec (SMACK64EXEC)
     char *label_no_exec = strdupa(label);
     if (!label_no_exec) {
         ERROR("strdupa");
@@ -132,7 +138,7 @@ __nonnull() __wur static int label_exec(const char *path, const char *label) {
 
     int rc = set_smack(path, XATTR_NAME_SMACKEXEC, label_no_exec);
     if (rc < 0) {
-        ERROR("set_smack(%s,%s,%s)", path, XATTR_NAME_SMACKEXEC, label);
+        ERROR("set_smack(%s,%s,%s)", path, XATTR_NAME_SMACKEXEC, label_no_exec);
         return rc;
     }
 
@@ -222,7 +228,8 @@ __nonnull() __wur static int smack_process_paths(const secure_app_t *secure_app,
 
 /* see smack.h */
 int install_smack(const secure_app_t *secure_app) {
-    path_type_definitions_t path_type_definitions[number_path_type] = {0};
+    path_type_definitions_t path_type_definitions[number_path_type];
+    memset(&path_type_definitions, 0, sizeof(path_type_definitions_t) * number_path_type);
     int rc = init_path_type_definitions(path_type_definitions, secure_app->id);
     if (rc < 0) {
         ERROR("init_path_type_definitions");

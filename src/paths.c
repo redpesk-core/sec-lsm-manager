@@ -52,10 +52,9 @@ __nonnull() static void free_path(path_t *path) {
 /**********************/
 
 /* see paths.h */
-int init_path_set(path_set_t *path_set) {
+void init_path_set(path_set_t *path_set) {
     path_set->size = 0;
     path_set->paths = NULL;
-    return 0;
 }
 
 /* see paths.h */

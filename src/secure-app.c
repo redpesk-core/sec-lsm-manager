@@ -44,25 +44,12 @@
  * @brief Initialize the fields 'id', 'permission_set', 'path_set' and error_flag
  *
  * @param[in] secure_app handler
- * @return 0 in case of success or a negative -errno value
  */
-__nonnull() __wur static int init_secure_app(secure_app_t *secure_app) {
+__nonnull() static void init_secure_app(secure_app_t *secure_app) {
     secure_app->id = NULL;
-    int rc = init_path_set(&(secure_app->path_set));
-    if (rc < 0) {
-        ERROR("init_path_set");
-        return rc;
-    }
-
-    rc = init_permission_set(&(secure_app->permission_set));
-    if (rc < 0) {
-        ERROR("init_permission_set");
-        return rc;
-    }
-
+    init_path_set(&(secure_app->path_set));
+    init_permission_set(&(secure_app->permission_set));
     secure_app->error_flag = false;
-
-    return 0;
 }
 
 /**********************/
@@ -77,13 +64,7 @@ int create_secure_app(secure_app_t **secure_app) {
         return -ENOMEM;
     }
 
-    int rc = init_secure_app(*secure_app);
-    if (rc < 0) {
-        ERROR("init_secure_app");
-        free(*secure_app);
-        *secure_app = NULL;
-        return rc;
-    }
+    init_secure_app(*secure_app);
 
     return 0;
 }

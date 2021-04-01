@@ -27,6 +27,18 @@
 #include <stdbool.h>
 #include <sys/types.h>
 
+#define CHECK_NO_NULL(param, param_name)   \
+    if (!param) {                          \
+        ERROR("%s undefined", param_name); \
+        return -EINVAL;                    \
+    }
+
+#define CHECK_NO_NULL_NO_RETURN(param, param_name) \
+    if (!param) {                                  \
+        ERROR("%s undefined", param_name);         \
+        return;                                    \
+    }
+
 /**
  * @brief Check if file exists
  *

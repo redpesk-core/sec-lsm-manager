@@ -54,7 +54,7 @@ bool check_file_type(const char *path, const unsigned short file_type) {
     struct stat s;
     memset(&s, 0, sizeof(s));
 
-    int rc = stat(path, &s) == -1;
+    int rc = stat(path, &s);
     if (rc < 0) {
         ERROR("stat failed : %d %s", errno, strerror(errno));
         return false;
@@ -87,7 +87,7 @@ bool check_executable(const char *path) {
     memset(&s, 0, sizeof(s));
     int rc = 0;
 
-    rc = stat(path, &s) == -1;
+    rc = stat(path, &s);
     if (rc < 0) {
         ERROR("stat failed : %d %s", errno, strerror(errno));
         return false;

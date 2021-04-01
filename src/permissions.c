@@ -28,10 +28,9 @@
 /**********************/
 
 /* see permissions.h */
-int init_permission_set(permission_set_t *permission_set) {
+void init_permission_set(permission_set_t *permission_set) {
     permission_set->size = 0;
     permission_set->permissions = NULL;
-    return 0;
 }
 
 /* see permissions.h */

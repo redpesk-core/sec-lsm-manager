@@ -89,6 +89,7 @@ __nonnull((2)) __wur static int generate_label(char **label, const char *id, con
     if (rc <= 0) {
         ERROR("Invalid SMACK label %s", *label);
         free(*label);
+        *label = NULL;
         return rc;
     }
 

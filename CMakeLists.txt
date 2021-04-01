@@ -53,7 +53,7 @@ option(SIMULATE_CYNAGORA    "simulate cynagora" OFF)
 option(SIMULATE_SMACK       "simulate smack" OFF)
 option(SIMULATE_SELINUX     "simulate selinux" OFF)
 
-option(FORTIFY              "fortify" OFF)
+option(FORTIFY              "fortify" ON)
 option(COMPILE_TEST         "compile test" OFF)
 option(DEBUG                "debug" OFF)
 
@@ -123,6 +123,12 @@ endfunction()
 add_compile_definitions_and_print(SEC_LSM_MANAGER_DATADIR="${SEC_LSM_MANAGER_DATADIR}")
 add_compile_definitions_and_print(SEC_LSM_MANAGER_SOCKET_NAME="${SEC_LSM_MANAGER_SOCKET_NAME}")
 
+# SYSTEMD
+
+if(WITH_SYSTEMD)
+    add_compile_definitions_and_print(WITH_SYSTEMD)
+endif()
+
 # CYNAGORA
 
 if(SIMULATE_CYNAGORA)
@@ -132,6 +138,7 @@ endif()
 # SMACK
 
 if(WITH_SMACK)
+    add_compile_definitions_and_print(WITH_SMACK)
     add_compile_definitions_and_print(TEMPLATE_FILE="${TEMPLATE_FILE}")
     add_compile_definitions_and_print(SMACK_FS_PATH="${SMACK_FS_PATH}")
     if(SIMULATE_SMACK)
@@ -145,6 +152,7 @@ endif()
 # SELINUX
 
 if(WITH_SELINUX)
+    add_compile_definitions_and_print(WITH_SELINUX)
     add_compile_definitions_and_print(SELINUX_RULES_DIR="${SELINUX_RULES_DIR}")
     add_compile_definitions_and_print(TE_TEMPLATE_FILE="${TE_TEMPLATE_FILE}")
     add_compile_definitions_and_print(IF_TEMPLATE_FILE="${IF_TEMPLATE_FILE}")
@@ -185,6 +193,8 @@ elseif()
     set(CMAKE_BUILD_TYPE "RELEASE")
 endif()
 
+message("CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}")
+
 link_libraries(-Wl,--as-needed -Wl,--gc-sections -Wl,--no-undefined)
 
 add_compile_options(-Wall -Wextra -Wconversion -Wshadow)
@@ -224,6 +234,13 @@ endif()
 
 if(NOT SIMULATE_CYNAGORA)
     PKG_CHECK_MODULES(cynagora REQUIRED cynagora)
+endif()
+
+if(COMPILE_TEST)
+    find_program(GVOVR gcovr)
+    if(NOT GVOVR)
+        message(FATAL_ERROR "COMPILE_TEST required gcovr")
+    endif()
 endif()
 
 ###########################################################################

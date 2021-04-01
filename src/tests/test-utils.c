@@ -21,17 +21,14 @@
  * $RP_END_LICENSE$
  */
 
-#include "test_utils.h"
-
-#include <check.h>
 #include <errno.h>
 #include <linux/stat.h>
 #include <stdio.h>
 #include <sys/stat.h>
 #include <unistd.h>
 
-#include "../utils.h"
-#include "tests.h"
+#include "../utils.c"
+#include "setup-tests.h"
 
 START_TEST(test_check_file_exists) {
     char *path = "test.txt";
@@ -76,13 +73,14 @@ END_TEST
 
 START_TEST(test_remove_file) {
     char *path = "test";
+    ck_assert_int_ne(remove_file(path), 0);
     FILE *fp = fopen(path, "w");
     fclose(fp);
     ck_assert_int_eq(remove_file(path), 0);
 }
 END_TEST
 
-void tests_utils(void) {
+void test_utils() {
     addtest(test_check_file_exists);
     addtest(test_check_file_type);
     addtest(test_check_executable);

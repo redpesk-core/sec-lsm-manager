@@ -15,16 +15,12 @@
  * limitations under the License.
  */
 
-#include "test_permissions.h"
-
-#include <check.h>
-
-#include "../permissions.h"
-#include "tests.h"
+#include "../permissions.c"
+#include "setup-tests.h"
 
 START_TEST(test_init_permission_set) {
     permission_set_t permission_set;
-    ck_assert_int_eq(init_permission_set(&permission_set), 0);
+    init_permission_set(&permission_set);
     ck_assert_ptr_eq(permission_set.permissions, NULL);
     ck_assert_int_eq((int)permission_set.size, 0);
     free_permission_set(&permission_set);
@@ -33,7 +29,7 @@ END_TEST
 
 START_TEST(test_free_permission_set) {
     permission_set_t permission_set;
-    ck_assert_int_eq(init_permission_set(&permission_set), 0);
+    init_permission_set(&permission_set);
     ck_assert_int_eq(permission_set_add_permission(&permission_set, "perm"), 0);
     free_permission_set(&permission_set);
     ck_assert_ptr_eq(permission_set.permissions, NULL);
@@ -43,7 +39,7 @@ END_TEST
 
 START_TEST(test_permission_set_add_permission) {
     permission_set_t permission_set;
-    ck_assert_int_eq(init_permission_set(&permission_set), 0);
+    init_permission_set(&permission_set);
     ck_assert_int_eq(permission_set_add_permission(&permission_set, "perm"), 0);
 
     ck_assert_int_eq((int)permission_set.size, 1);
@@ -52,7 +48,7 @@ START_TEST(test_permission_set_add_permission) {
 }
 END_TEST
 
-void tests_permissions(void) {
+void test_permissions() {
     addtest(test_init_permission_set);
     addtest(test_free_permission_set);
     addtest(test_permission_set_add_permission);

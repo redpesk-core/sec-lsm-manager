@@ -135,7 +135,7 @@ __nonnull((2, 3, 4)) __wur static int generate_path_module_file(char **dest, con
     }
     memset(*dest, 0, len);
     strcpy(*dest, selinux_rules_dir);
-    strcpy(*dest, "/");
+    strcat(*dest, "/");
     strcat(*dest, id);
     strcat(*dest, extension);
 
@@ -212,6 +212,7 @@ __nonnull((1, 2)) __wur
     static int init_selinux_module(selinux_module_t *selinux_module, const char *id,
                                    const char *selinux_te_template_file, const char *selinux_if_template_file,
                                    const char *selinux_rules_dir) {
+    CHECK_NO_NULL(id, "id");
     int rc = 0;
     memset(selinux_module, 0, sizeof(*selinux_module));
 
@@ -258,11 +259,8 @@ end:
  * @param[in,out] line The line to parse
  * @param[in] id The id of the application
  * @param[in] selinux_id The selinux id of the application
- * @return 0 in case of success or a negative -errno value
  */
-__nonnull() __wur static int parse_line(const char *line, const char *id, const char *selinux_id) {
-    int rc = 0;
-
+__nonnull() static void parse_line(const char *line, const char *id, const char *selinux_id) {
     char *pos_str;
     char after[MAX_LINE_SIZE_MODULE];
 
@@ -279,8 +277,6 @@ __nonnull() __wur static int parse_line(const char *line, const char *id, const 
         strcpy(pos_str, selinux_id);
         strcpy(pos_str + strlen(selinux_id), after);
     }
-
-    return rc;
 }
 
 /**
@@ -314,12 +310,7 @@ __nonnull() __wur
     }
 
     while (fgets(line, MAX_LINE_SIZE_MODULE, f_template)) {
-        rc = parse_line(line, id, selinux_id);
-        if (rc < 0) {
-            ERROR("parse_line");
-            goto error2;
-        }
-
+        parse_line(line, id, selinux_id);
         rc = fputs(line, f_module);
         if (rc < 0) {
             rc = -errno;

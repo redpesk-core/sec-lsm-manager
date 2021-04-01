@@ -21,17 +21,30 @@
  * $RP_END_LICENSE$
  */
 
-#include "test_paths.h"
-
-#include <check.h>
 #include <stdio.h>
 
-#include "../paths.h"
-#include "tests.h"
+#include "../paths.c"
+#include "setup-tests.h"
+
+START_TEST(test_free_path) {
+    path_t path;
+    path.path = strdup("/path");
+    path.path_type = type_lib;
+    free_path(&path);
+    ck_assert_ptr_eq(path.path, NULL);
+    ck_assert_int_eq(path.path_type, type_none);
+
+    path_t path2;
+    memset(&path2, 0, sizeof(path_t));
+    free_path(&path2);
+    ck_assert_ptr_eq(path2.path, NULL);
+    ck_assert_int_eq(path2.path_type, type_none);
+}
+END_TEST
 
 START_TEST(test_init_path_set) {
     path_set_t path_set;
-    ck_assert_int_eq(init_path_set(&path_set), 0);
+    init_path_set(&path_set);
     ck_assert_ptr_eq(path_set.paths, NULL);
     ck_assert_int_eq((int)path_set.size, 0);
     free_path_set(&path_set);
@@ -40,7 +53,7 @@ END_TEST
 
 START_TEST(test_free_path_set) {
     path_set_t path_set;
-    ck_assert_int_eq(init_path_set(&path_set), 0);
+    init_path_set(&path_set);
     ck_assert_int_eq(path_set_add_path(&path_set, "/test", type_data), 0);
     free_path_set(&path_set);
     ck_assert_ptr_eq(path_set.paths, NULL);
@@ -50,7 +63,12 @@ END_TEST
 
 START_TEST(test_path_set_add_path) {
     path_set_t paths;
-    ck_assert_int_eq(init_path_set(&paths), 0);
+    init_path_set(&paths);
+
+    ck_assert_int_eq(path_set_add_path(&paths, "/test", 10000), -EINVAL);
+
+    ck_assert_int_eq(path_set_add_path(&paths, "/", type_data), -EINVAL);
+
     ck_assert_int_eq(path_set_add_path(&paths, "/test", type_data), 0);
 
     ck_assert_int_eq((int)paths.size, 1);
@@ -67,6 +85,14 @@ START_TEST(test_path_set_add_path) {
     ck_assert_int_eq((int)paths.paths[0].path_type, type_data);
     ck_assert_str_eq(paths.paths[41].path, "/test/n40");
     ck_assert_int_eq((int)paths.paths[41].path_type, type_conf);
+    ck_assert_int_eq(path_set_add_path(&paths, "/test_slash/", type_lib), 0);
+    ck_assert_str_eq(paths.paths[51].path, "/test_slash");
+    ck_assert_int_eq((int)paths.paths[51].path_type, type_lib);
+
+    ck_assert_int_eq(path_set_add_path(&paths, "//", type_data), 0);
+    ck_assert_str_eq(paths.paths[52].path, "/");
+    ck_assert_int_eq((int)paths.paths[52].path_type, type_data);
+
     free_path_set(&paths);
 }
 END_TEST
@@ -95,6 +121,16 @@ START_TEST(test_get_path_type) {
     ck_assert_int_eq(get_path_type("id"), type_id);
     ck_assert_int_eq(get_path_type("lib"), type_lib);
     ck_assert_int_eq(get_path_type("public"), type_public);
+
+    ck_assert_int_eq(get_path_type("co"), type_none);
+    ck_assert_int_eq(get_path_type("dat"), type_none);
+    ck_assert_int_eq(get_path_type("exe"), type_none);
+    ck_assert_int_eq(get_path_type("htt"), type_none);
+    ck_assert_int_eq(get_path_type("ico"), type_none);
+    ck_assert_int_eq(get_path_type("ip"), type_none);
+    ck_assert_int_eq(get_path_type("li"), type_none);
+    ck_assert_int_eq(get_path_type("pub"), type_none);
+    ck_assert_int_eq(get_path_type("zzzz"), type_none);
 }
 END_TEST
 
@@ -112,7 +148,8 @@ START_TEST(test_get_path_type_string) {
 }
 END_TEST
 
-void tests_paths(void) {
+void test_paths() {
+    addtest(test_free_path);
     addtest(test_init_path_set);
     addtest(test_free_path_set);
     addtest(test_path_set_add_path);

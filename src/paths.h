@@ -78,9 +78,8 @@ typedef struct path_set {
  * @brief Initialize the fields 'size' and 'paths'
  *
  * @param[in] paths paths handler
- * @return int 0 in case of success or a negative -errno value
  */
-int init_path_set(path_set_t *path_set) __wur __nonnull();
+void init_path_set(path_set_t *path_set) __nonnull();
 
 /**
  * @brief Free paths that have been added
