@@ -25,7 +25,6 @@
 #include <errno.h>
 #include <getopt.h>
 #include <grp.h>
-#include <limits.h>
 #include <pwd.h>
 #include <signal.h>
 #include <stdbool.h>
@@ -36,6 +35,8 @@
 #include <sys/prctl.h>
 #include <sys/stat.h>
 #include <unistd.h>
+
+#include "limits.h"
 
 #if defined(WITH_SYSTEMD)
 #include <systemd/sd-daemon.h>
@@ -321,7 +322,13 @@ int main(int ac, char **av) {
     /* initialize server */
     setvbuf(stderr, NULL, _IOLBF, 1000);
     sec_lsm_manager_server_log = (bool)flog;
-    printf("[smd] LOG : %d\n", sec_lsm_manager_server_log);
+
+    printf("LOG = %d\n", sec_lsm_manager_server_log);
+
+#if defined(DEBUG_MODE)
+    puts("DEBUG_MODE = 1");
+#endif
+
     signal(SIGPIPE, SIG_IGN); /* avoid SIGPIPE! */
     rc = sec_lsm_manager_server_create(&server, spec_socket);
     if (rc < 0) {

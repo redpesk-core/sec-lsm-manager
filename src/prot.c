@@ -30,12 +30,13 @@
 
 #include <assert.h>
 #include <errno.h>
-#include <limits.h>
 #include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/uio.h>
 #include <unistd.h>
+
+#include "limits.h"
 
 #define MAX_FIELDS 20
 #define MAX_BUFFER_LENGTH 2000

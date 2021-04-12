@@ -22,13 +22,15 @@
 #include <stdint.h>
 #include <time.h>
 
+#include "limits.h"
+
 /**
  * @brief Structure of permission_set
  * permission_set contains several permission
  *
  */
 typedef struct permission_set {
-    char **permissions;
+    char (*permissions)[SEC_LSM_MANAGER_MAX_SIZE_PERMISSION];
     size_t size;
 } permission_set_t;
 

@@ -21,84 +21,65 @@
 #define TESTID "testid-binding"
 #define TESTID_SELINUX "testid_binding"
 
-START_TEST(test_template_to_module) {
+START_TEST(test_generate_app_module_fc) {
+    char fs_file[200] = "/sys/fs/test";
     char tmp_file[200] = {'\0'};
-    char tmp_file2[200] = {'\0'};
-    ck_assert_int_lt(template_to_module("/tmp/template_path", "/tmp/module_path", TESTID, TESTID_SELINUX), 0);
+
+    path_type_definitions_t path_type_definitions[number_path_type];
+    init_path_type_definitions(path_type_definitions, TESTID);
+
+    secure_app_t *secure_app = NULL;
+    create_secure_app(&secure_app);
+    ck_assert_int_eq(secure_app_add_path(secure_app, "/tmp/data", type_data), 0);
+    ck_assert_int_eq(secure_app_add_path(secure_app, "/tmp/conf", type_conf), 0);
+    ck_assert_int_eq(secure_app_add_path(secure_app, "/tmp/lib", type_lib), 0);
+    ck_assert_int_lt(generate_app_module_fc(fs_file, secure_app, path_type_definitions), 0);
+
     create_tmp_file(tmp_file);
-    create_tmp_file(tmp_file2);
-    ck_assert_int_eq(template_to_module(tmp_file, tmp_file2, TESTID, TESTID_SELINUX), 0);
+    ck_assert_int_eq(generate_app_module_fc(tmp_file, secure_app, path_type_definitions), 0);
     remove(tmp_file);
-    remove(tmp_file2);
 }
 END_TEST
 
-START_TEST(test_generate_app_module_if) {
-    char tmp_file[200] = {'\0'};
-    char tmp_file2[200] = {'\0'};
-    ck_assert_int_lt(generate_app_module_if(tmp_file, tmp_file2, TESTID, TESTID_SELINUX), 0);
-    create_tmp_file(tmp_file);
-    create_tmp_file(tmp_file2);
-    ck_assert_int_eq(generate_app_module_if(tmp_file, tmp_file2, TESTID, TESTID_SELINUX), 0);
-    remove(tmp_file);
-    remove(tmp_file2);
+START_TEST(test_generate_app_module_files) {
+    char tmp_dir[200] = {'\0'};
+    create_tmp_dir(tmp_dir);
+
+    secure_app_t *secure_app = NULL;
+    create_secure_app(&secure_app);
+    ck_assert_int_eq(secure_app_set_id(secure_app, TESTID), 0);
+    ck_assert_int_eq(secure_app_add_path(secure_app, "/tmp", type_conf), 0);
+
+    selinux_module_t selinux_module = {0};
+    path_type_definitions_t path_type_definitions[number_path_type];
+    init_path_type_definitions(path_type_definitions, TESTID);
+
+    DEBUG("generate_app_module_files");
+
+    ck_assert_int_lt(generate_app_module_files(&selinux_module, secure_app, path_type_definitions), 0);
+
+    strncpy(selinux_module.selinux_te_template_file, "/usr/share/sec-lsm-manager/app-template.te",
+            SEC_LSM_MANAGER_MAX_SIZE_PATH);
+    snprintf(selinux_module.selinux_te_file, SEC_LSM_MANAGER_MAX_SIZE_PATH, "%s/%s", tmp_dir, "tefile");
+
+    ck_assert_int_lt(generate_app_module_files(&selinux_module, secure_app, path_type_definitions), 0);
+
+    strncpy(selinux_module.selinux_if_template_file, "/usr/share/sec-lsm-manager/app-template.if",
+            SEC_LSM_MANAGER_MAX_SIZE_PATH);
+    snprintf(selinux_module.selinux_if_file, SEC_LSM_MANAGER_MAX_SIZE_PATH, "%s/%s", tmp_dir, "iffile");
+
+    ck_assert_int_lt(generate_app_module_files(&selinux_module, secure_app, path_type_definitions), 0);
+
+    snprintf(selinux_module.selinux_fc_file, SEC_LSM_MANAGER_MAX_SIZE_PATH, "%s/%s", tmp_dir, "fcfile");
+
+    remove(selinux_module.selinux_fc_file);
+    remove(selinux_module.selinux_if_file);
+    remove(selinux_module.selinux_te_file);
+    rmdir(tmp_dir);
 }
 END_TEST
-
-START_TEST(test_generate_app_module_te) {
-    char tmp_file[200] = {'\0'};
-    char tmp_file2[200] = {'\0'};
-    ck_assert_int_lt(generate_app_module_te(tmp_file, tmp_file2, TESTID, TESTID_SELINUX), 0);
-    create_tmp_file(tmp_file);
-    create_tmp_file(tmp_file2);
-    ck_assert_int_eq(generate_app_module_te(tmp_file, tmp_file2, TESTID, TESTID_SELINUX), 0);
-    remove(tmp_file);
-    remove(tmp_file2);
-}
-END_TEST
-
-// START_TEST(test_generate_app_module_files) {
-//     char tmp_file[200] = {'\0'};
-//     char tmp_file2[200] = {'\0'};
-//     char tmp_dir[200] = {'\0'};
-
-//     create_tmp_file(tmp_file);
-//     create_tmp_file(tmp_file2);
-//     create_tmp_dir(tmp_dir);
-
-//     selinux_module_t selinux_module;
-//     init_selinux_module(&selinux_module, TESTID, tmp_file, tmp_file2, tmp_dir);
-
-//     secure_app_t *secure_app;
-
-//     create_secure_app(&secure_app);
-
-//     ck_assert_int_eq(generate_app_module_files(&selinux_module, secure_app), 0);
-
-//     init_selinux_module(&selinux_module, TESTID, NULL, NULL, tmp_dir);
-
-//     ck_assert_int_eq(generate_app_module_files(&selinux_module, secure_app), 0);
-
-//     destroy_secure_app(secure_app);
-//     remove(tmp_file);
-//     remove(tmp_file2);
-//     rmdir(tmp_dir);
-// }
-// END_TEST
-
-// START_TEST(test_generate_app_module_fc) {
-//     char tmp_file[200] = {'\0'};
-//     char tmp_file2[200] = {'\0'};
-//     ck_assert_int_lt(template_to_module("/tmp/template_path", "/tmp/module_path", TESTID,
-//     TESTID_SELINUX),
-//                      0);
-//     create_tmp_file(tmp_file);
-// }
-// END_TEST
 
 void test_selinux_template() {
-    addtest(test_template_to_module);
-    addtest(test_generate_app_module_if);
-    addtest(test_generate_app_module_te);
-    // addtest(test_generate_app_module_files);
+    addtest(test_generate_app_module_fc);
+    addtest(test_generate_app_module_files);
 }

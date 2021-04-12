@@ -23,38 +23,46 @@
 ###########################################################################
 
 find_program(M4EXEC m4)
+if(NOT M4EXEC)
+    message(FATAL_ERROR "m4 required")
+endif()
+
 mark_as_advanced(M4EXEC)
 
 configure_file(macros.in macros.in @ONLY)
-configure_file(smack/app-template.smack.in  smack/app-template.smack.in   @ONLY)
-configure_file(selinux/app-template.te.in   selinux/app-template.te.in    @ONLY)
-configure_file(selinux/app-template.if.in   selinux/app-template.if.in    @ONLY)
+configure_file(smack/${TEMPLATE_FILE}.in        smack/${TEMPLATE_FILE}.in         @ONLY)
+configure_file(selinux/${TE_TEMPLATE_FILE}.in   selinux/${TE_TEMPLATE_FILE}.in    @ONLY)
+configure_file(selinux/${IF_TEMPLATE_FILE}.in   selinux/${IF_TEMPLATE_FILE}.in    @ONLY)
 
 if(WITH_SMACK)
-    add_custom_command(OUTPUT app-template.smack
-        COMMAND ${M4EXEC} ${optm4} -I. app-template.smack.in > app-template.smack
+    add_custom_command(OUTPUT ${TEMPLATE_FILE}
+        COMMAND ${M4EXEC} ${optm4} -I. ${TEMPLATE_FILE}.in > ${TEMPLATE_FILE}
+        COMMAND sed -i "'/^$$/d'" ${TEMPLATE_FILE}
+        COMMAND sed -i "'/^#/d'" ${TEMPLATE_FILE}
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/smack
     )
-    add_custom_target(unitconf ALL DEPENDS app-template.smack)
+    add_custom_target(conf-smack ALL DEPENDS ${TEMPLATE_FILE})
 
-    INSTALL(FILES "smack/app-template.smack" DESTINATION ${CMAKE_INSTALL_FULL_DATADIR}/${CMAKE_PROJECT_NAME}/)
+    INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/smack/${TEMPLATE_FILE} DESTINATION ${SEC_LSM_MANAGER_DATADIR})
     if(SIMULATE_SMACK)
-        INSTALL(DIRECTORY DESTINATION ${CMAKE_INSTALL_FULL_DATADIR}/${CMAKE_PROJECT_NAME}/smack-simulation/)
+        INSTALL(DIRECTORY DESTINATION ${SIMULATION_SMACK_POLICY_DIR})
     endif()
 endif()
 
 if(WITH_SELINUX)
-    add_custom_command(OUTPUT app-template.te app-template.if
-        COMMAND ${M4EXEC} ${optm4} -I. app-template.te.in > app-template.te
-        COMMAND ${M4EXEC} ${optm4} -I. app-template.if.in > app-template.if
+    add_custom_command(OUTPUT ${TE_TEMPLATE_FILE} ${IF_TEMPLATE_FILE}
+        COMMAND ${M4EXEC}  -I. ${TE_TEMPLATE_FILE}.in > ${TE_TEMPLATE_FILE}
+        COMMAND ${M4EXEC}  -I. ${IF_TEMPLATE_FILE}.in > ${IF_TEMPLATE_FILE}
+        COMMAND sed -i "'/^$$/d'" ${TE_TEMPLATE_FILE} ${IF_TEMPLATE_FILE}
+        COMMAND sed -i "'/^#/d'" ${TE_TEMPLATE_FILE} ${IF_TEMPLATE_FILE}
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/selinux
     )
-    add_custom_target(unitconf ALL DEPENDS app-template.te app-template.if)
+    add_custom_target(conf-selinux ALL DEPENDS ${TE_TEMPLATE_FILE} ${IF_TEMPLATE_FILE})
 
-    INSTALL(FILES "selinux/app-template.te" DESTINATION ${CMAKE_INSTALL_FULL_DATADIR}/${CMAKE_PROJECT_NAME}/)
-    INSTALL(FILES "selinux/app-template.if" DESTINATION ${CMAKE_INSTALL_FULL_DATADIR}/${CMAKE_PROJECT_NAME}/)
-    INSTALL(DIRECTORY DESTINATION ${CMAKE_INSTALL_FULL_DATADIR}/${CMAKE_PROJECT_NAME}/selinux-policy/)
+    INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/selinux/${TE_TEMPLATE_FILE} DESTINATION ${SEC_LSM_MANAGER_DATADIR})
+    INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/selinux/${IF_TEMPLATE_FILE} DESTINATION ${SEC_LSM_MANAGER_DATADIR})
+    INSTALL(DIRECTORY DESTINATION ${SELINUX_RULES_DIR})
     if(SIMULATE_SELINUX)
-        INSTALL(DIRECTORY DESTINATION ${CMAKE_INSTALL_FULL_DATADIR}/${CMAKE_PROJECT_NAME}/selinux-simulation/)
+        INSTALL(DIRECTORY DESTINATION ${SIMULATION_SELINUX_POLICY_DIR})
     endif()
 endif()

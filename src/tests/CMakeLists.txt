@@ -72,13 +72,13 @@ endif()
 
 
 if(WITH_SMACK)
+    target_compile_definitions(tests PRIVATE WITH_SMACK)
     target_link_libraries(tests ${libsmack_LDFLAGS} ${libsmack_LINK_LIBRARIES})
     target_include_directories(tests PRIVATE ${libsmack_INCLUDE_DIRS})
     target_compile_options(tests PRIVATE ${libsmack_CFLAGS})
     message("[-] Link : smack")
-endif()
-
-if(WITH_SELINUX)
+elseif(WITH_SELINUX)
+    target_compile_definitions(tests PRIVATE WITH_SELINUX)
     target_link_libraries(tests ${libselinux_LDFLAGS} ${libselinux_LINK_LIBRARIES})
     target_include_directories(tests PRIVATE ${libselinux_INCLUDE_DIRS})
     target_compile_options(tests PRIVATE ${libselinux_CFLAGS})
@@ -99,13 +99,12 @@ endif()
 add_test(tests ${CMAKE_CURRENT_BINARY_DIR}/tests)
 message("[x] Done : tests\n")
 
-
 message("GCOVR=${GVOVR}")
 
 add_custom_target(coverage
                     COMMAND rm -rf ${CMAKE_BINARY_DIR}/coverage && mkdir ${CMAKE_BINARY_DIR}/coverage
-                    COMMAND ${GVOVR} -r ${CMAKE_SOURCE_DIR}/src --object-directory=${CMAKE_BINARY_DIR} --html --html-details -o ${CMAKE_BINARY_DIR}/coverage/index.html
-                    COMMAND ${GVOVR} -r ${CMAKE_SOURCE_DIR}/src --object-directory=${CMAKE_BINARY_DIR}
+                    COMMAND ${GVOVR} --exclude ${CMAKE_SOURCE_DIR}/src/mustach -r ${CMAKE_SOURCE_DIR}/src --object-directory=${CMAKE_BINARY_DIR} --html --html-details -o ${CMAKE_BINARY_DIR}/coverage/index.html
+                    COMMAND ${GVOVR} --exclude ${CMAKE_SOURCE_DIR}/src/mustach -r ${CMAKE_SOURCE_DIR}/src --object-directory=${CMAKE_BINARY_DIR}
                     WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
 
 

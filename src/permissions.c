@@ -44,15 +44,22 @@ void free_permission_set(permission_set_t *permission_set) {
 
 /* see permissions.h */
 int permission_set_add_permission(permission_set_t *permission_set, const char *permission) {
-    char **permissions_tmp = (char **)realloc(permission_set->permissions, (permission_set->size + 1) * sizeof(char *));
+    size_t permission_len = strlen(permission);
+    if (permission_len < 2 || permission_len >= SEC_LSM_MANAGER_MAX_SIZE_PERMISSION) {
+        ERROR("invalid permission size : %ld", permission_len);
+        return -EINVAL;
+    }
+
+    size_t size = (permission_set->size + 1) * (sizeof(char) * SEC_LSM_MANAGER_MAX_SIZE_PERMISSION);
+
+    char(*permissions_tmp)[SEC_LSM_MANAGER_MAX_SIZE_PERMISSION] = realloc(permission_set->permissions, size);
     if (permissions_tmp == NULL) {
-        ERROR("realloc char**");
+        ERROR("realloc char[SEC_LSM_MANAGER_MAX_SIZE_PERMISSION]");
         return -ENOMEM;
     }
     permission_set->permissions = permissions_tmp;
 
-    permission_set->permissions[permission_set->size] = strdup(permission);
-
+    strncpy(permission_set->permissions[permission_set->size], permission, SEC_LSM_MANAGER_MAX_SIZE_PERMISSION);
     permission_set->size++;
 
     return 0;

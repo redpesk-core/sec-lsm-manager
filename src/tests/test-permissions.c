@@ -41,9 +41,10 @@ START_TEST(test_permission_set_add_permission) {
     permission_set_t permission_set;
     init_permission_set(&permission_set);
     ck_assert_int_eq(permission_set_add_permission(&permission_set, "perm"), 0);
-
     ck_assert_int_eq((int)permission_set.size, 1);
     ck_assert_str_eq(permission_set.permissions[0], "perm");
+    ck_assert_int_lt(permission_set_add_permission(&permission_set, "m"), 0);
+    ck_assert_int_lt(permission_set_add_permission(&permission_set, ""), 0);
     free_permission_set(&permission_set);
 }
 END_TEST

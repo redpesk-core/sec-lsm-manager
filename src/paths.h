@@ -28,6 +28,8 @@
 #include <stddef.h>
 #include <sys/cdefs.h>
 
+#include "limits.h"
+
 /**
  * @brief several type path
  *
@@ -60,13 +62,13 @@ enum path_type {
  *
  */
 typedef struct path {
-    char *path;
+    char path[SEC_LSM_MANAGER_MAX_SIZE_PATH];
     enum path_type path_type;
 } path_t;
 
 /**
- * @brief Structure of paths
- * paths contains several path
+ * @brief Structure of path_set
+ * path_set contains several path
  *
  */
 typedef struct path_set {
@@ -77,7 +79,7 @@ typedef struct path_set {
 /**
  * @brief Initialize the fields 'size' and 'paths'
  *
- * @param[in] paths paths handler
+ * @param[in] path_set path_set handler
  */
 void init_path_set(path_set_t *path_set) __nonnull();
 
@@ -85,14 +87,14 @@ void init_path_set(path_set_t *path_set) __nonnull();
  * @brief Free paths that have been added
  * The pointer is not free
  *
- * @param[in] paths paths handler
+ * @param[in] path_set path_set handler
  */
 void free_path_set(path_set_t *path_set) __nonnull();
 
 /**
  * @brief Add a path to paths
  *
- * @param paths[in] paths handler
+ * @param path_set[in] path_set handler
  * @param path[in] The path to add
  * @param path_type[in] The path_type to add
  * @return 0 in case of success or a negative -errno value
@@ -100,7 +102,7 @@ void free_path_set(path_set_t *path_set) __nonnull();
 int path_set_add_path(path_set_t *path_set, const char *path, enum path_type path_type) __wur __nonnull();
 
 /**
- * @brief Check if path type is valid
+ * @brief Check if path_type is valid
  *
  * @param[in] path_type The path_type to check
  * @return int 0 if not valid or 1 if valid
@@ -111,14 +113,14 @@ bool valid_path_type(enum path_type path_type) __wur;
  * @brief Get the path type object associate to a string path type
  *
  * @param[in] path_type_string The string path type
- * @return enum path_type The enumaration associate
+ * @return enum path_type The enumeration associate
  */
 enum path_type get_path_type(const char *path_type_string) __wur __nonnull();
 
 /**
  * @brief Get the path type string associate to a enum path_type
  *
- * @param[in] path_type The path type enumaration
+ * @param[in] path_type The path type enumeration
  * @return const char* The string associate
  */
 const char *get_path_type_string(enum path_type path_type) __wur;

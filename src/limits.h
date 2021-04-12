@@ -21,45 +21,29 @@
  * $RP_END_LICENSE$
  */
 
-#ifndef SEC_LSM_MANAGER_SMACK_LABEL_H
-#define SEC_LSM_MANAGER_SMACK_LABEL_H
+#ifndef SEC_LSM_MANAGER_LIMITS_H
+#define SEC_LSM_MANAGER_LIMITS_H
 
-#include <sys/smack.h>
+#include <limits.h>
 
-#include "paths.h"
+// dir + path
+#define SEC_LSM_MANAGER_MAX_SIZE_DIR 1024
+#define SEC_LSM_MANAGER_MAX_SIZE_PATH 4096
+//#define SEC_LSM_MANAGER_MAX_SIZE_PATH PATH_MAX
 
-extern char suffix_exec[];
+// id
+#define SEC_LSM_MANAGER_MAX_SIZE_ID 200
 
-typedef struct path_type_definitions {
-    char *label;
-    bool is_executable;
-    bool is_transmute;
-} path_type_definitions_t;
+// label
+#define SEC_LSM_MANAGER_MAX_SIZE_LABEL 255
 
-/**
- * @brief Check if smack is enabled
- *
- * @return true if enabled
- * @return false if not
- */
-bool smack_enabled() __wur;
+// permissions
+#define SEC_LSM_MANAGER_MAX_SIZE_PERMISSION 1024
 
-/**
- * @brief Init differents labels for all path type
- *
- * @param[in] path_type_definitions Array definition to complete
- * @param[in] id to generate label of an application
- *
- * @return 0 in case of success or a negative -errno value
- */
-int init_path_type_definitions(path_type_definitions_t path_type_definitions[number_path_type], const char *id) __wur
-    __nonnull((2));
+// line module
+#define SEC_LSM_MANAGER_MAX_SIZE_LINE_MODULE (SEC_LSM_MANAGER_MAX_SIZE_PATH + SEC_LSM_MANAGER_MAX_SIZE_LABEL + 50)
 
-/**
- * @brief Free path type definition label
- *
- * @param[in] path_type_definitions Array definition to free
- */
-void free_path_type_definitions(path_type_definitions_t path_type_definitions[number_path_type]) __nonnull();
+// attr value
+#define SEC_LSM_MANAGER_MAX_SIZE_XATTR XATTR_SIZE_MAX
 
 #endif

@@ -18,6 +18,8 @@
 #include "setup-tests.h"
 
 #include "../log.c"
+#include "../mustach/mustach.c"
+#include "../template.c"
 
 Suite *suite;
 TCase *tcase;

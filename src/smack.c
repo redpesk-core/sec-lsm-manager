@@ -28,37 +28,14 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
-#include <sys/xattr.h>
 
 #include "log.h"
-#include "smack-label.h"
 #include "smack-template.h"
 #include "utils.h"
 
 /***********************/
 /*** PRIVATE METHODS ***/
 /***********************/
-
-/**
- * @brief Set smack attr on file
- *
- * @param[in] path the path of the file
- * @param[in] xattr name of the extended attribute
- * @param[in] value value of the extended attribute
- * @return 0 in case of success or a negative -errno value
- */
-__nonnull() __wur static int set_smack(const char *path, const char *xattr, const char *value) {
-    int rc = lsetxattr(path, xattr, value, strlen(value), 0);
-    if (rc < 0) {
-        rc = -errno;
-        ERROR("lsetxattr('%s','%s','%s',%ld,%d) : %m", path, xattr, value, strlen(value), 0);
-        return rc;
-    }
-
-    LOG("set %s=%s on %s", xattr, value, path);
-
-    return 0;
-}
 
 /**
  * @brief Label file
@@ -69,11 +46,11 @@ __nonnull() __wur static int set_smack(const char *path, const char *xattr, cons
  */
 __nonnull() __wur static int label_file(const char *path, const char *label) {
     if (!check_file_exists(path)) {
-        LOG("%s not exist", path);
+        DEBUG("%s not exist", path);
         return -1;
     }
 
-    int rc = set_smack(path, XATTR_NAME_SMACK, label);
+    int rc = set_label(path, XATTR_NAME_SMACK, label);
     if (rc < 0) {
         ERROR("set_smack(%s,%s,%s)", path, XATTR_NAME_SMACK, label);
         return rc;
@@ -90,11 +67,11 @@ __nonnull() __wur static int label_file(const char *path, const char *label) {
  */
 __nonnull() __wur static int label_dir_transmute(const char *path) {
     if (!check_file_type(path, __S_IFDIR)) {
-        LOG("%s not directory", path);
+        DEBUG("%s not directory", path);
         return 0;
     }
 
-    int rc = set_smack(path, XATTR_NAME_SMACKTRANSMUTE, "TRUE");
+    int rc = set_label(path, XATTR_NAME_SMACKTRANSMUTE, "TRUE");
     if (rc < 0) {
         ERROR("set_smack(%s,%s,%s)", path, XATTR_NAME_SMACKTRANSMUTE, "TRUE");
         return rc;
@@ -112,7 +89,7 @@ __nonnull() __wur static int label_dir_transmute(const char *path) {
  */
 __nonnull() __wur static int label_exec(const char *path, const char *label) {
     if (!check_file_type(path, __S_IFREG)) {
-        LOG("%s not regular file", path);
+        DEBUG("%s not regular file", path);
         return 0;
     }
 
@@ -136,7 +113,7 @@ __nonnull() __wur static int label_exec(const char *path, const char *label) {
 
     label_no_exec[strlen(label_no_exec) - strlen(suffix_exec)] = 0;
 
-    int rc = set_smack(path, XATTR_NAME_SMACKEXEC, label_no_exec);
+    int rc = set_label(path, XATTR_NAME_SMACKEXEC, label_no_exec);
     if (rc < 0) {
         ERROR("set_smack(%s,%s,%s)", path, XATTR_NAME_SMACKEXEC, label_no_exec);
         return rc;
@@ -228,43 +205,45 @@ __nonnull() __wur static int smack_process_paths(const secure_app_t *secure_app,
 
 /* see smack.h */
 int install_smack(const secure_app_t *secure_app) {
-    path_type_definitions_t path_type_definitions[number_path_type];
-    memset(&path_type_definitions, 0, sizeof(path_type_definitions_t) * number_path_type);
-    int rc = init_path_type_definitions(path_type_definitions, secure_app->id);
-    if (rc < 0) {
-        ERROR("init_path_type_definitions");
-        goto ret;
+    if (secure_app->id[0] == '\0') {
+        ERROR("id undefined");
+        return -EINVAL;
     }
 
-    rc = create_smack_rules(secure_app, path_type_definitions, NULL, NULL);
+    int rc = create_smack_rules(secure_app);
     if (rc < 0) {
         ERROR("create_smack_rules");
-        goto end1;
+        goto end;
     }
+
+    path_type_definitions_t path_type_definitions[number_path_type];
+    init_path_type_definitions(path_type_definitions, secure_app->id);
 
     rc = smack_process_paths(secure_app, path_type_definitions);
     if (rc < 0) {
-        ERROR("smack_process_paths");
-        goto error2;
+        goto error;
     }
 
-    LOG("install smack success");
+    DEBUG("install smack success");
 
-    goto end1;
+    goto end;
 
-error2:
-    if (remove_smack_rules(secure_app, NULL) < 0) {
+error:
+    if (remove_smack_rules(secure_app) < 0) {
         ERROR("remove_smack_rules");
     }
-end1:
-    free_path_type_definitions(path_type_definitions);
-ret:
+end:
     return rc;
 }
 
 /* see smack.h */
 int uninstall_smack(const secure_app_t *secure_app) {
-    int rc = remove_smack_rules(secure_app, NULL);
+    if (secure_app->id[0] == '\0') {
+        ERROR("id undefined");
+        return -EINVAL;
+    }
+
+    int rc = remove_smack_rules(secure_app);
     if (rc < 0) {
         ERROR("remove_app_rules : %d %s", rc, strerror(rc));
         return rc;

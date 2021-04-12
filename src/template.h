@@ -21,33 +21,4 @@
  * $RP_END_LICENSE$
  */
 
-#ifndef SEC_LSM_MANAGER_SELINUX_H
-#define SEC_LSM_MANAGER_SELINUX_H
-
-#include "secure-app.h"
-
-/**
- * @brief Check if selinux is enabled
- *
- * @return true if enabled
- * @return false if not
- */
-bool selinux_enabled() __wur;
-
-/**
- * @brief Install a secure app for selinux
- *
- * @param[in] secure_app The handle of secure app
- * @return 0 in case of success or a negative -errno value
- */
-int install_selinux(const secure_app_t *secure_app) __wur __nonnull();
-
-/**
- * @brief Uninstall a secure app for selinux
- *
- * @param[in] secure_app The handle of secure app
- * @return 0 in case of success or a negative -errno value
- */
-int uninstall_selinux(const secure_app_t *secure_app) __wur __nonnull();
-
-#endif
+int process_template(const char *template, const char *dest, const secure_app_t *secure_app);

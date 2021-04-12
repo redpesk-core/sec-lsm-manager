@@ -35,6 +35,16 @@ void log_function(const char *msg, ...) __attribute__((format(printf, 1, 2)));
 #define LOG(...) log_function(__VA_ARGS__);
 
 /**
+ * @brief Print a message and arguments when debugging mode
+ *
+ * @param msg The message to display
+ * @param ... arguments
+ */
+void debug_function(const char *msg, ...) __attribute__((format(printf, 1, 2)));
+
+#define DEBUG(...) debug_function(__VA_ARGS__);
+
+/**
  * @brief Display an error with details
  *
  * @param file The file where occurs the error

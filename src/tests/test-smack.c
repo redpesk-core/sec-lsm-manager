@@ -44,15 +44,6 @@ START_TEST(test_set_smack) {
 }
 END_TEST
 
-START_TEST(test_generate_app_label) {
-    char *id = "id";
-    char *label = NULL;
-    ck_assert_int_eq(generate_label(&label, id, "App::", "::Lib"), 0);
-    ck_assert_str_eq(label, "App::id::Lib");
-    free(label);
-}
-END_TEST
-
 START_TEST(test_label_file) {
     char path[200] = {'\0'};
     char label[200] = {'\0'};
@@ -229,7 +220,7 @@ START_TEST(test_smack_install) {
 
     // test settings
 
-    ck_assert_int_eq(check_file_exists("/etc/smack/accesses.d/app-testid"), true);
+    ck_assert_int_eq(check_file_exists("/etc/smack/accesses.d/testid.smack"), true);
     ck_assert_int_eq(compare_xattr(data_dir, XATTR_NAME_SMACK, "App:testid:Data"), true);
     ck_assert_int_eq(compare_xattr(data_dir, XATTR_NAME_SMACKTRANSMUTE, "TRUE"), true);
     ck_assert_int_eq(compare_xattr(data_file, XATTR_NAME_SMACK, "App:testid:Data"), true);
@@ -292,7 +283,6 @@ END_TEST
 
 void test_smack() {
     addtest(test_set_smack);
-    addtest(test_generate_app_label);
     addtest(test_label_file);
     addtest(test_label_dir_transmute);
     addtest(test_label_exec);

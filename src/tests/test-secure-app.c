@@ -27,7 +27,8 @@
 START_TEST(test_init_secure_app) {
     secure_app_t secure_app;
     init_secure_app(&secure_app);
-    ck_assert_ptr_eq(secure_app.id, NULL);
+    ck_assert_str_eq(secure_app.id, "");
+    ck_assert_str_eq(secure_app.id_underscore, "");
     ck_assert_ptr_eq(secure_app.permission_set.permissions, NULL);
     ck_assert_int_eq((int)secure_app.permission_set.size, 0);
     ck_assert_ptr_eq(secure_app.path_set.paths, NULL);
@@ -39,7 +40,8 @@ START_TEST(test_create_secure_app) {
     secure_app_t *secure_app = NULL;
     ck_assert_int_eq(create_secure_app(&secure_app), 0);
     ck_assert_ptr_ne(secure_app, NULL);
-    ck_assert_ptr_eq(secure_app->id, NULL);
+    ck_assert_str_eq(secure_app->id, "");
+    ck_assert_str_eq(secure_app->id_underscore, "");
     ck_assert_ptr_eq(secure_app->permission_set.permissions, NULL);
     ck_assert_int_eq((int)secure_app->permission_set.size, 0);
     ck_assert_ptr_eq(secure_app->path_set.paths, NULL);
@@ -56,6 +58,18 @@ START_TEST(test_secure_app_set_id) {
     ck_assert_str_eq(secure_app->id, "id");
     // test duplicate set id
     ck_assert_int_eq(secure_app_set_id(secure_app, "id2"), -EINVAL);
+    destroy_secure_app(secure_app);
+
+    ck_assert_int_eq(create_secure_app(&secure_app), 0);
+    ck_assert_int_lt(secure_app_set_id(secure_app, "i"), 0);
+    destroy_secure_app(secure_app);
+
+    ck_assert_int_eq(create_secure_app(&secure_app), 0);
+    ck_assert_int_lt(secure_app_set_id(secure_app, ""), 0);
+    destroy_secure_app(secure_app);
+
+    ck_assert_int_eq(create_secure_app(&secure_app), 0);
+    ck_assert_int_lt(secure_app_set_id(secure_app, "id?bad/name"), 0);
     destroy_secure_app(secure_app);
 
     ck_assert_int_eq(create_secure_app(&secure_app), 0);
@@ -116,7 +130,6 @@ START_TEST(test_free_secure_app) {
     free_secure_app(secure_app);
     ck_assert_int_eq((int)secure_app->path_set.size, 0);
     ck_assert_int_eq((int)secure_app->permission_set.size, 0);
-    ck_assert_ptr_eq(secure_app->id, NULL);
     destroy_secure_app(secure_app);
 }
 END_TEST

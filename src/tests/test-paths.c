@@ -26,22 +26,6 @@
 #include "../paths.c"
 #include "setup-tests.h"
 
-START_TEST(test_free_path) {
-    path_t path;
-    path.path = strdup("/path");
-    path.path_type = type_lib;
-    free_path(&path);
-    ck_assert_ptr_eq(path.path, NULL);
-    ck_assert_int_eq(path.path_type, type_none);
-
-    path_t path2;
-    memset(&path2, 0, sizeof(path_t));
-    free_path(&path2);
-    ck_assert_ptr_eq(path2.path, NULL);
-    ck_assert_int_eq(path2.path_type, type_none);
-}
-END_TEST
-
 START_TEST(test_init_path_set) {
     path_set_t path_set;
     init_path_set(&path_set);
@@ -149,7 +133,6 @@ START_TEST(test_get_path_type_string) {
 END_TEST
 
 void test_paths() {
-    addtest(test_free_path);
     addtest(test_init_path_set);
     addtest(test_free_path_set);
     addtest(test_path_set_add_path);

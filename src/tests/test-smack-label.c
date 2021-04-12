@@ -19,53 +19,12 @@
 #include "../smack-template.c"
 #include "setup-tests.h"
 
-START_TEST(test_generate_label) {
-    char *label = NULL;
-    char id[200] = {'\0'};
-    char prefix[200] = {'\0'};
-    char suffix[200] = {'\0'};
-
-    ck_assert_int_lt(generate_label(&label, id, prefix, suffix), 0);
-
-    strcpy(id, "testid");
-
-    ck_assert_int_eq(generate_label(&label, id, prefix, suffix), 0);
-
-    ck_assert_str_eq(label, "testid");
-
-    free(label);
-    label = NULL;
-
-    strcpy(prefix, "App:");
-
-    ck_assert_int_eq(generate_label(&label, id, prefix, suffix), 0);
-
-    ck_assert_str_eq(label, "App:testid");
-
-    free(label);
-    label = NULL;
-
-    strcpy(suffix, ":Conf");
-    ck_assert_int_eq(generate_label(&label, id, prefix, suffix), 0);
-
-    ck_assert_str_eq(label, "App:testid:Conf");
-
-    free(label);
-    label = NULL;
-
-    strcpy(suffix, ":Con£f");
-
-    ck_assert_int_lt(generate_label(&label, id, prefix, suffix), 0);
-}
-
 START_TEST(test_init_path_type_definitions) {
     path_type_definitions_t path_type_definitions[number_path_type];
     memset(&path_type_definitions, 0, sizeof(path_type_definitions_t) * number_path_type);
 
-    ck_assert_int_lt(init_path_type_definitions(path_type_definitions, "tes£tid"), 0);
-
     memset(&path_type_definitions, 0, sizeof(path_type_definitions_t) * number_path_type);
-    ck_assert_int_eq(init_path_type_definitions(path_type_definitions, "testid"), 0);
+    init_path_type_definitions(path_type_definitions, "testid");
 
     ck_assert_str_eq(path_type_definitions[type_conf].label, "App:testid:Conf");
 
@@ -90,12 +49,7 @@ START_TEST(test_init_path_type_definitions) {
     ck_assert_int_eq(path_type_definitions[type_id].is_transmute, 1);
     ck_assert_int_eq(path_type_definitions[type_lib].is_transmute, 1);
     ck_assert_int_eq(path_type_definitions[type_public].is_transmute, 1);
-
-    free_path_type_definitions(path_type_definitions);
 }
 END_TEST
 
-void test_smack_label() {
-    addtest(test_generate_label);
-    addtest(test_init_path_type_definitions);
-}
+void test_smack_label() { addtest(test_init_path_type_definitions); }

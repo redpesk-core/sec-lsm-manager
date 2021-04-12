@@ -16,44 +16,28 @@
  */
 
 #include "../selinux-compile.c"
-#include "../selinux-label.c"
 #include "../selinux.c"
 #include "./test-selinux-template.c"
 #include "setup-tests.h"
 
-START_TEST(test_restorecon) {
-    char tmp_file[200] = {'\0'};
-    create_etc_tmp_file(tmp_file);
-
-    ck_assert_int_eq(compare_xattr(tmp_file, XATTR_NAME_SELINUX, "unconfined_u:object_r:etc_t:s0"),
-                     true);  // unconfined_u can be changed
-
-    ck_assert_int_eq(restorecon(tmp_file), 0);
-
-    ck_assert_int_eq(compare_xattr(tmp_file, XATTR_NAME_SELINUX, "system_u:object_r:etc_t:s0"), true);
-
-    ck_assert_int_lt(restorecon("bad_path"), 0);
-
-    remove(tmp_file);
-}
-END_TEST
-
-START_TEST(test_apply_selinux_label) {
+START_TEST(test_selinux_process_paths) {
     char etc_tmp_file[200] = {'\0'};
     create_etc_tmp_file(etc_tmp_file);
 
-    path_set_t path_set;
-    init_path_set(&path_set);
+    path_type_definitions_t path_type_definitions[number_path_type];
+    init_path_type_definitions(path_type_definitions, TESTID);
 
-    path_set_add_path(&path_set, etc_tmp_file, type_id);  // Type is not checked
+    secure_app_t *secure_app = NULL;
+    create_secure_app(&secure_app);
+    ck_assert_int_eq(secure_app_add_path(secure_app, etc_tmp_file, type_id), 0);
 
-    ck_assert_int_eq(apply_selinux_label(&path_set), 0);
+    ck_assert_int_eq(selinux_process_paths(secure_app, path_type_definitions), 0);
 
     ck_assert_int_eq(compare_xattr(etc_tmp_file, XATTR_NAME_SELINUX, "system_u:object_r:etc_t:s0"), true);
 
-    path_set_add_path(&path_set, "bad_path", type_id);
+    ck_assert_int_eq(secure_app_add_path(secure_app, "bad_path", type_id), 0);
 
-    ck_assert_int_eq(apply_selinux_label(&path_set), 0);
+    ck_assert_int_eq(selinux_process_paths(secure_app, path_type_definitions), 0);
 
     remove(etc_tmp_file);
 }
@@ -149,7 +133,6 @@ START_TEST(test_selinux_install) {
 END_TEST
 
 void test_selinux() {
-    addtest(test_restorecon);
-    addtest(test_apply_selinux_label);
+    addtest(test_selinux_process_paths);
     addtest(test_selinux_install);
 }

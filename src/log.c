@@ -42,6 +42,19 @@ void log_function(const char *msg, ...) {
 }
 
 /* see log.h */
+void debug_function(const char *msg, ...) {
+    (void)msg;
+#if defined(DEBUG_MODE)
+    va_list va;
+    va_start(va, msg);
+    fprintf(stdout, "[DEBUG] ");
+    vfprintf(stdout, msg, va);
+    fprintf(stdout, "\n");
+    va_end(va);
+#endif
+}
+
+/* see log.h */
 void error_function(const char *file, const int line, const char *msg, ...) {
     va_list va;
     va_start(va, msg);

@@ -31,13 +31,10 @@
 #include <unistd.h>
 
 #include "log.h"
+#include "template.h"
 #include "utils.h"
 
-#define MAX_SMACK_LABEL_SIZE SMACK_LABEL_LEN
-#define MAX_ACCESS_SIZE 6
-#define MAX_SMACK_RULE_SIZE MAX_SMACK_LABEL_SIZE * 2 + MAX_ACCESS_SIZE + 2
-
-#define SMACK_COMMENT_CHAR '#'
+#define SMACK_EXTENSION "smack"
 
 #if !defined(SEC_LSM_MANAGER_DATADIR)
 #define SEC_LSM_MANAGER_DATADIR "/usr/share/sec-lsm-manager"
@@ -51,251 +48,26 @@
 #define SMACK_TEMPLATE_FILE SEC_LSM_MANAGER_DATADIR "/" TEMPLATE_FILE
 #endif
 
-#if !defined(SMACK_RULES_DIR)
-#define SMACK_RULES_DIR "/etc/smack/accesses.d"
+#if !defined(SMACK_POLICY_DIR)
+#define SMACK_POLICY_DIR "/etc/smack/accesses.d"
 #endif
 
 const char default_smack_template_file[] = SMACK_TEMPLATE_FILE;
-const char default_smack_rules_dir[] = SMACK_RULES_DIR;
+const char default_smack_policy_dir[] = SMACK_POLICY_DIR;
 
-const char prefix_app_rules[] = "app-";
-
-#define REPLACE_APP "~APP~"
-
-typedef struct smack_handle {
-    const char *id;
-    struct smack_accesses *smack_accesses;
-} smack_handle_t;
+char prefix_app[] = "App:";
+char suffix_lib[] = ":Lib";
+char suffix_conf[] = ":Conf";
+char suffix_exec[] = ":Exec";  // see label_exec before remove this line
+char suffix_icon[] = ":Icon";
+char suffix_data[] = ":Data";
+char suffix_http[] = ":Http";
+char user_home[] = "User:Home";
+char public_app[] = "_";
 
 /***********************/
 /*** PRIVATE METHODS ***/
 /***********************/
-
-/**
- * @brief Free smack handle
- * The pointer is not free
- * @param[in] smack_handle smack_handle handler
- */
-__nonnull() static void free_smack_handle(smack_handle_t *smack_handle) {
-    if (smack_handle) {
-        if (smack_handle->smack_accesses) {
-            smack_accesses_free(smack_handle->smack_accesses);
-            smack_handle->smack_accesses = NULL;
-        }
-        free((void *)smack_handle->id);
-        smack_handle->id = NULL;
-    }
-}
-
-/**
- * @brief Init smack handle
- *
- * @param[in] smack_handle smack_handle handler
- * @param[in] id id of application
- * @return 0 in case of success or a negative -errno value
- */
-__nonnull() __wur static int init_smack_handle(smack_handle_t *smack_handle, const char *id) {
-    int rc = 0;
-    smack_handle->id = strdup(id);
-
-    if (!smack_handle->id) {
-        rc = -errno;
-        ERROR("strdup id %m");
-        return rc;
-    }
-
-    rc = smack_accesses_new(&(smack_handle->smack_accesses));
-    if (rc < 0) {
-        ERROR("smack_accesses_new");
-        free_smack_handle(smack_handle);
-        return rc;
-    }
-
-    return 0;
-}
-
-/**
- * @brief Count the number of space in a line
- *
- * @param[in] line The line to parse
- * @return number of space in case of success or a negative -errno value
- */
-__nonnull() __wur static int count_space(const char *line) {
-    size_t len = strlen(line);
-    int count = 0;
-    for (size_t i = 0; i < len; i++) {
-        if (line[i] == ' ')
-            count++;
-    }
-    return count;
-}
-
-/**
- * @brief Parse a line and add the rule in smack handle
- *
- * @param[in] line The smack rule line to parse
- * @param[in] smack_handle smack_handle handler
- * @return 0 in case of success or a negative -errno value
- */
-__nonnull() __wur static int parse_line(char *line, const smack_handle_t *smack_handle,
-                                        path_type_definitions_t path_type_definitions[number_path_type]) {
-    if (line[0] == SMACK_COMMENT_CHAR) {  // comment
-        return 0;
-    } else if (line[0] == '\n') {  // new line
-        return 0;
-    }
-
-    char subject[MAX_SMACK_LABEL_SIZE];
-    char object[MAX_SMACK_LABEL_SIZE];
-    char access[MAX_SMACK_LABEL_SIZE];
-
-    // replace id
-    char *pos_str = NULL;
-    char after[MAX_SMACK_RULE_SIZE] = {0};
-
-    line[strcspn(line, "\n")] = 0;
-    while ((pos_str = strstr(line, REPLACE_APP))) {
-        strcpy(after, pos_str + strlen(REPLACE_APP));  // save overwrite data
-        strcpy(pos_str, path_type_definitions[type_id].label);
-        strcpy(pos_str + strlen(path_type_definitions[type_id].label), after);
-    }
-
-    // check valid rule
-    int c = count_space(line);
-    if (c != 2) {
-        printf("Invalid rules");
-        return -EINVAL;
-    }
-
-    // subject
-    char *ptr = strtok(line, " ");
-    strncpy(subject, ptr, MAX_SMACK_LABEL_SIZE);
-
-    // object
-    ptr = strtok(NULL, " ");
-    strncpy(object, ptr, MAX_SMACK_LABEL_SIZE);
-
-    // access
-    ptr = strtok(NULL, " ");
-    strncpy(access, ptr, MAX_ACCESS_SIZE);
-
-    int rc = smack_accesses_add(smack_handle->smack_accesses, subject, object, access);
-    if (rc < 0) {
-        ERROR("smack_accesses_add");
-        return rc;
-    }
-
-    return 0;
-}
-
-/**
- * @brief Parse the smack template file and add rules in smack_handle
- *
- * @param[in] smack_template_file The template file
- * @param[in] smack_handle smack_handle handler
- * @return 0 in case of success or a negative -errno value
- */
-__nonnull() __wur static int parse_template_file(const char *smack_template_file, const smack_handle_t *smack_handle,
-                                                 path_type_definitions_t path_type_definitions[number_path_type]) {
-    int rc = 0;
-    char line[MAX_SMACK_LABEL_SIZE];
-    FILE *f = fopen(smack_template_file, "r");
-
-    if (!f) {
-        rc = -errno;
-        ERROR("fopen : %m");
-        return rc;
-    }
-
-    while (rc >= 0 && fgets(line, MAX_SMACK_LABEL_SIZE, f)) {
-        rc = parse_line(line, smack_handle, path_type_definitions);
-    }
-
-    if (rc < 0) {
-        ERROR("parse_line : %s", line);
-    }
-
-    if (fclose(f)) {
-        ERROR("fclose %s : %m", smack_template_file);
-    }
-
-    return rc;
-}
-
-/**
- * @brief Get smack rules file path specification
- *
- * @param[in] smack_rules_dir some value or NULL for getting default
- * @param[in] id id of the application
- * @return smack rules file path if success, NULL if error
- */
-__nonnull() __wur static char *get_smack_rules_file_path(const char *smack_rules_dir, const char *id) {
-    size_t len = strlen(smack_rules_dir) + 1 + strlen(prefix_app_rules) + strlen(id);
-    char *file = (char *)malloc(len + 1);
-    if (!file) {
-        ERROR("malloc");
-        return NULL;
-    }
-    memset(file, 0, len + 1);
-
-    strcpy(file, smack_rules_dir);
-    strcat(file, "/");
-    strcat(file, prefix_app_rules);
-    strcat(file, id);
-
-    return file;
-}
-
-/**
- * @brief save the rules in smack rules dir and if smack enable load them directly
- *
- * @param[in] smack_rules_dir The smack rules directory
- * @param[in] smack_handle smack handle handler with some accesses added
- * @return 0 in case of success or a negative -errno value
- */
-__nonnull() __wur static int apply_save_accesses_file(const char *smack_rules_dir, smack_handle_t *smack_handle) {
-    int rc = 0;
-
-    if (smack_enabled()) {
-        rc = smack_accesses_apply(smack_handle->smack_accesses);
-        if (rc < 0) {
-            ERROR("smack_accesses_apply");
-            return rc;
-        }
-    }
-
-    char *file = get_smack_rules_file_path(smack_rules_dir, smack_handle->id);
-
-    if (!file) {
-        ERROR("get_smack_rules_file_path");
-        return -EINVAL;
-    }
-
-    int fd = open(file, O_CREAT | O_WRONLY | O_TRUNC, 0644);
-
-    if (fd < 0) {
-        rc = -errno;
-        ERROR("open : %m");
-        goto end;
-    }
-
-    rc = smack_accesses_save(smack_handle->smack_accesses, fd);
-    if (rc < 0) {
-        ERROR("smack_accesses_save");
-        goto end2;
-    }
-
-    LOG("success store smack rules in %s", file);
-
-end2:
-    if (close(fd)) {
-        ERROR("close : %m");
-    }
-end:
-    free(file);
-    file = NULL;
-    return rc;
-}
 
 /**
  * @brief Remove file and loaded rules
@@ -350,70 +122,128 @@ const char *get_smack_template_file(const char *value) {
 }
 
 /* see smack-template.h */
-const char *get_smack_rules_dir(const char *value) {
-    return value ?: secure_getenv("SMACK_RULES_DIR") ?: default_smack_rules_dir;
+const char *get_smack_policy_dir(const char *value) {
+    value = value ?: secure_getenv("SMACK_POLICY_DIR") ?: default_smack_policy_dir;
+    if (strlen(value) >= SEC_LSM_MANAGER_MAX_SIZE_DIR) {
+        value = NULL;
+        ERROR("smack_policy_dir too long");
+    }
+    return value;
+}
+
+/* see smack-label.h */
+bool smack_enabled() {
+    if (smack_smackfs_path() == NULL) {
+        return false;
+    }
+    return true;
+}
+
+/* see smack-label.h */
+void init_path_type_definitions(path_type_definitions_t path_type_definitions[number_path_type], const char *id) {
+    snprintf(path_type_definitions[type_conf].label, SEC_LSM_MANAGER_MAX_SIZE_LABEL, "%s%s%s", prefix_app, id,
+             suffix_conf);
+    snprintf(path_type_definitions[type_data].label, SEC_LSM_MANAGER_MAX_SIZE_LABEL, "%s%s%s", prefix_app, id,
+             suffix_data);
+    snprintf(path_type_definitions[type_exec].label, SEC_LSM_MANAGER_MAX_SIZE_LABEL, "%s%s%s", prefix_app, id,
+             suffix_exec);
+    snprintf(path_type_definitions[type_http].label, SEC_LSM_MANAGER_MAX_SIZE_LABEL, "%s%s%s", prefix_app, id,
+             suffix_http);
+    snprintf(path_type_definitions[type_icon].label, SEC_LSM_MANAGER_MAX_SIZE_LABEL, "%s%s%s", prefix_app, id,
+             suffix_icon);
+    snprintf(path_type_definitions[type_id].label, SEC_LSM_MANAGER_MAX_SIZE_LABEL, "%s%s", prefix_app, id);
+    snprintf(path_type_definitions[type_lib].label, SEC_LSM_MANAGER_MAX_SIZE_LABEL, "%s%s%s", prefix_app, id,
+             suffix_lib);
+    strncpy(path_type_definitions[type_public].label, public_app, SEC_LSM_MANAGER_MAX_SIZE_LABEL);
+
+    // executable
+    path_type_definitions[type_exec].is_executable = true;
+
+    // transmute
+    path_type_definitions[type_data].is_transmute = true;
+    path_type_definitions[type_http].is_transmute = true;
+    path_type_definitions[type_id].is_transmute = true;
+    path_type_definitions[type_lib].is_transmute = true;
+    path_type_definitions[type_public].is_transmute = true;
 }
 
 /* see smack-template.h */
-int create_smack_rules(const secure_app_t *secure_app, path_type_definitions_t path_type_definitions[number_path_type],
-                       const char *smack_template_file, const char *smack_rules_dir) {
-    smack_handle_t smack_handle = {0};
+int create_smack_rules(const secure_app_t *secure_app) {
+    struct smack_accesses *smack_accesses = NULL;
+    char smack_policy_dir[SEC_LSM_MANAGER_MAX_SIZE_DIR];
+    char smack_template_file[SEC_LSM_MANAGER_MAX_SIZE_PATH];
+    char smack_rules_file[SEC_LSM_MANAGER_MAX_SIZE_PATH];
 
-    smack_template_file = get_smack_template_file(smack_template_file);
-    smack_rules_dir = get_smack_rules_dir(smack_rules_dir);
+    strncpy(smack_policy_dir, get_smack_policy_dir(NULL), SEC_LSM_MANAGER_MAX_SIZE_DIR);
+    strncpy(smack_template_file, get_smack_template_file(NULL), SEC_LSM_MANAGER_MAX_SIZE_PATH);
 
-    int rc = init_smack_handle(&smack_handle, secure_app->id);
+    snprintf(smack_rules_file, SEC_LSM_MANAGER_MAX_SIZE_PATH, "%s/%s.%s", smack_policy_dir, secure_app->id,
+             SMACK_EXTENSION);
+
+    int rc = process_template(smack_template_file, smack_rules_file, secure_app);
     if (rc < 0) {
-        ERROR("init_smack_handle");
-        return rc;
-    }
-
-    rc = parse_template_file(smack_template_file, &smack_handle, path_type_definitions);
-    if (rc < 0) {
-        ERROR("parse_template_file")
-        free_smack_handle(&smack_handle);
-        return rc;
-    }
-
-    rc = apply_save_accesses_file(smack_rules_dir, &smack_handle);
-    if (rc < 0) {
-        ERROR("apply_save_accesses_file");
-        free_smack_handle(&smack_handle);
-        return rc;
-    }
-
-    free_smack_handle(&smack_handle);
-
-    LOG("create_smack_rules success");
-
-    return 0;
-}
-
-/* see smack-template.h */
-int remove_smack_rules(const secure_app_t *secure_app, const char *smack_rules_dir) {
-    int rc = 0;
-    smack_rules_dir = get_smack_rules_dir(smack_rules_dir);
-    char *file = get_smack_rules_file_path(smack_rules_dir, secure_app->id);
-
-    if (!file) {
-        ERROR("get_smack_rules_file_path");
-        rc = -EINVAL;
+        ERROR("process_template");
         goto end;
     }
 
+    int fd = open(smack_rules_file, O_RDONLY);
+    if (fd < 0) {
+        ERROR("open %s\n", smack_rules_file);
+        goto error;
+    }
+
+    rc = smack_accesses_new(&smack_accesses);
+    if (rc < 0) {
+        ERROR("smack_accesses_new");
+        goto error;
+    }
+
+    rc = smack_accesses_add_from_file(smack_accesses, fd);
+    if (rc < 0) {
+        ERROR("smack_accesses_add_from_file");
+        goto error;
+    }
+
     if (smack_enabled()) {
-        rc = remove_load_rules(file);
+        rc = smack_accesses_apply(smack_accesses);
+        if (rc < 0) {
+            ERROR("smack_accesses_apply");
+            goto error;
+        }
+    }
+
+    DEBUG("create_smack_rules success");
+    goto end;
+
+error:
+    remove(smack_rules_file);
+end:
+    smack_accesses_free(smack_accesses);
+    smack_accesses = NULL;
+    return rc;
+}
+
+/* see smack-template.h */
+int remove_smack_rules(const secure_app_t *secure_app) {
+    int rc = 0;
+    char smack_policy_dir[SEC_LSM_MANAGER_MAX_SIZE_DIR];
+    char smack_rules_file[SEC_LSM_MANAGER_MAX_SIZE_PATH];
+
+    strncpy(smack_policy_dir, get_smack_policy_dir(NULL), SEC_LSM_MANAGER_MAX_SIZE_DIR);
+    snprintf(smack_rules_file, SEC_LSM_MANAGER_MAX_SIZE_PATH, "%s/%s.%s", smack_policy_dir, secure_app->id,
+             SMACK_EXTENSION);
+
+    if (smack_enabled()) {
+        rc = remove_load_rules(smack_rules_file);
         if (rc < 0) {
             ERROR("remove_load_rules");
         }
     }
 
-    rc = remove_file(file);
+    rc = remove_file(smack_rules_file);
     if (rc < 0) {
-        ERROR("remove");
+        ERROR("remove_file");
     }
 
-end:
-    file = NULL;
     return rc;
 }

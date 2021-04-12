@@ -44,7 +44,7 @@ int launch_compile(const char *id) {
 
     pid = vfork();
     if (pid == 0) {
-        LOG("Launch : %s %s", COMPILE_SCRIPT_NAME, id);
+        DEBUG("Launch : %s %s", COMPILE_SCRIPT_NAME, id);
         execl(COMPILE_SCRIPT, COMPILE_SCRIPT_NAME, id, NULL);
         _exit(EXIT_FAILURE);
     }

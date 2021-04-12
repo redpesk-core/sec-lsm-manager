@@ -27,7 +27,20 @@
 #include <sys/cdefs.h>
 
 #include "secure-app.h"
-#include "smack-label.h"
+
+#ifndef SIMULATE_SMACK
+#include <sys/smack.h>
+#else
+#include "simulation/smack/smcack.h"
+#endif
+
+extern char suffix_exec[];
+
+typedef struct path_type_definitions {
+    char label[SEC_LSM_MANAGER_MAX_SIZE_LABEL];
+    bool is_executable;
+    bool is_transmute;
+} path_type_definitions_t;
 
 /**
  * @brief Get the selinux template file
@@ -38,31 +51,45 @@
 const char *get_smack_template_file(const char *value) __wur;
 
 /**
- * @brief Get the smack rules directory
+ * @brief Get the smack policy directory
  *
  * @param[in] value some value or NULL for getting default
- * @return the smack rules directory specification
+ * @return the smack policy directory specification
  */
-const char *get_smack_rules_dir(const char *value) __wur;
+const char *get_smack_policy_dir(const char *value) __wur;
+
+/**
+ * @brief Check if smack is enabled
+ *
+ * @return true if enabled
+ * @return false if not
+ */
+bool smack_enabled() __wur;
+
+/**
+ * @brief Init different labels for all path type
+ *
+ * @param[in] path_type_definitions Array definition to complete
+ * @param[in] id to generate label of an application
+ *
+ */
+void init_path_type_definitions(path_type_definitions_t path_type_definitions[number_path_type], const char *id) __wur
+    __nonnull((2));
 
 /**
  * @brief Create smack rules
  *
  * @param[in] secure_app secure app handler to install
- * @param[in] smack_template_file some value or NULL for getting default
- * @param[in] smack_rules_dir some value or NULL for getting default
  * @return 0 in case of success or a negative -errno value
  */
-int create_smack_rules(const secure_app_t *secure_app, path_type_definitions_t path_type_definitions[number_path_type],
-                       const char *smack_template_file, const char *smack_rules_dir) __wur __nonnull((1));
+int create_smack_rules(const secure_app_t *secure_app) __wur __nonnull();
 
 /**
  * @brief Remove smack rules
  *
  * @param[in] secure_app secure app handler
- * @param[in] smack_rules_dir some value or NULL for getting default
  * @return 0 in case of success or a negative -errno value
  */
-int remove_smack_rules(const secure_app_t *secure_app, const char *smack_rules_dir) __wur __nonnull((1));
+int remove_smack_rules(const secure_app_t *secure_app) __wur __nonnull();
 
 #endif

@@ -27,10 +27,12 @@
 #include <sys/types.h>
 
 #include "cynagora-interface.h"
+#include "limits.h"
 #include "paths.h"
 
 typedef struct secure_app {
-    const char *id;
+    char id[SEC_LSM_MANAGER_MAX_SIZE_ID];
+    char id_underscore[SEC_LSM_MANAGER_MAX_SIZE_ID];
     permission_set_t permission_set;
     path_set_t path_set;
     bool error_flag;

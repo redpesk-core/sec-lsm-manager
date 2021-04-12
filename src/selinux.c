@@ -24,50 +24,53 @@
 #include "selinux.h"
 
 #include <errno.h>
-
-#ifndef SIMULATE_SELINUX
-#include <selinux/restorecon.h>
-#else
-#include "simulation/selinux/selinux.h"
-#endif
+#include <linux/xattr.h>
+#include <stdio.h>
+#include <sys/xattr.h>
 
 #include "log.h"
 #include "selinux-template.h"
 #include "utils.h"
 
 /**
- * @brief Restore the selinux context of a file
+ * @brief Label file
  *
  * @param[in] path The path of the file
+ * @param[in] label The label to set
  * @return 0 in case of success or a negative -errno value
  */
-__nonnull() __wur static int restorecon(const char *path) {
-    int rc = selinux_restorecon(path, SELINUX_RESTORECON_SET_SPECFILE_CTX | SELINUX_RESTORECON_IGNORE_DIGEST);
-    if (rc < 0) {
-        rc = -errno;
-        ERROR("selinux_restorecon");
-        return rc;
+__nonnull() __wur static int label_file(const char *path, const char *label) {
+    if (!check_file_exists(path)) {
+        DEBUG("%s not exist", path);
+        return -1;
     }
 
-    LOG("success restorecon %s", path);
+    int rc = set_label(path, XATTR_NAME_SELINUX, label);
+    if (rc < 0) {
+        ERROR("set_smack(%s,%s,%s)", path, XATTR_NAME_SMACK, label);
+        return rc;
+    }
 
     return 0;
 }
 
 /**
- * @brief Apply selinux label on files contain in paths
+ * @brief Apply selinux on a secure app
  *
- * @param[in] paths paths handler
+ * @param[in] secure_app secure app handler
  * @return 0 in case of success or a negative -errno value
  */
-__nonnull() __wur static int apply_selinux_label(const path_set_t *paths) {
-    for (size_t i = 0; i < paths->size; i++) {
-        if (check_file_exists(paths->paths[i].path)) {
-            int rc = restorecon(paths->paths[i].path);
-            if (rc < 0) {
-                ERROR("restorecon");
-                return rc;
-            }
+__nonnull() __wur static int selinux_process_paths(const secure_app_t *secure_app,
+                                                   path_type_definitions_t path_type_definitions[number_path_type]) {
+    path_t *path = NULL;
+    char label[SEC_LSM_MANAGER_MAX_SIZE_LABEL + 3];
+    for (size_t i = 0; i < secure_app->path_set.size; i++) {
+        path = secure_app->path_set.paths + i;
+        snprintf(label, SEC_LSM_MANAGER_MAX_SIZE_LABEL + 3, "%s:s0", path_type_definitions[path->path_type].label);
+        int rc = label_file(path->path, label);
+        if (rc < 0) {
+            ERROR("label_file((%s,%s),%s)", path->path, get_path_type_string(path->path_type), secure_app->id);
+            return rc;
         }
     }
 
@@ -78,46 +81,67 @@ __nonnull() __wur static int apply_selinux_label(const path_set_t *paths) {
 /*** PUBLIC METHODS ***/
 /**********************/
 
+/* see selinux-label.h */
+bool selinux_enabled() {
+    if (is_selinux_enabled() == 1) {
+        return true;
+    }
+    return false;
+}
+
 /* see selinux.h */
 int install_selinux(const secure_app_t *secure_app) {
+    if (secure_app->id[0] == '\0') {
+        ERROR("id undefined");
+        return -EINVAL;
+    }
+
+    path_type_definitions_t path_type_definitions[number_path_type];
+    init_path_type_definitions(path_type_definitions, secure_app->id_underscore);
+
     // ################## CREATE ##################
-    int rc = create_selinux_rules(secure_app, NULL, NULL, NULL);
+    int rc = create_selinux_rules(secure_app, path_type_definitions);
     if (rc < 0) {
         ERROR("create_selinux_rules");
         return rc;
     }
 
     // ############### CHECK AFTER ###############
-    if (!check_module_files_exist(secure_app, NULL)) {
+    if (!check_module_files_exist(secure_app)) {
         ERROR("module files not exist");
         return -ENOENT;
     }
 
-    LOG("success check files exist");
+    DEBUG("success check files exist");
 
     if (!check_module_in_policy(secure_app)) {
         ERROR("module not in the policy");
         return -ENOENT;
     }
 
-    LOG("success check module in policy");
+    DEBUG("success check module in policy");
 
     // force label
-    rc = apply_selinux_label(&(secure_app->path_set));
+    rc = selinux_process_paths(secure_app, path_type_definitions);
     if (rc < 0) {
-        ERROR("apply_selinux_label");
+        ERROR("selinux_process_paths");
         return rc;
     }
 
-    LOG("success apply selinux label");
+    DEBUG("success apply selinux label");
 
     return 0;
 }
 
 /* see selinux.h */
 int uninstall_selinux(const secure_app_t *secure_app) {
+    if (secure_app->id[0] == '\0') {
+        ERROR("id undefined");
+        return -EINVAL;
+    }
+
     // ############### CHECK BEFORE ###############
-    if (!check_module_files_exist(secure_app, NULL)) {
+    if (!check_module_files_exist(secure_app)) {
         ERROR("module files not exist");
         return -ENOENT;
     }
@@ -128,29 +152,29 @@ int uninstall_selinux(const secure_app_t *secure_app) {
     }
 
     // ################## REMOVE ##################
-    int rc = remove_selinux_rules(secure_app, NULL);
+    int rc = remove_selinux_rules(secure_app);
 
     if (rc < 0) {
         ERROR("remove_selinux_rules");
         return rc;
     }
 
-    LOG("success remove selinux module and files");
+    DEBUG("success remove selinux module and files");
 
     // ############### CHECK AFTER ###############
-    if (check_module_files_exist(secure_app, NULL)) {
+    if (check_module_files_exist(secure_app)) {
         ERROR("module files exist");
         return -1;
     }
 
-    LOG("success check files removed");
+    DEBUG("success check files removed");
 
     if (check_module_in_policy(secure_app)) {
         ERROR("module in the policy");
         return -1;
     }
 
-    LOG("success check module removed");
+    DEBUG("success check module removed");
 
     return 0;
 }

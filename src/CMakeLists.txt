@@ -32,6 +32,8 @@ set(SERVER_SOURCES
     utils.c
     paths.c
     permissions.c
+    mustach/mustach.c
+    template.c
     cynagora-interface.c
     secure-app.c
     socket.c
@@ -54,11 +56,11 @@ if(SIMULATE_SELINUX)
 endif()
 
 if(WITH_SMACK)
-    set(SERVER_SOURCES_SMACK ${SERVER_SOURCES} smack-label.c smack-template.c smack.c)
+    set(SERVER_SOURCES_SMACK ${SERVER_SOURCES} smack-template.c smack.c)
 endif()
 
 if(WITH_SELINUX)
-    set(SERVER_SOURCES_SELINUX ${SERVER_SOURCES} selinux-label.c selinux.c selinux-template.c)
+    set(SERVER_SOURCES_SELINUX ${SERVER_SOURCES} selinux.c selinux-template.c)
 endif()
 
 if((NOT SIMULATE_SELINUX) AND WITH_SELINUX)
@@ -158,10 +160,12 @@ endfunction()
 
 if(WITH_SMACK)
     build_daemon_for_mac("smack")
+    target_compile_definitions(${CMAKE_PROJECT_NAME}-smackd PRIVATE WITH_SMACK)
 endif()
 
 if(WITH_SELINUX)
     build_daemon_for_mac("selinux")
+    target_compile_definitions(${CMAKE_PROJECT_NAME}-selinuxd PRIVATE WITH_SELINUX)
 endif()
 
 ####################################
@@ -173,10 +177,12 @@ message("[*] Create : ${CMAKE_PROJECT_NAME}d")
 add_executable(${CMAKE_PROJECT_NAME}d main-${CMAKE_PROJECT_NAME}d-setup.c)
 
 if(WITH_SMACK)
+    target_compile_definitions(${CMAKE_PROJECT_NAME}d PRIVATE WITH_SMACK)
     target_compile_definitions(${CMAKE_PROJECT_NAME}d PRIVATE SMACK_BYNARY_NAME="${CMAKE_PROJECT_NAME}-smackd")
 endif()
 
 if(WITH_SELINUX)
+    target_compile_definitions(${CMAKE_PROJECT_NAME}d PRIVATE WITH_SELINUX)
     target_compile_definitions(${CMAKE_PROJECT_NAME}d PRIVATE SELINUX_BYNARY_NAME="${CMAKE_PROJECT_NAME}-selinuxd")
 endif()
 

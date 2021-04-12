@@ -27,7 +27,7 @@
 |                                   |  | |  app-redpesk-service-id1   | |   +--------------------+    | |                    |                       |
 |                                   |  | |                            | |                             | |                    |                       |
 |                                   |  | |                            | | /usr/share/sec-lsm-manager/ | |                    | install               |
-|                                   |  | |  app-redpesk-service-id2   | | selinux-policy/             | |                    |                       |
+|                                   |  | |  app-redpesk-service-id2   | | selinux-rules/              | |                    |                       |
 |                                   |  | |                            | |                             | |                    |                       |
 |                                   |  | |                            | | redpesk-service-id.te       | |                    | uninstall             |
 |                                   |  | |                            | |                             | |                    |                       |

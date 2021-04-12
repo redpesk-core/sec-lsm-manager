@@ -45,7 +45,7 @@
 /**********************/
 
 /* see cynagora-interface.h */
-int cynagora_drop_policies(cynagora_t *cynagora, const char *client) {
+int cynagora_set_policies(cynagora_t *cynagora, const char *id, const permission_set_t *permission_set) {
     // enter to modify policies cynagora
     int rc = cynagora_enter(cynagora);
     if (rc < 0) {
@@ -53,10 +53,18 @@ int cynagora_drop_policies(cynagora_t *cynagora, const char *client) {
         return rc;
     }
 
-    cynagora_key_t key = {client, CYNAGORA_SELECT_ALL, CYNAGORA_SELECT_ALL, CYNAGORA_SELECT_ALL};
-    rc = cynagora_drop(cynagora, &key);
-    if (rc < 0) {
-        ERROR("cynagora_drop : %d %s", -rc, strerror(-rc));
+    size_t i = 0;
+    cynagora_key_t k = {id, CYNAGORA_INSERT_ALL, CYNAGORA_INSERT_ALL, NULL};
+    cynagora_value_t v = {CYNAGORA_AUTHORIZED, 0};
+
+    while (i < permission_set->size) {
+        k.permission = permission_set->permissions[i];
+        rc = cynagora_set(cynagora, &k, &v);
+        if (rc < 0) {
+            ERROR("cynagora_set : %d %s", -rc, strerror(-rc));
+            break;
+        }
+        i++;
     }
 
     // leave and apply modification
@@ -68,7 +76,7 @@ int cynagora_drop_policies(cynagora_t *cynagora, const char *client) {
 }
 
 /* see cynagora-interface.h */
-int cynagora_set_policies(cynagora_t *cynagora, const char *client, const permission_set_t *permission_set) {
+int cynagora_drop_policies(cynagora_t *cynagora, const char *id) {
     // enter to modify policies cynagora
     int rc = cynagora_enter(cynagora);
     if (rc < 0) {
@@ -76,18 +84,10 @@ int cynagora_set_policies(cynagora_t *cynagora, const char *client, const permis
         return rc;
     }
 
-    size_t i = 0;
-    cynagora_key_t k = {client, CYNAGORA_INSERT_ALL, CYNAGORA_INSERT_ALL, NULL};
-    cynagora_value_t v = {CYNAGORA_AUTHORIZED, 0};
-
-    while (i < permission_set->size) {
-        k.permission = permission_set->permissions[i];
-        rc = cynagora_set(cynagora, &k, &v);
-        if (rc < 0) {
-            ERROR("cynagora_set : %d %s", -rc, strerror(-rc));
-            break;
-        }
-        i++;
+    cynagora_key_t key = {id, CYNAGORA_SELECT_ALL, CYNAGORA_SELECT_ALL, CYNAGORA_SELECT_ALL};
+    rc = cynagora_drop(cynagora, &key);
+    if (rc < 0) {
+        ERROR("cynagora_drop : %d %s", -rc, strerror(-rc));
     }
 
     // leave and apply modification

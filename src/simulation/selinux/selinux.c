@@ -30,7 +30,7 @@ static int ptr = 0;
 #endif
 
 #if !defined(SELINUX_RULES_DIR)
-#define SELINUX_RULES_DIR SEC_LSM_MANAGER_DATADIR "selinux-policy"
+#define SELINUX_RULES_DIR SEC_LSM_MANAGER_DATADIR "selinux-rules"
 #endif
 
 #if !defined(SELINUX_POLICY_DIR)

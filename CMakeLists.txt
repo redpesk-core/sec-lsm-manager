@@ -53,7 +53,7 @@ option(SIMULATE_CYNAGORA    "simulate cynagora" OFF)
 option(SIMULATE_SMACK       "simulate smack" OFF)
 option(SIMULATE_SELINUX     "simulate selinux" OFF)
 
-option(FORTIFY              "fortify" ON)
+option(FORTIFY              "fortify" OFF)
 option(COMPILE_TEST         "compile test" OFF)
 option(DEBUG                "debug" OFF)
 
@@ -75,7 +75,7 @@ set(PREFIX_PERMISSION               "urn:AGL:" CACHE STRING "Prefix permission")
 # SELINUX
 
 set(SELINUX_MAKEFILE                "${CMAKE_INSTALL_FULL_DATADIR}/selinux/devel/Makefile")
-set(SELINUX_RULES_DIR               "${SEC_LSM_MANAGER_DATADIR}/selinux-policy")
+set(SELINUX_RULES_DIR               "${SEC_LSM_MANAGER_DATADIR}/selinux-rules")
 set(COMPILE_SCRIPT_DIR              "${SEC_LSM_MANAGER_DATADIR}/script")
 set(COMPILE_SCRIPT_NAME             "build-module.sh")
 set(TE_TEMPLATE_FILE                "app-template.te")
@@ -89,8 +89,8 @@ set(SIMULATION_SELINUX_POLICY_DIR   "${SEC_LSM_MANAGER_DATADIR}/selinux-simulati
 set(TEMPLATE_FILE                   "app-template.smack")
 
 set(SMACK_FS_PATH                   "/sys/fs/smackfs")
-set(DEFAULT_SMACK_RULES_DIR         "/etc/smack/accesses.d")
-set(SIMULATION_SMACK_RULES_DIR      "${SEC_LSM_MANAGER_DATADIR}/smack-simulation")
+set(DEFAULT_SMACK_POLICY_DIR        "/etc/smack/accesses.d")
+set(SIMULATION_SMACK_POLICY_DIR     "${SEC_LSM_MANAGER_DATADIR}/smack-simulation")
 
 ##########################################################################
 # check valid MAC
@@ -140,21 +140,19 @@ endif()
 # SMACK
 
 if(WITH_SMACK)
-    add_compile_definitions_and_print(WITH_SMACK)
     add_compile_definitions_and_print(TEMPLATE_FILE="${TEMPLATE_FILE}")
     add_compile_definitions_and_print(SMACK_FS_PATH="${SMACK_FS_PATH}")
     if(SIMULATE_SMACK)
         add_compile_definitions_and_print(SIMULATE_SMACK)
-        add_compile_definitions_and_print(SMACK_RULES_DIR="${SIMULATION_SMACK_RULES_DIR}")
+        add_compile_definitions_and_print(SMACK_POLICY_DIR="${SIMULATION_SMACK_POLICY_DIR}")
     else()
-        add_compile_definitions_and_print(SMACK_RULES_DIR="${DEFAULT_SMACK_RULES_DIR}")
+        add_compile_definitions_and_print(SMACK_POLICY_DIR="${DEFAULT_SMACK_POLICY_DIR}")
     endif()
 endif()
 
 # SELINUX
 
 if(WITH_SELINUX)
-    add_compile_definitions_and_print(WITH_SELINUX)
     add_compile_definitions_and_print(SELINUX_RULES_DIR="${SELINUX_RULES_DIR}")
     add_compile_definitions_and_print(TE_TEMPLATE_FILE="${TE_TEMPLATE_FILE}")
     add_compile_definitions_and_print(IF_TEMPLATE_FILE="${IF_TEMPLATE_FILE}")
@@ -191,6 +189,7 @@ add_compile_definitions(SYSTEMD_NAME="${CMAKE_PROJECT_NAME}")
 
 if(DEBUG)
     set(CMAKE_BUILD_TYPE "DEBUG")
+    add_compile_definitions(DEBUG_MODE)
 elseif()
     set(CMAKE_BUILD_TYPE "RELEASE")
 endif()

@@ -29,11 +29,6 @@
 #include <sys/socket.h>
 
 #include "log.h"
-
-#ifdef WITH_SMACK
-#include "smack-label.h"
-#endif
-
 #include "utils.h"
 
 /***********************/
@@ -41,15 +36,30 @@
 /***********************/
 
 /**
- * @brief Initialize the fields 'id', 'permission_set', 'path_set' and error_flag
+ * @brief Initialize the fields 'id', 'id_underscore', 'permission_set', 'path_set' and error_flag
  *
  * @param[in] secure_app handler
  */
 __nonnull() static void init_secure_app(secure_app_t *secure_app) {
-    secure_app->id = NULL;
+    memset(secure_app->id, '\0', SEC_LSM_MANAGER_MAX_SIZE_ID);
+    memset(secure_app->id_underscore, '\0', SEC_LSM_MANAGER_MAX_SIZE_ID);
     init_path_set(&(secure_app->path_set));
     init_permission_set(&(secure_app->permission_set));
     secure_app->error_flag = false;
+}
+
+/**
+ * @brief Turns dash into underscore
+ *
+ * @param[in] s String to parse
+ */
+__nonnull() static void dash_to_underscore(char *s) {
+    while (*s) {
+        if (*s == '-') {
+            *s = '_';
+        }
+        s++;
+    }
 }
 
 /**********************/
@@ -65,16 +75,12 @@ int create_secure_app(secure_app_t **secure_app) {
     }
 
     init_secure_app(*secure_app);
-
     return 0;
 }
 
 /* see secure-app.h */
 void free_secure_app(secure_app_t *secure_app) {
     if (secure_app) {
-        free((void *)secure_app->id);
-        secure_app->id = NULL;
-
         free_permission_set(&(secure_app->permission_set));
         free_path_set(&(secure_app->path_set));
         secure_app->error_flag = false;
@@ -89,8 +95,20 @@ void destroy_secure_app(secure_app_t *secure_app) {
 
 /* see secure-app.h */
 int secure_app_set_id(secure_app_t *secure_app, const char *id) {
-    if (secure_app->id) {
+    if (secure_app->id[0] != '\0') {
         ERROR("id already set");
+        return -EINVAL;
+    }
+
+    size_t len_id = strlen(id);
+
+    if (len_id < 2 || len_id >= SEC_LSM_MANAGER_MAX_SIZE_ID) {
+        ERROR("invalid id size : %ld", len_id);
+        return -EINVAL;
+    }
+
+    if (!valid_label(id)) {
+        ERROR("invalid id : %s", id);
         return -EINVAL;
     }
 
@@ -99,11 +117,9 @@ int secure_app_set_id(secure_app_t *secure_app, const char *id) {
         return -EPERM;
     }
 
-    secure_app->id = strdup(id);
-    if (secure_app->id == NULL) {
-        ERROR("strdup id");
-        return -ENOMEM;
-    }
+    strncpy(secure_app->id, id, SEC_LSM_MANAGER_MAX_SIZE_ID);
+    strncpy(secure_app->id_underscore, id, SEC_LSM_MANAGER_MAX_SIZE_ID);
+    dash_to_underscore(secure_app->id_underscore);
 
     return 0;
 }
@@ -134,7 +150,7 @@ int secure_app_add_permission(secure_app_t *secure_app, const char *permission) 
 /* see secure-app.h */
 int secure_app_add_path(secure_app_t *secure_app, const char *path, enum path_type path_type) {
     if (!valid_path_type(path_type)) {
-        ERROR("path_type invalid");
+        ERROR("path_type invalid : %d", path_type);
         return -EINVAL;
     }
 

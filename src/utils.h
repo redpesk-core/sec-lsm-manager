@@ -24,20 +24,28 @@
 #ifndef SEC_LSM_MANAGER_UTILS_H
 #define SEC_LSM_MANAGER_UTILS_H
 
+#include <ctype.h>
 #include <stdbool.h>
 #include <sys/types.h>
 
-#define CHECK_NO_NULL(param, param_name)   \
-    if (!param) {                          \
-        ERROR("%s undefined", param_name); \
-        return -EINVAL;                    \
-    }
+#include "limits.h"
 
-#define CHECK_NO_NULL_NO_RETURN(param, param_name) \
-    if (!param) {                                  \
-        ERROR("%s undefined", param_name);         \
-        return;                                    \
-    }
+/**
+ * @brief Check if string is valid label
+ *
+ * @param[in] s String to check
+ */
+bool valid_label(const char *s) __wur __nonnull();
+
+/**
+ * @brief Set label attr on file
+ *
+ * @param[in] path the path of the file
+ * @param[in] xattr name of the extended attribute
+ * @param[in] value value of the extended attribute
+ * @return 0 in case of success or a negative -errno value
+ */
+int set_label(const char *path, const char *xattr, const char *value) __wur __nonnull();
 
 /**
  * @brief Check if file exists
@@ -70,9 +78,17 @@ bool check_executable(const char *path) __wur __nonnull();
 /**
  * @brief Remove a file
  *
- * @param[in] file The path of the file
+ * @param[in] path The path of the file
  * @return 0 in case of success or a negative -errno value
  */
 int remove_file(const char *path) __wur __nonnull();
+
+/**
+ * @brief Read content of a file
+ *
+ * @param[in] path The path of the file
+ * @return the content of the file in case of success or NULL
+ */
+char *read_file(const char *path);
 
 #endif

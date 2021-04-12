@@ -27,7 +27,7 @@ include(../macros.in)
 ########################################
 ## <summary>
 ##    Allow the specified domain to
-##    manage ~APP~ files perms
+##    manage {{id_underscore}} files perms
 ## </summary>
 ## <param name="domain">
 ##    <summary>
@@ -35,17 +35,17 @@ include(../macros.in)
 ##    </summary>
 ## </param>
 #
-interface(`manage_~APP~_file_dir_perms',`
+interface(`manage_{{id_underscore}}_file_dir_perms',`
     gen_require(`
-        type ~APP~_t;
-        type ~APP~_lib_t;
-        type ~APP~_conf_t;
-        type ~APP~_exec_t;
-        type ~APP~_icon_t;
-        type ~APP~_data_t;
-        type ~APP~_http_t;
+        type {{id_underscore}}_t;
+        type {{id_underscore}}_lib_t;
+        type {{id_underscore}}_conf_t;
+        type {{id_underscore}}_exec_t;
+        type {{id_underscore}}_icon_t;
+        type {{id_underscore}}_data_t;
+        type {{id_underscore}}_http_t;
     ')
 
-    allow $1 {~APP~_t ~APP~_lib_t ~APP~_conf_t ~APP~_exec_t ~APP~_icon_t ~APP~_data_t ~APP~_http_t}:dir manage_dir_perms;
-    allow $1 {~APP~_t ~APP~_lib_t ~APP~_conf_t ~APP~_exec_t ~APP~_icon_t ~APP~_data_t ~APP~_http_t}:file manage_file_perms;
+    allow $1 { {{id_underscore}}_t {{id_underscore}}_lib_t {{id_underscore}}_conf_t {{id_underscore}}_exec_t {{id_underscore}}_icon_t {{id_underscore}}_data_t {{id_underscore}}_http_t }:dir manage_dir_perms;
+    allow $1 { {{id_underscore}}_t {{id_underscore}}_lib_t {{id_underscore}}_conf_t {{id_underscore}}_exec_t {{id_underscore}}_icon_t {{id_underscore}}_data_t {{id_underscore}}_http_t }:file manage_file_perms;
 ')

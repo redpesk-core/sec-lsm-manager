@@ -29,24 +29,6 @@
 
 #include "log.h"
 
-/***********************/
-/*** PRIVATE METHODS ***/
-/***********************/
-
-/**
- * @brief Free path and set path type to type_none
- * The pointer is not free
- *
- * @param[in] path path handler
- */
-__nonnull() static void free_path(path_t *path) {
-    if (path) {
-        free(path->path);
-        path->path = NULL;
-        path->path_type = type_none;
-    }
-}
-
 /**********************/
 /*** PUBLIC METHODS ***/
 /**********************/
@@ -60,9 +42,6 @@ void init_path_set(path_set_t *path_set) {
 /* see paths.h */
 void free_path_set(path_set_t *path_set) {
     if (path_set) {
-        for (size_t i = 0; i < path_set->size; i++) {
-            free_path(path_set->paths + i);
-        }
         path_set->size = 0;
         free(path_set->paths);
         path_set->paths = NULL;
@@ -72,14 +51,14 @@ void free_path_set(path_set_t *path_set) {
 /* see paths.h */
 int path_set_add_path(path_set_t *path_set, const char *path, enum path_type path_type) {
     if (!valid_path_type(path_type)) {
-        ERROR("invalid path type");
+        ERROR("invalid path type %d", path_type);
         return -EINVAL;
     }
 
     size_t path_len = strlen(path);
 
-    if (path_len < 2) {
-        ERROR("invalid path");
+    if (path_len < 2 || path_len >= SEC_LSM_MANAGER_MAX_SIZE_PATH) {
+        ERROR("invalid path size : %ld", path_len);
         return -EINVAL;
     }
 
@@ -90,11 +69,7 @@ int path_set_add_path(path_set_t *path_set, const char *path, enum path_type pat
     }
     path_set->paths = path_set_tmp;
 
-    path_set->paths[path_set->size].path = strdup(path);
-    if (path_set->paths[path_set->size].path == NULL) {
-        ERROR("strdup path");
-        return -ENOMEM;
-    }
+    strncpy(path_set->paths[path_set->size].path, path, SEC_LSM_MANAGER_MAX_SIZE_PATH);
 
     char *new_path = path_set->paths[path_set->size].path;
 

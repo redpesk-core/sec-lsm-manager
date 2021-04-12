@@ -26,7 +26,6 @@
 
 #include <errno.h>
 #include <fcntl.h>
-#include <limits.h>
 #include <poll.h>
 #include <stdarg.h>
 #include <stdbool.h>
@@ -116,7 +115,10 @@ static int (*uninstall_mac)(const secure_app_t *secure_app) = uninstall_selinux;
  * @param[in] count count of fields
  * @param[in] fields the fields
  */
-__nonnull((1)) static void dolog(client_t *cli, int c2s, unsigned count, const char *fields[]) {
+__nonnull((1)) static void dolog_protocol(client_t *cli, int c2s, unsigned count, const char *fields[]) {
+    if (!sec_lsm_manager_server_log)
+        return;
+
     static const char dir[2] = {'>', '<'};
     unsigned i;
 
@@ -198,9 +200,7 @@ __nonnull((1)) __wur static int putx(client_t *cli, ...) {
     }
     va_end(l);
 
-    /* emit the log */
-    if (sec_lsm_manager_server_log)
-        dolog(cli, 0, n, fields);
+    dolog_protocol(cli, 0, n, fields);
 
     /* send now */
     rc = prot_put(cli->prot, n, fields);
@@ -271,14 +271,14 @@ __nonnull() __wur static int update_policy(secure_app_t *secure_app, cynagora_t 
     // drop old policies
     int rc = cynagora_drop_policies(cynagora_admin_client, secure_app->id);
     if (rc < 0) {
-        ERROR("cynagora_drop_policies");
+        ERROR("cynagora_drop_policies : %s", secure_app->id);
         return rc;
     }
 
     // apply new policies
     rc = cynagora_set_policies(cynagora_admin_client, secure_app->id, &(secure_app->permission_set));
     if (rc < 0) {
-        ERROR("cynagora_set_policies");
+        ERROR("cynagora_set_policies : %s", secure_app->id);
         return rc;
     }
 
@@ -297,7 +297,7 @@ __nonnull() __wur static int install(client_t *cli) {
         return rc;
     }
 
-    LOG("update_policy success");
+    DEBUG("update_policy success");
 
     rc = install_mac(cli->secure_app);
     if (rc < 0) {
@@ -309,7 +309,7 @@ __nonnull() __wur static int install(client_t *cli) {
         return rc;
     }
 
-    LOG("install success");
+    DEBUG("install success");
 
     return 0;
 }
@@ -334,7 +334,7 @@ __nonnull() __wur static int uninstall(client_t *cli) {
         return rc;
     }
 
-    LOG("uninstall success");
+    DEBUG("uninstall success");
 
     return 0;
 }
@@ -354,8 +354,8 @@ __nonnull((1)) static void onrequest(client_t *cli, unsigned count, const char *
         return;
 
     /* emit the log */
-    if (sec_lsm_manager_server_log)
-        dolog(cli, 1, count, args);
+
+    dolog_protocol(cli, 1, count, args);
 
     /* version hand-shake */
     if (!cli->version) {
@@ -657,7 +657,7 @@ void sec_lsm_manager_server_destroy(sec_lsm_manager_server_t *server) {
 
 /* see sec-lsm-manager-server.h */
 __wur int sec_lsm_manager_server_create(sec_lsm_manager_server_t **server, const char *socket_spec) {
-    LOG("sec_lsm_manager_server_create");
+    DEBUG("sec_lsm_manager_server_create");
     mode_t um;
     int rc = 0;
     /* allocate the structure */
@@ -681,7 +681,7 @@ __wur int sec_lsm_manager_server_create(sec_lsm_manager_server_t **server, const
     /* create the admin server socket */
     socket_spec = sec_lsm_manager_get_socket(socket_spec);
 
-    LOG("socket = %s", socket_spec);
+    DEBUG("socket = %s", socket_spec);
 
     um = umask(017);
     (*server)->socket.fd = socket_open(socket_spec, 1);
