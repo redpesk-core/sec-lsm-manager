@@ -1,0 +1,29 @@
+include(../macros.in)
+
+# All rights on app for system
+System {{id}} rwxa
+
+# Access shared
+{{id}} System:Shared rx
+{{id}} User:App-Shared rwx
+
+# Systemd ==> Really need to be system ?
+{{id}} System wx
+
+# Access lib
+{{id}} {{id}}:Lib rx
+
+# Access conf
+{{id}} {{id}}:Conf rx
+
+# Access http
+{{id}} {{id}}:Http rx
+
+# Access data
+{{id}} {{id}}:Data rx
+
+# Access exec
+{{id}} {{id}}:Exec rx
+
+# Access User:Home ==> /home/0/
+{{id}} User:Home rx

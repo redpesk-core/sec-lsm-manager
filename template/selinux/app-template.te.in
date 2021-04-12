@@ -1,0 +1,106 @@
+include(../macros.in)
+
+###########################################################################
+# Copyright 2020-2021 IoT.bzh Company
+#
+# Author: Arthur Guyader <arthur.guyader@iot.bzh>
+#
+# $RP_BEGIN_LICENSE$
+# Commercial License Usage
+#  Licensees holding valid commercial IoT.bzh licenses may use this file in
+#  accordance with the commercial license agreement provided with the
+#  Software or, alternatively, in accordance with the terms contained in
+#  a written agreement between you and The IoT.bzh Company. For licensing terms
+#  and conditions see https://www.iot.bzh/terms-conditions. For further
+#  information use the contact form at https://www.iot.bzh/contact.
+#
+# GNU General Public License Usage
+#  Alternatively, this file may be used under the terms of the GNU General
+#  Public license version 3. This license is as published by the Free Software
+#  Foundation and appearing in the file LICENSE.GPLv3 included in the packaging
+#  of this file. Please review the following information to ensure the GNU
+#  General Public License requirements will be met
+#  https://www.gnu.org/licenses/gpl-3.0.html.
+# $RP_END_LICENSE$
+###########################################################################
+
+policy_module({{id}},1.0)
+
+gen_require(`
+    type bin_t;
+    type unreserved_port_t;
+')
+
+###############
+# Definitions #
+###############
+
+type {{id_underscore}}_t;
+files_type({{id_underscore}}_t);
+type {{id_underscore}}_exec_t;
+init_daemon_domain({{id_underscore}}_t, {{id_underscore}}_exec_t);
+init_nnp_daemon_domain({{id_underscore}}_t);
+domain_entry_file({{id_underscore}}_t, bin_t);
+role system_r types {{id_underscore}}_t;
+
+type {{id_underscore}}_lib_t;
+files_type({{id_underscore}}_lib_t);
+
+type {{id_underscore}}_conf_t;
+files_config_file({{id_underscore}}_conf_t);
+
+type {{id_underscore}}_icon_t;
+files_type({{id_underscore}}_icon_t);
+
+type {{id_underscore}}_data_t;
+files_type({{id_underscore}}_data_t);
+
+type {{id_underscore}}_http_t;
+files_type({{id_underscore}}_http_t);
+
+##########
+# Policy #
+##########
+
+init_dbus_chat({{id_underscore}}_t);
+init_stream_connect({{id_underscore}}_t);
+init_rw_stream_sockets({{id_underscore}}_t);
+kernel_dgram_send({{id_underscore}}_t);
+
+# Read conf/bin/data/http/lib
+list_dirs_pattern({{id_underscore}}_t, {{id_underscore}}_conf_t, {{id_underscore}}_conf_t);
+list_dirs_pattern({{id_underscore}}_t, {{id_underscore}}_exec_t, {{id_underscore}}_exec_t);
+list_dirs_pattern({{id_underscore}}_t, {{id_underscore}}_data_t, {{id_underscore}}_data_t);
+list_dirs_pattern({{id_underscore}}_t, {{id_underscore}}_http_t, {{id_underscore}}_http_t);
+list_dirs_pattern({{id_underscore}}_t, {{id_underscore}}_lib_t, {{id_underscore}}_lib_t);
+
+read_files_pattern({{id_underscore}}_t, {{id_underscore}}_conf_t, {{id_underscore}}_conf_t);
+read_files_pattern({{id_underscore}}_t, {{id_underscore}}_exec_t, {{id_underscore}}_exec_t);
+read_files_pattern({{id_underscore}}_t, {{id_underscore}}_data_t, {{id_underscore}}_data_t);
+read_files_pattern({{id_underscore}}_t, {{id_underscore}}_http_t, {{id_underscore}}_http_t);
+read_files_pattern({{id_underscore}}_t, {{id_underscore}}_lib_t, {{id_underscore}}_lib_t);
+
+read_lnk_files_pattern({{id_underscore}}_t, {{id_underscore}}_conf_t, {{id_underscore}}_conf_t);
+read_lnk_files_pattern({{id_underscore}}_t, {{id_underscore}}_exec_t, {{id_underscore}}_exec_t);
+read_lnk_files_pattern({{id_underscore}}_t, {{id_underscore}}_data_t, {{id_underscore}}_data_t);
+read_lnk_files_pattern({{id_underscore}}_t, {{id_underscore}}_http_t, {{id_underscore}}_http_t);
+read_lnk_files_pattern({{id_underscore}}_t, {{id_underscore}}_lib_t, {{id_underscore}}_lib_t);
+
+# Load binding shared library
+allow {{id_underscore}}_t {{id_underscore}}_lib_t:file mmap_exec_file_perms;
+
+# socket + all port > 1024
+corenet_tcp_bind_generic_node({{id_underscore}}_t);
+corenet_tcp_bind_all_unreserved_ports({{id_underscore}}_t);
+allow {{id_underscore}}_t self:tcp_socket create_stream_socket_perms;
+allow {{id_underscore}}_t self:unix_dgram_socket create_stream_socket_perms;
+
+# read /etc/resolv.conf
+sysnet_read_config({{id_underscore}}_t);
+
+# redpesk
+platform_var_rw_dir({{id_underscore}}_t);
+
+IF_PERM(canbus)
+allow can
+ENDIF
