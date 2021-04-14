@@ -28,6 +28,7 @@
 #include <string.h>
 
 #include "log.h"
+#include "utils.h"
 
 /**********************/
 /*** PUBLIC METHODS ***/
@@ -69,7 +70,7 @@ int path_set_add_path(path_set_t *path_set, const char *path, enum path_type pat
     }
     path_set->paths = path_set_tmp;
 
-    strncpy(path_set->paths[path_set->size].path, path, SEC_LSM_MANAGER_MAX_SIZE_PATH);
+    secure_strncpy(path_set->paths[path_set->size].path, path, SEC_LSM_MANAGER_MAX_SIZE_PATH);
 
     char *new_path = path_set->paths[path_set->size].path;
 

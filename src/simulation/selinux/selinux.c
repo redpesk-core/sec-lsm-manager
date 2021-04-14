@@ -153,7 +153,7 @@ int semanage_module_list(semanage_handle_t *sh, semanage_module_info_t **semanag
     if (dir != NULL) {
         while (i < *num_modules) {
             file = readdir(dir);
-            strncpy((*semanage_module_info)[i].name, file->d_name, 256);
+            secure_strncpy((*semanage_module_info)[i].name, file->d_name, 256);
             i++;
         }
         closedir(dir);

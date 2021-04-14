@@ -100,13 +100,13 @@ char public_app[] = "redpesk_public_t";
 __nonnull() __wur static void init_selinux_module(selinux_module_t *selinux_module, const secure_app_t *secure_app) {
     memset(selinux_module, 0, sizeof(*selinux_module));
 
-    strncpy(selinux_module->selinux_rules_dir, get_selinux_rules_dir(NULL), SEC_LSM_MANAGER_MAX_SIZE_DIR);
+    secure_strncpy(selinux_module->selinux_rules_dir, get_selinux_rules_dir(NULL), SEC_LSM_MANAGER_MAX_SIZE_DIR);
 
-    strncpy(selinux_module->selinux_te_template_file, get_selinux_te_template_file(NULL),
-            SEC_LSM_MANAGER_MAX_SIZE_PATH);
+    secure_strncpy(selinux_module->selinux_te_template_file, get_selinux_te_template_file(NULL),
+                   SEC_LSM_MANAGER_MAX_SIZE_PATH);
 
-    strncpy(selinux_module->selinux_if_template_file, get_selinux_if_template_file(NULL),
-            SEC_LSM_MANAGER_MAX_SIZE_PATH);
+    secure_strncpy(selinux_module->selinux_if_template_file, get_selinux_if_template_file(NULL),
+                   SEC_LSM_MANAGER_MAX_SIZE_PATH);
 
     snprintf(selinux_module->selinux_te_file, SEC_LSM_MANAGER_MAX_SIZE_PATH, "%s/%s.%s",
              selinux_module->selinux_rules_dir, secure_app->id, TE_EXTENSION);

@@ -117,8 +117,8 @@ int secure_app_set_id(secure_app_t *secure_app, const char *id) {
         return -EPERM;
     }
 
-    strncpy(secure_app->id, id, SEC_LSM_MANAGER_MAX_SIZE_ID);
-    strncpy(secure_app->id_underscore, id, SEC_LSM_MANAGER_MAX_SIZE_ID);
+    secure_strncpy(secure_app->id, id, SEC_LSM_MANAGER_MAX_SIZE_ID);
+    secure_strncpy(secure_app->id_underscore, id, SEC_LSM_MANAGER_MAX_SIZE_ID);
     dash_to_underscore(secure_app->id_underscore);
 
     return 0;

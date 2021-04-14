@@ -154,7 +154,7 @@ void init_path_type_definitions(path_type_definitions_t path_type_definitions[nu
     snprintf(path_type_definitions[type_id].label, SEC_LSM_MANAGER_MAX_SIZE_LABEL, "%s%s", prefix_app, id);
     snprintf(path_type_definitions[type_lib].label, SEC_LSM_MANAGER_MAX_SIZE_LABEL, "%s%s%s", prefix_app, id,
              suffix_lib);
-    strncpy(path_type_definitions[type_public].label, public_app, SEC_LSM_MANAGER_MAX_SIZE_LABEL);
+    secure_strncpy(path_type_definitions[type_public].label, public_app, SEC_LSM_MANAGER_MAX_SIZE_LABEL);
 
     // executable
     path_type_definitions[type_exec].is_executable = true;
@@ -174,8 +174,8 @@ int create_smack_rules(const secure_app_t *secure_app) {
     char smack_template_file[SEC_LSM_MANAGER_MAX_SIZE_PATH];
     char smack_rules_file[SEC_LSM_MANAGER_MAX_SIZE_PATH];
 
-    strncpy(smack_policy_dir, get_smack_policy_dir(NULL), SEC_LSM_MANAGER_MAX_SIZE_DIR);
-    strncpy(smack_template_file, get_smack_template_file(NULL), SEC_LSM_MANAGER_MAX_SIZE_PATH);
+    secure_strncpy(smack_policy_dir, get_smack_policy_dir(NULL), SEC_LSM_MANAGER_MAX_SIZE_DIR);
+    secure_strncpy(smack_template_file, get_smack_template_file(NULL), SEC_LSM_MANAGER_MAX_SIZE_PATH);
 
     snprintf(smack_rules_file, SEC_LSM_MANAGER_MAX_SIZE_PATH, "%s/%s.%s", smack_policy_dir, secure_app->id,
              SMACK_EXTENSION);
@@ -229,7 +229,7 @@ int remove_smack_rules(const secure_app_t *secure_app) {
     char smack_policy_dir[SEC_LSM_MANAGER_MAX_SIZE_DIR];
     char smack_rules_file[SEC_LSM_MANAGER_MAX_SIZE_PATH];
 
-    strncpy(smack_policy_dir, get_smack_policy_dir(NULL), SEC_LSM_MANAGER_MAX_SIZE_DIR);
+    secure_strncpy(smack_policy_dir, get_smack_policy_dir(NULL), SEC_LSM_MANAGER_MAX_SIZE_DIR);
     snprintf(smack_rules_file, SEC_LSM_MANAGER_MAX_SIZE_PATH, "%s/%s.%s", smack_policy_dir, secure_app->id,
              SMACK_EXTENSION);
 

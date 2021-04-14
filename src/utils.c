@@ -42,6 +42,16 @@ static const size_t BLOCKSIZE = 8192;
 /*** PUBLIC METHODS ***/
 /**********************/
 
+char *secure_strncpy(char *dest, const char *src, size_t n) {
+    char *ret = NULL;
+    if (dest != NULL && src != NULL) {
+        ret = strncpy(dest, src, n - 1);
+        if (n > 0)
+            dest[n - 1] = '\0';
+    }
+    return ret;
+}
+
 /* see utils.h */
 bool valid_label(const char *s) {
     if (!s)

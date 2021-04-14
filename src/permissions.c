@@ -22,6 +22,7 @@
 #include <string.h>
 
 #include "log.h"
+#include "utils.h"
 
 /**********************/
 /*** PUBLIC METHODS ***/
@@ -59,7 +60,7 @@ int permission_set_add_permission(permission_set_t *permission_set, const char *
     }
     permission_set->permissions = permissions_tmp;
 
-    strncpy(permission_set->permissions[permission_set->size], permission, SEC_LSM_MANAGER_MAX_SIZE_PERMISSION);
+    secure_strncpy(permission_set->permissions[permission_set->size], permission, SEC_LSM_MANAGER_MAX_SIZE_PERMISSION);
     permission_set->size++;
 
     return 0;

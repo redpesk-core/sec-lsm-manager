@@ -30,6 +30,8 @@
 
 #include "limits.h"
 
+char *secure_strncpy(char *dest, const char *src, size_t n) __nonnull((1, 2));
+
 /**
  * @brief Check if string is valid label
  *
