@@ -21,7 +21,7 @@
 static void list(void *closure, const cynagora_key_t *key, const cynagora_value_t *value) {
     (void)value;
     permission_set_t *permission_set = closure;
-    permission_set_add_permission(permission_set, key->permission);
+    ck_assert_int_eq(permission_set_add_permission(permission_set, key->permission), 0);
 }
 
 int cynagora_get_policies(cynagora_t *cynagora, const char *client, permission_set_t *permission_set) {
@@ -50,8 +50,8 @@ START_TEST(test_cynagora_set_policies) {
     permission_set_t permission_set;
     init_permission_set(&permission_set);
 
-    permission_set_add_permission(&permission_set, "perm1");
-    permission_set_add_permission(&permission_set, "perm2");
+    ck_assert_int_eq(permission_set_add_permission(&permission_set, "perm1"), 0);
+    ck_assert_int_eq(permission_set_add_permission(&permission_set, "perm2"), 0);
 
     ck_assert_int_eq(cynagora_set_policies(cynagora_admin_client, id, &permission_set), 0);
 
@@ -72,6 +72,8 @@ START_TEST(test_cynagora_set_policies) {
 
     ck_assert_int_eq(cynagora_drop_policies(cynagora_admin_client, id), 0);
 
+    free_permission_set(&permission_set);
+    free_permission_set(&permission_set2);
     cynagora_destroy(cynagora_admin_client);
 }
 END_TEST
@@ -84,8 +86,8 @@ START_TEST(test_cynagora_drop_policies) {
     permission_set_t permission_set;
     init_permission_set(&permission_set);
 
-    permission_set_add_permission(&permission_set, "perm1");
-    permission_set_add_permission(&permission_set, "perm2");
+    ck_assert_int_eq(permission_set_add_permission(&permission_set, "perm1"), 0);
+    ck_assert_int_eq(permission_set_add_permission(&permission_set, "perm2"), 0);
 
     ck_assert_int_eq(cynagora_set_policies(cynagora_admin_client, id, &permission_set), 0);
 
@@ -106,6 +108,8 @@ START_TEST(test_cynagora_drop_policies) {
         found = 0;
     }
 
+    free_permission_set(&permission_set);
+    free_permission_set(&permission_set2);
     cynagora_destroy(cynagora_admin_client);
 }
 END_TEST

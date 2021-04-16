@@ -22,7 +22,6 @@
  */
 
 #include <errno.h>
-#include <linux/stat.h>
 #include <stdio.h>
 #include <sys/stat.h>
 #include <unistd.h>
@@ -31,52 +30,52 @@
 #include "setup-tests.h"
 
 START_TEST(test_check_file_exists) {
-    char *path = "test.txt";
-    ck_assert_int_eq((int)check_file_exists(path), 0);
-    FILE *fp = fopen(path, "w");
-    fclose(fp);
-    ck_assert_int_eq((int)check_file_exists(path), 1);
-    remove(path);
+    char tmp_file[SEC_LSM_MANAGER_MAX_SIZE_PATH] = {'\0'};
+    create_tmp_file(tmp_file);
+    ck_assert_int_eq((int)check_file_exists(tmp_file), 1);
+    remove(tmp_file);
+    ck_assert_int_eq((int)check_file_exists(tmp_file), 0);
 }
 END_TEST
 
 START_TEST(test_check_file_type) {
-    char *path = "test";
-    ck_assert_int_eq((int)check_file_type(path, S_IFREG), 0);
-    FILE *fp = fopen(path, "w");
-    fclose(fp);
-    ck_assert_int_eq((int)check_file_type(path, 123), 0);
-    ck_assert_int_eq((int)check_file_type(path, S_IFDIR), 0);
-    ck_assert_int_eq((int)check_file_type(path, S_IFREG), 1);
-    remove(path);
-    mkdir(path, 0700);
-    ck_assert_int_eq((int)check_file_type(path, S_IFREG), 0);
-    ck_assert_int_eq((int)check_file_type(path, S_IFDIR), 1);
-    rmdir(path);
+    char tmp_file[SEC_LSM_MANAGER_MAX_SIZE_PATH] = {'\0'};
+    char tmp_dir[SEC_LSM_MANAGER_MAX_SIZE_DIR] = {'\0'};
+    create_tmp_file(tmp_file);
+    ck_assert_int_eq((int)check_file_type(tmp_file, 123), 0);
+    ck_assert_int_eq((int)check_file_type(tmp_file, S_IFDIR), 0);
+    ck_assert_int_eq((int)check_file_type(tmp_file, S_IFREG), 1);
+    remove(tmp_file);
+    ck_assert_int_eq((int)check_file_type(tmp_file, S_IFREG), 0);
+    create_tmp_dir(tmp_dir);
+    ck_assert_int_eq((int)check_file_type(tmp_dir, S_IFREG), 0);
+    ck_assert_int_eq((int)check_file_type(tmp_dir, S_IFDIR), 1);
+    rmdir(tmp_dir);
 }
 END_TEST
 
 START_TEST(test_check_executable) {
-    char *path = "test";
-    ck_assert_int_eq((int)check_executable(path), 0);
-    FILE *fp = fopen(path, "w");
-    fclose(fp);
-    ck_assert_int_eq((int)check_executable(path), 0);
-    chmod(path, 0700);
-    ck_assert_int_eq((int)check_executable(path), 1);
-    remove(path);
-    mkdir(path, 0700);
-    ck_assert_int_eq((int)check_executable(path), 1);
-    rmdir(path);
+    char tmp_file[SEC_LSM_MANAGER_MAX_SIZE_PATH] = {'\0'};
+    char tmp_dir[SEC_LSM_MANAGER_MAX_SIZE_DIR] = {'\0'};
+    create_tmp_file(tmp_file);
+    ck_assert_int_eq((int)check_executable(tmp_file), 0);
+    chmod(tmp_file, 0700);
+    ck_assert_int_eq((int)check_executable(tmp_file), 1);
+    remove(tmp_file);
+    create_tmp_dir(tmp_dir);
+    ck_assert_int_eq((int)check_executable(tmp_dir), 1);
+    chmod(tmp_dir, 0400);
+    ck_assert_int_eq((int)check_executable(tmp_dir), 0);
+    rmdir(tmp_dir);
+    ck_assert_int_eq((int)check_executable(tmp_file), 0);
 }
 END_TEST
 
 START_TEST(test_remove_file) {
-    char *path = "test";
-    ck_assert_int_ne(remove_file(path), 0);
-    FILE *fp = fopen(path, "w");
-    fclose(fp);
-    ck_assert_int_eq(remove_file(path), 0);
+    char tmp_file[SEC_LSM_MANAGER_MAX_SIZE_PATH] = {'\0'};
+    create_tmp_file(tmp_file);
+    ck_assert_int_eq(remove_file(tmp_file), 0);
+    ck_assert_int_lt(remove_file(tmp_file), 0);
 }
 END_TEST
 

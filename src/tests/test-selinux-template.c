@@ -22,14 +22,14 @@
 #define TESTID_SELINUX "testid_binding"
 
 START_TEST(test_generate_app_module_fc) {
-    char fs_file[200] = "/sys/fs/test";
-    char tmp_file[200] = {'\0'};
+    char fs_file[SEC_LSM_MANAGER_MAX_SIZE_PATH] = "/sys/fs/test";
+    char tmp_file[SEC_LSM_MANAGER_MAX_SIZE_PATH] = {'\0'};
 
     path_type_definitions_t path_type_definitions[number_path_type];
     init_path_type_definitions(path_type_definitions, TESTID);
 
     secure_app_t *secure_app = NULL;
-    create_secure_app(&secure_app);
+    ck_assert_int_eq(create_secure_app(&secure_app), 0);
     ck_assert_int_eq(secure_app_add_path(secure_app, "/tmp/data", type_data), 0);
     ck_assert_int_eq(secure_app_add_path(secure_app, "/tmp/conf", type_conf), 0);
     ck_assert_int_eq(secure_app_add_path(secure_app, "/tmp/lib", type_lib), 0);
@@ -42,11 +42,11 @@ START_TEST(test_generate_app_module_fc) {
 END_TEST
 
 START_TEST(test_generate_app_module_files) {
-    char tmp_dir[200] = {'\0'};
+    char tmp_dir[SEC_LSM_MANAGER_MAX_SIZE_DIR] = {'\0'};
     create_tmp_dir(tmp_dir);
 
     secure_app_t *secure_app = NULL;
-    create_secure_app(&secure_app);
+    ck_assert_int_eq(create_secure_app(&secure_app), 0);
     ck_assert_int_eq(secure_app_set_id(secure_app, TESTID), 0);
     ck_assert_int_eq(secure_app_add_path(secure_app, "/tmp", type_conf), 0);
 

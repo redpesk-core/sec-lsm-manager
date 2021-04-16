@@ -156,6 +156,8 @@ __nonnull() __wur static int generate_app_module_fc(const char *selinux_fc_file,
         }
     }
 
+    rc = 0;
+
 error:
     rc2 = fclose(f_module_fc);
     if (rc2 < 0) {

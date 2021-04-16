@@ -21,63 +21,52 @@
 #include "setup-tests.h"
 
 START_TEST(test_selinux_process_paths) {
-    char etc_tmp_file[200] = {'\0'};
+    char etc_tmp_file[SEC_LSM_MANAGER_MAX_SIZE_PATH] = {'\0'};
     create_etc_tmp_file(etc_tmp_file);
 
     path_type_definitions_t path_type_definitions[number_path_type];
     init_path_type_definitions(path_type_definitions, TESTID);
 
     secure_app_t *secure_app = NULL;
-    create_secure_app(&secure_app);
+    ck_assert_int_eq(create_secure_app(&secure_app), 0);
     ck_assert_int_eq(secure_app_add_path(secure_app, etc_tmp_file, type_id), 0);
 
     ck_assert_int_eq(selinux_process_paths(secure_app, path_type_definitions), 0);
 
-    ck_assert_int_eq(compare_xattr(etc_tmp_file, XATTR_NAME_SELINUX, "system_u:object_r:etc_t:s0"), true);
+    ck_assert_int_eq(compare_xattr(etc_tmp_file, XATTR_NAME_SELINUX, "system_u:object_r:testid-binding_t:s0"), true);
 
     ck_assert_int_eq(secure_app_add_path(secure_app, "bad_path", type_id), 0);
 
-    ck_assert_int_eq(selinux_process_paths(secure_app, path_type_definitions), 0);
+    ck_assert_int_eq(selinux_process_paths(secure_app, path_type_definitions), -ENOENT);
 
     remove(etc_tmp_file);
 }
 END_TEST
 
 START_TEST(test_selinux_install) {
-    char tmp_dir[200] = {'\0'};
+    char tmp_dir[SEC_LSM_MANAGER_MAX_SIZE_DIR] = {'\0'};
     create_tmp_dir(tmp_dir);
 
-    char data_dir[100];
-    strcpy(data_dir, tmp_dir);
-    strcat(data_dir, "/data/");
-    char data_file[100];
-    strcpy(data_file, tmp_dir);
-    strcat(data_file, "/data/");
-    strcat(data_file, "data_file");
+    char data_dir[SEC_LSM_MANAGER_MAX_SIZE_DIR];
+    char data_file[SEC_LSM_MANAGER_MAX_SIZE_PATH];
+    char exec_dir[SEC_LSM_MANAGER_MAX_SIZE_DIR];
+    char exec_file[SEC_LSM_MANAGER_MAX_SIZE_PATH];
+    char id_dir[SEC_LSM_MANAGER_MAX_SIZE_DIR];
+    char id_file[SEC_LSM_MANAGER_MAX_SIZE_PATH];
+    char public_dir[SEC_LSM_MANAGER_MAX_SIZE_DIR];
+    char public_file[SEC_LSM_MANAGER_MAX_SIZE_PATH];
 
-    char exec_dir[100];
-    strcpy(exec_dir, tmp_dir);
-    strcat(exec_dir, "/exec/");
-    char exec_file[100];
-    strcpy(exec_file, tmp_dir);
-    strcat(exec_file, "/exec/");
-    strcat(exec_file, "exec_file");
+    snprintf(data_dir, SEC_LSM_MANAGER_MAX_SIZE_DIR, "%s/data/", tmp_dir);
+    snprintf(data_file, SEC_LSM_MANAGER_MAX_SIZE_PATH, "%s/data/data_file", tmp_dir);
 
-    char id_dir[100];
-    strcpy(id_dir, tmp_dir);
-    strcat(id_dir, "/id/");
-    char id_file[100];
-    strcpy(id_file, tmp_dir);
-    strcat(id_file, "/id/");
-    strcat(id_file, "id_file");
+    snprintf(exec_dir, SEC_LSM_MANAGER_MAX_SIZE_DIR, "%s/exec/", tmp_dir);
+    snprintf(exec_file, SEC_LSM_MANAGER_MAX_SIZE_PATH, "%s/exec/exec_file", tmp_dir);
 
-    char public_dir[100];
-    strcpy(public_dir, tmp_dir);
-    strcat(public_dir, "/public/");
-    char public_file[100];
-    strcpy(public_file, tmp_dir);
-    strcat(public_file, "/public/");
-    strcat(public_file, "public_file");
+    snprintf(id_dir, SEC_LSM_MANAGER_MAX_SIZE_DIR, "%s/id/", tmp_dir);
+    snprintf(id_file, SEC_LSM_MANAGER_MAX_SIZE_PATH, "%s/id/id_file", tmp_dir);
+
+    snprintf(public_dir, SEC_LSM_MANAGER_MAX_SIZE_DIR, "%s/public/", tmp_dir);
+    snprintf(public_file, SEC_LSM_MANAGER_MAX_SIZE_PATH, "%s/public/public_file", tmp_dir);
 
     ck_assert_int_eq(mkdir(data_dir, 0777), 0);
     ck_assert_int_eq(mkdir(exec_dir, 0777), 0);

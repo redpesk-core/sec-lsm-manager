@@ -144,6 +144,7 @@ bool smack_enabled() {
 
 /* see smack-label.h */
 void init_path_type_definitions(path_type_definitions_t path_type_definitions[number_path_type], const char *id) {
+    memset(path_type_definitions, 0, sizeof(path_type_definitions_t) * 9);
     snprintf(path_type_definitions[type_conf].label, SEC_LSM_MANAGER_MAX_SIZE_LABEL, "%s%s%s", prefix_app, id,
              suffix_conf);
     snprintf(path_type_definitions[type_data].label, SEC_LSM_MANAGER_MAX_SIZE_LABEL, "%s%s%s", prefix_app, id,

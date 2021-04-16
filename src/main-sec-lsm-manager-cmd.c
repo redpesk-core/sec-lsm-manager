@@ -110,9 +110,8 @@ static const char help_path_text[] =
     "   - data\n"
     "   - http\n"
     "   - log\n"
-    "   - tmp\n"
     "\n"
-    "Example : path /tmp/file tmp\n"
+    "Example : path /tmp/file data\n"
     "\n";
 
 static const char help_permission_text[] =
@@ -500,12 +499,12 @@ int main(int ac, char **av) {
 
     /* handles help, version, error */
     if (help) {
-        fprintf(stdout, helptxt);
+        puts(helptxt);
         return 0;
     }
 
     if (version) {
-        fprintf(stdout, versiontxt);
+        puts(versiontxt);
         return 0;
     }
 

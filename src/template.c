@@ -85,7 +85,8 @@ int process_template(const char *template_path, const char *dest, secure_app_t *
     FILE *f_dest = fopen(dest, "w");
     if (f_dest == NULL) {
         ERROR("fopen : %s", dest);
-        return -EINVAL;
+        rc = -EINVAL;
+        goto end;
     }
 
     rc = fmustach(template, &itf, secure_app, f_dest);
@@ -97,5 +98,8 @@ int process_template(const char *template_path, const char *dest, secure_app_t *
     if (rc2 < 0) {
         ERROR("fclose %s : %d %s", dest, errno, strerror(errno));
     }
+
+end:
+    free(template);
     return rc;
 }

@@ -34,9 +34,10 @@ void addtcase(const char *name) {
 
 void addtest(const TTest *fun) { tcase_add_test(tcase, fun); }
 
-int srun() {
+int srun(const char *log_file) {
     int nerr;
     SRunner *srunner = srunner_create(suite);
+    srunner_set_tap(srunner, log_file);
     srunner_run_all(srunner, CK_NORMAL);
     nerr = srunner_ntests_failed(srunner);
     srunner_free(srunner);
@@ -69,9 +70,9 @@ void create_etc_tmp_file(char *tmp_file) {
 }
 
 bool compare_xattr(const char *path, const char *xattr, const char *value) {
-    char buf[500] = {0};
+    char buf[SEC_LSM_MANAGER_MAX_SIZE_LABEL] = {0};
 
-    lgetxattr(path, xattr, buf, 500);
+    lgetxattr(path, xattr, buf, SEC_LSM_MANAGER_MAX_SIZE_LABEL);
 
     if (!strcmp(buf, value)) {
         return true;
@@ -98,8 +99,15 @@ extern void test_smack_label();
 extern void test_selinux_template();
 extern void test_selinux();
 #endif
+int main(int argc, char const *argv[]) {
+    char log_file[SEC_LSM_MANAGER_MAX_SIZE_PATH];
+    if (argc != 2) {
+        printf("Usage : %s log_file.tap\n", argv[0]);
+        return -1;
+    }
 
-int main() {
+    secure_strncpy(log_file, argv[1], SEC_LSM_MANAGER_MAX_SIZE_PATH);
+
     mksuite("tests");
 
     addtcase("paths");
@@ -131,5 +139,5 @@ int main() {
     test_selinux();
 #endif
 
-    return !!srun();
+    return !!srun(log_file);
 }

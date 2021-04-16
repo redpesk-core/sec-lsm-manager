@@ -24,6 +24,8 @@
 
 cmake_minimum_required(VERSION 3.3)
 
+message("\n######################## COMPILE TESTS ########################\n")
+
 PKG_CHECK_MODULES(check REQUIRED check)
 
 set(CMAKE_BUILD_TYPE "DEBUG")
@@ -46,59 +48,79 @@ if(NOT SIMULATE_CYNAGORA)
 endif()
 
 if(WITH_SMACK)
-    set(TEST_SOURCES ${TEST_SOURCES} test-smack.c)
+    set(TEST_SOURCES_SMACK ${TEST_SOURCES} test-smack.c)
 endif()
 
 if(WITH_SELINUX)
-    set(TEST_SOURCES ${TEST_SOURCES} test-selinux.c)
+    set(TEST_SOURCES_SELINUX ${TEST_SOURCES} test-selinux.c)
 endif()
 
-message("[*] Create : tests")
-add_executable(tests ${TEST_SOURCES})
+function(build_tests_for_mac MAC_NAME)
+    message("[*] Create : tests-${MAC_NAME}")
 
-target_compile_options(tests PRIVATE --coverage)
-target_link_libraries(tests --coverage)
+    if(${MAC_NAME} STREQUAL "smack")
+        add_executable(tests-smack ${TEST_SOURCES_SMACK})
+        target_compile_definitions(tests-smack PRIVATE WITH_SMACK)
+        if(NOT SIMULATE_SMACK)
+            target_link_libraries(tests-smack ${libsmack_LDFLAGS} ${libsmack_LINK_LIBRARIES})
+            target_include_directories(tests-smack PRIVATE ${libsmack_INCLUDE_DIRS})
+            target_compile_options(tests-smack PRIVATE ${libsmack_CFLAGS})
+            message("[-] Link : libsmack")
+        endif()
+    endif()
 
-target_link_libraries(tests ${check_LDFLAGS} ${check_LINK_LIBRARIES})
-target_include_directories(tests PRIVATE ${check_INCLUDE_DIRS})
-message("[-] Link : check")
+    if(${MAC_NAME} STREQUAL "selinux")
+        add_executable(tests-selinux ${TEST_SOURCES_SELINUX})
+        target_compile_definitions(tests-selinux PRIVATE WITH_SELINUX)
+        if(NOT SIMULATE_SELINUX)
+            target_link_libraries(tests-selinux ${libselinux_LDFLAGS} ${libselinux_LINK_LIBRARIES})
+            target_include_directories(tests-selinux PRIVATE ${libselinux_INCLUDE_DIRS})
+            target_compile_options(tests-selinux PRIVATE ${libselinux_CFLAGS})
+            target_link_libraries(tests-selinux ${libsemanage_LDFLAGS} ${libsemanage_LINK_LIBRARIES})
+            target_include_directories(tests-selinux PRIVATE ${libsemanage_INCLUDE_DIRS})
+            target_compile_options(tests-selinux PRIVATE ${libsemanage_CFLAGS})
+            message("[-] Link : libselinux")
+            message("[-] Link : libsemanage")
+        endif()
+    endif()
 
-if(NOT SIMULATE_CYNAGORA)
-    target_link_libraries(tests ${cynagora_LDFLAGS} ${libselinux_LINK_LIBRARIES})
-    target_include_directories(tests PRIVATE ${cynagora_INCLUDE_DIRS})
-    target_compile_options(tests PRIVATE ${cynagora_CFLAGS})
-    message("[-] Link : cynagora")
-endif()
+    target_compile_options(tests-${MAC_NAME} PRIVATE --coverage)
+    target_link_libraries(tests-${MAC_NAME} --coverage)
 
+    target_link_libraries(tests-${MAC_NAME} ${check_LDFLAGS} ${check_LINK_LIBRARIES})
+    target_include_directories(tests-${MAC_NAME} PRIVATE ${check_INCLUDE_DIRS})
+    message("[-] Link : check")
+
+    target_link_libraries(tests-${MAC_NAME} cap)
+
+    if(NOT SIMULATE_CYNAGORA)
+        target_link_libraries(tests-${MAC_NAME} ${cynagora_LDFLAGS} ${cynagora_LINK_LIBRARIES})
+        target_include_directories(tests-${MAC_NAME} PRIVATE ${cynagora_INCLUDE_DIRS})
+        target_compile_options(tests-${MAC_NAME} PRIVATE ${cynagora_CFLAGS})
+        message("[-] Link : cynagora")
+    endif()
+
+    if(WITH_SYSTEMD)
+        target_link_libraries(tests-${MAC_NAME} ${libsystemd_LDFLAGS} ${libsystemd_LINK_LIBRARIES})
+        target_include_directories(tests-${MAC_NAME} PRIVATE ${libsystemd_INCLUDE_DIRS})
+        target_compile_options(tests-${MAC_NAME} PRIVATE ${libsystemd_CFLAGS})
+        message("[-] Link : libsystemd")
+    endif()
+
+    add_test(tests-${MAC_NAME} ${CMAKE_CURRENT_BINARY_DIR}/tests)
+    INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/tests-${MAC_NAME} DESTINATION ${SEC_LSM_MANAGER_DATADIR}/tests/)
+    message("[x] Done : tests-${MAC_NAME}\n")
+endfunction()
 
 if(WITH_SMACK)
-    target_compile_definitions(tests PRIVATE WITH_SMACK)
-    target_link_libraries(tests ${libsmack_LDFLAGS} ${libsmack_LINK_LIBRARIES})
-    target_include_directories(tests PRIVATE ${libsmack_INCLUDE_DIRS})
-    target_compile_options(tests PRIVATE ${libsmack_CFLAGS})
-    message("[-] Link : smack")
-elseif(WITH_SELINUX)
-    target_compile_definitions(tests PRIVATE WITH_SELINUX)
-    target_link_libraries(tests ${libselinux_LDFLAGS} ${libselinux_LINK_LIBRARIES})
-    target_include_directories(tests PRIVATE ${libselinux_INCLUDE_DIRS})
-    target_compile_options(tests PRIVATE ${libselinux_CFLAGS})
-    target_link_libraries(tests ${libsemanage_LDFLAGS} ${libsemanage_LINK_LIBRARIES})
-    target_include_directories(tests PRIVATE ${libsemanage_INCLUDE_DIRS})
-    target_compile_options(tests PRIVATE ${libsemanage_CFLAGS})
-    message("[-] Link : libselinux")
-    message("[-] Link : libsemanage")
+    build_tests_for_mac("smack")
 endif()
 
-if(WITH_SYSTEMD)
-    target_link_libraries(tests ${libsystemd_LDFLAGS} ${libsystemd_LINK_LIBRARIES})
-    target_include_directories(tests PRIVATE ${libsystemd_INCLUDE_DIRS})
-    target_compile_options(tests PRIVATE ${libsystemd_CFLAGS})
-    message("[-] Link : libsystemd")
+if(WITH_SELINUX)
+    build_tests_for_mac("selinux")
 endif()
 
-add_test(tests ${CMAKE_CURRENT_BINARY_DIR}/tests)
-message("[x] Done : tests\n")
-
+find_program(GVOVR gcovr)
 message("GCOVR=${GVOVR}")
 
 add_custom_target(coverage
@@ -106,6 +128,3 @@ add_custom_target(coverage
                     COMMAND ${GVOVR} --exclude ${CMAKE_SOURCE_DIR}/src/mustach -r ${CMAKE_SOURCE_DIR}/src --object-directory=${CMAKE_BINARY_DIR} --html --html-details -o ${CMAKE_BINARY_DIR}/coverage/index.html
                     COMMAND ${GVOVR} --exclude ${CMAKE_SOURCE_DIR}/src/mustach -r ${CMAKE_SOURCE_DIR}/src --object-directory=${CMAKE_BINARY_DIR}
                     WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
-
-
-

@@ -61,7 +61,7 @@ START_TEST(test_path_set_add_path) {
     int i = 0;
     while (i < 50) {
         char buf[50];
-        sprintf(buf, "/test/n%d", i);
+        snprintf(buf, 50, "/test/n%d", i);
         ck_assert_int_eq(path_set_add_path(&paths, buf, type_conf), 0);
         i++;
     }

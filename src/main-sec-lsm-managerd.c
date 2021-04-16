@@ -96,7 +96,7 @@ static const char helptxt[] =
     "otpions:\n"
     "    -u, --user xxx        set the user\n"
     "    -g, --group xxx       set the group\n"
-    "    -G  --groups xxx,yyy  set additional groups"
+    "    -G  --groups xxx,yyy  set additional groups\n"
     "    -l, --log             activate log of transactions\n"
     "\n"
     "    -S, --socketdir xxx   set the base directory xxx for sockets\n"
@@ -188,7 +188,7 @@ int main(int ac, char **av) {
         return 0;
     }
     if (version) {
-        fprintf(stdout, versiontxt);
+        puts(versiontxt);
         return 0;
     }
     if (error)

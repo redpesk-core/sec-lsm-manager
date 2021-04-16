@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 
-#include "../smack-label.c"
 #include "../smack-template.c"
 #include "setup-tests.h"
 

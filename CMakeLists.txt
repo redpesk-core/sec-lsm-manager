@@ -53,8 +53,8 @@ option(SIMULATE_CYNAGORA    "simulate cynagora" OFF)
 option(SIMULATE_SMACK       "simulate smack" OFF)
 option(SIMULATE_SELINUX     "simulate selinux" OFF)
 
-option(FORTIFY              "fortify" OFF)
-option(COMPILE_TEST         "compile test" OFF)
+option(FORTIFY              "fortify" ON)
+option(COMPILE_TEST         "compile test" ON)
 option(DEBUG                "debug" OFF)
 
 ##########################################################################
@@ -70,7 +70,7 @@ set(CYNAGORA_GROUP cynagora CACHE STRING "group of the daemon")
 set(SEC_LSM_MANAGER_DATADIR         "${CMAKE_INSTALL_FULL_DATADIR}/${CMAKE_PROJECT_NAME}")
 set(SEC_LSM_MANAGER_SOCKET_NAME     "sec-lsm-manager.socket")
 
-set(PREFIX_PERMISSION               "urn:AGL:" CACHE STRING "Prefix permission")
+set(PREFIX_PERMISSION               "urn:AGL:")
 
 # SELINUX
 
@@ -114,7 +114,7 @@ if(WITH_SIMULATION)
     set(SIMULATE_CYNAGORA   ON)
 endif()
 
-message("########################### VARIABLES ###########################\n")
+message("\n########################### VARIABLES ###########################\n")
 
 function(add_compile_definitions_and_print args)
     add_compile_definitions(${args})
@@ -163,8 +163,6 @@ if(WITH_SELINUX)
     endif()
 endif()
 
-message("\n#################################################################")
-
 ##########################################################################
 # define sockets, binaries and systemd directory
 
@@ -187,10 +185,12 @@ add_compile_definitions(SYSTEMD_NAME="${CMAKE_PROJECT_NAME}")
 ##########################################################################
 # define compile options
 
+message("\n######################## COMPILE OPTIONS ########################\n")
+
 if(DEBUG)
     set(CMAKE_BUILD_TYPE "DEBUG")
     add_compile_definitions(DEBUG_MODE)
-elseif()
+else()
     set(CMAKE_BUILD_TYPE "RELEASE")
 endif()
 
@@ -206,6 +206,7 @@ add_compile_options(-Wno-nonnull-compare)
 #add_compile_options(-ffile-prefix-map=${CMAKE_SOURCE_DIR}=.)
 
 add_compile_definitions(_GNU_SOURCE)
+message("_GNU_SOURCE")
 
 if(FORTIFY)
     add_compile_definitions(_FORTIFY_SOURCE=2)
@@ -213,6 +214,7 @@ if(FORTIFY)
     message("FORTIFY")
 endif()
 
+message("\n#################################################################\n")
 
 ###########################################################################
 # Check libraries
@@ -235,13 +237,6 @@ endif()
 
 if(NOT SIMULATE_CYNAGORA)
     PKG_CHECK_MODULES(cynagora REQUIRED cynagora)
-endif()
-
-if(COMPILE_TEST)
-    find_program(GVOVR gcovr)
-    if(NOT GVOVR)
-        message(FATAL_ERROR "COMPILE_TEST required gcovr")
-    endif()
 endif()
 
 ###########################################################################

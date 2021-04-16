@@ -19,65 +19,33 @@
 #include "./test-smack-label.c"
 #include "setup-tests.h"
 
-START_TEST(test_set_smack) {
-    char tmp_dir[200] = {'\0'};
-    char path[200] = {'\0'};
-    char val[200] = {'\0'};
-    char label[200] = {'\0'};
-    // path and label not set + file not created
-    ck_assert_int_lt(set_smack(path, XATTR_NAME_SMACK, label), 0);
-    // set label
-    strcpy(label, "label");
-    ck_assert_int_lt(set_smack(path, XATTR_NAME_SMACK, label), 0);
-    // set path
-    create_tmp_dir(tmp_dir);
-    strcpy(path, tmp_dir);
-    strcat(path, "/test.txt");
-    ck_assert_int_lt(set_smack(path, XATTR_NAME_SMACK, label), 0);
-    // create file
-    create_file(path);
-    ck_assert_int_eq(set_smack(path, XATTR_NAME_SMACK, label), 0);
-    ck_assert_int_gt(lgetxattr(path, XATTR_NAME_SMACK, val, 200), 0);
-    ck_assert_str_eq(val, label);
-    ck_assert_int_eq(remove(path), 0);
-    ck_assert_int_eq(rmdir(tmp_dir), 0);
-}
-END_TEST
-
 START_TEST(test_label_file) {
-    char path[200] = {'\0'};
-    char label[200] = {'\0'};
-    char tmp_dir[200] = {'\0'};
+    char label[SEC_LSM_MANAGER_MAX_SIZE_LABEL] = {'\0'};
+    char tmp_file[SEC_LSM_MANAGER_MAX_SIZE_PATH] = {'\0'};
     // path and label not set + file not created
-    ck_assert_int_lt(label_file(path, label), 0);
-    // set path
-    create_tmp_dir(tmp_dir);
-    strcpy(path, tmp_dir);
-    strcat(path, "/test.txt");
-    ck_assert_int_lt(label_file(path, label), 0);
+    ck_assert_int_lt(label_file(tmp_file, label), 0);
     // set label
-    strcpy(label, "label");
-    ck_assert_int_lt(label_file(path, label), 0);
+    secure_strncpy(label, "label", SEC_LSM_MANAGER_MAX_SIZE_LABEL);
+    ck_assert_int_lt(label_file(tmp_file, label), 0);
     // create file
-    create_file(path);
-    ck_assert_int_eq(label_file(path, label), 0);
+    create_tmp_file(tmp_file);
+    ck_assert_int_eq(label_file(tmp_file, label), 0);
     // set label = ""
-    strcpy(label, "");
-    ck_assert_int_lt(label_file(path, label), 0);
-    remove(path);
+    secure_strncpy(label, "", SEC_LSM_MANAGER_MAX_SIZE_LABEL);
+    ck_assert_int_lt(label_file(tmp_file, label), 0);
+    remove(tmp_file);
 }
 END_TEST
 
 START_TEST(test_label_dir_transmute) {
-    char path[200] = {'\0'};
-    char tmp_dir[200] = {'\0'};
+    char path[SEC_LSM_MANAGER_MAX_SIZE_PATH] = {'\0'};
+    char tmp_dir[SEC_LSM_MANAGER_MAX_SIZE_DIR] = {'\0'};
     // path not set + dir not created
     ck_assert_int_eq(label_dir_transmute(tmp_dir), 0);
     // create dir
     create_tmp_dir(tmp_dir);
     // set path
-    strcpy(path, tmp_dir);
-    strcat(path, "/test.txt");
+    snprintf(path, SEC_LSM_MANAGER_MAX_SIZE_PATH, "%s/test.txt", tmp_dir);
     ck_assert_int_eq(label_dir_transmute(tmp_dir), 0);
     ck_assert_int_eq(label_dir_transmute(path), 0);
     // create file
@@ -89,25 +57,24 @@ START_TEST(test_label_dir_transmute) {
 END_TEST
 
 START_TEST(test_label_exec) {
-    char path[200] = {'\0'};
-    char label[200] = {'\0'};
-    char tmp_dir[200] = {'\0'};
+    char path[SEC_LSM_MANAGER_MAX_SIZE_PATH] = {'\0'};
+    char label[SEC_LSM_MANAGER_MAX_SIZE_LABEL] = {'\0'};
+    char tmp_dir[SEC_LSM_MANAGER_MAX_SIZE_DIR] = {'\0'};
     // path and label not set + file not created
     ck_assert_int_eq(label_exec(path, label), 0);
     // create dir
     create_tmp_dir(tmp_dir);
     // set path
-    strcpy(path, tmp_dir);
-    strcat(path, "/test.bin");
+    snprintf(path, 200, "%s/test.bin", tmp_dir);
     ck_assert_int_eq(label_exec(path, label), 0);
     // set label
-    strcpy(label, "label");
+    secure_strncpy(label, "label", SEC_LSM_MANAGER_MAX_SIZE_LABEL);
     ck_assert_int_eq(label_exec(path, label), 0);
     // create file
     create_file(path);
     ck_assert_int_eq(label_exec(path, label), -EINVAL);
     // set label with suffix :Exec
-    strcat(label, suffix_exec);
+    snprintf(label, SEC_LSM_MANAGER_MAX_SIZE_LABEL, "label%s", suffix_exec);
     ck_assert_int_eq(label_exec(path, label), 0);
     remove(path);
     rmdir(tmp_dir);
@@ -115,20 +82,19 @@ START_TEST(test_label_exec) {
 END_TEST
 
 START_TEST(test_label_path) {
-    char path[200] = {'\0'};
-    char path2[200] = {'\0'};
-    char label[200] = {'\0'};
-    char tmp_dir[200] = {'\0'};
+    char path[SEC_LSM_MANAGER_MAX_SIZE_PATH] = {'\0'};
+    char path2[SEC_LSM_MANAGER_MAX_SIZE_PATH] = {'\0'};
+    char label[SEC_LSM_MANAGER_MAX_SIZE_LABEL] = {'\0'};
+    char tmp_dir[SEC_LSM_MANAGER_MAX_SIZE_DIR] = {'\0'};
 
     // path not set + file and dir not created
-    strcpy(label, "label");
+    secure_strncpy(label, "label", SEC_LSM_MANAGER_MAX_SIZE_LABEL);
     ck_assert_int_lt(label_path(tmp_dir, label, 0, 1), 0);
     ck_assert_int_lt(label_path(path, label, 1, 1), 0);
 
     // create dir
     create_tmp_dir(tmp_dir);
-    strcpy(path, tmp_dir);
-    strcat(path, "/test.txt");
+    snprintf(path, SEC_LSM_MANAGER_MAX_SIZE_PATH, "%s/test.txt", tmp_dir);
     // create file
     create_file(path);
 
@@ -137,8 +103,7 @@ START_TEST(test_label_path) {
     // label file with label
     ck_assert_int_eq(label_path(path, label, 0, 0), 0);
 
-    strcpy(path2, tmp_dir);
-    strcat(path2, "/test.bin");
+    snprintf(path2, SEC_LSM_MANAGER_MAX_SIZE_PATH, "%s/test.bin", tmp_dir);
     // create file 2
     create_file(path2);
 
@@ -146,7 +111,7 @@ START_TEST(test_label_path) {
     ck_assert_int_eq(label_path(path2, label, 1, 0), -EINVAL);
 
     // set label with suffix :Exec
-    strcat(label, suffix_exec);
+    snprintf(label, SEC_LSM_MANAGER_MAX_SIZE_LABEL, "label%s", suffix_exec);
 
     // label file 2 with label+suffix and executable
     ck_assert_int_eq(label_path(path2, label, 1, 0), 0);
@@ -158,40 +123,29 @@ START_TEST(test_label_path) {
 END_TEST
 
 START_TEST(test_smack_install) {
-    char tmp_dir[200] = {'\0'};
+    char tmp_dir[SEC_LSM_MANAGER_MAX_SIZE_DIR] = {'\0'};
     create_tmp_dir(tmp_dir);
 
-    char data_dir[100];
-    strcpy(data_dir, tmp_dir);
-    strcat(data_dir, "/data/");
-    char data_file[100];
-    strcpy(data_file, tmp_dir);
-    strcat(data_file, "/data/");
-    strcat(data_file, "data_file");
+    char data_dir[SEC_LSM_MANAGER_MAX_SIZE_DIR];
+    char data_file[SEC_LSM_MANAGER_MAX_SIZE_PATH];
+    char exec_dir[SEC_LSM_MANAGER_MAX_SIZE_DIR];
+    char exec_file[SEC_LSM_MANAGER_MAX_SIZE_PATH];
+    char id_dir[SEC_LSM_MANAGER_MAX_SIZE_DIR];
+    char id_file[SEC_LSM_MANAGER_MAX_SIZE_PATH];
+    char public_dir[SEC_LSM_MANAGER_MAX_SIZE_DIR];
+    char public_file[SEC_LSM_MANAGER_MAX_SIZE_PATH];
 
-    char exec_dir[100];
-    strcpy(exec_dir, tmp_dir);
-    strcat(exec_dir, "/exec/");
-    char exec_file[100];
-    strcpy(exec_file, tmp_dir);
-    strcat(exec_file, "/exec/");
-    strcat(exec_file, "exec_file");
+    snprintf(data_dir, SEC_LSM_MANAGER_MAX_SIZE_DIR, "%s/data/", tmp_dir);
+    snprintf(data_file, SEC_LSM_MANAGER_MAX_SIZE_PATH, "%s/data/data_file", tmp_dir);
 
-    char id_dir[100];
-    strcpy(id_dir, tmp_dir);
-    strcat(id_dir, "/id/");
-    char id_file[100];
-    strcpy(id_file, tmp_dir);
-    strcat(id_file, "/id/");
-    strcat(id_file, "id_file");
+    snprintf(exec_dir, SEC_LSM_MANAGER_MAX_SIZE_DIR, "%s/exec/", tmp_dir);
+    snprintf(exec_file, SEC_LSM_MANAGER_MAX_SIZE_PATH, "%s/exec/exec_file", tmp_dir);
 
-    char public_dir[100];
-    strcpy(public_dir, tmp_dir);
-    strcat(public_dir, "/public/");
-    char public_file[100];
-    strcpy(public_file, tmp_dir);
-    strcat(public_file, "/public/");
-    strcat(public_file, "public_file");
+    snprintf(id_dir, SEC_LSM_MANAGER_MAX_SIZE_DIR, "%s/id/", tmp_dir);
+    snprintf(id_file, SEC_LSM_MANAGER_MAX_SIZE_PATH, "%s/id/id_file", tmp_dir);
+
+    snprintf(public_dir, SEC_LSM_MANAGER_MAX_SIZE_DIR, "%s/public/", tmp_dir);
+    snprintf(public_file, SEC_LSM_MANAGER_MAX_SIZE_PATH, "%s/public/public_file", tmp_dir);
 
     ck_assert_int_eq(mkdir(data_dir, 0777), 0);
     ck_assert_int_eq(mkdir(exec_dir, 0777), 0);
@@ -236,6 +190,7 @@ START_TEST(test_smack_install) {
 
     ck_assert_int_eq(uninstall_smack(secure_app), 0);
 
+    destroy_secure_app(secure_app);
     remove(data_file);
     remove(exec_file);
     remove(id_file);
@@ -249,16 +204,13 @@ START_TEST(test_smack_install) {
 END_TEST
 
 START_TEST(test_smack_uninstall) {
-    char tmp_dir[200] = {'\0'};
+    char tmp_dir[SEC_LSM_MANAGER_MAX_SIZE_DIR] = {'\0'};
     create_tmp_dir(tmp_dir);
 
-    char data_dir[100];
-    strcpy(data_dir, tmp_dir);
-    strcat(data_dir, "/data/");
-    char data_file[100];
-    strcpy(data_file, tmp_dir);
-    strcat(data_file, "/data/");
-    strcat(data_file, "data_file");
+    char data_dir[SEC_LSM_MANAGER_MAX_SIZE_DIR];
+    char data_file[SEC_LSM_MANAGER_MAX_SIZE_PATH];
+    snprintf(data_dir, SEC_LSM_MANAGER_MAX_SIZE_DIR, "%s/data/", tmp_dir);
+    snprintf(data_file, SEC_LSM_MANAGER_MAX_SIZE_PATH, "%s/data/data_file", tmp_dir);
 
     ck_assert_int_eq(mkdir(data_dir, 0777), 0);
     create_file(data_file);
@@ -275,6 +227,7 @@ START_TEST(test_smack_uninstall) {
 
     ck_assert_int_eq(check_file_exists("/etc/smack/accesses.d/app-testid"), 0);
 
+    destroy_secure_app(secure_app);
     remove(data_file);
     rmdir(data_dir);
     rmdir(tmp_dir);
@@ -282,7 +235,7 @@ START_TEST(test_smack_uninstall) {
 END_TEST
 
 void test_smack() {
-    addtest(test_set_smack);
+    // addtest(test_set_smack);
     addtest(test_label_file);
     addtest(test_label_dir_transmute);
     addtest(test_label_exec);

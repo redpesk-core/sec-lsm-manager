@@ -1,0 +1,28 @@
+#!/bin/bash
+
+test_common(){
+    LOGS_PATH="${FULL_TEST_PATH}/logs"
+    mkdir -p "${LOGS_PATH}"
+    rm -f "${LOGS_PATH}/*.tap"
+    "${FULL_TEST_PATH}/${TEST_BIN}" "${LOGS_PATH}/tests_sec_lsm_manager.tap"
+}
+
+test_selinux() {
+    setenforce 0
+    FULL_TEST_PATH="/lib/sec-lsm-manager-selinux-redtest/redtest"
+    TEST_BIN="tests-selinux"
+    test_common
+    setenforce 1
+}
+
+test_smack() {
+    FULL_TEST_PATH="/lib/sec-lsm-manager-smack-redtest/redtest"
+    TEST_BIN="tests-smack"
+    test_common
+}
+
+test -d "/sys/fs/selinux" && test_selinux
+
+test -d "/sys/fs/smackfs" && test_smack
+
+exit 0
