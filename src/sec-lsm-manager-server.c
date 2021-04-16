@@ -218,8 +218,14 @@ __nonnull((1)) __wur static int putx(client_t *cli, ...) {
  * @param[in] cli client handler
  */
 __nonnull() static void send_done(client_t *cli) {
-    putx(cli, _done_, NULL);
-    flushw(cli);
+    int rc = putx(cli, _done_, NULL);
+    if (rc < 0) {
+        ERROR("putx : %d %s", -rc, strerror(-rc));
+    }
+    rc = flushw(cli);
+    if (rc < 0) {
+        ERROR("flushw : %d %s", -rc, strerror(-rc));
+    }
 }
 
 /**
@@ -230,8 +236,14 @@ __nonnull() static void send_done(client_t *cli) {
  */
 __nonnull((1)) static void send_error(client_t *cli, const char *errorstr) {
     raise_error_flag(cli->secure_app);
-    putx(cli, _error_, errorstr, NULL);
-    flushw(cli);
+    int rc = putx(cli, _error_, errorstr, NULL);
+    if (rc < 0) {
+        ERROR("putx : %d %s", -rc, strerror(-rc));
+    }
+    rc = flushw(cli);
+    if (rc < 0) {
+        ERROR("flushw : %d %s", -rc, strerror(-rc));
+    }
 }
 
 /**
@@ -240,22 +252,32 @@ __nonnull((1)) static void send_error(client_t *cli, const char *errorstr) {
  * @param[in] cli client handler
  */
 __nonnull() __wur static int send_display_secure_app(client_t *cli) {
+    int rc = 0;
     if (cli->secure_app->error_flag) {
         ERROR("error flag has been raised, clear secure app");
         return -EPERM;
     }
 
     if (cli->secure_app->id) {
-        putx(cli, _string_, _id_, cli->secure_app->id, NULL);
+        rc = putx(cli, _string_, _id_, cli->secure_app->id, NULL);
+        if (rc < 0) {
+            ERROR("putx : %d %s", -rc, strerror(-rc));
+        }
     }
 
     for (size_t i = 0; i < cli->secure_app->path_set.size; i++) {
-        putx(cli, _string_, _path_, cli->secure_app->path_set.paths[i].path,
-             get_path_type_string(cli->secure_app->path_set.paths[i].path_type), NULL);
+        rc = putx(cli, _string_, _path_, cli->secure_app->path_set.paths[i].path,
+                  get_path_type_string(cli->secure_app->path_set.paths[i].path_type), NULL);
+        if (rc < 0) {
+            ERROR("putx : %d %s", -rc, strerror(-rc));
+        }
     }
 
     for (size_t i = 0; i < cli->secure_app->permission_set.size; i++) {
-        putx(cli, _string_, _permission_, cli->secure_app->permission_set.permissions[i], NULL);
+        rc = putx(cli, _string_, _permission_, cli->secure_app->permission_set.permissions[i], NULL);
+        if (rc < 0) {
+            ERROR("putx : %d %s", -rc, strerror(-rc));
+        }
     }
 
     return 0;
@@ -271,14 +293,14 @@ __nonnull() __wur static int update_policy(secure_app_t *secure_app, cynagora_t 
     // drop old policies
     int rc = cynagora_drop_policies(cynagora_admin_client, secure_app->id);
     if (rc < 0) {
-        ERROR("cynagora_drop_policies : %s", secure_app->id);
+        ERROR("cynagora_drop_policies %s : %d %s", secure_app->id, -rc, strerror(-rc));
         return rc;
     }
 
     // apply new policies
     rc = cynagora_set_policies(cynagora_admin_client, secure_app->id, &(secure_app->permission_set));
     if (rc < 0) {
-        ERROR("cynagora_set_policies : %s", secure_app->id);
+        ERROR("cynagora_set_policies %s : %d %s", secure_app->id, -rc, strerror(-rc));
         return rc;
     }
 
@@ -293,7 +315,7 @@ __nonnull() __wur static int install(client_t *cli) {
 
     int rc = update_policy(cli->secure_app, cli->sec_lsm_manager_server->cynagora_admin_client);
     if (rc < 0) {
-        ERROR("update_policy");
+        ERROR("update_policy : %d %s", -rc, strerror(-rc));
         return rc;
     }
 
@@ -301,7 +323,7 @@ __nonnull() __wur static int install(client_t *cli) {
 
     rc = install_mac(cli->secure_app);
     if (rc < 0) {
-        ERROR("install");
+        ERROR("install_mac : %d %s", -rc, strerror(-rc));
         int rc2 = cynagora_drop_policies(cli->sec_lsm_manager_server->cynagora_admin_client, cli->secure_app->id);
         if (rc2 < 0) {
             ERROR("cannot delete policy : %d %s", -rc2, strerror(-rc2));
@@ -330,7 +352,7 @@ __nonnull() __wur static int uninstall(client_t *cli) {
     rc = uninstall_mac(cli->secure_app);
 
     if (rc < 0) {
-        ERROR("uninstall");
+        ERROR("uninstall_mac : %d %s", -rc, strerror(-rc));
         return rc;
     }
 
@@ -366,8 +388,14 @@ __nonnull((1)) static void onrequest(client_t *cli, unsigned count, const char *
                     cli->invalid = 1;
                 return;
             }
-            putx(cli, _done_, "1", NULL);
-            flushw(cli);
+            rc = putx(cli, _done_, "1", NULL);
+            if (rc < 0) {
+                ERROR("putx : %d %s", -rc, strerror(-rc));
+            }
+            rc = flushw(cli);
+            if (rc < 0) {
+                ERROR("flushw : %d %s", -rc, strerror(-rc));
+            }
             cli->version = 1;
             return;
         }
@@ -425,8 +453,14 @@ __nonnull((1)) static void onrequest(client_t *cli, unsigned count, const char *
                         break;
                     nextlog = ckarg(args[1], _on_, 0);
                 }
-                putx(cli, _done_, nextlog ? _on_ : _off_, NULL);
-                flushw(cli);
+                rc = putx(cli, _done_, nextlog ? _on_ : _off_, NULL);
+                if (rc < 0) {
+                    ERROR("putx : %d %s", -rc, strerror(-rc));
+                }
+                rc = flushw(cli);
+                if (rc < 0) {
+                    ERROR("flushw : %d %s", -rc, strerror(-rc));
+                }
                 sec_lsm_manager_server_log = nextlog;
                 return;
             }
@@ -435,8 +469,14 @@ __nonnull((1)) static void onrequest(client_t *cli, unsigned count, const char *
             if (ckarg(args[0], _path_, 1) && count == 3) {
                 rc = secure_app_add_path(cli->secure_app, args[1], get_path_type(args[2]));
                 if (rc >= 0) {
-                    putx(cli, _done_, NULL);
-                    flushw(cli);
+                    rc = putx(cli, _done_, NULL);
+                    if (rc < 0) {
+                        ERROR("putx : %d %s", -rc, strerror(-rc));
+                    }
+                    rc = flushw(cli);
+                    if (rc < 0) {
+                        ERROR("flushw : %d %s", -rc, strerror(-rc));
+                    }
                 } else {
                     ERROR("sec_lsm_manager_handle_add_path : %d %s", -rc, strerror(-rc));
                     send_error(cli, "sec_lsm_manager_handle_add_path");
@@ -446,8 +486,14 @@ __nonnull((1)) static void onrequest(client_t *cli, unsigned count, const char *
             if (ckarg(args[0], _permission_, 1) && count == 2) {
                 rc = secure_app_add_permission(cli->secure_app, args[1]);
                 if (rc >= 0) {
-                    putx(cli, _done_, NULL);
-                    flushw(cli);
+                    rc = putx(cli, _done_, NULL);
+                    if (rc < 0) {
+                        ERROR("putx : %d %s", -rc, strerror(-rc));
+                    }
+                    rc = flushw(cli);
+                    if (rc < 0) {
+                        ERROR("flushw : %d %s", -rc, strerror(-rc));
+                    }
                 } else {
                     ERROR("sec_lsm_manager_handle_add_permission : %d %s", -rc, strerror(-rc));
                     send_error(cli, "sec_lsm_manager_handle_add_permission");
@@ -554,13 +600,13 @@ __wur static int create_client(client_t **pcli, int fd, sec_lsm_manager_server_t
     /* create protocol object */
     rc = prot_create(&((*pcli)->prot));
     if (rc < 0) {
-        ERROR("prot_create")
+        ERROR("prot_create : %d %s", -rc, strerror(-rc))
         goto error1;
     }
 
     rc = create_secure_app(&((*pcli)->secure_app));
     if (rc < 0) {
-        ERROR("create_secure_app");
+        ERROR("create_secure_app %d %s", -rc, strerror(-rc));
         (*pcli)->secure_app = NULL;
         goto error2;
     }
@@ -604,7 +650,7 @@ static void on_server_event(pollitem_t *pollitem, uint32_t events, int pollfd) {
 
     /* is it a hangup? it shouldn't! */
     if (events & EPOLLHUP) {
-        fprintf(stderr, "unexpected server socket closing\n");
+        ERROR("unexpected server socket closing");
         exit(2);
     }
 
@@ -616,7 +662,7 @@ static void on_server_event(pollitem_t *pollitem, uint32_t events, int pollfd) {
     slen = (socklen_t)sizeof(saddr);
     fd = accept(servfd, &saddr, &slen);
     if (fd < 0) {
-        fprintf(stderr, "can't accept connection: %m\n");
+        ERROR("can't accept connection: %m");
         return;
     }
     fcntl(fd, F_SETFD, FD_CLOEXEC);
@@ -625,7 +671,7 @@ static void on_server_event(pollitem_t *pollitem, uint32_t events, int pollfd) {
     /* create a client for the connection */
     rc = create_client(&cli, fd, server);
     if (rc < 0) {
-        fprintf(stderr, "can't create client connection: %s\n", strerror(-rc));
+        ERROR("can't create client connection: %d %s", -rc, strerror(-rc));
         close(fd);
         return;
     }
@@ -633,7 +679,7 @@ static void on_server_event(pollitem_t *pollitem, uint32_t events, int pollfd) {
     /* add the client to the epolling */
     rc = pollitem_add(&cli->pollitem, EPOLLIN, pollfd);
     if (rc < 0) {
-        fprintf(stderr, "can't poll client connection: %s\n", strerror(-rc));
+        ERROR("can't poll client connection: %d %s", -rc, strerror(-rc));
         destroy_client(cli, 1);
         return;
     }
@@ -663,7 +709,7 @@ __wur int sec_lsm_manager_server_create(sec_lsm_manager_server_t **server, const
     /* allocate the structure */
     *server = (sec_lsm_manager_server_t *)malloc(sizeof(sec_lsm_manager_server_t));
     if (*server == NULL) {
-        ERROR("malloc sec_lsm_manager_server_t failed");
+        ERROR("malloc failed");
         rc = -ENOMEM;
         goto ret;
     }
@@ -674,7 +720,7 @@ __wur int sec_lsm_manager_server_create(sec_lsm_manager_server_t **server, const
     (*server)->pollfd = epoll_create1(EPOLL_CLOEXEC);
     if ((*server)->pollfd < 0) {
         rc = -errno;
-        ERROR("create polling: %m")
+        ERROR("create polling : %d %s", -rc, strerror(-rc));
         goto error;
     }
 
@@ -688,7 +734,7 @@ __wur int sec_lsm_manager_server_create(sec_lsm_manager_server_t **server, const
     umask(um);
     if ((*server)->socket.fd < 0) {
         rc = -errno;
-        ERROR("create server socket %s: %m", socket_spec);
+        ERROR("create server socket %s : %d %s", socket_spec, -rc, strerror(-rc));
         goto error;
     }
 
@@ -698,13 +744,13 @@ __wur int sec_lsm_manager_server_create(sec_lsm_manager_server_t **server, const
     rc = pollitem_add(&(*server)->socket, EPOLLIN, (*server)->pollfd);
     if (rc < 0) {
         rc = -errno;
-        ERROR("pollitem_add socket: %m");
+        ERROR("pollitem_add socket : %d %s", -rc, strerror(-rc));
         goto error;
     }
 
     rc = cynagora_create(&((*server)->cynagora_admin_client), cynagora_Admin, 1, 0);
     if (rc < 0) {
-        ERROR("cynagora_create");
+        ERROR("cynagora_create : %d %s", -rc, strerror(-rc));
         (*server)->cynagora_admin_client = NULL;
         goto error;
     }

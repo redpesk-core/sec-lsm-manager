@@ -72,7 +72,7 @@ int set_label(const char *path, const char *xattr, const char *value) {
     int rc = lsetxattr(path, xattr, value, strlen(value), 0);
     if (rc < 0) {
         rc = -errno;
-        ERROR("lsetxattr('%s','%s','%s',%ld,%d) : %m", path, xattr, value, strlen(value), 0);
+        ERROR("lsetxattr('%s','%s','%s',%ld,%d) : %d %s", path, xattr, value, strlen(value), 0, -rc, strerror(-rc));
         return rc;
     }
 
@@ -148,7 +148,7 @@ int remove_file(const char *path) {
     int rc = remove(path);
     if (rc < 0) {
         rc = -errno;
-        ERROR("remove %s %m", path);
+        ERROR("remove %s : %d %s", path, -rc, strerror(-rc));
         return rc;
     }
     return 0;

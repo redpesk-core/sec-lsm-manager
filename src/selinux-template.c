@@ -97,7 +97,7 @@ char public_app[] = "redpesk_public_t";
  * @param[in] secure_app The secure_app of application
  * @return 0 in case of success or a negative -errno value
  */
-__nonnull() __wur static void init_selinux_module(selinux_module_t *selinux_module, const secure_app_t *secure_app) {
+__nonnull() static void init_selinux_module(selinux_module_t *selinux_module, const secure_app_t *secure_app) {
     memset(selinux_module, 0, sizeof(*selinux_module));
 
     secure_strncpy(selinux_module->selinux_rules_dir, get_selinux_rules_dir(NULL), SEC_LSM_MANAGER_MAX_SIZE_DIR);
@@ -131,12 +131,13 @@ __nonnull() __wur static void init_selinux_module(selinux_module_t *selinux_modu
 __nonnull() __wur static int generate_app_module_fc(const char *selinux_fc_file, const secure_app_t *secure_app,
                                                     path_type_definitions_t path_type_definitions[number_path_type]) {
     int rc = 0;
+    int rc2 = 0;
 
     FILE *f_module_fc = fopen(selinux_fc_file, "w");
 
     if (f_module_fc == NULL) {
         rc = -errno;
-        ERROR("fopen %s %m", selinux_fc_file);
+        ERROR("fopen %s : %d %s", selinux_fc_file, -rc, strerror(-rc));
         goto ret;
     }
 
@@ -150,16 +151,15 @@ __nonnull() __wur static int generate_app_module_fc(const char *selinux_fc_file,
         rc = fputs(line, f_module_fc);
         if (rc < 0) {
             rc = -errno;
-            ERROR("fputs %m");
+            ERROR("fputs : %d %s", -rc, strerror(-rc));
             goto error;
         }
     }
 
 error:
-    rc = fclose(f_module_fc);
-    if (rc < 0) {
-        rc = -errno;
-        ERROR("Fail fclose %m");
+    rc2 = fclose(f_module_fc);
+    if (rc2 < 0) {
+        ERROR("fclose : %d %s", errno, strerror(errno));
     }
 ret:
     return rc;
@@ -175,21 +175,25 @@ ret:
 __nonnull() __wur
     static int generate_app_module_files(const selinux_module_t *selinux_module, const secure_app_t *secure_app,
                                          path_type_definitions_t path_type_definitions[number_path_type]) {
-    int rc = process_template(selinux_module->selinux_te_template_file, selinux_module->selinux_te_file, secure_app);
+    int rc = 0;
+    int rc2 = 0;
+    rc = process_template(selinux_module->selinux_te_template_file, selinux_module->selinux_te_file, secure_app);
     if (rc < 0) {
-        ERROR("process_template : %s -> %s", selinux_module->selinux_te_template_file, selinux_module->selinux_te_file);
+        ERROR("process_template %s -> %s : %d %s", selinux_module->selinux_te_template_file,
+              selinux_module->selinux_te_file, -rc, strerror(-rc));
         goto ret;
     }
 
     rc = process_template(selinux_module->selinux_if_template_file, selinux_module->selinux_if_file, secure_app);
     if (rc < 0) {
-        ERROR("process_template : %s -> %s", selinux_module->selinux_if_template_file, selinux_module->selinux_if_file);
+        ERROR("process_template %s -> %s : %d %s", selinux_module->selinux_if_template_file,
+              selinux_module->selinux_if_file, -rc, strerror(-rc));
         goto remove_te;
     }
 
     rc = generate_app_module_fc(selinux_module->selinux_fc_file, secure_app, path_type_definitions);
     if (rc < 0) {
-        ERROR("generate_app_module_fc : %s", selinux_module->selinux_fc_file);
+        ERROR("generate_app_module_fc %s : %d %s", selinux_module->selinux_fc_file, -rc, strerror(-rc));
         goto remove_if;
     }
 
@@ -198,12 +202,14 @@ __nonnull() __wur
     goto ret;
 
 remove_if:
-    if (remove_file(selinux_module->selinux_if_file) < 0) {
-        ERROR("remove file : %s", selinux_module->selinux_if_file);
+    rc2 = remove_file(selinux_module->selinux_if_file);
+    if (rc2 < 0) {
+        ERROR("remove file %s : %d %s", selinux_module->selinux_if_file, -rc2, strerror(-rc2));
     }
 remove_te:
-    if (remove_file(selinux_module->selinux_te_file) < 0) {
-        ERROR("remove file : %s", selinux_module->selinux_te_file);
+    rc2 = remove_file(selinux_module->selinux_te_file);
+    if (rc < 0) {
+        ERROR("remove file %s : %d %s", selinux_module->selinux_te_file, -rc2, strerror(-rc2));
     }
 ret:
     return rc;
@@ -236,25 +242,22 @@ __nonnull() __wur static bool check_app_module_files_exists(const selinux_module
 __nonnull() __wur static int remove_app_module_files(const selinux_module_t *selinux_module) {
     int rc = remove_file(selinux_module->selinux_te_file);
     if (rc < 0) {
-        ERROR("remove_file : %s", selinux_module->selinux_te_file);
-        goto end;
+        ERROR("remove_file %s : %d %s", selinux_module->selinux_te_file, -rc, strerror(-rc));
+        goto error;
     }
 
     rc = remove_file(selinux_module->selinux_if_file);
     if (rc < 0) {
-        ERROR("remove_file : %s", selinux_module->selinux_if_file);
-        goto end;
+        ERROR("remove_file %s : %d %s", selinux_module->selinux_if_file, -rc, strerror(-rc));
+        goto error;
     }
 
     rc = remove_file(selinux_module->selinux_fc_file);
     if (rc < 0) {
-        ERROR("remove_file : %s", selinux_module->selinux_fc_file);
-        goto end;
+        ERROR("remove_file %s : %d %s", selinux_module->selinux_fc_file, -rc, strerror(-rc));
     }
 
-    goto end;
-
-end:
+error:
     return rc;
 }
 
@@ -267,7 +270,7 @@ end:
 __nonnull() __wur static int remove_pp_file(const selinux_module_t *selinux_module) {
     int rc = remove_file(selinux_module->selinux_pp_file);
     if (rc < 0) {
-        ERROR("remove_file : %s", selinux_module->selinux_pp_file);
+        ERROR("remove_file %s : %d %s", selinux_module->selinux_pp_file, -rc, strerror(-rc));
     }
     return rc;
 }
@@ -284,7 +287,8 @@ __nonnull() __wur static int destroy_semanage_handle(semanage_handle_t *semanage
     if (semanage_is_connected(semanage_handle)) {
         rc = semanage_disconnect(semanage_handle);
         if (rc < 0) {
-            ERROR("semanage_disconnect");
+            rc = -errno;
+            ERROR("semanage_disconnect : %d %s", -rc, strerror(-rc));
         }
     }
     semanage_handle_destroy(semanage_handle);
@@ -300,11 +304,12 @@ __nonnull() __wur static int destroy_semanage_handle(semanage_handle_t *semanage
  */
 __wur static int create_semanage_handle(semanage_handle_t **semanage_handle) {
     int rc = 0;
+    int rc2 = 0;
     *semanage_handle = semanage_handle_create();
 
     if (semanage_handle == NULL) {
-        ERROR("semanage_handle_create");
-        rc = -1;
+        rc = -errno;
+        ERROR("semanage_handle_create : %d %s", -rc, strerror(-rc));
         goto ret;
     }
 
@@ -312,14 +317,15 @@ __wur static int create_semanage_handle(semanage_handle_t **semanage_handle) {
 
     rc = semanage_connect(*semanage_handle);
     if (rc < 0) {
-        ERROR("semanage_connect");
-
+        rc = -errno;
+        ERROR("semanage_connect : %d %s", -rc, strerror(-rc));
         goto error;
     }
 
     rc = semanage_set_default_priority(*semanage_handle, 400);
     if (rc != 0) {
-        ERROR("semanage_set_default_priority");
+        rc = -errno;
+        ERROR("semanage_set_default_priority : %d %s", -rc, strerror(-rc));
         goto error;
     }
 
@@ -327,7 +333,8 @@ __wur static int create_semanage_handle(semanage_handle_t **semanage_handle) {
 
 error:
     if (destroy_semanage_handle(*semanage_handle) < 0) {
-        ERROR("destroy_semanage_handle");
+        rc2 = -errno;
+        ERROR("destroy_semanage_handle : %d %s", -rc2, strerror(-rc2));
     }
 ret:
     return rc;
@@ -343,13 +350,15 @@ ret:
 __nonnull((1)) __wur static int install_module(semanage_handle_t *semanage_handle, const char *selinux_pp_file) {
     int rc = semanage_module_install_file(semanage_handle, selinux_pp_file);
     if (rc < 0) {
-        ERROR("semanage_module_install_file : %s", selinux_pp_file);
+        rc = -errno;
+        ERROR("semanage_module_install_file %s : %d %s", selinux_pp_file, -rc, strerror(-rc));
         goto end;
     }
 
     rc = semanage_commit(semanage_handle);
     if (rc < 0) {
-        ERROR("semanage_commit : install_module %s", selinux_pp_file);
+        rc = -errno;
+        ERROR("semanage_commit (install_module %s) : %d %s", selinux_pp_file, -rc, strerror(-rc));
         goto end;
     }
 
@@ -365,23 +374,25 @@ end:
  * @return 0 in case of success or a negative -errno value
  */
 __nonnull() __wur static int remove_module(semanage_handle_t *semanage_handle, const char *module_name) {
-    char *module_name_ = strdupa(module_name);  // semanage_module_remove take no const module name
     int rc = 0;
+    char *module_name_ = strdupa(module_name);  // semanage_module_remove take no const module name
     if (module_name_ == NULL) {
-        ERROR("strdupa : %s", module_name);
         rc = -ENOMEM;
+        ERROR("strdupa %s : %d %s", module_name, -rc, strerror(-rc));
         goto end;
     }
 
     rc = semanage_module_remove(semanage_handle, module_name_);
     if (rc < 0) {
-        ERROR("semanage_module_remove : %s", module_name_);
+        rc = -errno;
+        ERROR("semanage_module_remove %s : %d %s", module_name_, -rc, strerror(-rc));
         goto end;
     }
 
     rc = semanage_commit(semanage_handle);
     if (rc < 0) {
-        ERROR("semanage_commit : remove module %s", module_name_);
+        rc = -errno;
+        ERROR("semanage_commit (remove module %s) : %d %s", module_name_, -rc, strerror(-rc));
         goto end;
     }
 
@@ -415,14 +426,15 @@ __nonnull() static void free_module_info_list(semanage_handle_t *semanage_handle
  * @return true if exists, false else
  */
 __nonnull() __wur static bool check_module(semanage_handle_t *semanage_handle, const char *id) {
+    bool ret = false;
+    int semanage_module_info_len = 0;
     semanage_module_info_t *semanage_module_info = NULL;
     semanage_module_info_t *semanage_module_info_list = NULL;
-    int semanage_module_info_len = 0;
-    bool ret = false;
 
     int rc = semanage_module_list(semanage_handle, &semanage_module_info_list, &semanage_module_info_len);
     if (rc < 0) {
-        ERROR("semanage_module_list");
+        rc = -errno;
+        ERROR("semanage_module_list : %d %s", -rc, strerror(-rc));
         goto end;
     }
 
@@ -431,7 +443,8 @@ __nonnull() __wur static bool check_module(semanage_handle_t *semanage_handle, c
         const char *module_name = NULL;
         rc = semanage_module_info_get_name(semanage_handle, semanage_module_info, &module_name);
         if (rc < 0) {
-            ERROR("semanage_module_info_get_name");
+            rc = -errno;
+            ERROR("semanage_module_info_get_name : %d %s", -rc, strerror(-rc));
             goto end;
         }
 
@@ -492,20 +505,22 @@ void init_path_type_definitions(path_type_definitions_t path_type_definitions[nu
 /* see selinux-template.h */
 int create_selinux_rules(const secure_app_t *secure_app,
                          path_type_definitions_t path_type_definitions[number_path_type]) {
+    int rc = 0;
+    int rc2 = 0;
     selinux_module_t selinux_module;
     init_selinux_module(&selinux_module, secure_app);
 
     semanage_handle_t *semanage_handle;
-    int rc = create_semanage_handle(&semanage_handle);
+    rc = create_semanage_handle(&semanage_handle);
     if (rc < 0) {
-        ERROR("create_semanage_handle");
+        ERROR("create_semanage_handle : %d %s", -rc, strerror(-rc));
         goto ret;
     }
 
     // Generate files
     rc = generate_app_module_files(&selinux_module, secure_app, path_type_definitions);
     if (rc < 0) {
-        ERROR("generate_app_module_files");
+        ERROR("generate_app_module_files : %d %s", -rc, strerror(-rc));
         goto end2;
     }
 
@@ -514,7 +529,7 @@ int create_selinux_rules(const secure_app_t *secure_app,
     // fc, if, te generated
     rc = launch_compile(secure_app->id);
     if (rc < 0) {
-        ERROR("launch_compile");
+        ERROR("launch_compile : %d %s", -rc, strerror(-rc));
         goto error3;
     }
 
@@ -523,9 +538,8 @@ int create_selinux_rules(const secure_app_t *secure_app,
     // pp generated
 
     rc = install_module(semanage_handle, selinux_module.selinux_pp_file);
-
     if (rc < 0) {
-        ERROR("install_module");
+        ERROR("install_module : %d %s", -rc, strerror(-rc));
         goto error4;
     }
 
@@ -534,13 +548,19 @@ int create_selinux_rules(const secure_app_t *secure_app,
     goto end2;
 
 error4:
-    remove_pp_file(&selinux_module);
+    rc2 = remove_pp_file(&selinux_module);
+    if (rc2 < 0) {
+        ERROR("remove_pp_file : %d %s", -rc2, strerror(-rc2));
+    }
 error3:
-    remove_app_module_files(&selinux_module);
+    rc2 = remove_app_module_files(&selinux_module);
+    if (rc2 < 0) {
+        ERROR("remove_app_module_files : %d %s", -rc2, strerror(-rc2));
+    }
 end2:
-    rc = destroy_semanage_handle(semanage_handle);
-    if (rc < 0) {
-        ERROR("destroy_semanage_handle");
+    rc2 = destroy_semanage_handle(semanage_handle);
+    if (rc2 < 0) {
+        ERROR("destroy_semanage_handle : %d %s", -rc2, strerror(-rc2));
     }
 ret:
     return rc;
@@ -548,29 +568,26 @@ ret:
 
 /* see selinux-template.h */
 bool check_module_files_exist(const secure_app_t *secure_app) {
-    bool ret = false;
     selinux_module_t selinux_module;
     init_selinux_module(&selinux_module, secure_app);
-
-    ret = check_app_module_files_exists(&selinux_module);
-
-    return ret;
+    return check_app_module_files_exists(&selinux_module);
 }
 
 /* see selinux-template.h */
 bool check_module_in_policy(const secure_app_t *secure_app) {
-    semanage_handle_t *semanage_handle;
     bool ret = false;
+    semanage_handle_t *semanage_handle;
     int rc = create_semanage_handle(&semanage_handle);
     if (rc < 0) {
-        ERROR("create_semanage_handle");
+        ERROR("create_semanage_handle : %d %s", -rc, strerror(-rc));
         goto end;
     }
 
     ret = check_module(semanage_handle, secure_app->id);
 
-    if (destroy_semanage_handle(semanage_handle) < 0) {
-        ERROR("destroy_semanage_handle");
+    rc = destroy_semanage_handle(semanage_handle);
+    if (rc < 0) {
+        ERROR("destroy_semanage_handle : %d %s", -rc, strerror(-rc));
     }
 
 end:
@@ -579,13 +596,21 @@ end:
 
 /* see selinux-template.h */
 int remove_selinux_rules(const secure_app_t *secure_app) {
-    // remove files
+    int rc = 0;
+    int rc2 = 0;
     selinux_module_t selinux_module;
     init_selinux_module(&selinux_module, secure_app);
 
-    int rc = remove_app_module_files(&selinux_module) + remove_pp_file(&selinux_module);
+    // remove files
+    rc = remove_app_module_files(&selinux_module);
     if (rc < 0) {
-        ERROR("remove files modules");
+        ERROR("remove_app_module_files : %d %s", -rc, strerror(-rc));
+        goto ret;
+    }
+
+    rc = remove_pp_file(&selinux_module);
+    if (rc < 0) {
+        ERROR("remove_pp_file : %d %s", -rc, strerror(-rc));
         goto ret;
     }
 
@@ -595,23 +620,23 @@ int remove_selinux_rules(const secure_app_t *secure_app) {
     semanage_handle_t *semanage_handle;
     rc = create_semanage_handle(&semanage_handle);
     if (rc < 0) {
-        ERROR("create_semanage_handle");
+        ERROR("create_semanage_handle : %d %s", -rc, strerror(-rc));
         goto ret;
     }
     rc = remove_module(semanage_handle, secure_app->id);
     if (rc < 0) {
-        ERROR("remove_module");
-        goto end2;
+        ERROR("remove_module : %d %s", -rc, strerror(-rc));
+        goto end;
     }
 
     DEBUG("success remove selinux module");
 
-    goto end2;
+    goto end;
 
-end2:
-    rc = destroy_semanage_handle(semanage_handle);
-    if (rc < 0) {
-        ERROR("destroy_semanage_handle");
+end:
+    rc2 = destroy_semanage_handle(semanage_handle);
+    if (rc2 < 0) {
+        ERROR("destroy_semanage_handle : %d %s", -rc2, strerror(-rc2));
     }
 ret:
     return rc;

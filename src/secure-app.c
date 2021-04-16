@@ -70,7 +70,7 @@ __nonnull() static void dash_to_underscore(char *s) {
 int create_secure_app(secure_app_t **secure_app) {
     *secure_app = (secure_app_t *)malloc(sizeof(secure_app_t));
     if (*secure_app == NULL) {
-        ERROR("malloc secure_app_t");
+        ERROR("malloc failed");
         return -ENOMEM;
     }
 
@@ -140,7 +140,7 @@ int secure_app_add_permission(secure_app_t *secure_app, const char *permission) 
 
     int rc = permission_set_add_permission(&(secure_app->permission_set), permission);
     if (rc < 0) {
-        ERROR("permission_set_add_permission");
+        ERROR("permission_set_add_permission : %d %s", -rc, strerror(-rc));
         return rc;
     }
 
@@ -168,7 +168,7 @@ int secure_app_add_path(secure_app_t *secure_app, const char *path, enum path_ty
 
     int rc = path_set_add_path(&(secure_app->path_set), path, path_type);
     if (rc < 0) {
-        ERROR("path_set_add_path");
+        ERROR("path_set_add_path %d %s", -rc, strerror(-rc));
         return rc;
     }
 

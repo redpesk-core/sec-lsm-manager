@@ -77,14 +77,16 @@ char public_app[] = "_";
  */
 __nonnull() __wur static int remove_load_rules(const char *file) {
     int rc = 0;
+    int rc2 = 0;
+    struct smack_accesses *smack_access = NULL;
+
     int fd = open(file, O_RDONLY);
     if (fd < 0) {
         rc = -errno;
-        ERROR("open file : %s", file);
-        return rc;
+        ERROR("open file %s : %d %s", file, -rc, strerror(-rc));
+        goto ret;
     }
 
-    struct smack_accesses *smack_access = NULL;
     rc = smack_accesses_new(&smack_access);
     if (rc < 0) {
         ERROR("smack_accesses_new");
@@ -94,21 +96,22 @@ __nonnull() __wur static int remove_load_rules(const char *file) {
     rc = smack_accesses_add_from_file(smack_access, fd);
     if (rc < 0) {
         ERROR("smack_accesses_add_from_file");
-        goto end2;
+        goto end;
     }
 
     rc = smack_accesses_clear(smack_access);
     if (rc < 0) {
         ERROR("smack_accesses_clear");
-        goto end2;
+        goto end;
     }
 
-end2:
-    smack_accesses_free(smack_access);
 end:
-    if (close(fd)) {
-        ERROR("close");
+    rc2 = close(fd);
+    if (rc2 < 0) {
+        ERROR("close : %d %s", errno, strerror(errno));
     }
+ret:
+    smack_accesses_free(smack_access);
     return rc;
 }
 
@@ -169,10 +172,12 @@ void init_path_type_definitions(path_type_definitions_t path_type_definitions[nu
 
 /* see smack-template.h */
 int create_smack_rules(const secure_app_t *secure_app) {
+    int rc = 0;
+    int rc2 = 0;
     struct smack_accesses *smack_accesses = NULL;
     char smack_policy_dir[SEC_LSM_MANAGER_MAX_SIZE_DIR];
-    char smack_template_file[SEC_LSM_MANAGER_MAX_SIZE_PATH];
     char smack_rules_file[SEC_LSM_MANAGER_MAX_SIZE_PATH];
+    char smack_template_file[SEC_LSM_MANAGER_MAX_SIZE_PATH];
 
     secure_strncpy(smack_policy_dir, get_smack_policy_dir(NULL), SEC_LSM_MANAGER_MAX_SIZE_DIR);
     secure_strncpy(smack_template_file, get_smack_template_file(NULL), SEC_LSM_MANAGER_MAX_SIZE_PATH);
@@ -180,15 +185,16 @@ int create_smack_rules(const secure_app_t *secure_app) {
     snprintf(smack_rules_file, SEC_LSM_MANAGER_MAX_SIZE_PATH, "%s/%s.%s", smack_policy_dir, secure_app->id,
              SMACK_EXTENSION);
 
-    int rc = process_template(smack_template_file, smack_rules_file, secure_app);
+    rc = process_template(smack_template_file, smack_rules_file, secure_app);
     if (rc < 0) {
-        ERROR("process_template");
+        ERROR("process_template : %d %s", -rc, strerror(-rc));
         goto end;
     }
 
     int fd = open(smack_rules_file, O_RDONLY);
     if (fd < 0) {
-        ERROR("open %s\n", smack_rules_file);
+        rc = -errno;
+        ERROR("open file %s : %d %s", smack_rules_file, -rc, strerror(-rc));
         goto error;
     }
 
@@ -216,7 +222,10 @@ int create_smack_rules(const secure_app_t *secure_app) {
     goto end;
 
 error:
-    remove(smack_rules_file);
+    rc2 = remove(smack_rules_file);
+    if (rc2 < 0) {
+        ERROR("remove %s : %d %s", smack_rules_file, errno, strerror(errno));
+    }
 end:
     smack_accesses_free(smack_accesses);
     smack_accesses = NULL;
@@ -236,13 +245,13 @@ int remove_smack_rules(const secure_app_t *secure_app) {
     if (smack_enabled()) {
         rc = remove_load_rules(smack_rules_file);
         if (rc < 0) {
-            ERROR("remove_load_rules");
+            ERROR("remove_load_rules : %d %s", -rc, strerror(-rc));
         }
     }
 
     rc = remove_file(smack_rules_file);
     if (rc < 0) {
-        ERROR("remove_file");
+        ERROR("remove_file %s : %d %s", smack_rules_file, -rc, strerror(-rc));
     }
 
     return rc;

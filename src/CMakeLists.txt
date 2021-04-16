@@ -71,6 +71,7 @@ endif()
 # define client sources
 
 set(LIBCLI_SOURCES
+    utils.c
     prot.c
     socket.c
     log.c
@@ -114,6 +115,7 @@ function(build_daemon_for_mac MAC_NAME)
     message("[*] Create : ${CMAKE_PROJECT_NAME}-${MAC_NAME}d")
     if(${MAC_NAME} STREQUAL "smack")
         add_executable(${CMAKE_PROJECT_NAME}-smackd main-${CMAKE_PROJECT_NAME}d.c ${SERVER_SOURCES_SMACK})
+        target_compile_definitions(${CMAKE_PROJECT_NAME}-smackd PRIVATE WITH_SMACK)
         if(NOT SIMULATE_SMACK)
             target_link_libraries(${CMAKE_PROJECT_NAME}-smackd ${libsmack_LDFLAGS} ${libsmack_LINK_LIBRARIES})
             target_include_directories(${CMAKE_PROJECT_NAME}-smackd PRIVATE ${libsmack_INCLUDE_DIRS})
@@ -124,6 +126,7 @@ function(build_daemon_for_mac MAC_NAME)
 
     if(${MAC_NAME} STREQUAL "selinux")
         add_executable(${CMAKE_PROJECT_NAME}-selinuxd main-${CMAKE_PROJECT_NAME}d.c ${SERVER_SOURCES_SELINUX})
+        target_compile_definitions(${CMAKE_PROJECT_NAME}-selinuxd PRIVATE WITH_SELINUX)
         if(NOT SIMULATE_SELINUX)
             target_link_libraries(${CMAKE_PROJECT_NAME}-selinuxd ${libselinux_LDFLAGS} ${libselinux_LINK_LIBRARIES})
             target_include_directories(${CMAKE_PROJECT_NAME}-selinuxd PRIVATE ${libselinux_INCLUDE_DIRS})
@@ -160,12 +163,10 @@ endfunction()
 
 if(WITH_SMACK)
     build_daemon_for_mac("smack")
-    target_compile_definitions(${CMAKE_PROJECT_NAME}-smackd PRIVATE WITH_SMACK)
 endif()
 
 if(WITH_SELINUX)
     build_daemon_for_mac("selinux")
-    target_compile_definitions(${CMAKE_PROJECT_NAME}-selinuxd PRIVATE WITH_SELINUX)
 endif()
 
 ####################################

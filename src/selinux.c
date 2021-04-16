@@ -26,6 +26,7 @@
 #include <errno.h>
 #include <linux/xattr.h>
 #include <stdio.h>
+#include <string.h>
 #include <sys/xattr.h>
 
 #include "log.h"
@@ -42,12 +43,12 @@
 __nonnull() __wur static int label_file(const char *path, const char *label) {
     if (!check_file_exists(path)) {
         DEBUG("%s not exist", path);
-        return -1;
+        return -ENOENT;
     }
 
     int rc = set_label(path, XATTR_NAME_SELINUX, label);
     if (rc < 0) {
-        ERROR("set_smack(%s,%s,%s)", path, XATTR_NAME_SMACK, label);
+        ERROR("set_label(%s,%s,%s) : %d %s", path, XATTR_NAME_SELINUX, label, -rc, strerror(-rc));
         return rc;
     }
 
@@ -69,7 +70,8 @@ __nonnull() __wur static int selinux_process_paths(const secure_app_t *secure_ap
         snprintf(label, SEC_LSM_MANAGER_MAX_SIZE_LABEL + 3, "%s:s0", path_type_definitions[path->path_type].label);
         int rc = label_file(path->path, label);
         if (rc < 0) {
-            ERROR("label_file((%s,%s),%s)", path->path, get_path_type_string(path->path_type), secure_app->id);
+            ERROR("label_file((%s,%s),%s) : %d %s", path->path, get_path_type_string(path->path_type), secure_app->id,
+                  -rc, strerror(-rc));
             return rc;
         }
     }
@@ -102,7 +104,7 @@ int install_selinux(const secure_app_t *secure_app) {
     // ################## CREATE ##################
     int rc = create_selinux_rules(secure_app, path_type_definitions);
     if (rc < 0) {
-        ERROR("create_selinux_rules");
+        ERROR("create_selinux_rules : %d %s", -rc, strerror(-rc));
         return rc;
     }
 
@@ -124,7 +126,7 @@ int install_selinux(const secure_app_t *secure_app) {
     // force label
     rc = selinux_process_paths(secure_app, path_type_definitions);
     if (rc < 0) {
-        ERROR("selinux_process_paths");
+        ERROR("selinux_process_paths : %d %s", -rc, strerror(-rc));
         return rc;
     }
 
@@ -155,7 +157,7 @@ int uninstall_selinux(const secure_app_t *secure_app) {
     int rc = remove_selinux_rules(secure_app);
 
     if (rc < 0) {
-        ERROR("remove_selinux_rules");
+        ERROR("remove_selinux_rules : %d %s", -rc, strerror(-rc));
         return rc;
     }
 

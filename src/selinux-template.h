@@ -69,7 +69,7 @@ const char *get_selinux_rules_dir(const char *value) __wur;
  * @param[in] id to generate label of an application
  *
  */
-void init_path_type_definitions(path_type_definitions_t path_type_definitions[number_path_type], const char *id) __wur
+void init_path_type_definitions(path_type_definitions_t path_type_definitions[number_path_type], const char *id)
     __nonnull((2));
 
 /**

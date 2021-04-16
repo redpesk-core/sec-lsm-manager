@@ -625,7 +625,7 @@ int sec_lsm_manager_display(sec_lsm_manager_t *sec_lsm_manager) {
     rc = wait_reply(sec_lsm_manager, true);
 
     if (rc > 2 && !strcmp(sec_lsm_manager->reply.fields[0], _string_)) {
-        printf("################## SECURE APP ##################\n");
+        puts("################## SECURE APP ##################\n");
 
         while (rc > 2 && !strcmp(sec_lsm_manager->reply.fields[0], _string_)) {
             if (!strcmp(sec_lsm_manager->reply.fields[1], _id_)) {
@@ -643,7 +643,7 @@ int sec_lsm_manager_display(sec_lsm_manager_t *sec_lsm_manager) {
             rc = wait_reply(sec_lsm_manager, true);
         }
 
-        printf("################################################\n");
+        puts("################################################");
     } else if (rc > 0 && !strcmp(sec_lsm_manager->reply.fields[0], _error_)) {
         ERROR("%s", sec_lsm_manager->reply.fields[1]);
     }

@@ -38,6 +38,8 @@
 #include <sys/un.h>
 #include <unistd.h>
 
+#include "utils.h"
+
 #if defined(WITH_SYSTEMD)
 #include <systemd/sd-daemon.h>
 #endif
@@ -122,7 +124,7 @@ static int open_unix(const char *spec, int server) {
     /* prepare address  */
     memset(&addr, 0, sizeof addr);
     addr.sun_family = AF_UNIX;
-    strncpy(addr.sun_path, spec, 108);
+    secure_strncpy(addr.sun_path, spec, 108);
     if (abstract)
         addr.sun_path[0] = 0; /* implement abstract sockets */
 

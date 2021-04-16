@@ -75,6 +75,7 @@ static struct mustach_itf itf = {.enter = enter, .put = put, .next = next, .leav
 
 int process_template(const char *template_path, const char *dest, secure_app_t *secure_app) {
     int rc = 0;
+    int rc2 = 0;
     char *template = read_file(template_path);
     if (template == NULL) {
         ERROR("read_file : %s", template_path);
@@ -89,9 +90,12 @@ int process_template(const char *template_path, const char *dest, secure_app_t *
 
     rc = fmustach(template, &itf, secure_app, f_dest);
     if (rc < 0) {
-        ERROR("fmustach : %m");
+        ERROR("fmustach : %d %s", errno, strerror(errno));
     }
 
-    fclose(f_dest);
+    rc2 = fclose(f_dest);
+    if (rc2 < 0) {
+        ERROR("fclose %s : %d %s", dest, errno, strerror(errno));
+    }
     return rc;
 }

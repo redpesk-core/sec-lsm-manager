@@ -196,7 +196,7 @@ int do_clear(int ac, char **av) {
     last_status = rc = sec_lsm_manager_clear(sec_lsm_manager);
 
     if (rc < 0) {
-        ERROR("%s", strerror(-rc));
+        ERROR("sec_lsm_manager_clear : %d %s", -rc, strerror(-rc));
     } else {
         LOG("clear success");
     }
@@ -217,7 +217,7 @@ int do_display(int ac, char **av) {
     last_status = rc = sec_lsm_manager_display(sec_lsm_manager);
 
     if (rc < 0) {
-        ERROR("%s", strerror(-rc));
+        ERROR("sec_lsm_manager_display : %d %s", -rc, strerror(-rc));
     }
 
     return uc;
@@ -244,7 +244,7 @@ int do_id(int ac, char **av) {
     last_status = rc = sec_lsm_manager_set_id(sec_lsm_manager, id);
 
     if (rc < 0) {
-        ERROR("%s", strerror(-rc));
+        ERROR("sec_lsm_manager_set_id : %d %s", -rc, strerror(-rc));
         return uc;
     }
 
@@ -277,7 +277,7 @@ int do_path(int ac, char **av) {
     last_status = rc = sec_lsm_manager_add_path(sec_lsm_manager, path, path_type);
 
     if (rc < 0) {
-        ERROR("%s", strerror(-rc));
+        ERROR("sec_lsm_manager_add_path : %d %s", -rc, strerror(-rc));
     } else {
         LOG("add path '%s' with type %s", path, path_type);
     }
@@ -306,7 +306,7 @@ int do_permission(int ac, char **av) {
 
     last_status = rc = sec_lsm_manager_add_permission(sec_lsm_manager, permission);
     if (rc < 0) {
-        ERROR("%s", strerror(-rc));
+        ERROR("sec_lsm_manager_add_permission : %d %s", -rc, strerror(-rc));
     } else {
         LOG("add permission %s", permission);
     }
@@ -327,7 +327,7 @@ int do_install(int ac, char **av) {
     last_status = rc = sec_lsm_manager_install(sec_lsm_manager);
 
     if (rc < 0) {
-        ERROR("%s", strerror(-rc));
+        ERROR("sec_lsm_manager_install : %d %s", -rc, strerror(-rc));
     } else {
         LOG("install success");
     }
@@ -348,7 +348,7 @@ int do_uninstall(int ac, char **av) {
     last_status = rc = sec_lsm_manager_uninstall(sec_lsm_manager);
 
     if (rc < 0) {
-        ERROR("%s", strerror(-rc));
+        ERROR("sec_lsm_manager_uninstall : %d %s", -rc, strerror(-rc));
     } else {
         LOG("uninstall success");
     }
@@ -373,7 +373,7 @@ int do_log(int ac, char **av) {
     last_status = rc = sec_lsm_manager_log(sec_lsm_manager, on, off);
 
     if (rc < 0) {
-        ERROR("%s", strerror(-rc));
+        ERROR("sec_lsm_manager_log : %d %s", -rc, strerror(-rc));
     } else {
         LOG("logging %s", rc ? "on" : "off");
     }
@@ -516,11 +516,11 @@ int main(int ac, char **av) {
     signal(SIGPIPE, SIG_IGN); /* avoid SIGPIPE! */
     rc = sec_lsm_manager_create(&sec_lsm_manager, socket);
     if (rc < 0) {
-        fprintf(stderr, "initialization failed: %s\n", strerror(-rc));
+        ERROR("initialization failed : %d %s", -rc, strerror(-rc));
         return 1;
     }
 
-    LOG("sec_lsm_manager_create success");
+    LOG("initialization success");
 
     if (optind < ac) {
         do_all(ac - optind, av + optind, 1);
