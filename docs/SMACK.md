@@ -1,21 +1,20 @@
-# SMACK
-
+## SMACK
 
 SMACK (Simplified Mandatory Access Control Kernel) allows to define simple rules to limit the rights of a user or a process.
 
-## Context
+### Context
 
 The context of the actual user is defined in the file :
 
-```
+```bash
 /proc/$$/attr/current
 ```
 
-## Rules
+### Rules
 
-A rule is defined as follows:
+A rule is defined as follows :
 
-```
+```bash
 System  User  rwxat
 ```
 
@@ -23,62 +22,49 @@ System  User  rwxat
 - User is the object's label
 - rwx are the access read, write, execute, append and transmute
 
-
-
-With this rule :
-
 > ℹ️ The processes System can read, write and execute User objects.
 
 
+#### Possible access
 
-### Possible access
-
-r = read
-
-w = write
-
-x = execute
-
-t = transmute (If a file is created in a directory with transmute access, it will inherit of the label of parent)
-
-a = append (add)
-
-l = lock (use for locking a file ==> Read-Only)
-
-b = bring-up (equivalent of permissive mode)
+- r = read
+- w = write
+- x = execute
+- t = transmute (If a file is created in a directory with transmute access, it will inherit of the label of parent)
+- a = append (add)
+- l = lock (use for locking a file ==> Read-Only)
+- b = bring-up (equivalent of permissive mode)
 
 
-
-
-Without any capability, you can only **reduce** acesses. If you want to change a rule you need capability **CAP_MAC_ADMIN**
+Without any capability, you can only **reduce** acesses.
+If you want to change a rule you need capability **CAP_MAC_ADMIN**.
 
 You have two ways to change rules :
 
-- Edit files :
+1) Runtime
 
-```
-echo "subject object rwt" > /sys/fs/smackfs/load-self2
-echo "subject object rwt" > /sys/fs/smackfs/load
-```
-
-- Use binary
-
-```
+```bash
 smackload subject object rwt
 ```
 
-In the old security manager an other way exists to add rules for specific application. You need to create a file in the repository :
+Changes are lost on restart.
 
+2) Persistant
+
+Create a file in `/etc/smack/accesses.d/` with rules :
+
+```bash
+# vim /etc/smack/accesses.d/demo-app.smack
+subject object rwt
 ```
-/etc/smack/accesses.d
-```
 
+Changes are applied on restart.
 
-### Default smack access rules
+#### Default smack access rules
 
 |      | REQUESTED BY             | REQUESTED ON             |
 | ---- | ------------------------ | ------------------------ |
-| *    | 🛑 Access                 | ✔️ Access                 |
+| *    | 🛑 Access                 | ✔️ Access                |
 | ^    | ✔️ Read or execute access |                          |
 | _    |                          | ✔️ Read or execute access |
 
@@ -87,7 +73,7 @@ In the old security manager an other way exists to add rules for specific applic
 🛑 All other rules not explicitly defined
 
 
-Sources :
+### Sources
 
 https://www.kernel.org/doc/html/v4.15/admin-guide/LSM/Smack.html
 

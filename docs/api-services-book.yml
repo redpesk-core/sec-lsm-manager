@@ -1,0 +1,22 @@
+type: books
+books:
+-
+    id: sec-lsm-manager
+    title: sec-lsm-manager
+    description: sec-lsm-manager documentation
+    keywords:
+    chapters:
+    - url: Architecture.md
+      name: Architecture presentation
+    - url: Compilation.md
+      name: Compilation Guide
+    - url: Usage.md
+      name: Usage Guide
+    - url: Permissions.md
+      name: Permissions definition
+    - url: SMACK.md
+      name: SMACK Explanation
+    - url: SELinux.md
+      name: SELinux Explanation
+    - url: Templating.md
+      name: Templating Explanation

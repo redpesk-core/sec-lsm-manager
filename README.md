@@ -1,57 +1,76 @@
 # SEC-LSM-MANAGER
 
-```
-                                                                                       systemd-socket
-                                                                                              ^
-                       +---------------------------+            +----------------------+      |             +-----------------------------+
-                       |                           |            |                      |      |             |                             |
-                       |  libsec-lsm-manager-core  +<-----------+   sec-lsm-managerd   +<-----+-------------+  libsec-lsm-manager-client  |
-                       |                           |            |                      |                    |                             |
-                       +--------+----------------+-+            +----------------------+                    +-----------------------+-----+
-                                |                |                                                                                  ^
-                                |                |                                                                                  |
-                                |                |                                                                                  |
-      systemd-socket  <---------+                |                                                                                  |
-                                |                |                                                                                  |
-                                v                v                                                                           +------+----------------+
-+-------------------------------+---+  +---------+------------------------------------------------------+                    |                       |
-|                                   |  |                                                                |                    | sec-lsm-manager-cmd   |
-|             CYNAGORA              |  | +----------------------------+ +-----------------------------+ |                    |                       |
-|                                   |  | |                            | |                             | |                    | id redpesk-service-id |
-|                                   |  | |          SMACK             | |         SELINUX             | |                    |                       |
-|                                   |  | |                            | |                             | |                    |                       |
-|     id  * * perm123 yes forever   |  | |                            | |     install semodule        | |                    | path /tmp/toto tmp    |
-|                                   |  | |   /etc/smack/accesses.d/   | |                             | |                    |                       |
-|                                   |  | |                            | |  ==> redpesk-service-id     | |                    |                       |
-|                                   |  | |                            | |                             | |                    | permission perm123    |
-|                                   |  | |  app-redpesk-service-id1   | |   +--------------------+    | |                    |                       |
-|                                   |  | |                            | |                             | |                    |                       |
-|                                   |  | |                            | | /usr/share/sec-lsm-manager/ | |                    | install               |
-|                                   |  | |  app-redpesk-service-id2   | | selinux-rules/              | |                    |                       |
-|                                   |  | |                            | |                             | |                    |                       |
-|                                   |  | |                            | | redpesk-service-id.te       | |                    | uninstall             |
-|                                   |  | |                            | |                             | |                    |                       |
-|                                   |  | |                            | | redpesk-service-id.if       | |                    |                       |
-|                                   |  | |                            | |                             | |                    | clear                 |
-|                                   |  | |                            | | redpesk-service-id.fc       | |                    |                       |
-|                                   |  | |                            | |                             | |                    |                       |
-|                                   |  | |                            | | redpesk-service-id.pp       | |                    | display               |
-|                                   |  | |                            | |                             | |                    |                       |
-|                                   |  | +----------------------------+ +-----------------------------+ |                    |                       |
-+-----------------------------------+  +----------------------------------------------------------------+                    +-----------------------+
-```
+<div align="center">
+<img src="https://img.shields.io/badge/project-redpesk-red" alt="test-coverage">
+<img src="https://img.shields.io/badge/version-2.0-blue" alt="version">
+<img src="https://img.shields.io/badge/build smack-success-success" alt="build-smack">
+<img src="https://img.shields.io/badge/build selinux-success-success" alt="build-selinux">
+<img src="https://img.shields.io/badge/tests_coverage-90-green" alt="test-coverage">
+</div>
 
-## Compile
+## Overview
+
+sec-lsm-manager allows to easily create SMACK or SELinux security policies for applications.
+It is used in the [redpesk](https://docs.redpesk.bzh/) project to guarantee the partitioning of applications within a Linux embedded system.
+
+## History
+
+The sec-lsm-manager project is a redesign of the [security-manager](https://github.com/Samsung/security-manager) project present in [Tizen](https://www.tizen.org/) and [Automotive Grade Linux](https://www.automotivelinux.org/) systems. The code is lighter, more easily auditable and allows to use SELinux.
+
+## Usage
+
+The project produces binaries :
+
+- sec-lsm-managerd (lauch smack or selinux daemon)
+- sec-lsm-manager-smackd (lauch smack daemon)
+- sec-lsm-manager-selinuxd (lauch selinux daemon)
+- sec-lsm-manager-cmd (Allows the client to communicate with the daemon in command line)
+
+And a shared library :
+
+- libsec-lsm-manager.so
+
+It is possible to access this library through the file `sec-lsm-manager.h` and the associated pkgconfig.
+
+For more informations about usage : [Usage.md](./docs/Usage.md)
+
+## How to compile?
+
+To compile the project we use make and cmake.
+
+The project has some dependencies:
+
+- libcap (capabilities management)
+
+- libsystemd (systemd socket activation)
+
+- libsmack (SMACK mode)
+
+- libselinux (SELinux mode)
+
+- libsemanage (SELinux mode)
+
+- sec-cynagora (permission database service)
+
+By default the project is compiled with all these dependencies but only `libcap` is mandatory.
+
+Here is an example to compile the project for SMACK and SELinux :
 
 ```bash
+git clone https://github.com/redpesk-core/sec-lsm-manager
+cd sec-lsm-manager
 mkdir build
 cd build
-cmake ..
+cmake -DWITH_SELINUX=ON -DWITH_SMACK=ON ..
 make
 ```
 
-## Launch test
+For more informations about compilation : [Compilation.md](./docs/Compilation.md)
 
-```bash
-sudo make test
-```
+## Architecture
+
+<div align="center">
+<img src="./docs/images/sec-lsm-manager.png" alt="architecture">
+</div>
+
+For more informations about architecture : [Architecture.md](./docs/Architecture.md)
