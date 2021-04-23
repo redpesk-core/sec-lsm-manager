@@ -15,7 +15,7 @@ It is used in the [redpesk](https://docs.redpesk.bzh/) project to guarantee the 
 
 ## History
 
-The sec-lsm-manager project is a redesign of the [security-manager](https://github.com/Samsung/security-manager) project present in [Tizen](https://www.tizen.org/) and [Automotive Grade Linux](https://www.automotivelinux.org/) systems. The code is lighter, more easily auditable and allows to use SELinux.
+The sec-lsm-manager project is a redesign of the [security-manager](https://github.com/Samsung/security-manager) project presented in [Tizen](https://www.tizen.org/) and [Automotive Grade Linux](https://www.automotivelinux.org/) systems. The code is lighter, more easily auditable and allows to use SELinux.
 
 ## Usage
 
@@ -30,7 +30,7 @@ And a shared library :
 
 - libsec-lsm-manager.so
 
-It is possible to access this library through the file `sec-lsm-manager.h` and the associated pkgconfig.
+It is possible to access this library through the `sec-lsm-manager.h` file and the associated pkgconfig.
 
 For more informations about usage : [Usage.md](./docs/Usage.md)
 

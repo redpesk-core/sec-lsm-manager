@@ -3,7 +3,7 @@
 ### Basics
 #### Policy Module
 
-A policy module will define the rules of your application and it is easy to install and uninstall.
+A policy module will define your application rules and it is easy to install and uninstall.
 
 It contains three files :
 
@@ -21,7 +21,7 @@ Type enforcement files contains the rules to confine your application
 
 ##### File Context files
 
-File contexts files define which label to give to each files
+File contexts files define which label to give to each file
 
 
 ##### Interface files
@@ -38,7 +38,7 @@ make -f /usr/share/selinux/devel/Makefile -C /usr/share/sec-lsm-manager/selinux-
 
 #### Install / Uninstall
 
-To install the new created SELinux module, use the following command :
+To install the newly created SELinux module, use the following command :
 
 ```bash
 semodule -i demo-app.pp

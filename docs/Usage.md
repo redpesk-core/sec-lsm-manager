@@ -11,14 +11,14 @@ Within an application, we can qualify our files according to several types :
 - lib    : libraries files
 - public : public files
 
-Moreover an application can have particular rights for example create a can socket.
+Moreover an application can have particular rights, for example for a can socket creation.
 
-The first thing to do is to send all this information to the sec-lsm-manager
-so that it can proceed with the installation.
+The first thing to do is to send all these informations to the sec-lsm-manager
+so it can proceed with the installation.
 
 ### Library
 
-To start using the library, we will create an handle for informations :
+To start using the library, we will create an handler for informations :
 
 ```c
 #include <sec-lsm-manager.h>
@@ -67,9 +67,9 @@ sec_lsm_manager_add_permission(sec_lsm_manager, "urn:AGL::partner:create-can-soc
 
 > A permission must be composed of at least two characters.
 
-For more informations about permissions : [Permissions.md](./Permissions.md)
+For more information about permissions : [Permissions.md](./Permissions.md)
 
-And finally we install the security context of our application :
+And finally we can install our application security context :
 
 ```c
 sec_lsm_manager_install(sec_lsm_manager);
@@ -77,7 +77,7 @@ sec_lsm_manager_install(sec_lsm_manager);
 
 #### Uninstall
 
-To uninstall the security context of an application, you must define its id :
+To uninstall the application security context, you must define its id :
 
 ```c
 sec_lsm_manager_set_id(sec_lsm_manager, "demo-app");
@@ -86,7 +86,7 @@ sec_lsm_manager_uninstall(sec_lsm_manager);
 
 #### Additional
 
-It is possible to display the status of handle with the display function :
+It is possible to display the status of a handler with the display function :
 
 ```c
 sec_lsm_manager_display(sec_lsm_manager);
@@ -107,7 +107,7 @@ sec_lsm_manager_destroy(sec_lsm_manager);
 
 ### Command Line
 
-It is possible to use the previous functions easily on the command line 
+It is possible to use the previous functions easily on the command line
 thanks to the binary : `sec-lsm-manager-cmd`.
 
 ```bash

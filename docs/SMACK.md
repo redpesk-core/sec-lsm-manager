@@ -1,10 +1,10 @@
 ## SMACK
 
-SMACK (Simplified Mandatory Access Control Kernel) allows to define simple rules to limit the rights of a user or a process.
+SMACK (Simplified Mandatory Access Control Kernel) allows to define simple rules to limit a user or a process rights.
 
 ### Context
 
-The context of the actual user is defined in the file :
+The actual user context is defined in the following file :
 
 ```bash
 /proc/$$/attr/current
@@ -36,8 +36,8 @@ System  User  rwxat
 - b = bring-up (equivalent of permissive mode)
 
 
-Without any capability, you can only **reduce** acesses.
-If you want to change a rule you need capability **CAP_MAC_ADMIN**.
+Without any capability, you can only **reduce** accesses.
+If you want to change a rule you need **CAP_MAC_ADMIN** capability.
 
 You have two ways to change rules :
 

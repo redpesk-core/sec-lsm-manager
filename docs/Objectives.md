@@ -1,6 +1,6 @@
 # SEC-LSM-MANAGER
 
-The objective of this project is to remake the security-manager of Tyzen for AGL. The security context has evolved. In order to clearly define the need we want, I will start by reviewing the key points of the old security-manager.
+The main objective of this project is to remake the Tyzen security-manager for AGL. The security context has evolved. In order to clearly define our need, I will start by reviewing the key points of the old security-manager.
 
 - Defining SMACK access rights on files
 - Define cynara rights
@@ -8,7 +8,7 @@ The objective of this project is to remake the security-manager of Tyzen for AGL
 - A deamon that runs in the background and a library to interface with it
 - Stores information in a database
 
-The objective of our new security manager will be :
+The objectives of our new security manager will be :
 
 - ✅ Be designed to accept several MACs : SMACK, SELinux; or not at all (token)
 - ✅ Being atomic (either set up everything or nothing)

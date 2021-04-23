@@ -34,7 +34,7 @@ It is possible to modify the following compilation options when executing the cm
 - COMPILE_TEST (default : ON) : compile tests
 - DEBUG (default : OFF) : active debug mode (symbols, debug message)
 
-For example with DEBUG option and only SELinux : 
+For example with DEBUG option and only SELinux :
 
 ```bash
 cmake -DDEBUG=ON -DWITH_SELINUX=ON ..
@@ -45,7 +45,7 @@ cmake -DDEBUG=ON -DWITH_SELINUX=ON ..
 
 Then there are variables defined at compile time in the `CMakeLists.txt` file that can be changed at runtime by defining an environment variable.
 
-For example the variable SEC_LSM_MANAGER_SOCKET_NAME which contains `sec-lsm-manager.socket` can be modified at launch :
+For example the SEC_LSM_MANAGER_SOCKET_NAME variable which contains `sec-lsm-manager.socket` can be modified at launch :
 
 ```bash
 export SEC_LSM_MANAGER_SOCKET_NAME="new-socket-name.socket"
