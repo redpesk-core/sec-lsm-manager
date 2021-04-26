@@ -30,7 +30,7 @@
  *
  */
 typedef struct permission_set {
-    char (*permissions)[SEC_LSM_MANAGER_MAX_SIZE_PERMISSION];
+    char **permissions;
     size_t size;
 } permission_set_t;
 
@@ -39,14 +39,14 @@ typedef struct permission_set {
  *
  * @param[in] permission_set The permission_set handler
  */
-void init_permission_set(permission_set_t *permission_set) __nonnull();
+extern void init_permission_set(permission_set_t *permission_set) __nonnull();
 
 /**
  * @brief[in] Free permission_set that have been added
  * The pointer is not free
  * @param policies The permission_set handler
  */
-void free_permission_set(permission_set_t *permission_set) __nonnull();
+extern void free_permission_set(permission_set_t *permission_set) __nonnull();
 ;
 
 /**
@@ -56,6 +56,6 @@ void free_permission_set(permission_set_t *permission_set) __nonnull();
  * @param[in] permission The permission to add
  * @return 0 in case of success or a negative -errno value
  */
-int permission_set_add_permission(permission_set_t *permission_set, const char *permission) __wur __nonnull();
+extern int permission_set_add_permission(permission_set_t *permission_set, const char *permission) __wur __nonnull();
 
 #endif

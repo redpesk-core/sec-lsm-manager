@@ -37,7 +37,8 @@ void init_permission_set(permission_set_t *permission_set) {
 /* see permissions.h */
 void free_permission_set(permission_set_t *permission_set) {
     if (permission_set) {
-        permission_set->size = 0;
+        while (permission_set->size)
+            free(permission_set->permissions[--permission_set->size]);
         free(permission_set->permissions);
         permission_set->permissions = NULL;
     }
@@ -51,17 +52,22 @@ int permission_set_add_permission(permission_set_t *permission_set, const char *
         return -EINVAL;
     }
 
-    size_t size = (permission_set->size + 1) * (sizeof(char) * SEC_LSM_MANAGER_MAX_SIZE_PERMISSION);
+    size_t size = (permission_set->size + 1) * (sizeof(char*) * SEC_LSM_MANAGER_MAX_SIZE_PERMISSION);
 
-    char(*permissions_tmp)[SEC_LSM_MANAGER_MAX_SIZE_PERMISSION] = realloc(permission_set->permissions, size);
+    char **permissions_tmp = realloc(permission_set->permissions, size);
     if (permissions_tmp == NULL) {
-        ERROR("realloc char[SEC_LSM_MANAGER_MAX_SIZE_PERMISSION]");
+        ERROR("realloc permissions_tmp");
         return -ENOMEM;
     }
     permission_set->permissions = permissions_tmp;
 
-    secure_strncpy(permission_set->permissions[permission_set->size], permission, SEC_LSM_MANAGER_MAX_SIZE_PERMISSION);
-    permission_set->size++;
+    char *perm_tmp = malloc(1 + permission_len);
+    if (perm_tmp == NULL) {
+        ERROR("malloc perm_tmp");
+        return -ENOMEM;
+    }
+    secure_strncpy(perm_tmp, permission, 1 + permission_len);
+    permission_set->permissions[permission_set->size++] = perm_tmp;
 
     return 0;
 }
