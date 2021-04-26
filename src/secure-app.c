@@ -160,7 +160,7 @@ int secure_app_add_path(secure_app_t *secure_app, const char *path, enum path_ty
     }
 
     for (size_t i = 0; i < secure_app->path_set.size; i++) {
-        if (!strcmp(secure_app->path_set.paths[i].path, path)) {
+        if (!strcmp(secure_app->path_set.paths[i]->path, path)) {
             ERROR("path already defined");
             return -EINVAL;
         }

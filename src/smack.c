@@ -168,14 +168,14 @@ __nonnull() __wur static int smack_process_paths(const secure_app_t *secure_app,
     int rc = 0;
     path_t *path = NULL;
     for (size_t i = 0; i < secure_app->path_set.size; i++) {
-        path = secure_app->path_set.paths + i;
+        path = secure_app->path_set.paths[i];
         rc = label_path(path->path, path_type_definitions[path->path_type].label,
                         path_type_definitions[path->path_type].is_executable,
                         path_type_definitions[path->path_type].is_transmute);
 
         if (rc < 0) {
-            ERROR("label_path((%s,%s),%s) : %d %s", secure_app->path_set.paths[i].path,
-                  get_path_type_string(secure_app->path_set.paths[i].path_type), secure_app->id, -rc, strerror(-rc));
+            ERROR("label_path((%s,%s),%s) : %d %s", secure_app->path_set.paths[i]->path,
+                  get_path_type_string(secure_app->path_set.paths[i]->path_type), secure_app->id, -rc, strerror(-rc));
             return rc;
         }
     }

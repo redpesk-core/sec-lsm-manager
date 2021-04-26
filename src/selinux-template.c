@@ -144,7 +144,7 @@ __nonnull() __wur static int generate_app_module_fc(const char *selinux_fc_file,
     path_t *path;
     char line[SEC_LSM_MANAGER_MAX_SIZE_LINE_MODULE];
     for (size_t i = 0; i < secure_app->path_set.size; i++) {
-        path = secure_app->path_set.paths + i;
+        path = secure_app->path_set.paths[i];
         snprintf(line, SEC_LSM_MANAGER_MAX_SIZE_LINE_MODULE, "%s(/.*)? gen_context(%s,s0)\n", path->path,
                  path_type_definitions[path->path_type].label);
 

@@ -66,7 +66,7 @@ __nonnull() __wur static int selinux_process_paths(const secure_app_t *secure_ap
     path_t *path = NULL;
     char label[SEC_LSM_MANAGER_MAX_SIZE_LABEL + 3];
     for (size_t i = 0; i < secure_app->path_set.size; i++) {
-        path = secure_app->path_set.paths + i;
+        path = secure_app->path_set.paths[i];
         snprintf(label, SEC_LSM_MANAGER_MAX_SIZE_LABEL + 3, "%s:s0", path_type_definitions[path->path_type].label);
         int rc = label_file(path->path, label);
         if (rc < 0) {

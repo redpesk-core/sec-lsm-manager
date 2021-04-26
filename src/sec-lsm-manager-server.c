@@ -266,8 +266,8 @@ __nonnull() __wur static int send_display_secure_app(client_t *cli) {
     }
 
     for (size_t i = 0; i < cli->secure_app->path_set.size; i++) {
-        rc = putx(cli, _string_, _path_, cli->secure_app->path_set.paths[i].path,
-                  get_path_type_string(cli->secure_app->path_set.paths[i].path_type), NULL);
+        rc = putx(cli, _string_, _path_, cli->secure_app->path_set.paths[i]->path,
+                  get_path_type_string(cli->secure_app->path_set.paths[i]->path_type), NULL);
         if (rc < 0) {
             ERROR("putx : %d %s", -rc, strerror(-rc));
         }

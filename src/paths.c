@@ -43,7 +43,8 @@ void init_path_set(path_set_t *path_set) {
 /* see paths.h */
 void free_path_set(path_set_t *path_set) {
     if (path_set) {
-        path_set->size = 0;
+        while(path_set->size)
+            free(path_set->paths[--path_set->size]);
         free(path_set->paths);
         path_set->paths = NULL;
     }
@@ -63,23 +64,26 @@ int path_set_add_path(path_set_t *path_set, const char *path, enum path_type pat
         return -EINVAL;
     }
 
-    path_t *path_set_tmp = (path_t *)realloc(path_set->paths, sizeof(path_t) * (path_set->size + 1));
+    path_t **path_set_tmp = (path_t **)realloc(path_set->paths, sizeof(path_t*) * (path_set->size + 1));
     if (path_set_tmp == NULL) {
         ERROR("realloc path_set_t");
         return -ENOMEM;
     }
     path_set->paths = path_set_tmp;
 
-    secure_strncpy(path_set->paths[path_set->size].path, path, SEC_LSM_MANAGER_MAX_SIZE_PATH);
-
-    char *new_path = path_set->paths[path_set->size].path;
-
-    if (new_path[path_len - 1] == '/') {
-        new_path[path_len - 1] = '\0';
+    path_t *path_item = (path_t *)malloc(sizeof(path_t) + path_len + 1);
+    if (path_item == NULL) {
+        ERROR("malloc path_item");
+        return -ENOMEM;
+    }
+    
+    secure_strncpy(path_item->path, path, SEC_LSM_MANAGER_MAX_SIZE_PATH);
+    if (path_item->path[path_len - 1] == '/') {
+        path_item->path[path_len - 1] = '\0';
     }
 
-    path_set->paths[path_set->size].path_type = path_type;
-    path_set->size++;
+    path_item->path_type = path_type;
+    path_set->paths[path_set->size++] = path_item;
 
     return 0;
 }
