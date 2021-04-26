@@ -44,7 +44,7 @@ typedef struct path_type_definitions {
  * @param[in] value some value or NULL for getting default
  * @return the selinux te template file specification
  */
-const char *get_selinux_te_template_file(const char *value) __wur;
+extern const char *get_selinux_te_template_file(const char *value) __wur;
 
 /**
  * @brief Get the selinux if template file
@@ -52,7 +52,7 @@ const char *get_selinux_te_template_file(const char *value) __wur;
  * @param[in] value some value or NULL for getting default
  * @return the selinux if template file specification
  */
-const char *get_selinux_if_template_file(const char *value) __wur;
+extern const char *get_selinux_if_template_file(const char *value) __wur;
 
 /**
  * @brief Get the selinux rules directory
@@ -60,7 +60,7 @@ const char *get_selinux_if_template_file(const char *value) __wur;
  * @param[in] value some value or NULL for getting default
  * @return the selinux rules directory specification
  */
-const char *get_selinux_rules_dir(const char *value) __wur;
+extern const char *get_selinux_rules_dir(const char *value) __wur;
 
 /**
  * @brief Init differents labels for all path type
@@ -69,7 +69,7 @@ const char *get_selinux_rules_dir(const char *value) __wur;
  * @param[in] id to generate label of an application
  *
  */
-void init_path_type_definitions(path_type_definitions_t path_type_definitions[number_path_type], const char *id)
+extern void init_path_type_definitions(path_type_definitions_t path_type_definitions[number_path_type], const char *id)
     __nonnull((2));
 
 /**
@@ -78,7 +78,7 @@ void init_path_type_definitions(path_type_definitions_t path_type_definitions[nu
  * @param[in] secure_app secure app handler to install
  * @return 0 in case of success or a negative -errno value
  */
-int create_selinux_rules(const secure_app_t *secure_app,
+extern int create_selinux_rules(const secure_app_t *secure_app,
                          path_type_definitions_t path_type_definitions[number_path_type]) __wur __nonnull();
 
 /**
@@ -88,7 +88,7 @@ int create_selinux_rules(const secure_app_t *secure_app,
  * @param[in] selinux_rules_dir some value or NULL for getting default
  * @return true if exists, false if not
  */
-bool check_module_files_exist(const secure_app_t *secure_app) __wur __nonnull((1));
+extern bool check_module_files_exist(const secure_app_t *secure_app) __wur __nonnull((1));
 
 /**
  * @brief Check if module is in the policy
@@ -96,7 +96,7 @@ bool check_module_files_exist(const secure_app_t *secure_app) __wur __nonnull((1
  * @param[in] secure_app secure app handler
  * @return true if exists, false if not
  */
-bool check_module_in_policy(const secure_app_t *secure_app) __wur __nonnull();
+extern bool check_module_in_policy(const secure_app_t *secure_app) __wur __nonnull();
 
 /**
  * @brief Remove selinux rules (in the selinux rules directory and in the policy)
@@ -104,6 +104,6 @@ bool check_module_in_policy(const secure_app_t *secure_app) __wur __nonnull();
  * @param[in] secure_app secure app handler
  * @return 0 in case of success or a negative -errno value
  */
-int remove_selinux_rules(const secure_app_t *secure_app) __wur __nonnull();
+extern int remove_selinux_rules(const secure_app_t *secure_app) __wur __nonnull();
 
 #endif

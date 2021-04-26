@@ -48,7 +48,7 @@ typedef struct path_type_definitions {
  * @param[in] value some value or NULL for getting default
  * @return the selinux template file specification
  */
-const char *get_smack_template_file(const char *value) __wur;
+extern const char *get_smack_template_file(const char *value) __wur;
 
 /**
  * @brief Get the smack policy directory
@@ -56,7 +56,7 @@ const char *get_smack_template_file(const char *value) __wur;
  * @param[in] value some value or NULL for getting default
  * @return the smack policy directory specification
  */
-const char *get_smack_policy_dir(const char *value) __wur;
+extern const char *get_smack_policy_dir(const char *value) __wur;
 
 /**
  * @brief Check if smack is enabled
@@ -64,7 +64,7 @@ const char *get_smack_policy_dir(const char *value) __wur;
  * @return true if enabled
  * @return false if not
  */
-bool smack_enabled() __wur;
+extern bool smack_enabled() __wur;
 
 /**
  * @brief Init different labels for all path type
@@ -73,7 +73,7 @@ bool smack_enabled() __wur;
  * @param[in] id to generate label of an application
  *
  */
-void init_path_type_definitions(path_type_definitions_t path_type_definitions[number_path_type], const char *id)
+extern void init_path_type_definitions(path_type_definitions_t path_type_definitions[number_path_type], const char *id)
     __nonnull();
 
 /**
@@ -82,7 +82,7 @@ void init_path_type_definitions(path_type_definitions_t path_type_definitions[nu
  * @param[in] secure_app secure app handler to install
  * @return 0 in case of success or a negative -errno value
  */
-int create_smack_rules(const secure_app_t *secure_app) __wur __nonnull();
+extern int create_smack_rules(const secure_app_t *secure_app) __wur __nonnull();
 
 /**
  * @brief Remove smack rules
@@ -90,6 +90,6 @@ int create_smack_rules(const secure_app_t *secure_app) __wur __nonnull();
  * @param[in] secure_app secure app handler
  * @return 0 in case of success or a negative -errno value
  */
-int remove_smack_rules(const secure_app_t *secure_app) __wur __nonnull();
+extern int remove_smack_rules(const secure_app_t *secure_app) __wur __nonnull();
 
 #endif

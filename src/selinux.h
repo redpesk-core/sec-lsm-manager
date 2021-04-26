@@ -32,7 +32,7 @@
  * @return true if enabled
  * @return false if not
  */
-bool selinux_enabled() __wur;
+extern bool selinux_enabled() __wur;
 
 /**
  * @brief Install a secure app for selinux
@@ -40,7 +40,7 @@ bool selinux_enabled() __wur;
  * @param[in] secure_app The handle of secure app
  * @return 0 in case of success or a negative -errno value
  */
-int install_selinux(const secure_app_t *secure_app) __wur __nonnull();
+extern int install_selinux(const secure_app_t *secure_app) __wur __nonnull();
 
 /**
  * @brief Uninstall a secure app for selinux
@@ -48,6 +48,6 @@ int install_selinux(const secure_app_t *secure_app) __wur __nonnull();
  * @param[in] secure_app The handle of secure app
  * @return 0 in case of success or a negative -errno value
  */
-int uninstall_selinux(const secure_app_t *secure_app) __wur __nonnull();
+extern int uninstall_selinux(const secure_app_t *secure_app) __wur __nonnull();
 
 #endif

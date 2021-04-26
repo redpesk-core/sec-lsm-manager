@@ -30,14 +30,14 @@
 
 #include "limits.h"
 
-char *secure_strncpy(char *dest, const char *src, size_t n) __nonnull((1, 2));
+extern char *secure_strncpy(char *dest, const char *src, size_t n) __nonnull((1, 2));
 
 /**
  * @brief Check if string is valid label
  *
  * @param[in] s String to check
  */
-bool valid_label(const char *s) __wur __nonnull();
+extern bool valid_label(const char *s) __wur __nonnull();
 
 /**
  * @brief Set label attr on file
@@ -47,7 +47,7 @@ bool valid_label(const char *s) __wur __nonnull();
  * @param[in] value value of the extended attribute
  * @return 0 in case of success or a negative -errno value
  */
-int set_label(const char *path, const char *xattr, const char *value) __wur __nonnull();
+extern int set_label(const char *path, const char *xattr, const char *value) __wur __nonnull();
 
 /**
  * @brief Check if file exists
@@ -56,7 +56,7 @@ int set_label(const char *path, const char *xattr, const char *value) __wur __no
  * @return true if exists
  * @return false if not
  */
-bool check_file_exists(const char *path) __wur __nonnull();
+extern bool check_file_exists(const char *path) __wur __nonnull();
 
 /**
  * @brief Check the type of a file
@@ -66,7 +66,7 @@ bool check_file_exists(const char *path) __wur __nonnull();
  * @return true if good type
  * @return false if not
  */
-bool check_file_type(const char *path, const unsigned short type_file) __wur __nonnull();
+extern bool check_file_type(const char *path, const unsigned short type_file) __wur __nonnull();
 
 /**
  * @brief Check if a file is executable by owner
@@ -75,7 +75,7 @@ bool check_file_type(const char *path, const unsigned short type_file) __wur __n
  * @return true if executable
  * @return false if not
  */
-bool check_executable(const char *path) __wur __nonnull();
+extern bool check_executable(const char *path) __wur __nonnull();
 
 /**
  * @brief Remove a file
@@ -83,7 +83,7 @@ bool check_executable(const char *path) __wur __nonnull();
  * @param[in] path The path of the file
  * @return 0 in case of success or a negative -errno value
  */
-int remove_file(const char *path) __wur __nonnull();
+extern int remove_file(const char *path) __wur __nonnull();
 
 /**
  * @brief Read content of a file
@@ -91,6 +91,6 @@ int remove_file(const char *path) __wur __nonnull();
  * @param[in] path The path of the file
  * @return the content of the file in case of success or NULL
  */
-char *read_file(const char *path);
+extern char *read_file(const char *path);
 
 #endif

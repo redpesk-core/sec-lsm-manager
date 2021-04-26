@@ -42,6 +42,6 @@
  * @param[in] id id of module to compile
  * @return 0 in case of success or a negative -errno value
  */
-int launch_compile(const char* id) __wur;
+extern int launch_compile(const char* id) __wur;
 
 #endif

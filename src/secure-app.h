@@ -47,7 +47,7 @@ typedef struct secure_app {
  * @param[out] pointer to secure_app handler
  * @return 0 in case of success or a negative -errno value
  */
-int create_secure_app(secure_app_t **secure_app) __wur;
+extern int create_secure_app(secure_app_t **pointer) __wur;
 
 /**
  * @brief Free id, paths and permissions
@@ -55,7 +55,7 @@ int create_secure_app(secure_app_t **secure_app) __wur;
  *
  * @param[in] secure_app handler
  */
-void free_secure_app(secure_app_t *secure_app) __nonnull();
+extern void free_secure_app(secure_app_t *secure_app) __nonnull();
 
 /**
  * @brief Destroy the secure app
@@ -63,7 +63,7 @@ void free_secure_app(secure_app_t *secure_app) __nonnull();
  *
  * @param[in] secure_app handler
  */
-void destroy_secure_app(secure_app_t *secure_app) __nonnull();
+extern void destroy_secure_app(secure_app_t *secure_app) __nonnull();
 
 /**
  * @brief Alloc and copy id in secure app
@@ -72,7 +72,7 @@ void destroy_secure_app(secure_app_t *secure_app) __nonnull();
  * @param[in] id The id to copy
  * @return 0 in case of success or a negative -errno value
  */
-int secure_app_set_id(secure_app_t *secure_app, const char *id) __wur __nonnull();
+extern int secure_app_set_id(secure_app_t *secure_app, const char *id) __wur __nonnull();
 
 /**
  * @brief Add a new policy in policies field
@@ -81,7 +81,7 @@ int secure_app_set_id(secure_app_t *secure_app, const char *id) __wur __nonnull(
  * @param[in] permission The permission to add
  * @return 0 in case of success or a negative -errno value
  */
-int secure_app_add_permission(secure_app_t *secure_app, const char *permission) __wur __nonnull();
+extern int secure_app_add_permission(secure_app_t *secure_app, const char *permission) __wur __nonnull();
 
 /**
  * @brief Add a new path in paths field
@@ -91,13 +91,13 @@ int secure_app_add_permission(secure_app_t *secure_app, const char *permission) 
  * @param[in] path_type The path type to add
  * @return 0 in case of success or a negative -errno value
  */
-int secure_app_add_path(secure_app_t *secure_app, const char *path, enum path_type path_type) __wur __nonnull();
+extern int secure_app_add_path(secure_app_t *secure_app, const char *path, enum path_type path_type) __wur __nonnull();
 
 /**
  * @brief Set error_flag
  * The secure_app can't be installed after
  * You need to clear to return in create state
  */
-void raise_error_flag(secure_app_t *secure_app) __nonnull();
+extern void raise_error_flag(secure_app_t *secure_app) __nonnull();
 
 #endif

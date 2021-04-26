@@ -21,4 +21,4 @@
  * $RP_END_LICENSE$
  */
 
-int process_template(const char *template, const char *dest, const secure_app_t *secure_app);
+extern int process_template(const char *template, const char *dest, const secure_app_t *secure_app);
