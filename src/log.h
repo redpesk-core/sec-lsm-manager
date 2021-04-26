@@ -30,7 +30,7 @@
  * @param msg The message to display
  * @param ... arguments
  */
-void log_function(const char *msg, ...) __attribute__((format(printf, 1, 2)));
+extern void log_function(const char *msg, ...) __attribute__((format(printf, 1, 2)));
 
 #define LOG(...) log_function(__VA_ARGS__);
 
@@ -40,7 +40,7 @@ void log_function(const char *msg, ...) __attribute__((format(printf, 1, 2)));
  * @param msg The message to display
  * @param ... arguments
  */
-void debug_function(const char *msg, ...) __attribute__((format(printf, 1, 2)));
+extern void debug_function(const char *msg, ...) __attribute__((format(printf, 1, 2)));
 
 #define DEBUG(...) debug_function(__VA_ARGS__);
 
@@ -52,7 +52,7 @@ void debug_function(const char *msg, ...) __attribute__((format(printf, 1, 2)));
  * @param msg The message to display
  * @param ... arguments
  */
-void error_function(const char *file, const int line, const char *msg, ...) __attribute__((format(printf, 3, 4)));
+extern void error_function(const char *file, const int line, const char *msg, ...) __attribute__((format(printf, 3, 4)));
 
 #define ERROR(...) error_function(__FILE__, __LINE__, __VA_ARGS__);
 
