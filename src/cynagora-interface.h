@@ -40,8 +40,8 @@
  * @param[in] permission_set array of permission_set_t
  * @return 0 in case of success or a negative -errno value
  */
-int cynagora_set_policies(cynagora_t *cynagora, const char *id, const permission_set_t *permission_set) __wur
-    __nonnull();
+extern int cynagora_set_policies(cynagora_t *cynagora, const char *id, const permission_set_t *permission_set)
+    __wur __nonnull();
 
 /**
  * @brief Drop old policies of cynagora for an id (client)
@@ -50,6 +50,6 @@ int cynagora_set_policies(cynagora_t *cynagora, const char *id, const permission
  * @param[in] id the id of the application for which to remove permissions
  * @return 0 in case of success or a negative -errno value
  */
-int cynagora_drop_policies(cynagora_t *cynagora, const char *id) __wur __nonnull();
+extern int cynagora_drop_policies(cynagora_t *cynagora, const char *id) __wur __nonnull();
 
 #endif

@@ -54,8 +54,14 @@ int cynagora_set_policies(cynagora_t *cynagora, const char *id, const permission
     }
 
     size_t i = 0;
-    cynagora_key_t k = {id, CYNAGORA_INSERT_ALL, CYNAGORA_INSERT_ALL, NULL};
-    cynagora_value_t v = {CYNAGORA_AUTHORIZED, 0};
+    cynagora_key_t k = {
+        .client = id,
+        .session = CYNAGORA_INSERT_ALL,
+        .user = CYNAGORA_INSERT_ALL,
+        .permission = NULL};
+    cynagora_value_t v = {
+        .value = CYNAGORA_AUTHORIZED,
+        .expire = 0 /* infinite */};
 
     while (i < permission_set->size) {
         k.permission = permission_set->permissions[i];
@@ -69,6 +75,8 @@ int cynagora_set_policies(cynagora_t *cynagora, const char *id, const permission
 
     // leave and apply modification
     int rc2 = cynagora_leave(cynagora, rc == 0);
+    if (rc2 < 0)
+        ERROR("cynagora_leave : %d %s", -rc, strerror(-rc));
     if (rc == 0)
         rc = rc2;
 
@@ -84,14 +92,19 @@ int cynagora_drop_policies(cynagora_t *cynagora, const char *id) {
         return rc;
     }
 
-    cynagora_key_t key = {id, CYNAGORA_SELECT_ALL, CYNAGORA_SELECT_ALL, CYNAGORA_SELECT_ALL};
+    cynagora_key_t key = {
+        .client = id,
+        .session = CYNAGORA_SELECT_ALL,
+        .user = CYNAGORA_SELECT_ALL,
+        .permission = CYNAGORA_SELECT_ALL};
     rc = cynagora_drop(cynagora, &key);
-    if (rc < 0) {
+    if (rc < 0)
         ERROR("cynagora_drop : %d %s", -rc, strerror(-rc));
-    }
 
     // leave and apply modification
     int rc2 = cynagora_leave(cynagora, rc == 0);
+    if (rc2 < 0)
+        ERROR("cynagora_leave : %d %s", -rc2, strerror(-rc2));
     if (rc == 0)
         rc = rc2;
 
