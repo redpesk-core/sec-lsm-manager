@@ -83,14 +83,7 @@ int set_label(const char *path, const char *xattr, const char *value) {
 
 /* see utils.h */
 bool check_file_exists(const char *path) {
-    struct stat s;
-    memset(&s, 0, sizeof(s));
-
-    if (stat(path, &s) == -1) {
-        return false;
-    }
-
-    return true;
+    return access(path, F_OK) == 0;
 }
 
 /* see utils.h */

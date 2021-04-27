@@ -62,14 +62,12 @@
 #endif
 
 bool mac_enable(const char *path) {
-    (void)path;
 #if !defined(SIMULATE_SMACK) && !defined(SIMULATE_SELINUX)
-    struct statfs sf;
-    if (statfs(path, &sf)) {
-        return false;
-    }
-#endif
+    return 0 == access(path, F_OK);
+#else
+    (void)path;
     return true;
+#endif
 }
 
 int main(int argc, char **argv, char **envp) {
