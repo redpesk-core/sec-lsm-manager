@@ -52,7 +52,7 @@ static int put(void *closure, const char *name, int escape, FILE *file) {
 static int enter(void *closure, const char *name) {
     secure_app_t *secure_app = (secure_app_t *)closure;
     for (size_t i = 0; i < secure_app->permission_set.size; i++) {
-        if (!strcmp(name, secure_app->permission_set.permissions[i])) {
+        if (!strcasecmp(name, secure_app->permission_set.permissions[i])) {
             return 1;
         }
     }
