@@ -31,7 +31,7 @@
 #ifndef SIMULATE_SMACK
 #include <sys/smack.h>
 #else
-#include "simulation/smack/smcack.h"
+#include "simulation/smack/smack.h"
 #endif
 
 extern char suffix_exec[];
