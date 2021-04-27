@@ -78,6 +78,14 @@ extern bool check_file_type(const char *path, const unsigned short type_file) __
 extern bool check_executable(const char *path) __wur __nonnull();
 
 /**
+ * @brief Create a file
+ *
+ * @param[in] path The path of the file
+ * @return 0 in case of success or a negative -errno value
+ */
+extern int create_file(const char *path) __wur __nonnull();
+
+/**
  * @brief Remove a file
  *
  * @param[in] path The path of the file

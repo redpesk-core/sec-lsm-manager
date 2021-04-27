@@ -49,7 +49,7 @@ START_TEST(test_label_dir_transmute) {
     ck_assert_int_eq(label_dir_transmute(tmp_dir), 0);
     ck_assert_int_eq(label_dir_transmute(path), 0);
     // create file
-    create_file(path);
+    ck_assert_int_eq(create_file(path), 0);
     ck_assert_int_eq(label_dir_transmute(path), 0);
     remove(path);
     rmdir(tmp_dir);
@@ -71,7 +71,7 @@ START_TEST(test_label_exec) {
     secure_strncpy(label, "label", SEC_LSM_MANAGER_MAX_SIZE_LABEL);
     ck_assert_int_eq(label_exec(path, label), 0);
     // create file
-    create_file(path);
+    ck_assert_int_eq(create_file(path), 0);
     ck_assert_int_eq(label_exec(path, label), -EINVAL);
     // set label with suffix :Exec
     snprintf(label, SEC_LSM_MANAGER_MAX_SIZE_LABEL, "label%s", suffix_exec);
@@ -96,7 +96,7 @@ START_TEST(test_label_path) {
     create_tmp_dir(tmp_dir);
     snprintf(path, SEC_LSM_MANAGER_MAX_SIZE_PATH, "%s/test.txt", tmp_dir);
     // create file
-    create_file(path);
+    ck_assert_int_eq(create_file(path), 0);
 
     // label dir with label and transmute
     ck_assert_int_eq(label_path(tmp_dir, label, 0, 1), 0);
@@ -105,7 +105,7 @@ START_TEST(test_label_path) {
 
     snprintf(path2, SEC_LSM_MANAGER_MAX_SIZE_PATH, "%s/test.bin", tmp_dir);
     // create file 2
-    create_file(path2);
+    ck_assert_int_eq(create_file(path2), 0);
 
     // label file 2 with label and executable
     ck_assert_int_eq(label_path(path2, label, 1, 0), -EINVAL);
@@ -151,10 +151,10 @@ START_TEST(test_smack_install) {
     ck_assert_int_eq(mkdir(exec_dir, 0777), 0);
     ck_assert_int_eq(mkdir(id_dir, 0777), 0);
     ck_assert_int_eq(mkdir(public_dir, 0777), 0);
-    create_file(data_file);
-    create_file(exec_file);
-    create_file(id_file);
-    create_file(public_file);
+    ck_assert_int_eq(create_file(data_file), 0);
+    ck_assert_int_eq(create_file(exec_file), 0);
+    ck_assert_int_eq(create_file(id_file), 0);
+    ck_assert_int_eq(create_file(public_file), 0);
 
     // create secure app
     secure_app_t *secure_app = NULL;
@@ -213,7 +213,7 @@ START_TEST(test_smack_uninstall) {
     snprintf(data_file, SEC_LSM_MANAGER_MAX_SIZE_PATH, "%s/data/data_file", tmp_dir);
 
     ck_assert_int_eq(mkdir(data_dir, 0777), 0);
-    create_file(data_file);
+    ck_assert_int_eq(create_file(data_file), 0);
 
     // create secure app
     secure_app_t *secure_app = NULL;

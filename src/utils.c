@@ -137,6 +137,19 @@ bool check_executable(const char *path) {
 }
 
 /* see utils.h */
+int create_file(const char *path) {
+    int rc;
+    int fd = creat(path, S_IRWXU | S_IRWXG);
+    if (fd < 0) {
+        rc = -errno;
+        ERROR("creat %s : %d %s", path, -rc, strerror(-rc));
+        return rc;
+    }
+    close(fd);
+    return 0;
+}
+
+/* see utils.h */
 int remove_file(const char *path) {
     int rc = remove(path);
     if (rc < 0) {

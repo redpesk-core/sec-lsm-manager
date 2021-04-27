@@ -15,6 +15,10 @@
  * limitations under the License.
  */
 
+#if defined(SIMULATE_SMACK)
+#include "../simulation/smack/smack.c"
+#endif
+
 #include "../smack-template.c"
 #include "setup-tests.h"
 

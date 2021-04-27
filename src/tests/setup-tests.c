@@ -44,12 +44,6 @@ int srun(const char *log_file) {
     return nerr;
 }
 
-void create_file(const char *path) {
-    int fd = creat(path, S_IRWXU | S_IRWXG);
-    ck_assert_int_ne(fd, -1);
-    close(fd);
-}
-
 void create_tmp_dir(char *tmp_dir) {
     secure_strncpy(tmp_dir, "/tmp/sec-lsm-XXXXXX", 20);
     ck_assert_ptr_ne(mkdtemp(tmp_dir), NULL);

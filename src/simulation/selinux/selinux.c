@@ -51,17 +51,6 @@ struct semanage_module_info {
     char name[256];
 };
 
-int create_file(const char *path) {
-    printf("create_file(%s)\n", path);
-    int rc = -1;
-    FILE *f = fopen(path, "w");
-    if (f) {
-        fclose(f);
-        rc = 0;
-    }
-    return rc;
-}
-
 ////////////////////////////////////////////
 
 int is_selinux_enabled(void) {
@@ -114,19 +103,19 @@ void semanage_handle_destroy(semanage_handle_t *sh) { printf("semanage_handle_de
 int semanage_module_install_file(semanage_handle_t *sh, const char *file_path) {
     printf("semanage_module_install_file(%p, %s)\n", sh, file_path);
     mkdir(SELINUX_POLICY_DIR, 0755);
-    char path[200];
+    char path[SEC_LSM_MANAGER_MAX_SIZE_PATH];
     char *f_tmp = strdup(file_path);
     char *b = basename(f_tmp);
     b[strlen(b) - 3] = 0;
-    snprintf(path, 200, "%s/%s", SELINUX_POLICY_DIR, b);
+    snprintf(path, SEC_LSM_MANAGER_MAX_SIZE_PATH, "%s/%s", SELINUX_POLICY_DIR, b);
     int rc = create_file(path);
     return rc;
 }
 
 int semanage_module_remove(semanage_handle_t *sh, char *module_name) {
     printf("semanage_module_remove(%p, %s)\n", sh, module_name);
-    char path[200];
-    snprintf(path, 200, "%s/%s", SELINUX_POLICY_DIR, module_name);
+    char path[SEC_LSM_MANAGER_MAX_SIZE_PATH];
+    snprintf(path, SEC_LSM_MANAGER_MAX_SIZE_PATH, "%s/%s", SELINUX_POLICY_DIR, module_name);
     remove(path);
     return 0;
 }
@@ -182,8 +171,8 @@ int semanage_module_info_destroy(semanage_handle_t *handle, semanage_module_info
 
 int launch_compile(const char *id) {
     printf("launch_compile(%s)\n", id);
-    char path[200];
-    snprintf(path, 200, "%s/%s.pp", SELINUX_RULES_DIR, id);
+    char path[SEC_LSM_MANAGER_MAX_SIZE_PATH];
+    snprintf(path, SEC_LSM_MANAGER_MAX_SIZE_PATH, "%s/%s.pp", SELINUX_RULES_DIR, id);
     int rc = create_file(path);
     return rc;
 }

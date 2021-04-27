@@ -26,6 +26,10 @@ cmake_minimum_required(VERSION 3.3)
 
 message("\n######################## COMPILE TESTS ########################\n")
 
+if(SIMULATE_SMACK OR SIMULATE_SELINUX)
+    message("WARNING : Tests can't work when SMACK or SELinux are simulated\n")
+endif()
+
 PKG_CHECK_MODULES(check REQUIRED check)
 
 set(CMAKE_BUILD_TYPE "DEBUG")
@@ -107,7 +111,7 @@ function(build_tests_for_mac MAC_NAME)
         message("[-] Link : libsystemd")
     endif()
 
-    add_test(tests-${MAC_NAME} ${CMAKE_CURRENT_BINARY_DIR}/tests)
+    add_test(tests-${MAC_NAME} ${CMAKE_CURRENT_BINARY_DIR}/tests-${MAC_NAME} test-${MAC_NAME}.tap)
     INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/tests-${MAC_NAME} DESTINATION ${SEC_LSM_MANAGER_DATADIR}/tests/)
     message("[x] Done : tests-${MAC_NAME}\n")
 endfunction()

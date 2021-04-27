@@ -15,7 +15,12 @@
  * limitations under the License.
  */
 
+#if defined(SIMULATE_SELINUX)
+#include "../simulation/selinux/selinux.c"
+#else
 #include "../selinux-compile.c"
+#endif
+
 #include "../selinux.c"
 #include "./test-selinux-template.c"
 #include "setup-tests.h"
@@ -72,10 +77,10 @@ START_TEST(test_selinux_install) {
     ck_assert_int_eq(mkdir(exec_dir, 0777), 0);
     ck_assert_int_eq(mkdir(id_dir, 0777), 0);
     ck_assert_int_eq(mkdir(public_dir, 0777), 0);
-    create_file(data_file);
-    create_file(exec_file);
-    create_file(id_file);
-    create_file(public_file);
+    ck_assert_int_eq(create_file(data_file), 0);
+    ck_assert_int_eq(create_file(exec_file), 0);
+    ck_assert_int_eq(create_file(id_file), 0);
+    ck_assert_int_eq(create_file(public_file), 0);
 
     // create secure app
     secure_app_t *secure_app = NULL;

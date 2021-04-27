@@ -17,8 +17,6 @@ void addtest(const TTest *fun);
 
 int srun();
 
-void create_file(const char *path);
-
 void create_tmp_dir(char *tmp_dir);
 
 void create_tmp_file(char *tmp_file);
