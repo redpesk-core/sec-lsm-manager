@@ -53,29 +53,11 @@ extern int set_label(const char *path, const char *xattr, const char *value) __w
  * @brief Check if file exists
  *
  * @param[in] path The path of the file
- * @return true if exists
- * @return false if not
+ * @param[out] exists true if file exists
+ * @param[out] is_exec true if file is regular and executable
+ * @param[out] is_dir true if file is a directory
  */
-extern bool check_file_exists(const char *path) __wur __nonnull();
-
-/**
- * @brief Check the type of a file
- *
- * @param[in] path The path of the file
- * @param[in] type_file the type of the file
- * @return true if good type
- * @return false if not
- */
-extern bool check_file_type(const char *path, const unsigned short type_file) __wur __nonnull();
-
-/**
- * @brief Check if a file is executable by owner
- *
- * @param[in] path The path of the file
- * @return true if executable
- * @return false if not
- */
-extern bool check_executable(const char *path) __wur __nonnull();
+extern void get_file_informations(const char *path, bool *exists, bool *is_exec, bool *is_dir) __nonnull((1));
 
 /**
  * @brief Create a file

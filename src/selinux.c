@@ -41,8 +41,10 @@
  * @return 0 in case of success or a negative -errno value
  */
 __nonnull() __wur static int label_file(const char *path, const char *label) {
-    if (!check_file_exists(path)) {
-        DEBUG("%s not exist", path);
+    bool exists;
+    get_file_informations(path, &exists, NULL, NULL);
+    if (!exists) {
+        DEBUG("%s not exists", path);
         return -ENOENT;
     }
 

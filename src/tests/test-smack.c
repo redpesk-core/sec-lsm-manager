@@ -19,58 +19,51 @@
 #include "./test-smack-label.c"
 #include "setup-tests.h"
 
-START_TEST(test_label_file) {
-    char label[SEC_LSM_MANAGER_MAX_SIZE_LABEL] = {'\0'};
-    char tmp_file[SEC_LSM_MANAGER_MAX_SIZE_PATH] = {'\0'};
-    // path and label not set + file not created
-    ck_assert_int_lt(label_file(tmp_file, label), 0);
-    // set label
-    secure_strncpy(label, "label", SEC_LSM_MANAGER_MAX_SIZE_LABEL);
-    ck_assert_int_lt(label_file(tmp_file, label), 0);
-    // create file
-    create_tmp_file(tmp_file);
-    ck_assert_int_eq(label_file(tmp_file, label), 0);
-    // set label = ""
-    secure_strncpy(label, "", SEC_LSM_MANAGER_MAX_SIZE_LABEL);
-    ck_assert_int_lt(label_file(tmp_file, label), 0);
-    remove(tmp_file);
-}
-END_TEST
+// START_TEST(test_label_file) {
+//     char label[SEC_LSM_MANAGER_MAX_SIZE_LABEL] = {'\0'};
+//     char tmp_file[SEC_LSM_MANAGER_MAX_SIZE_PATH] = {'\0'};
+//     // path and label not set + file not created
+//     ck_assert_int_lt(label_file(tmp_file, label), 0);
+//     // set label
+//     secure_strncpy(label, "label", SEC_LSM_MANAGER_MAX_SIZE_LABEL);
+//     ck_assert_int_lt(label_file(tmp_file, label), 0);
+//     // create file
+//     create_tmp_file(tmp_file);
+//     ck_assert_int_eq(label_file(tmp_file, label), 0);
+//     // set label = ""
+//     secure_strncpy(label, "", SEC_LSM_MANAGER_MAX_SIZE_LABEL);
+//     ck_assert_int_lt(label_file(tmp_file, label), 0);
+//     remove(tmp_file);
+// }
+// END_TEST
 
-START_TEST(test_label_dir_transmute) {
-    char path[SEC_LSM_MANAGER_MAX_SIZE_PATH] = {'\0'};
-    char tmp_dir[SEC_LSM_MANAGER_MAX_SIZE_DIR] = {'\0'};
-    // path not set + dir not created
-    ck_assert_int_eq(label_dir_transmute(tmp_dir), 0);
-    // create dir
-    create_tmp_dir(tmp_dir);
-    // set path
-    snprintf(path, SEC_LSM_MANAGER_MAX_SIZE_PATH, "%s/test.txt", tmp_dir);
-    ck_assert_int_eq(label_dir_transmute(tmp_dir), 0);
-    ck_assert_int_eq(label_dir_transmute(path), 0);
-    // create file
-    ck_assert_int_eq(create_file(path), 0);
-    ck_assert_int_eq(label_dir_transmute(path), 0);
-    remove(path);
-    rmdir(tmp_dir);
-}
-END_TEST
+// START_TEST(test_label_dir_transmute) {
+//     char path[SEC_LSM_MANAGER_MAX_SIZE_PATH] = {'\0'};
+//     char tmp_dir[SEC_LSM_MANAGER_MAX_SIZE_DIR] = {'\0'};
+//     // path not set + dir not created
+//     ck_assert_int_eq(label_dir_transmute(tmp_dir), 0);
+//     // create dir
+//     create_tmp_dir(tmp_dir);
+//     // set path
+//     snprintf(path, SEC_LSM_MANAGER_MAX_SIZE_PATH, "%s/test.txt", tmp_dir);
+//     ck_assert_int_eq(label_dir_transmute(tmp_dir), 0);
+//     ck_assert_int_eq(label_dir_transmute(path), 0);
+//     // create file
+//     ck_assert_int_eq(create_file(path), 0);
+//     ck_assert_int_eq(label_dir_transmute(path), 0);
+//     remove(path);
+//     rmdir(tmp_dir);
+// }
+// END_TEST
 
 START_TEST(test_label_exec) {
     char path[SEC_LSM_MANAGER_MAX_SIZE_PATH] = {'\0'};
     char label[SEC_LSM_MANAGER_MAX_SIZE_LABEL] = {'\0'};
     char tmp_dir[SEC_LSM_MANAGER_MAX_SIZE_DIR] = {'\0'};
-    // path and label not set + file not created
-    ck_assert_int_eq(label_exec(path, label), 0);
     // create dir
     create_tmp_dir(tmp_dir);
     // set path
     snprintf(path, 200, "%s/test.bin", tmp_dir);
-    ck_assert_int_eq(label_exec(path, label), 0);
-    // set label
-    secure_strncpy(label, "label", SEC_LSM_MANAGER_MAX_SIZE_LABEL);
-    ck_assert_int_eq(label_exec(path, label), 0);
-    // create file
     ck_assert_int_eq(create_file(path), 0);
     ck_assert_int_eq(label_exec(path, label), -EINVAL);
     // set label with suffix :Exec
@@ -174,7 +167,9 @@ START_TEST(test_smack_install) {
 
     // test settings
 
-    ck_assert_int_eq(check_file_exists("/etc/smack/accesses.d/testid.smack"), true);
+    bool exists;
+    get_file_informations("/etc/smack/accesses.d/testid.smack", &exists, NULL, NULL);
+    ck_assert_int_eq(exists, true);
     ck_assert_int_eq(compare_xattr(data_dir, XATTR_NAME_SMACK, "App:testid:Data"), true);
     ck_assert_int_eq(compare_xattr(data_dir, XATTR_NAME_SMACKTRANSMUTE, "TRUE"), true);
     ck_assert_int_eq(compare_xattr(data_file, XATTR_NAME_SMACK, "App:testid:Data"), true);
@@ -225,7 +220,9 @@ START_TEST(test_smack_uninstall) {
 
     ck_assert_int_eq(uninstall_smack(secure_app), 0);
 
-    ck_assert_int_eq(check_file_exists("/etc/smack/accesses.d/app-testid"), 0);
+    bool exists;
+    get_file_informations("/etc/smack/accesses.d/app-testid", &exists, NULL, NULL);
+    ck_assert_int_eq(exists, false);
 
     destroy_secure_app(secure_app);
     remove(data_file);
@@ -236,8 +233,6 @@ END_TEST
 
 void test_smack() {
     // addtest(test_set_smack);
-    addtest(test_label_file);
-    addtest(test_label_dir_transmute);
     addtest(test_label_exec);
     addtest(test_label_path);
     addtest(test_smack_install);

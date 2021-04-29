@@ -38,49 +38,6 @@
 /***********************/
 
 /**
- * @brief Label file
- *
- * @param[in] path The path of the file
- * @param[in] label The label to set
- * @return 0 in case of success or a negative -errno value
- */
-__nonnull() __wur static int label_file(const char *path, const char *label) {
-    if (!check_file_exists(path)) {
-        DEBUG("%s not exist", path);
-        return -EINVAL;
-    }
-
-    int rc = set_label(path, XATTR_NAME_SMACK, label);
-    if (rc < 0) {
-        ERROR("set_smack(%s,%s,%s) : %d %s", path, XATTR_NAME_SMACK, label, -rc, strerror(-rc));
-        return rc;
-    }
-
-    return 0;
-}
-
-/**
- * @brief Label a directory to be transmute
- *
- * @param[in] path The path of the directory
- * @return 0 in case of success or a negative -errno value
- */
-__nonnull() __wur static int label_dir_transmute(const char *path) {
-    if (!check_file_type(path, __S_IFDIR)) {
-        DEBUG("%s not directory", path);
-        return 0;
-    }
-
-    int rc = set_label(path, XATTR_NAME_SMACKTRANSMUTE, "TRUE");
-    if (rc < 0) {
-        ERROR("set_smack(%s,%s,%s)", path, XATTR_NAME_SMACKTRANSMUTE, "TRUE");
-        return rc;
-    }
-
-    return 0;
-}
-
-/**
  * @brief Label an executable file
  *
  * @param[in] path The path of the file
@@ -88,16 +45,6 @@ __nonnull() __wur static int label_dir_transmute(const char *path) {
  * @return 0 in case of success or a negative -errno value
  */
 __nonnull() __wur static int label_exec(const char *path, const char *label) {
-    if (!check_file_type(path, __S_IFREG)) {
-        DEBUG("%s not regular file", path);
-        return 0;
-    }
-
-    if (!check_executable(path)) {
-        ERROR("%s not executable", path);
-        return 0;  // Check that it should not be restricted.
-    }
-
     char *test_exec = strstr(label, suffix_exec);
     if (test_exec == NULL || strcmp(test_exec, suffix_exec)) {
         ERROR("%s not end with %s", label, suffix_exec)
@@ -132,13 +79,24 @@ __nonnull() __wur static int label_exec(const char *path, const char *label) {
  */
 __nonnull((1, 2)) __wur
     static int label_path(const char *path, const char *label, int is_executable, int is_transmute) {
-    int rc = label_file(path, label);
+    bool exists, is_exec, is_dir;
+    get_file_informations(path, &exists, &is_exec, &is_dir);
+
+    DEBUG("%s : exists=%d ; exec=%d ; dir=%d", path, exists, is_exec, is_dir);
+
+    if (!exists) {
+        return -ENOENT;
+    }
+
+    // file
+    int rc = set_label(path, XATTR_NAME_SMACK, label);
     if (rc < 0) {
-        ERROR("label file : %d %s", -rc, strerror(-rc));
+        ERROR("set_label(%s,%s,%s) : %d %s", path, XATTR_NAME_SMACK, label, -rc, strerror(-rc));
         return rc;
     }
 
-    if (is_executable) {
+    // exec
+    if (is_executable && is_exec) {
         rc = label_exec(path, label);
         if (rc < 0) {
             ERROR("label exec : %d %s", -rc, strerror(-rc));
@@ -146,10 +104,11 @@ __nonnull((1, 2)) __wur
         }
     }
 
-    if (is_transmute) {
-        rc = label_dir_transmute(path);
+    // dir
+    if (is_transmute && is_dir) {
+        rc = set_label(path, XATTR_NAME_SMACKTRANSMUTE, "TRUE");
         if (rc < 0) {
-            ERROR("label dir : %d %s", -rc, strerror(-rc));
+            ERROR("set_label(%s,%s,%s) : %d %s ", path, XATTR_NAME_SMACKTRANSMUTE, "TRUE", -rc, strerror(-rc));
             return rc;
         }
     }

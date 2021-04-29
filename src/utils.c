@@ -81,59 +81,27 @@ int set_label(const char *path, const char *xattr, const char *value) {
     return 0;
 }
 
-/* see utils.h */
-bool check_file_exists(const char *path) {
-    return access(path, F_OK) == 0;
-}
-
-/* see utils.h */
-bool check_file_type(const char *path, const unsigned short file_type) {
+void get_file_informations(const char *path, bool *exists, bool *is_exec, bool *is_dir) {
     struct stat s;
     memset(&s, 0, sizeof(s));
 
-    int rc = stat(path, &s);
-    if (rc < 0) {
-        ERROR("stat failed : %d %s", errno, strerror(errno));
-        return false;
+    if (exists)
+        *exists = false;
+    if (is_exec)
+        *is_exec = false;
+    if (is_dir)
+        *is_dir = false;
+
+    if (stat(path, &s) != 0) {
+        return;
     }
 
-    switch (file_type) {
-        case __S_IFDIR:
-        case __S_IFCHR:
-        case __S_IFBLK:
-        case __S_IFREG:
-        case __S_IFIFO:
-        case __S_IFLNK:
-        case __S_IFSOCK:
-            break;
-        default:
-            ERROR("Type undefined");
-            return false;
-    }
-
-    if (__S_ISTYPE(s.st_mode, file_type) != 0) {
-        return true;
-    } else {
-        return false;
-    }
-}
-
-/* see utils.h */
-bool check_executable(const char *path) {
-    struct stat s;
-    memset(&s, 0, sizeof(s));
-    int rc = 0;
-
-    rc = stat(path, &s);
-    if (rc < 0) {
-        ERROR("stat failed : %d %s", errno, strerror(errno));
-        return false;
-    }
-
-    if (s.st_mode & S_IXUSR)
-        return true;
-    else
-        return false;
+    if (exists)
+        *exists = true;
+    if (is_exec)
+        *is_exec = __S_ISTYPE(s.st_mode, __S_IFREG) && (s.st_mode & S_IXUSR || s.st_mode & S_IXGRP);
+    if (is_dir)
+        *is_dir = __S_ISTYPE(s.st_mode, __S_IFDIR);
 }
 
 /* see utils.h */
