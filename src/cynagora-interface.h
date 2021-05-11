@@ -36,20 +36,20 @@
  * @brief Define new permissions in cynagora
  *
  * @param[in] cynagora cynagora admin client
- * @param[in] id id of the application
+ * @param[in] label label of the application
  * @param[in] permission_set array of permission_set_t
  * @return 0 in case of success or a negative -errno value
  */
-extern int cynagora_set_policies(cynagora_t *cynagora, const char *id, const permission_set_t *permission_set)
+extern int cynagora_set_policies(cynagora_t *cynagora, const char *label, const permission_set_t *permission_set)
     __wur __nonnull();
 
 /**
- * @brief Drop old policies of cynagora for an id (client)
+ * @brief Drop old policies of cynagora for a label (client)
  *
  * @param[in] cynagora cynagora admin client
- * @param[in] id the id of the application for which to remove permissions
+ * @param[in] label the label of the application for which to remove permissions
  * @return 0 in case of success or a negative -errno value
  */
-extern int cynagora_drop_policies(cynagora_t *cynagora, const char *id) __wur __nonnull();
+extern int cynagora_drop_policies(cynagora_t *cynagora, const char *label) __wur __nonnull();
 
 #endif

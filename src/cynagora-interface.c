@@ -45,7 +45,7 @@
 /**********************/
 
 /* see cynagora-interface.h */
-int cynagora_set_policies(cynagora_t *cynagora, const char *id, const permission_set_t *permission_set) {
+int cynagora_set_policies(cynagora_t *cynagora, const char *label, const permission_set_t *permission_set) {
     // enter to modify policies cynagora
     int rc = cynagora_enter(cynagora);
     if (rc < 0) {
@@ -55,7 +55,7 @@ int cynagora_set_policies(cynagora_t *cynagora, const char *id, const permission
 
     size_t i = 0;
     cynagora_key_t k = {
-        .client = id,
+        .client = label,
         .session = CYNAGORA_INSERT_ALL,
         .user = CYNAGORA_INSERT_ALL,
         .permission = NULL};
@@ -84,7 +84,7 @@ int cynagora_set_policies(cynagora_t *cynagora, const char *id, const permission
 }
 
 /* see cynagora-interface.h */
-int cynagora_drop_policies(cynagora_t *cynagora, const char *id) {
+int cynagora_drop_policies(cynagora_t *cynagora, const char *label) {
     // enter to modify policies cynagora
     int rc = cynagora_enter(cynagora);
     if (rc < 0) {
@@ -93,7 +93,7 @@ int cynagora_drop_policies(cynagora_t *cynagora, const char *id) {
     }
 
     cynagora_key_t key = {
-        .client = id,
+        .client = label,
         .session = CYNAGORA_SELECT_ALL,
         .user = CYNAGORA_SELECT_ALL,
         .permission = CYNAGORA_SELECT_ALL};

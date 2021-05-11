@@ -291,16 +291,16 @@ __nonnull() __wur static int send_display_secure_app(client_t *cli) {
  */
 __nonnull() __wur static int update_policy(secure_app_t *secure_app, cynagora_t *cynagora_admin_client) {
     // drop old policies
-    int rc = cynagora_drop_policies(cynagora_admin_client, secure_app->id);
+    int rc = cynagora_drop_policies(cynagora_admin_client, secure_app->label);
     if (rc < 0) {
-        ERROR("cynagora_drop_policies %s : %d %s", secure_app->id, -rc, strerror(-rc));
+        ERROR("cynagora_drop_policies %s : %d %s", secure_app->label, -rc, strerror(-rc));
         return rc;
     }
 
     // apply new policies
-    rc = cynagora_set_policies(cynagora_admin_client, secure_app->id, &(secure_app->permission_set));
+    rc = cynagora_set_policies(cynagora_admin_client, secure_app->label, &(secure_app->permission_set));
     if (rc < 0) {
-        ERROR("cynagora_set_policies %s : %d %s", secure_app->id, -rc, strerror(-rc));
+        ERROR("cynagora_set_policies %s : %d %s", secure_app->label, -rc, strerror(-rc));
         return rc;
     }
 
@@ -324,7 +324,7 @@ __nonnull() __wur static int install(client_t *cli) {
     rc = install_mac(cli->secure_app);
     if (rc < 0) {
         ERROR("install_mac : %d %s", -rc, strerror(-rc));
-        int rc2 = cynagora_drop_policies(cli->sec_lsm_manager_server->cynagora_admin_client, cli->secure_app->id);
+        int rc2 = cynagora_drop_policies(cli->sec_lsm_manager_server->cynagora_admin_client, cli->secure_app->label);
         if (rc2 < 0) {
             ERROR("cannot delete policy : %d %s", -rc2, strerror(-rc2));
         }
@@ -342,7 +342,7 @@ __nonnull() __wur static int uninstall(client_t *cli) {
         return -EPERM;
     }
 
-    int rc = cynagora_drop_policies(cli->sec_lsm_manager_server->cynagora_admin_client, cli->secure_app->id);
+    int rc = cynagora_drop_policies(cli->sec_lsm_manager_server->cynagora_admin_client, cli->secure_app->label);
 
     if (rc < 0) {
         ERROR("cynagora_drop_policies : %d %s", -rc, strerror(-rc));

@@ -24,6 +24,7 @@
 #include "secure-app.h"
 
 #include <errno.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/socket.h>
@@ -43,6 +44,7 @@
 __nonnull() static void init_secure_app(secure_app_t *secure_app) {
     memset(secure_app->id, '\0', SEC_LSM_MANAGER_MAX_SIZE_ID);
     memset(secure_app->id_underscore, '\0', SEC_LSM_MANAGER_MAX_SIZE_ID);
+    memset(secure_app->label, '\0', SEC_LSM_MANAGER_MAX_SIZE_LABEL);
     init_path_set(&(secure_app->path_set));
     init_permission_set(&(secure_app->permission_set));
     secure_app->error_flag = false;
@@ -120,6 +122,12 @@ int secure_app_set_id(secure_app_t *secure_app, const char *id) {
     secure_strncpy(secure_app->id, id, SEC_LSM_MANAGER_MAX_SIZE_ID);
     secure_strncpy(secure_app->id_underscore, id, SEC_LSM_MANAGER_MAX_SIZE_ID);
     dash_to_underscore(secure_app->id_underscore);
+
+#if defined(WITH_SMACK)
+    snprintf(secure_app->label, SEC_LSM_MANAGER_MAX_SIZE_LABEL, "App:%s", secure_app->id);
+#elif defined(WITH_SELINUX)
+    snprintf(secure_app->label, SEC_LSM_MANAGER_MAX_SIZE_LABEL, "system_u:system_r:%s_t:s0", secure_app->id_underscore);
+#endif
 
     return 0;
 }
