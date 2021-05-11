@@ -98,6 +98,10 @@ allow {{id_underscore}}_t self:unix_dgram_socket create_stream_socket_perms;
 # read /etc/resolv.conf
 sysnet_read_config({{id_underscore}}_t);
 
+# Manage afm user home files
+# Possible improvement with mcs (at this time isolation is preserved with DAC)
+afm_user_manage_home_files({{id_underscore}}_t);
+
 # access /var/scope-platform
 IF_PERM(:partner:scope-platform)
 rw_platform_var({{id_underscore}}_t);
