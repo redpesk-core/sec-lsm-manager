@@ -27,7 +27,8 @@ include(../macros.in)
 ########################################
 ## <summary>
 ##    Allow the specified domain to
-##    manage {{id_underscore}} files perms
+##    manage {{id_underscore}}_domain
+##    perms.
 ## </summary>
 ## <param name="domain">
 ##    <summary>
@@ -35,17 +36,38 @@ include(../macros.in)
 ##    </summary>
 ## </param>
 #
-interface(`manage_{{id_underscore}}_file_dir_perms',`
+interface(`manage_{{id_underscore}}_domain_perms',`
     gen_require(`
-        type {{id_underscore}}_t;
-        type {{id_underscore}}_lib_t;
-        type {{id_underscore}}_conf_t;
-        type {{id_underscore}}_exec_t;
-        type {{id_underscore}}_icon_t;
-        type {{id_underscore}}_data_t;
-        type {{id_underscore}}_http_t;
+        attribute {{id_underscore}}_domain;
     ')
 
-    allow $1 { {{id_underscore}}_t {{id_underscore}}_lib_t {{id_underscore}}_conf_t {{id_underscore}}_exec_t {{id_underscore}}_icon_t {{id_underscore}}_data_t {{id_underscore}}_http_t }:dir manage_dir_perms;
-    allow $1 { {{id_underscore}}_t {{id_underscore}}_lib_t {{id_underscore}}_conf_t {{id_underscore}}_exec_t {{id_underscore}}_icon_t {{id_underscore}}_data_t {{id_underscore}}_http_t }:file manage_file_perms;
+    manage_dirs_pattern($1, {{id_underscore}}_domain, {{id_underscore}}_domain);
+    manage_files_pattern($1, {{id_underscore}}_domain, {{id_underscore}}_domain);
+    manage_lnk_files_pattern($1, {{id_underscore}}_domain, {{id_underscore}}_domain);
+    manage_fifo_files_pattern($1, {{id_underscore}}_domain, {{id_underscore}}_domain);
+    manage_sock_files_pattern($1, {{id_underscore}}_domain, {{id_underscore}}_domain);
+')
+
+
+########################################
+## <summary>
+##    Allow the specified domain to
+##    read {{id_underscore}}_domain
+## </summary>
+## <param name="domain">
+##    <summary>
+##    Domain allowed access.
+##    </summary>
+## </param>
+#
+interface(`read_{{id_underscore}}_domain',`
+    gen_require(`
+        attribute {{id_underscore}}_domain;
+    ')
+
+    list_dirs_pattern($1, {{id_underscore}}_domain, {{id_underscore}}_domain);
+    read_files_pattern($1, {{id_underscore}}_domain, {{id_underscore}}_domain);
+    read_lnk_files_pattern($1, {{id_underscore}}_domain, {{id_underscore}}_domain);
+    read_fifo_files_pattern($1, {{id_underscore}}_domain, {{id_underscore}}_domain);
+    read_sock_files_pattern($1, {{id_underscore}}_domain, {{id_underscore}}_domain);
 ')

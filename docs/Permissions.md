@@ -34,3 +34,7 @@ Here is a list of currently supported permissions and their effect :
 - urn:AGL:permission::partner:create-can-socket
 
 > Allow create and write on can socket
+
+- urn:AGL:permission::partner:launch-afbtest
+
+> Allow launch test with afbtest binding

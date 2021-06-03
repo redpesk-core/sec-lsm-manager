@@ -35,28 +35,39 @@ gen_require(`
 # Definitions #
 ###############
 
+# Attribute {{id_underscore}}_domain will contain all type
+attribute {{id_underscore}}_domain;
+
 type {{id_underscore}}_t;
 files_type({{id_underscore}}_t);
+typeattribute {{id_underscore}}_t {{id_underscore}}_domain;
+
 type {{id_underscore}}_exec_t;
 init_daemon_domain({{id_underscore}}_t, {{id_underscore}}_exec_t);
 init_nnp_daemon_domain({{id_underscore}}_t);
 domain_entry_file({{id_underscore}}_t, bin_t);
 role system_r types {{id_underscore}}_t;
+typeattribute {{id_underscore}}_exec_t {{id_underscore}}_domain;
 
 type {{id_underscore}}_lib_t;
 files_type({{id_underscore}}_lib_t);
+typeattribute {{id_underscore}}_lib_t {{id_underscore}}_domain;
 
 type {{id_underscore}}_conf_t;
 files_config_file({{id_underscore}}_conf_t);
+typeattribute {{id_underscore}}_conf_t {{id_underscore}}_domain;
 
 type {{id_underscore}}_icon_t;
 files_type({{id_underscore}}_icon_t);
+typeattribute {{id_underscore}}_icon_t {{id_underscore}}_domain;
 
 type {{id_underscore}}_data_t;
 files_type({{id_underscore}}_data_t);
+typeattribute {{id_underscore}}_data_t {{id_underscore}}_domain;
 
 type {{id_underscore}}_http_t;
 files_type({{id_underscore}}_http_t);
+typeattribute {{id_underscore}}_http_t {{id_underscore}}_domain;
 
 ##########
 # Policy #
@@ -89,6 +100,13 @@ read_lnk_files_pattern({{id_underscore}}_t, {{id_underscore}}_lib_t, {{id_unders
 # Load binding shared library
 allow {{id_underscore}}_t {{id_underscore}}_lib_t:file mmap_exec_file_perms;
 
+# Read and mmap redpesk_public files
+read_redpesk_public({{id_underscore}}_t);
+mmap_redpesk_public({{id_underscore}}_t);
+
+# write redpesk_public socket
+write_sock_redpesk_public({{id_underscore}}_t);
+
 # socket + all port > 1024
 corenet_tcp_bind_generic_node({{id_underscore}}_t);
 corenet_tcp_bind_all_unreserved_ports({{id_underscore}}_t);
@@ -113,4 +131,9 @@ allow {{id_underscore}}_t self:can_socket { create_socket_perms };
 
 # Load can module in kernel
 kernel_request_load_module({{id_underscore}}_t);
+ENDIF
+
+# Allow use binding afbtest
+IF_PERM(:partner:launch-afbtest)
+read_afbtest_domain({{id_underscore}}_t);
 ENDIF
