@@ -28,6 +28,7 @@ policy_module({{id}},1.0)
 
 gen_require(`
     type bin_t;
+    type tmp_t;
     type unreserved_port_t;
 ')
 
@@ -74,28 +75,19 @@ typeattribute {{id_underscore}}_http_t {{id_underscore}}_domain;
 ##########
 
 init_dbus_chat({{id_underscore}}_t);
+kernel_dgram_send({{id_underscore}}_t);
+fs_getattr_xattr_fs({{id_underscore}}_t);
 init_stream_connect({{id_underscore}}_t);
 init_rw_stream_sockets({{id_underscore}}_t);
-kernel_dgram_send({{id_underscore}}_t);
+kernel_dontaudit_read_system_state({{id_underscore}}_t);
+
+allow {{id_underscore}}_t self:process { setpgid };
 
 # Read conf/bin/data/http/lib
-list_dirs_pattern({{id_underscore}}_t, {{id_underscore}}_conf_t, {{id_underscore}}_conf_t);
-list_dirs_pattern({{id_underscore}}_t, {{id_underscore}}_exec_t, {{id_underscore}}_exec_t);
-list_dirs_pattern({{id_underscore}}_t, {{id_underscore}}_data_t, {{id_underscore}}_data_t);
-list_dirs_pattern({{id_underscore}}_t, {{id_underscore}}_http_t, {{id_underscore}}_http_t);
-list_dirs_pattern({{id_underscore}}_t, {{id_underscore}}_lib_t, {{id_underscore}}_lib_t);
+read_{{id_underscore}}_domain({{id_underscore}}_t);
 
-read_files_pattern({{id_underscore}}_t, {{id_underscore}}_conf_t, {{id_underscore}}_conf_t);
-read_files_pattern({{id_underscore}}_t, {{id_underscore}}_exec_t, {{id_underscore}}_exec_t);
-read_files_pattern({{id_underscore}}_t, {{id_underscore}}_data_t, {{id_underscore}}_data_t);
-read_files_pattern({{id_underscore}}_t, {{id_underscore}}_http_t, {{id_underscore}}_http_t);
-read_files_pattern({{id_underscore}}_t, {{id_underscore}}_lib_t, {{id_underscore}}_lib_t);
-
-read_lnk_files_pattern({{id_underscore}}_t, {{id_underscore}}_conf_t, {{id_underscore}}_conf_t);
-read_lnk_files_pattern({{id_underscore}}_t, {{id_underscore}}_exec_t, {{id_underscore}}_exec_t);
-read_lnk_files_pattern({{id_underscore}}_t, {{id_underscore}}_data_t, {{id_underscore}}_data_t);
-read_lnk_files_pattern({{id_underscore}}_t, {{id_underscore}}_http_t, {{id_underscore}}_http_t);
-read_lnk_files_pattern({{id_underscore}}_t, {{id_underscore}}_lib_t, {{id_underscore}}_lib_t);
+# Allow binding exec own file
+allow {{id_underscore}}_t {{id_underscore}}_exec_t:file { execute_no_trans };
 
 # Load binding shared library
 allow {{id_underscore}}_t {{id_underscore}}_lib_t:file mmap_exec_file_perms;
@@ -103,6 +95,9 @@ allow {{id_underscore}}_t {{id_underscore}}_lib_t:file mmap_exec_file_perms;
 # Read and mmap redpesk_public files
 read_redpesk_public({{id_underscore}}_t);
 mmap_redpesk_public({{id_underscore}}_t);
+
+# Search /run/user
+userdom_search_user_tmp_dirs({{id_underscore}}_t);
 
 # write redpesk_public socket
 write_sock_redpesk_public({{id_underscore}}_t);
@@ -112,6 +107,11 @@ corenet_tcp_bind_generic_node({{id_underscore}}_t);
 corenet_tcp_bind_all_unreserved_ports({{id_underscore}}_t);
 allow {{id_underscore}}_t self:tcp_socket create_stream_socket_perms;
 allow {{id_underscore}}_t self:unix_dgram_socket create_stream_socket_perms;
+
+# Connect other binding
+sysnet_dns_name_resolve({{id_underscore}}_t);
+allow {{id_underscore}}_t self:netlink_route_socket { create_socket_perms nlmsg_read nlmsg_write };
+corenet_tcp_connect_unreserved_ports({{id_underscore}}_t);
 
 # read /etc/resolv.conf
 sysnet_read_config({{id_underscore}}_t);
@@ -128,12 +128,25 @@ ENDIF
 # create and write on can socket
 IF_PERM(:partner:create-can-socket)
 allow {{id_underscore}}_t self:can_socket { create_socket_perms };
-
-# Load can module in kernel
-kernel_request_load_module({{id_underscore}}_t);
+kernel_request_load_module({{id_underscore}}_t); # Load can module in kernel
 ENDIF
 
-# Allow use binding afbtest
-IF_PERM(:partner:launch-afbtest)
+# Allow read binding afbtest
+IF_PERM(:partner:read-afbtest)
 read_afbtest_domain({{id_underscore}}_t);
+ENDIF
+
+# Allow execute shell and bin
+IF_PERM(:partner:execute-shell)
+corecmd_exec_bin({{id_underscore}}_t);
+corecmd_exec_shell({{id_underscore}}_t);
+ENDIF
+
+# Allow manage files in /tmp
+IF_PERM(:partner:access-tmp)
+manage_dirs_pattern({{id_underscore}}_t, tmp_t, tmp_t);
+manage_files_pattern({{id_underscore}}_t, tmp_t, tmp_t);
+manage_lnk_files_pattern({{id_underscore}}_t, tmp_t, tmp_t);
+manage_fifo_files_pattern({{id_underscore}}_t, tmp_t, tmp_t);
+manage_sock_files_pattern({{id_underscore}}_t, tmp_t, tmp_t);
 ENDIF

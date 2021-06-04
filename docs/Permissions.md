@@ -35,6 +35,14 @@ Here is a list of currently supported permissions and their effect :
 
 > Allow create and write on can socket
 
-- urn:AGL:permission::partner:launch-afbtest
+- urn:AGL:permission::partner:read-afbtest
 
-> Allow launch test with afbtest binding
+> Allow read binding afbtest
+
+- urn:AGL:permission::partner:execute-shell
+
+> Allow execute shell and programs in bin directories
+
+- urn:AGL:permission::partner:access-tmp
+
+> Allow manage all files types in /tmp
