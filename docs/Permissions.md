@@ -43,6 +43,10 @@ Here is a list of currently supported permissions and their effect :
 
 > Allow execute shell and programs in bin directories
 
-- urn:AGL:permission::partner:access-tmp
+- urn:AGL:permission::partner:manage-tmp
 
 > Allow manage all files types in /tmp
+
+- urn:AGL:permission::partner:manage-user-shared
+
+> Allow manage all files types in /run/user/[id]/usrshr/

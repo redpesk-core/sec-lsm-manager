@@ -63,7 +63,7 @@ char suffix_icon[] = ":Icon";
 char suffix_data[] = ":Data";
 char suffix_http[] = ":Http";
 char user_home[] = "User:Home";
-char public_app[] = "_";
+char public_app[] = "System:Shared";
 
 /***********************/
 /*** PRIVATE METHODS ***/

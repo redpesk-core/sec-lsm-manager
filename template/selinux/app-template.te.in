@@ -84,45 +84,51 @@ kernel_dontaudit_read_system_state({{id_underscore}}_t);
 allow {{id_underscore}}_t self:process { setpgid };
 
 # Read conf/bin/data/http/lib
+
 read_{{id_underscore}}_domain({{id_underscore}}_t);
 
-# Allow binding exec own file
-allow {{id_underscore}}_t {{id_underscore}}_exec_t:file { execute_no_trans };
+# Binding exec and load own files
 
-# Load binding shared library
+allow {{id_underscore}}_t {{id_underscore}}_exec_t:file { execute_no_trans };
 allow {{id_underscore}}_t {{id_underscore}}_lib_t:file mmap_exec_file_perms;
 
-# Read and mmap redpesk_public files
-read_redpesk_public({{id_underscore}}_t);
-mmap_redpesk_public({{id_underscore}}_t);
+# Create tcp socket and use port > 1024
 
-# Search /run/user
-userdom_search_user_tmp_dirs({{id_underscore}}_t);
-
-# write redpesk_public socket
-write_sock_redpesk_public({{id_underscore}}_t);
-
-# socket + all port > 1024
 corenet_tcp_bind_generic_node({{id_underscore}}_t);
 corenet_tcp_bind_all_unreserved_ports({{id_underscore}}_t);
 allow {{id_underscore}}_t self:tcp_socket create_stream_socket_perms;
 allow {{id_underscore}}_t self:unix_dgram_socket create_stream_socket_perms;
 
-# Connect other binding
-sysnet_dns_name_resolve({{id_underscore}}_t);
-allow {{id_underscore}}_t self:netlink_route_socket { create_socket_perms nlmsg_read nlmsg_write };
-corenet_tcp_connect_unreserved_ports({{id_underscore}}_t);
-
-# read /etc/resolv.conf
-sysnet_read_config({{id_underscore}}_t);
-
-# Manage afm user home files
+# Manage redpesk user home files
 # Possible improvement with mcs (at this time isolation is preserved with DAC)
-afm_user_manage_home_files({{id_underscore}}_t);
 
-# access /var/scope-platform
+redpesk_user_manage_home_files({{id_underscore}}_t);
+
+# Connect other binding
+
+sysnet_dns_name_resolve({{id_underscore}}_t);
+corenet_tcp_connect_unreserved_ports({{id_underscore}}_t);
+allow {{id_underscore}}_t self:netlink_route_socket { create_socket_perms nlmsg_read nlmsg_write };
+
+# Read and mmap redpesk_public files
+
+read_redpesk_public({{id_underscore}}_t);
+mmap_redpesk_public({{id_underscore}}_t);
+
+
+# Read redpesk_platform, redpesk_scope_platform and redpesk_user
+
+read_redpesk_scope_platform({{id_underscore}}_t);
+read_redpesk_platform_domain({{id_underscore}}_t);
+read_redpesk_user_domain({{id_underscore}}_t);
+
+# Write on redpesk sockets
+
+write_redpesk_socket({{id_underscore}}_t);
+
+# manage /var/scope-platform
 IF_PERM(:partner:scope-platform)
-rw_platform_var({{id_underscore}}_t);
+manage_redpesk_scope_platform({{id_underscore}}_t);
 ENDIF
 
 # create and write on can socket
@@ -138,15 +144,20 @@ ENDIF
 
 # Allow execute shell and bin
 IF_PERM(:partner:execute-shell)
+auth_read_passwd({{id_underscore}}_t);
 corecmd_exec_bin({{id_underscore}}_t);
 corecmd_exec_shell({{id_underscore}}_t);
 ENDIF
 
 # Allow manage files in /tmp
-IF_PERM(:partner:access-tmp)
+IF_PERM(:partner:manage-tmp)
 manage_dirs_pattern({{id_underscore}}_t, tmp_t, tmp_t);
 manage_files_pattern({{id_underscore}}_t, tmp_t, tmp_t);
 manage_lnk_files_pattern({{id_underscore}}_t, tmp_t, tmp_t);
 manage_fifo_files_pattern({{id_underscore}}_t, tmp_t, tmp_t);
 manage_sock_files_pattern({{id_underscore}}_t, tmp_t, tmp_t);
+ENDIF
+
+IF_PERM(:partner:manage-user-shared)
+manage_redpesk_user_shared({{id_underscore}}_t);
 ENDIF
