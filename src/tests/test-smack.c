@@ -179,9 +179,9 @@ START_TEST(test_smack_install) {
     ck_assert_int_eq(compare_xattr(id_dir, XATTR_NAME_SMACK, "App:testid"), true);
     ck_assert_int_eq(compare_xattr(id_dir, XATTR_NAME_SMACKTRANSMUTE, "TRUE"), true);
     ck_assert_int_eq(compare_xattr(id_file, XATTR_NAME_SMACK, "App:testid"), true);
-    ck_assert_int_eq(compare_xattr(public_dir, XATTR_NAME_SMACK, "_"), true);
+    ck_assert_int_eq(compare_xattr(public_dir, XATTR_NAME_SMACK, "System:Shared"), true);
     ck_assert_int_eq(compare_xattr(public_dir, XATTR_NAME_SMACKTRANSMUTE, "TRUE"), true);
-    ck_assert_int_eq(compare_xattr(public_file, XATTR_NAME_SMACK, "_"), true);
+    ck_assert_int_eq(compare_xattr(public_file, XATTR_NAME_SMACK, "System:Shared"), true);
 
     ck_assert_int_eq(uninstall_smack(secure_app), 0);
 

@@ -43,7 +43,7 @@ START_TEST(test_init_path_type_definitions) {
 
     ck_assert_str_eq(path_type_definitions[type_lib].label, "App:testid:Lib");
 
-    ck_assert_str_eq(path_type_definitions[type_public].label, "_");
+    ck_assert_str_eq(path_type_definitions[type_public].label, "System:Shared");
 
     ck_assert_int_eq(path_type_definitions[type_exec].is_executable, 1);
 
