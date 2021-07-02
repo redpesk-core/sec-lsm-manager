@@ -2,9 +2,7 @@
 
 sec-lsm-manager has the following architecture :
 
-<div align="center">
-<img src="./images/sec-lsm-manager.png" alt="architecture">
-</div>
+![architecture](./images/sec-lsm-manager.png)
 
 ### sec-lsm-managerd, sec-lsm-manager-smackd, sec-lsm-manager-selinuxd
 

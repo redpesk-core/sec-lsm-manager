@@ -18,5 +18,3 @@ books:
       name: SMACK Explanation
     - url: SELinux.md
       name: SELinux Explanation
-    - url: Templating.md
-      name: Templating Explanation
