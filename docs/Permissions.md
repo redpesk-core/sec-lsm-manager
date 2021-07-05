@@ -1,6 +1,6 @@
 ## Permissions
 
-In the sec-lsm-manager, the following system permission is used : [redpesk-permissions](https://docs.redpesk.bzh/docs/en/master/developer-guides/3-permissions.html#the-permissions)
+In the sec-lsm-manager, the following system permission is used : [redpesk-permissions]({% chapter_link application-framework.permissions %})
 
 ### Cynagora
 

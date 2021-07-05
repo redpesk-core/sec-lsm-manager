@@ -3,8 +3,7 @@
 
 ### Dependencies
 
-> If you are missing any dependencies please follow this guide : [redpesk-build-host](https://docs.redpesk.bzh/docs/en/master/getting_started/host-configuration/docs/1-Setup-your-build-host.html)
-
+> If you are missing any dependencies please follow this guide : [redpesk-build-host]({% chapter_link host-configuration-doc.setup-your-build-host %})
 #### Fedora / Centos
 
 ```

@@ -67,7 +67,7 @@ sec_lsm_manager_add_permission(sec_lsm_manager, "urn:AGL::partner:create-can-soc
 
 > A permission must be composed of at least two characters.
 
-For more information about permissions : [Permissions.md](./Permissions.md)
+For more information about permissions : [Permissions]({% chapter_link sec-lsm-manager.permissions-definition %})
 
 And finally we can install our application security context :
 
