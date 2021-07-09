@@ -8,6 +8,12 @@
 <img src="https://img.shields.io/badge/tests_coverage-90-green" alt="test-coverage">
 </div>
 
+## Logo
+
+<div align="center">
+<img src="./logo_sec_lsm_manager.png" alt="logo">
+</div>
+
 ## Overview
 
 sec-lsm-manager allows to easily create SMACK or SELinux security policies for applications.
