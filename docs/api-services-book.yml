@@ -2,7 +2,7 @@ type: books
 books:
 -
     id: sec-lsm-manager
-    title: sec-lsm-manager
+    title: Security manager
     description: sec-lsm-manager documentation
     keywords:
     chapters:
