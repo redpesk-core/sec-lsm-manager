@@ -67,6 +67,7 @@
 #define _GROUP_ 'g'
 #define _GROUPS_ 'G'
 #define _HELP_ 'h'
+#define _KEEPGOING_ 'k'
 #define _LOG_ 'l'
 #define _MAKESOCKDIR_ 'M'
 #define _OWNSOCKDIR_ 'O'
@@ -76,11 +77,12 @@
 #define _USER_ 'u'
 #define _VERSION_ 'v'
 
-static const char shortopts[] = "d:g:hi:lmMOoS:u:v";
+static const char shortopts[] = "d:g:hi:klmMOoS:u:v";
 
 static const struct option longopts[] = {{"group", 1, NULL, _GROUP_},
                                          {"groups", 1, NULL, _GROUPS_},
                                          {"help", 0, NULL, _HELP_},
+                                         {"keep-going", 0, NULL, _KEEPGOING_},
                                          {"log", 0, NULL, _LOG_},
                                          {"make-socket-dir", 0, NULL, _MAKESOCKDIR_},
                                          {"own-socket-dir", 0, NULL, _OWNSOCKDIR_},
@@ -98,6 +100,7 @@ static const char helptxt[] =
     "    -g, --group xxx       set the group\n"
     "    -G  --groups xxx,yyy  set additional groups\n"
     "    -l, --log             activate log of transactions\n"
+    "    -k, --keep-going      continue to run on some errors\n"
     "\n"
     "    -S, --socketdir xxx   set the base directory xxx for sockets\n"
     "                            (default: %s)\n"
@@ -119,6 +122,7 @@ int main(int ac, char **av) {
     int makesockdir = 0;
     int ownsockdir = 0;
     int flog = 0;
+    int keepgoing = 0;
     int help = 0;
     int version = 0;
     int error = 0;
@@ -157,6 +161,9 @@ int main(int ac, char **av) {
                 break;
             case _HELP_:
                 help = 1;
+                break;
+            case _KEEPGOING_:
+                keepgoing = 1;
                 break;
             case _LOG_:
                 flog = 1;
@@ -230,7 +237,7 @@ int main(int ac, char **av) {
             pw = getpwnam(user);
             if (pw == NULL) {
                 fprintf(stderr, "can not find user '%s'\n", user);
-                return -1;
+                return 1;
             }
             uid = (int)pw->pw_uid;
             gid = (int)pw->pw_gid;
@@ -244,7 +251,7 @@ int main(int ac, char **av) {
                 gr = getgrnam(g);
                 if (gr == NULL) {
                     fprintf(stderr, "can not find group '%s'\n", g);
-                    return -1;
+                    return 1;
                 }
                 gids[number_groups] = gr->gr_gid;
                 number_groups++;
@@ -258,7 +265,7 @@ int main(int ac, char **av) {
             gr = getgrnam(group);
             if (gr == NULL) {
                 fprintf(stderr, "can not find group '%s'\n", group);
-                return -1;
+                return 1;
             }
             gid = (int)gr->gr_gid;
         }
@@ -268,7 +275,7 @@ int main(int ac, char **av) {
     if (makesockdir && socketdir[0] != '@') {
         if (ensure_directory(socketdir, ownsockdir ? uid : -1, ownsockdir ? gid : -1) < 0) {
             fprintf(stderr, "error : ensure_directory");
-            return -1;
+            return 1;
         }
     }
 
@@ -280,21 +287,24 @@ int main(int ac, char **av) {
         rc = setgroups(number_groups, gids);
         if (rc < 0) {
             fprintf(stderr, "can not change groups: %m\n");
-            return -1;
+            if (!keepgoing)
+            return 1;
         }
     }
     if (gid >= 0) {
         rc = setgid((gid_t)gid);
         if (rc < 0) {
             fprintf(stderr, "can not change group: %m\n");
-            return -1;
+            if (!keepgoing)
+            return 1;
         }
     }
     if (uid >= 0) {
         rc = setuid((uid_t)uid);
         if (rc < 0) {
             fprintf(stderr, "can not change user: %m\n");
-            return -1;
+            if (!keepgoing)
+            return 1;
         }
     }
 
@@ -306,13 +316,15 @@ int main(int ac, char **av) {
 
     if (cap_set_proc(cap) != 0) {
         fprintf(stderr, "can not change cap: %m\n");
-        return -1;
+    if (!keepgoing)
+        return 1;
     }
 
     for (size_t i = 0; i < CAP_COUNT; i++) {
         if (cap_set_ambient(cap_vector[i], CAP_SET) != 0) {
             fprintf(stderr, "can not change cap amb: %m\n");
-            return -1;
+            if (!keepgoing)
+            return 1;
         }
     }
 
