@@ -253,9 +253,12 @@ __nonnull((1)) static void send_error(client_t *cli, const char *errorstr) {
  */
 __nonnull() __wur static int send_display_secure_app(client_t *cli) {
     int rc = 0;
+
     if (cli->secure_app->error_flag) {
-        ERROR("error flag has been raised, clear secure app");
-        return -EPERM;
+        rc = putx(cli, _string_, _error_, _on_, NULL);
+        if (rc < 0) {
+            ERROR("putx : %d %s", -rc, strerror(-rc));
+        }
     }
 
     if (cli->secure_app->id) {
