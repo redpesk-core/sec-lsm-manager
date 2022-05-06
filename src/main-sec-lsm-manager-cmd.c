@@ -526,7 +526,6 @@ int main(int ac, char **av) {
         return 0;
     }
 
-    fcntl(0, F_SETFL, O_NONBLOCK);
     bufill = 0;
     for (;;) {
         rc = (int)read(0, &buffer[bufill], sizeof buffer - bufill);
