@@ -625,23 +625,15 @@ int sec_lsm_manager_display(sec_lsm_manager_t *sec_lsm_manager) {
     rc = wait_reply(sec_lsm_manager, true);
 
     if (rc > 2 && !strcmp(sec_lsm_manager->reply.fields[0], _string_)) {
-        puts("################## SECURE APP ##################\n");
-
-        while (rc > 2 && !strcmp(sec_lsm_manager->reply.fields[0], _string_)) {
-            if (!strcmp(sec_lsm_manager->reply.fields[1], _id_)) {
-                printf("id : %s\n", sec_lsm_manager->reply.fields[2]);
-            }
-
-            if (!strcmp(sec_lsm_manager->reply.fields[1], _permission_)) {
-                printf("permission : %s\n", sec_lsm_manager->reply.fields[2]);
-            }
-
-            if (!strcmp(sec_lsm_manager->reply.fields[1], _path_) && rc > 3) {
-                printf("path : %s %s\n", sec_lsm_manager->reply.fields[2], sec_lsm_manager->reply.fields[3]);
-            }
-
+        puts("################## SECURE APP ##################");
+        do {
+            printf(&"%s %s %s\n"[rc > 3 ? 0 : 3],
+              sec_lsm_manager->reply.fields[1],
+              sec_lsm_manager->reply.fields[2],
+              rc > 3 ? sec_lsm_manager->reply.fields[3] : NULL);
             rc = wait_reply(sec_lsm_manager, true);
         }
+        while (rc > 2 && !strcmp(sec_lsm_manager->reply.fields[0], _string_));
 
         puts("################################################");
     } else if (rc > 0 && !strcmp(sec_lsm_manager->reply.fields[0], _error_)) {
