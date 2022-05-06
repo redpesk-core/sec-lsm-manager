@@ -60,6 +60,10 @@
 #define SYSTEMD_SOCKET "sd:" SYSTEMD_NAME
 #endif
 
+#if !defined(SHUTOFF_TIME)
+#define SHUTOFF_TIME (60 * 3) /* 3 minutes */
+#endif
+
 #define DELIM_GROUPS ","
 
 #define CAP_COUNT (sizeof cap_vector / sizeof cap_vector[0])
@@ -73,11 +77,11 @@
 #define _OWNSOCKDIR_ 'O'
 #define _OWNDBDIR_ 'o'
 #define _SOCKETDIR_ 'S'
-#define _SYSTEMD_ 's'
+#define _SHUTOFF_ 's'
 #define _USER_ 'u'
 #define _VERSION_ 'v'
 
-static const char shortopts[] = "d:g:hi:klmMOoS:u:v";
+static const char shortopts[] = "d:g:hi:klmMOoS:s:u:v";
 
 static const struct option longopts[] = {{"group", 1, NULL, _GROUP_},
                                          {"groups", 1, NULL, _GROUPS_},
@@ -86,6 +90,7 @@ static const struct option longopts[] = {{"group", 1, NULL, _GROUP_},
                                          {"log", 0, NULL, _LOG_},
                                          {"make-socket-dir", 0, NULL, _MAKESOCKDIR_},
                                          {"own-socket-dir", 0, NULL, _OWNSOCKDIR_},
+                                         {"shutoff", 1, NULL, _SHUTOFF_ },
                                          {"socketdir", 1, NULL, _SOCKETDIR_},
                                          {"user", 1, NULL, _USER_},
                                          {"version", 0, NULL, _VERSION_},
@@ -101,6 +106,7 @@ static const char helptxt[] =
     "    -G  --groups xxx,yyy  set additional groups\n"
     "    -l, --log             activate log of transactions\n"
     "    -k, --keep-going      continue to run on some errors\n"
+    "    -s, --shutoff VALUE   shuting off time setting\n"
     "\n"
     "    -S, --socketdir xxx   set the base directory xxx for sockets\n"
     "                            (default: %s)\n"
@@ -128,6 +134,8 @@ int main(int ac, char **av) {
     int error = 0;
     int uid = -1;
     int gid = -1;
+    int soff = SHUTOFF_TIME;
+    const char *shutoff = NULL;
     const char *socketdir = NULL;
     const char *user = NULL;
     const char *group = NULL;
@@ -174,6 +182,9 @@ int main(int ac, char **av) {
             case _OWNSOCKDIR_:
                 ownsockdir = 1;
                 break;
+            case _SHUTOFF_:
+                shutoff = optarg;
+                break;
             case _SOCKETDIR_:
                 socketdir = optarg;
                 break;
@@ -205,6 +216,21 @@ int main(int ac, char **av) {
     socketdir = socketdir ?: sec_lsm_manager_default_socket_dir;
     user = user ?: SEC_LSM_MANAGER_USER;
     group = group ?: SEC_LSM_MANAGER_GROUP;
+
+    /* compute shutoff delay */
+    if (shutoff != NULL) {
+        if (!strcmp(shutoff, "never"))
+            soff = -1;
+        else {
+            soff = isid(&shutoff[shutoff[0] == '-']);
+            if (soff < 0) {
+                fprintf(stderr, "not a valid shutoff '%s'\n", shutoff);
+                return 1;
+            }
+            if (shutoff[0] == '-')
+                soff = -1;
+        }
+    }
 
     /* compute socket specs */
     spec_socket = 0;
@@ -354,7 +380,7 @@ int main(int ac, char **av) {
 #endif
 
     /* serve */
-    rc = sec_lsm_manager_server_serve(server, -1);
+    rc = sec_lsm_manager_server_serve(server, soff);
     return rc ? 3 : 0;
 }
 
