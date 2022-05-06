@@ -406,7 +406,7 @@ __nonnull((1)) static void onrequest(client_t *cli, unsigned count, const char *
     switch (args[0][0]) {
         case 'c':
             if (ckarg(args[0], _clear_, 1) && count == 1) {
-                free_secure_app(cli->secure_app);
+                clear_secure_app(cli->secure_app);
                 send_done(cli);
                 return;
             }
@@ -770,11 +770,14 @@ void sec_lsm_manager_server_stop(sec_lsm_manager_server_t *server, int status) {
 }
 
 /* see sec-lsm-manager-server.h */
-__wur int sec_lsm_manager_server_serve(sec_lsm_manager_server_t *server) {
+__wur int sec_lsm_manager_server_serve(sec_lsm_manager_server_t *server, int shutofftime) {
+    int rc, tempo = shutofftime < 0 ? -1 : shutofftime > INT_MAX / 1000 ? INT_MAX : shutofftime * 1000;
     /* process inputs */
     server->stopped = 0;
     while (!server->stopped) {
-        pollitem_wait_dispatch(server->pollfd, -1);
+        rc = pollitem_wait_dispatch(server->pollfd, tempo);
+	if (rc <= 0 && server->count == 0)
+	    sec_lsm_manager_server_stop(server, rc);
     }
     return server->stopped == INT_MIN ? 0 : server->stopped;
 }

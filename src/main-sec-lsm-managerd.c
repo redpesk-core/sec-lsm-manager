@@ -354,7 +354,7 @@ int main(int ac, char **av) {
 #endif
 
     /* serve */
-    rc = sec_lsm_manager_server_serve(server);
+    rc = sec_lsm_manager_server_serve(server, -1);
     return rc ? 3 : 0;
 }
 

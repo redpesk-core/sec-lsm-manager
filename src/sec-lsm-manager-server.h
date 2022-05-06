@@ -60,12 +60,14 @@ extern void sec_lsm_manager_server_destroy(sec_lsm_manager_server_t *server) __n
  * @brief Start the sec_lsm_manager server and returns only when stopped
  *
  * @param[in] server the handler of the server
+ * @param[in] shutofftime the count of time of inactivity leading to shuting off the server
+ *                        -1 means never
  *
  * @return 0 on success or a negative value
  *
  * @see sec_lsm_manager_server_stop
  */
-extern int sec_lsm_manager_server_serve(sec_lsm_manager_server_t *server) __nonnull() __wur;
+extern int sec_lsm_manager_server_serve(sec_lsm_manager_server_t *server, int shutofftime) __nonnull() __wur;
 
 /**
  * @brief Stop the sec_lsm_manager server
