@@ -78,7 +78,7 @@ __nonnull() __wur static int label_exec(const char *path, const char *label) {
  * @return 0 in case of success or a negative -errno value
  */
 __nonnull((1, 2)) __wur
-    static int label_path(const char *path, const char *label, int is_executable, int is_transmute) {
+static int label_path(const char *path, const char *label, int is_executable, int is_transmute) {
     bool exists, is_exec, is_dir;
     get_file_informations(path, &exists, &is_exec, &is_dir);
 

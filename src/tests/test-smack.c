@@ -63,7 +63,7 @@ START_TEST(test_label_exec) {
     // create dir
     create_tmp_dir(tmp_dir);
     // set path
-    snprintf(path, 200, "%s/test.bin", tmp_dir);
+    snprintf(path, sizeof path, "%s/test.bin", tmp_dir);
     ck_assert_int_eq(create_file(path), 0);
     ck_assert_int_eq(label_exec(path, label), -EINVAL);
     // set label with suffix :Exec
