@@ -83,6 +83,7 @@ int create_secure_app(secure_app_t **secure_app) {
 /* see secure-app.h */
 void clear_secure_app(secure_app_t *secure_app) {
     if (secure_app) {
+	secure_app->id[0] = '\0';
         free_permission_set(&(secure_app->permission_set));
         free_path_set(&(secure_app->path_set));
         secure_app->error_flag = false;
