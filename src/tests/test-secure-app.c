@@ -127,7 +127,7 @@ START_TEST(test_free_secure_app) {
     ck_assert_int_eq(secure_app_set_id(secure_app, "id"), 0);
     ck_assert_int_eq(secure_app_add_path(secure_app, "/tmp", type_conf), 0);
     ck_assert_int_eq(secure_app_add_permission(secure_app, "perm"), 0);
-    free_secure_app(secure_app);
+    clear_secure_app(secure_app);
     ck_assert_int_eq((int)secure_app->path_set.size, 0);
     ck_assert_int_eq((int)secure_app->permission_set.size, 0);
     destroy_secure_app(secure_app);

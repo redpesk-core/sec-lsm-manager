@@ -81,7 +81,7 @@ int create_secure_app(secure_app_t **secure_app) {
 }
 
 /* see secure-app.h */
-void free_secure_app(secure_app_t *secure_app) {
+void clear_secure_app(secure_app_t *secure_app) {
     if (secure_app) {
         free_permission_set(&(secure_app->permission_set));
         free_path_set(&(secure_app->path_set));
@@ -91,7 +91,7 @@ void free_secure_app(secure_app_t *secure_app) {
 
 /* see secure-app.h */
 void destroy_secure_app(secure_app_t *secure_app) {
-    free_secure_app(secure_app);
+    clear_secure_app(secure_app);
     free(secure_app);
 }
 

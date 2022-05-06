@@ -56,7 +56,7 @@ extern int create_secure_app(secure_app_t **pointer) __wur;
  *
  * @param[in] secure_app handler
  */
-extern void free_secure_app(secure_app_t *secure_app) __nonnull();
+extern void clear_secure_app(secure_app_t *secure_app) __nonnull();
 
 /**
  * @brief Destroy the secure app
