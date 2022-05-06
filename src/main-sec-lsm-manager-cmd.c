@@ -87,6 +87,13 @@ static const char help_clear_text[] =
     "Clear the actual handle of application\n"
     "\n";
 
+static const char help_display_text[] =
+    "\n"
+    "Command: display\n"
+    "\n"
+    "Display current state\n"
+    "\n";
+
 static const char help_id_text[] =
     "\n"
     "Command: id app_id\n"
@@ -390,6 +397,8 @@ int do_help(int ac, char **av) {
         fprintf(stdout, "%s", help_help_text);
     else if (ac > 1 && !strcmp(av[1], "clear"))
         fprintf(stdout, "%s", help_clear_text);
+    else if (ac > 1 && !strcmp(av[1], "display"))
+        fprintf(stdout, "%s", help_display_text);
     else if (ac > 1 && !strcmp(av[1], "id"))
         fprintf(stdout, "%s", help_id_text);
     else if (ac > 1 && !strcmp(av[1], "path"))
