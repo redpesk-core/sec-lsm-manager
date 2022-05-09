@@ -95,13 +95,15 @@ struct sec_lsm_manager_server {
 };
 
 #ifdef WITH_SMACK
-#include "smack.h"
-static int (*install_mac)(const secure_app_t *secure_app) = install_smack;
-static int (*uninstall_mac)(const secure_app_t *secure_app) = uninstall_smack;
+# include "smack.h"
+# define install_mac install_smack
+# define uninstall_mac uninstall_smack
 #elif WITH_SELINUX
-#include "selinux.h"
-static int (*install_mac)(const secure_app_t *secure_app) = install_selinux;
-static int (*uninstall_mac)(const secure_app_t *secure_app) = uninstall_selinux;
+# include "selinux.h"
+# define install_mac install_selinux
+# define uninstall_mac uninstall_selinux
+#else
+# error "unrecognized LSM backend"
 #endif
 
 /***********************/
