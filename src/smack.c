@@ -33,6 +33,8 @@
 #include "smack-template.h"
 #include "utils.h"
 
+#define DROP_LABEL "User:Home"
+
 /***********************/
 /*** PRIVATE METHODS ***/
 /***********************/
@@ -117,12 +119,12 @@ static int label_path(const char *path, const char *label, int is_executable, in
 }
 
 /**
- * @brief Apply smack on a secure app
+ * @brief Set smack labels for secure app
  *
  * @param[in] secure_app secure app handler
  * @return 0 in case of success or a negative -errno value
  */
-__nonnull() __wur static int smack_process_paths(const secure_app_t *secure_app,
+__nonnull() __wur static int smack_set_path_labels(const secure_app_t *secure_app,
                                                  path_type_definitions_t path_type_definitions[number_path_type]) {
     int rc = 0;
     path_t *path = NULL;
@@ -132,6 +134,28 @@ __nonnull() __wur static int smack_process_paths(const secure_app_t *secure_app,
                         path_type_definitions[path->path_type].is_executable,
                         path_type_definitions[path->path_type].is_transmute);
 
+        if (rc < 0) {
+            ERROR("label_path((%s,%s),%s) : %d %s", secure_app->path_set.paths[i]->path,
+                  get_path_type_string(secure_app->path_set.paths[i]->path_type), secure_app->id, -rc, strerror(-rc));
+            return rc;
+        }
+    }
+
+    return 0;
+}
+
+/**
+ * @brief Removes smack labels for secure app
+ *
+ * @param[in] secure_app secure app handler
+ * @return 0 in case of success or a negative -errno value
+ */
+__nonnull() __wur static int smack_drop_path_labels(const secure_app_t *secure_app) {
+    int rc = 0;
+    path_t *path = NULL;
+    for (size_t i = 0; i < secure_app->path_set.size; i++) {
+        path = secure_app->path_set.paths[i];
+        rc = label_path(path->path, DROP_LABEL, 0, 0);
         if (rc < 0) {
             ERROR("label_path((%s,%s),%s) : %d %s", secure_app->path_set.paths[i]->path,
                   get_path_type_string(secure_app->path_set.paths[i]->path_type), secure_app->id, -rc, strerror(-rc));
@@ -162,7 +186,7 @@ int install_smack(const secure_app_t *secure_app) {
     path_type_definitions_t path_type_definitions[number_path_type];
     init_path_type_definitions(path_type_definitions, secure_app->id);
 
-    rc = smack_process_paths(secure_app, path_type_definitions);
+    rc = smack_set_path_labels(secure_app, path_type_definitions);
     if (rc < 0) {
         ERROR("smack_process_paths : %d %s", -rc, strerror(-rc));
         goto error;
@@ -189,7 +213,13 @@ int uninstall_smack(const secure_app_t *secure_app) {
 
     int rc = remove_smack_rules(secure_app);
     if (rc < 0) {
-        ERROR("remove_app_rules : %d %s", -rc, strerror(-rc));
+        ERROR("remove_smack_rules: %d %s", -rc, strerror(-rc));
+        return rc;
+    }
+
+    rc = smack_drop_path_labels(secure_app);
+    if (rc < 0) {
+        ERROR("smack_drop_path_labels: %d %s", -rc, strerror(-rc));
         return rc;
     }
 
