@@ -781,7 +781,8 @@ __wur int sec_lsm_manager_server_serve(sec_lsm_manager_server_t *server, int shu
     server->stopped = 0;
     while (!server->stopped) {
         rc = pollitem_wait_dispatch(server->pollfd, tempo);
-	if (rc <= 0 && server->count == 0)
+	if ((rc < 0 && errno != EINTR)
+	 || (rc == 0 && server->count == 0))
 	    sec_lsm_manager_server_stop(server, rc);
     }
     return server->stopped == INT_MIN ? 0 : server->stopped;
