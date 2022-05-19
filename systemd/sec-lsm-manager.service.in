@@ -2,18 +2,16 @@
 Description=Security Manager service
 
 [Service]
-ExecStart=/usr/bin/@CMAKE_PROJECT_NAME@d --user @USER@ --group @GROUP@ --groups @CYNAGORA_GROUP@
-
 Type=notify
+ExecStart=/usr/bin/@CMAKE_PROJECT_NAME@d --user @USER@ --group @GROUP@ --groups @CYNAGORA_GROUP@
+Restart=on-failure
 
 KillMode=process
 TimeoutStopSec=3
-Restart=always
 
 Sockets=@CMAKE_PROJECT_NAME@.socket
 
 CapabilityBoundingSet=CAP_MAC_ADMIN CAP_DAC_OVERRIDE CAP_MAC_OVERRIDE CAP_SYS_ADMIN  CAP_DAC_READ_SEARCH CAP_FOWNER CAP_SETFCAP CAP_SETUID CAP_SETGID
-
 #NoNewPrivileges=true
 
 [Install]
