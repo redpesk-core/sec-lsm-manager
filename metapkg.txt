@@ -1,0 +1,5 @@
+
+add	pkg	sec-lsm-manager
+req	pkg	libsystemd>=222
+req	pkg	cynagora
+
