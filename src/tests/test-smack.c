@@ -119,26 +119,26 @@ START_TEST(test_smack_install) {
     char tmp_dir[SEC_LSM_MANAGER_MAX_SIZE_DIR] = {'\0'};
     create_tmp_dir(tmp_dir);
 
-    char data_dir[SEC_LSM_MANAGER_MAX_SIZE_DIR];
-    char data_file[SEC_LSM_MANAGER_MAX_SIZE_PATH];
-    char exec_dir[SEC_LSM_MANAGER_MAX_SIZE_DIR];
-    char exec_file[SEC_LSM_MANAGER_MAX_SIZE_PATH];
-    char id_dir[SEC_LSM_MANAGER_MAX_SIZE_DIR];
-    char id_file[SEC_LSM_MANAGER_MAX_SIZE_PATH];
-    char public_dir[SEC_LSM_MANAGER_MAX_SIZE_DIR];
-    char public_file[SEC_LSM_MANAGER_MAX_SIZE_PATH];
+    char data_dir[SEC_LSM_MANAGER_MAX_SIZE_DIR+20];
+    char data_file[SEC_LSM_MANAGER_MAX_SIZE_PATH+20];
+    char exec_dir[SEC_LSM_MANAGER_MAX_SIZE_DIR+20];
+    char exec_file[SEC_LSM_MANAGER_MAX_SIZE_PATH+20];
+    char id_dir[SEC_LSM_MANAGER_MAX_SIZE_DIR+20];
+    char id_file[SEC_LSM_MANAGER_MAX_SIZE_PATH+20];
+    char public_dir[SEC_LSM_MANAGER_MAX_SIZE_DIR+20];
+    char public_file[SEC_LSM_MANAGER_MAX_SIZE_PATH+20];
 
-    snprintf(data_dir, SEC_LSM_MANAGER_MAX_SIZE_DIR, "%s/data/", tmp_dir);
-    snprintf(data_file, SEC_LSM_MANAGER_MAX_SIZE_PATH, "%s/data/data_file", tmp_dir);
+    snprintf(data_dir, sizeof data_dir, "%s/data/", tmp_dir);
+    snprintf(data_file, sizeof data_file, "%s/data/data_file", tmp_dir);
 
-    snprintf(exec_dir, SEC_LSM_MANAGER_MAX_SIZE_DIR, "%s/exec/", tmp_dir);
-    snprintf(exec_file, SEC_LSM_MANAGER_MAX_SIZE_PATH, "%s/exec/exec_file", tmp_dir);
+    snprintf(exec_dir, sizeof exec_dir, "%s/exec/", tmp_dir);
+    snprintf(exec_file, sizeof exec_file, "%s/exec/exec_file", tmp_dir);
 
-    snprintf(id_dir, SEC_LSM_MANAGER_MAX_SIZE_DIR, "%s/id/", tmp_dir);
-    snprintf(id_file, SEC_LSM_MANAGER_MAX_SIZE_PATH, "%s/id/id_file", tmp_dir);
+    snprintf(id_dir, sizeof id_dir, "%s/id/", tmp_dir);
+    snprintf(id_file, sizeof id_file, "%s/id/id_file", tmp_dir);
 
-    snprintf(public_dir, SEC_LSM_MANAGER_MAX_SIZE_DIR, "%s/public/", tmp_dir);
-    snprintf(public_file, SEC_LSM_MANAGER_MAX_SIZE_PATH, "%s/public/public_file", tmp_dir);
+    snprintf(public_dir, sizeof public_dir, "%s/public/", tmp_dir);
+    snprintf(public_file, sizeof public_file, "%s/public/public_file", tmp_dir);
 
     ck_assert_int_eq(mkdir(data_dir, 0777), 0);
     ck_assert_int_eq(mkdir(exec_dir, 0777), 0);
@@ -202,10 +202,10 @@ START_TEST(test_smack_uninstall) {
     char tmp_dir[SEC_LSM_MANAGER_MAX_SIZE_DIR] = {'\0'};
     create_tmp_dir(tmp_dir);
 
-    char data_dir[SEC_LSM_MANAGER_MAX_SIZE_DIR];
-    char data_file[SEC_LSM_MANAGER_MAX_SIZE_PATH];
-    snprintf(data_dir, SEC_LSM_MANAGER_MAX_SIZE_DIR, "%s/data/", tmp_dir);
-    snprintf(data_file, SEC_LSM_MANAGER_MAX_SIZE_PATH, "%s/data/data_file", tmp_dir);
+    char data_dir[SEC_LSM_MANAGER_MAX_SIZE_DIR + 20];
+    char data_file[SEC_LSM_MANAGER_MAX_SIZE_PATH + 20];
+    snprintf(data_dir, sizeof data_dir, "%s/data/", tmp_dir);
+    snprintf(data_file, sizeof data_file, "%s/data/data_file", tmp_dir);
 
     ck_assert_int_eq(mkdir(data_dir, 0777), 0);
     ck_assert_int_eq(create_file(data_file), 0);
