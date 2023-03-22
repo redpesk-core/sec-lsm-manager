@@ -263,7 +263,7 @@ __nonnull() __wur static int send_display_secure_app(client_t *cli) {
         }
     }
 
-    if (cli->secure_app->id) {
+    if (cli->secure_app->id[0] != '\0') {
         rc = putx(cli, _string_, _id_, cli->secure_app->id, NULL);
         if (rc < 0) {
             ERROR("putx : %d %s", -rc, strerror(-rc));
