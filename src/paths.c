@@ -30,6 +30,19 @@
 #include "log.h"
 #include "utils.h"
 
+static const char *type_strings[number_path_type] =
+{
+[type_none] =	"none",
+[type_conf] =	"conf",
+[type_data] =	"data",
+[type_exec] =	"exec",
+[type_http] =	"http",
+[type_icon] =	"icon",
+[type_id] =	"id",
+[type_lib] =	"lib",
+[type_public] =	"public"
+};
+
 /**********************/
 /*** PUBLIC METHODS ***/
 /**********************/
@@ -90,84 +103,22 @@ int path_set_add_path(path_set_t *path_set, const char *path, enum path_type pat
 
 /* see paths.h */
 bool valid_path_type(enum path_type path_type) {
-    if (path_type > type_none && path_type < number_path_type)
-        return true;
-    else
-        return false;
+    return path_type > type_none && path_type < number_path_type;
 }
 
 /* see paths.h */
 enum path_type get_path_type(const char *path_type_string) {
-    switch (path_type_string[0]) {
-        case 'c':
-            if (!strcmp(path_type_string, "conf")) {
-                return type_conf;
-            }
-            break;
-        case 'd':
-            if (!strcmp(path_type_string, "data")) {
-                return type_data;
-            }
-            break;
-        case 'e':
-            if (!strcmp(path_type_string, "exec")) {
-                return type_exec;
-            }
-            break;
-        case 'h':
-            if (!strcmp(path_type_string, "http")) {
-                return type_http;
-            }
-            break;
-        case 'i':
-            if (!strcmp(path_type_string, "icon")) {
-                return type_icon;
-            }
-            if (!strcmp(path_type_string, "id")) {
-                return type_id;
-            }
-            break;
-        case 'l':
-            if (!strcmp(path_type_string, "lib")) {
-                return type_lib;
-            }
-            break;
-        case 'p':
-            if (!strcmp(path_type_string, "public")) {
-                return type_public;
-            }
-            break;
-        default:
-            break;
-    }
-    ERROR("Path type invalid: %s", path_type_string);
-    return type_none;
+    enum path_type type = number_path_type;
+    while (--type != type_none && strcmp(path_type_string, type_strings[type]) != 0);
+    if (type == type_none)
+        ERROR("Path type invalid: %s", path_type_string);
+    return type;
 }
 
 /* see paths.h */
 const char *get_path_type_string(enum path_type path_type) {
-    switch (path_type) {
-        case type_none:
-            return "none";
-        case type_conf:
-            return "conf";
-        case type_data:
-            return "data";
-        case type_exec:
-            return "exec";
-        case type_http:
-            return "http";
-        case type_icon:
-            return "icon";
-        case type_id:
-            return "id";
-        case type_lib:
-            return "lib";
-        case type_public:
-            return "public";
-        default:
-            break;
-    }
+    if (path_type >= type_none && path_type < number_path_type)
+        return type_strings[path_type];
     ERROR("Path type invalid");
     return "invalid";
 }
