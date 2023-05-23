@@ -212,7 +212,8 @@ int main(int ac, char **av) {
         return EXIT_FAILURE;
 
     /* set the defaults */
-    socketdir = socketdir ?: sec_lsm_manager_default_socket_dir;
+    if (socketdir == NULL)
+        socketdir = sec_lsm_manager_default_socket_dir;
 
     /* compute shutoff delay */
     if (shutoff != NULL) {
@@ -311,7 +312,7 @@ int main(int ac, char **av) {
     if (groups != NULL) {
         rc = setgroups(number_groups, gids);
         if (rc < 0) {
-            fprintf(stderr, "can not change groups: %m\n");
+            fprintf(stderr, "can not change groups: %s\n", strerror(errno));
             if (!keepgoing)
             return EXIT_FAILURE;
         }
@@ -319,7 +320,7 @@ int main(int ac, char **av) {
     if (gid >= 0) {
         rc = setgid((gid_t)gid);
         if (rc < 0) {
-            fprintf(stderr, "can not change group: %m\n");
+            fprintf(stderr, "can not change group: %s\n", strerror(errno));
             if (!keepgoing)
             return EXIT_FAILURE;
         }
@@ -327,7 +328,7 @@ int main(int ac, char **av) {
     if (uid >= 0) {
         rc = setuid((uid_t)uid);
         if (rc < 0) {
-            fprintf(stderr, "can not change user: %m\n");
+            fprintf(stderr, "can not change user: %s\n", strerror(errno));
             if (!keepgoing)
             return EXIT_FAILURE;
         }
@@ -340,14 +341,14 @@ int main(int ac, char **av) {
     cap_set_flag(cap, CAP_INHERITABLE, CAP_COUNT, cap_vector, CAP_SET);
 
     if (cap_set_proc(cap) != 0) {
-        fprintf(stderr, "can not change cap: %m\n");
+        fprintf(stderr, "can not change cap: %s\n", strerror(errno));
     if (!keepgoing)
         return EXIT_FAILURE;
     }
 
     for (size_t i = 0; i < CAP_COUNT; i++) {
         if (cap_set_ambient(cap_vector[i], CAP_SET) != 0) {
-            fprintf(stderr, "can not change cap amb: %m\n");
+            fprintf(stderr, "can not change cap amb: %s\n", strerror(errno));
             if (!keepgoing)
             return EXIT_FAILURE;
         }
@@ -367,7 +368,7 @@ int main(int ac, char **av) {
     signal(SIGPIPE, SIG_IGN); /* avoid SIGPIPE! */
     rc = sec_lsm_manager_server_create(&server, spec_socket);
     if (rc < 0) {
-        fprintf(stderr, "can't initialize server: %m\n");
+        fprintf(stderr, "can't initialize server: %s\n", strerror(errno));
         return EXIT_FAILURE;
     }
 
@@ -428,17 +429,17 @@ static int ensuredir(char *path, int length, int uid, int gid) {
             if (n == length) {
                 rc = stat(path, &st);
                 if (rc < 0) {
-                    fprintf(stderr, "can not check %s: %m\n", path);
+                    fprintf(stderr, "can not check %s: %s\n", path, strerror(errno));
                     return -1;
                 } else if ((st.st_mode & S_IFMT) != S_IFDIR) {
-                    fprintf(stderr, "not a directory %s: %m\n", path);
+                    fprintf(stderr, "not a directory %s: %s\n", path, strerror(errno));
                     return -1;
                 }
                 /* set ownership */
                 if (((uid_t)uid != st.st_uid && uid >= 0) || ((gid_t)gid != st.st_gid && gid >= 0)) {
                     rc = chown(path, (uid_t)uid, (gid_t)gid);
                     if (rc < 0) {
-                        fprintf(stderr, "can not own directory %s for uid=%d & gid=%d: %m\n", path, uid, gid);
+                        fprintf(stderr, "can not own directory %s for uid=%d & gid=%d: %s\n", path, uid, gid, strerror(errno));
                         return -1;
                     }
                 }
@@ -456,7 +457,7 @@ static int ensuredir(char *path, int length, int uid, int gid) {
             }
             n = (int)(e - path);
         } else {
-            fprintf(stderr, "can not ensure directory %s: %m\n", path);
+            fprintf(stderr, "can not ensure directory %s: %s\n", path, strerror(errno));
             return -1;
         }
     }

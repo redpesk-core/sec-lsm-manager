@@ -179,7 +179,7 @@ static int nstr = 0;
 static int echo = 0;
 static int last_status = 0;
 
-int plink(int ac, char **av, int *used, int maxi) {
+static int plink(int ac, char **av, int *used, int maxi) {
     int r = 0;
 
     if (maxi < ac)
@@ -190,7 +190,7 @@ int plink(int ac, char **av, int *used, int maxi) {
     return r;
 }
 
-int do_clear(int ac, char **av) {
+static int do_clear(int ac, char **av) {
     int uc, rc;
     int n = plink(ac, av, &uc, 1);
 
@@ -211,7 +211,7 @@ int do_clear(int ac, char **av) {
     return uc;
 }
 
-int do_display(int ac, char **av) {
+static int do_display(int ac, char **av) {
     int uc, rc;
     int n = plink(ac, av, &uc, 1);
 
@@ -230,7 +230,7 @@ int do_display(int ac, char **av) {
     return uc;
 }
 
-int do_id(int ac, char **av) {
+static int do_id(int ac, char **av) {
     int uc, rc;
     char *id = NULL;
     int n = plink(ac, av, &uc, 2);
@@ -260,7 +260,7 @@ int do_id(int ac, char **av) {
     return uc;
 }
 
-int do_path(int ac, char **av) {
+static int do_path(int ac, char **av) {
     int uc, rc;
     char *path = NULL;
     char *path_type = NULL;
@@ -292,7 +292,7 @@ int do_path(int ac, char **av) {
     return uc;
 }
 
-int do_permission(int ac, char **av) {
+static int do_permission(int ac, char **av) {
     int uc, rc;
     char *permission = NULL;
     int n = plink(ac, av, &uc, 2);
@@ -321,7 +321,7 @@ int do_permission(int ac, char **av) {
     return uc;
 }
 
-int do_install(int ac, char **av) {
+static int do_install(int ac, char **av) {
     int uc, rc;
     int n = plink(ac, av, &uc, 1);
 
@@ -342,7 +342,7 @@ int do_install(int ac, char **av) {
     return uc;
 }
 
-int do_uninstall(int ac, char **av) {
+static int do_uninstall(int ac, char **av) {
     int uc, rc;
     int n = plink(ac, av, &uc, 1);
 
@@ -363,7 +363,7 @@ int do_uninstall(int ac, char **av) {
     return uc;
 }
 
-int do_log(int ac, char **av) {
+static int do_log(int ac, char **av) {
     int uc, rc;
     int on = 0, off = 0;
     int n = plink(ac, av, &uc, 2);
@@ -388,7 +388,7 @@ int do_log(int ac, char **av) {
     return uc;
 }
 
-int do_help(int ac, char **av) {
+static int do_help(int ac, char **av) {
     if (ac > 1 && !strcmp(av[1], "log"))
         fprintf(stdout, "%s", help_log_text);
     else if (ac > 1 && !strcmp(av[1], "quit"))
@@ -416,7 +416,7 @@ int do_help(int ac, char **av) {
     return 2;
 }
 
-int do_any(int ac, char **av) {
+static int do_any(int ac, char **av) {
     if (!ac)
         return 0;
 
@@ -454,7 +454,7 @@ int do_any(int ac, char **av) {
     return 1;
 }
 
-void do_all(int ac, char **av, int quit) {
+static void do_all(int ac, char **av, int quit) {
     int rc;
 
     if (echo) {

@@ -64,7 +64,7 @@ extern const char *get_smack_policy_dir(const char *value) __wur;
  * @return true if enabled
  * @return false if not
  */
-extern bool smack_enabled() __wur;
+extern bool smack_enabled(void) __wur;
 
 /**
  * @brief Init different labels for all path type

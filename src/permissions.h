@@ -47,7 +47,6 @@ extern void init_permission_set(permission_set_t *permission_set) __nonnull();
  * @param policies The permission_set handler
  */
 extern void free_permission_set(permission_set_t *permission_set) __nonnull();
-;
 
 /**
  * @brief Add a permission to permission_set struct

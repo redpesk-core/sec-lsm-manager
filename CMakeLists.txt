@@ -203,6 +203,9 @@ add_compile_options(-Werror=maybe-uninitialized)
 add_compile_options(-Werror=implicit-function-declaration)
 add_compile_options(-ffunction-sections -fdata-sections)
 add_compile_options(-Wno-nonnull-compare)
+
+add_compile_options(-Wpedantic -Wshadow -Wpointer-arith -Wcast-qual -Wcast-align -Wstrict-prototypes -Wmissing-prototypes -Wconversion)
+
 #add_compile_options(-ffile-prefix-map=${CMAKE_SOURCE_DIR}=.)
 
 add_compile_definitions(_GNU_SOURCE)

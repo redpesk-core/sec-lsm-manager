@@ -124,7 +124,7 @@ __nonnull((1)) static void dolog_protocol(client_t *cli, int c2s, unsigned count
     static const char dir[2] = {'>', '<'};
     unsigned i;
 
-    fprintf(stderr, "%p%c%c%s", cli, dir[!c2s], dir[!c2s], "server");
+    fprintf(stderr, "%p%c%c%s", (void*)cli, dir[!c2s], dir[!c2s], "server");
     for (i = 0; i < count; i++) fprintf(stderr, " %s", fields[i]);
     fprintf(stderr, "\n");
 }
@@ -667,7 +667,7 @@ static void on_server_event(pollitem_t *pollitem, uint32_t events, int pollfd) {
     slen = (socklen_t)sizeof(saddr);
     fd = accept(servfd, &saddr, &slen);
     if (fd < 0) {
-        ERROR("can't accept connection: %m");
+        ERROR("can't accept connection: %s", strerror(errno));
         return;
     }
     fcntl(fd, F_SETFD, FD_CLOEXEC);
@@ -770,7 +770,7 @@ ret:
 
 /* see sec-lsm-manager-server.h */
 void sec_lsm_manager_server_stop(sec_lsm_manager_server_t *server, int status) {
-    server->stopped = status ?: INT_MIN;
+    server->stopped = status != 0 ? status : INT_MIN;
     cynagora_disconnect(server->cynagora_admin_client);
 }
 

@@ -55,28 +55,28 @@ int smack_accesses_new(struct smack_accesses **handle) {
 
 int smack_accesses_add(struct smack_accesses *handle, const char *subject, const char *object,
                        const char *access_type) {
-    printf("smack_accesses_add(%p,%s,%s,%s)\n", handle, subject, object, access_type);
+    printf("smack_accesses_add(%p,%s,%s,%s)\n", (void *)handle, subject, object, access_type);
     return 0;
 }
 
 int smack_accesses_apply(struct smack_accesses *handle) {
-    printf("smack_accesses_apply(%p)\n", handle);
+    printf("smack_accesses_apply(%p)\n", (void *)handle);
     return 0;
 }
 
 int smack_accesses_save(struct smack_accesses *handle, int fd) {
-    printf("smack_accesses_save(%p,%d)\n", handle, fd);
+    printf("smack_accesses_save(%p,%d)\n", (void *)handle, fd);
     return 0;
 }
 
 int smack_accesses_add_from_file(struct smack_accesses *handle, int fd) {
-    printf("smack_accesses_add_from_file(%p,%d)\n", handle, fd);
+    printf("smack_accesses_add_from_file(%p,%d)\n", (void *)handle, fd);
     return 0;
 }
 
 int smack_accesses_clear(struct smack_accesses *handle) {
-    printf("smack_accesses_clear(%p)\n", handle);
+    printf("smack_accesses_clear(%p)\n", (void *)handle);
     return 0;
 }
 
-void smack_accesses_free(struct smack_accesses *handle) { printf("smack_smackfs_path(%p)\n", handle); }
+void smack_accesses_free(struct smack_accesses *handle) { printf("smack_smackfs_path(%p)\n", (void *)handle); }

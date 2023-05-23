@@ -89,7 +89,7 @@ START_TEST(test_remove_file) {
 }
 END_TEST
 
-void test_utils() {
+void test_utils(void) {
     addtest(test_check_file_exists);
     addtest(test_check_dir);
     addtest(test_check_executable);

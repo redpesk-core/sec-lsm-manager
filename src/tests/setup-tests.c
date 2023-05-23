@@ -75,24 +75,6 @@ bool compare_xattr(const char *path, const char *xattr, const char *value) {
     return false;
 }
 
-extern void test_paths();
-extern void test_permissions();
-extern void test_secure_app();
-extern void test_utils();
-
-#if !defined(SIMULATE_CYNAGORA)
-extern void test_cynagora();
-#endif
-
-#if defined(WITH_SMACK)
-extern void test_smack();
-extern void test_smack_label();
-#endif
-
-#if defined(WITH_SELINUX)
-extern void test_selinux_template();
-extern void test_selinux();
-#endif
 int main(int argc, char const *argv[]) {
     char log_file[SEC_LSM_MANAGER_MAX_SIZE_PATH];
     if (argc != 2) {

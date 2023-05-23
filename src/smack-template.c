@@ -121,12 +121,21 @@ ret:
 
 /* see smack-template.h */
 const char *get_smack_template_file(const char *value) {
-    return value ?: secure_getenv("SMACK_TEMPLATE_FILE") ?: default_smack_template_file;
+    if (value == NULL) {
+        value = secure_getenv("SMACK_TEMPLATE_FILE");
+        if (value == NULL)
+            value = default_smack_template_file;
+    }
+    return value;
 }
 
 /* see smack-template.h */
 const char *get_smack_policy_dir(const char *value) {
-    value = value ?: secure_getenv("SMACK_POLICY_DIR") ?: default_smack_policy_dir;
+    if (value == NULL) {
+        value = secure_getenv("SMACK_POLICY_DIR");
+        if (value == NULL)
+            value = default_smack_policy_dir;
+    }
     if (strlen(value) >= SEC_LSM_MANAGER_MAX_SIZE_DIR) {
         value = NULL;
         ERROR("smack_policy_dir too long");

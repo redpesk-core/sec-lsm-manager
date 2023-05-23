@@ -34,10 +34,11 @@
 #include "mustach/mustach.h"
 #include "secure-app.h"
 #include "utils.h"
+#include "template.h"
 
 static int put(void *closure, const char *name, int escape, FILE *file) {
     (void)escape;
-    secure_app_t *secure_app = (secure_app_t *)closure;
+    const secure_app_t *secure_app = (const secure_app_t *)closure;
     // DEBUG("name : %s", name);
 
     if (!strcmp(name, "id")) {
@@ -50,7 +51,7 @@ static int put(void *closure, const char *name, int escape, FILE *file) {
 }
 
 static int enter(void *closure, const char *name) {
-    secure_app_t *secure_app = (secure_app_t *)closure;
+    const secure_app_t *secure_app = (const secure_app_t *)closure;
     for (size_t i = 0; i < secure_app->permission_set.size; i++) {
         if (!strcasecmp(name, secure_app->permission_set.permissions[i])) {
             return 1;
@@ -73,7 +74,7 @@ static int next(void *closure) {
 
 static struct mustach_itf itf = {.enter = enter, .put = put, .next = next, .leave = leave};
 
-int process_template(const char *template_path, const char *dest, secure_app_t *secure_app) {
+int process_template(const char *template_path, const char *dest, const secure_app_t *secure_app) {
     int rc = 0;
     int rc2 = 0;
     char *template = read_file(template_path);
@@ -89,7 +90,7 @@ int process_template(const char *template_path, const char *dest, secure_app_t *
         goto end;
     }
 
-    rc = fmustach(template, &itf, secure_app, f_dest);
+    rc = fmustach(template, &itf, (void*)secure_app, f_dest);
     if (rc < 0) {
         ERROR("fmustach : %d %s", errno, strerror(errno));
     }

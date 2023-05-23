@@ -144,7 +144,7 @@ START_TEST(test_destroy_secure_app) {
 }
 END_TEST
 
-void test_secure_app() {
+void test_secure_app(void) {
     addtest(test_init_secure_app);
     addtest(test_create_secure_app);
     addtest(test_secure_app_set_id);

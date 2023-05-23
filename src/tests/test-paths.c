@@ -132,7 +132,7 @@ START_TEST(test_get_path_type_string) {
 }
 END_TEST
 
-void test_paths() {
+void test_paths(void) {
     addtest(test_init_path_set);
     addtest(test_free_path_set);
     addtest(test_path_set_add_path);

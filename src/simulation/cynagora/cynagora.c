@@ -63,52 +63,53 @@ int cynagora_create(cynagora_t **prcyn, cynagora_type_t type, uint32_t cache_siz
 }
 
 /* see cynagora.h */
-void cynagora_disconnect(cynagora_t *cynagora) { printf("cynagora_disconnect(%p)\n", cynagora); }
+void cynagora_disconnect(cynagora_t *cynagora) { printf("cynagora_disconnect(%p)\n", (void*)cynagora); }
 
 /* see cynagora.h */
 void cynagora_destroy(cynagora_t *cynagora) {
-    printf("cynagora_destroy(%p)\n", cynagora);
+    printf("cynagora_destroy(%p)\n", (void*)cynagora);
     free(cynagora);
 }
 
 /* see cynagora.h */
 int cynagora_async_setup(cynagora_t *cynagora, cynagora_async_ctl_cb_t *controlcb, void *closure) {
-    printf("cynagora_async_setup(%p,%p,%p)\n", cynagora, controlcb, closure);
+    (void)controlcb;
+    printf("cynagora_async_setup(%p,%p)\n", (void*)cynagora, (void*)closure);
     return 0;
 }
 
 /* see cynagora.h */
 int cynagora_async_process(cynagora_t *cynagora) {
-    printf("cynagora_async_process(%p)\n", cynagora);
+    printf("cynagora_async_process(%p)\n", (void*)cynagora);
     return 0;
 }
 
 /* see cynagora.h */
 int cynagora_cache_resize(cynagora_t *cynagora, uint32_t size) {
-    printf("cynagora_cache_resize(%p, %d)\n", cynagora, size);
+    printf("cynagora_cache_resize(%p, %d)\n", (void*)cynagora, size);
     return 0;
 }
 
 /* see cynagora.h */
-void cynagora_cache_clear(cynagora_t *cynagora) { printf("cynagora_cache_clear(%p)\n", cynagora); }
+void cynagora_cache_clear(cynagora_t *cynagora) { printf("cynagora_cache_clear(%p)\n", (void*)cynagora); }
 
 /* see cynagora.h */
 int cynagora_cache_check(cynagora_t *cynagora, const cynagora_key_t *key) {
-    printf("cynagora_cache_check(%p ,(%s,%s,%s,%s))\n", cynagora, key->client, key->session, key->user,
+    printf("cynagora_cache_check(%p ,(%s,%s,%s,%s))\n", (void*)cynagora, key->client, key->session, key->user,
            key->permission);
     return 0;
 }
 
 /* see cynagora.h */
 int cynagora_check(cynagora_t *cynagora, const cynagora_key_t *key, int force) {
-    printf("cynagora_check(%p ,(%s,%s,%s,%s), %d)\n", cynagora, key->client, key->session, key->user, key->permission,
+    printf("cynagora_check(%p ,(%s,%s,%s,%s), %d)\n", (void*)cynagora, key->client, key->session, key->user, key->permission,
            force);
     return 0;
 }
 
 /* see cynagora.h */
 int cynagora_test(cynagora_t *cynagora, const cynagora_key_t *key, int force) {
-    printf("cynagora_test(%p ,(%s,%s,%s,%s), %d)\n", cynagora, key->client, key->session, key->user, key->permission,
+    printf("cynagora_test(%p ,(%s,%s,%s,%s), %d)\n", (void*)cynagora, key->client, key->session, key->user, key->permission,
            force);
     return 0;
 }
@@ -116,8 +117,9 @@ int cynagora_test(cynagora_t *cynagora, const cynagora_key_t *key, int force) {
 /* see cynagora.h */
 int cynagora_async_check(cynagora_t *cynagora, const cynagora_key_t *key, int force, int simple,
                          cynagora_async_check_cb_t *callback, void *closure) {
-    printf("cynagora_async_check(%p ,(%s,%s,%s,%s), %d, %d, %p, %p)\n", cynagora, key->client, key->session, key->user,
-           key->permission, force, simple, callback, closure);
+    (void)callback;
+    printf("cynagora_async_check(%p ,(%s,%s,%s,%s), %d, %d, %p)\n", (void*)cynagora, key->client, key->session, key->user,
+           key->permission, force, simple, (void*)closure);
     return 0;
 }
 
@@ -127,7 +129,7 @@ int cynagora_async_check(cynagora_t *cynagora, const cynagora_key_t *key, int fo
 
 /* see cynagora.h */
 int cynagora_get(cynagora_t *cynagora, const cynagora_key_t *key, cynagora_get_cb_t *callback, void *closure) {
-    printf("cynagora_get(%p, %s,%s,%s,%s)\n", cynagora, key->client, key->session, key->user, key->permission);
+    printf("cynagora_get(%p, %s,%s,%s,%s)\n", (void*)cynagora, key->client, key->session, key->user, key->permission);
     cynagora_key_t k = {key->client, "*", key->user, "privilege"};
     cynagora_value_t v = {"yes", 0};
     callback(closure, &k, &v);
@@ -142,31 +144,31 @@ int cynagora_get(cynagora_t *cynagora, const cynagora_key_t *key, cynagora_get_c
 
 /* see cynagora.h */
 int cynagora_log(cynagora_t *cynagora, int on, int off) {
-    printf("cynagora_log(%p, %d, %d)\n", cynagora, on, off);
+    printf("cynagora_log(%p, %d, %d)\n", (void*)cynagora, on, off);
     return 0;
 }
 
 /* see cynagora.h */
 int cynagora_enter(cynagora_t *cynagora) {
-    printf("cynagora_enter(%p)\n", cynagora);
+    printf("cynagora_enter(%p)\n", (void*)cynagora);
     return 0;
 }
 
 /* see cynagora.h */
 int cynagora_leave(cynagora_t *cynagora, int commit) {
-    printf("cynagora_leave(%p, %d)\n", cynagora, commit);
+    printf("cynagora_leave(%p, %d)\n", (void*)cynagora, commit);
     return 0;
 }
 
 /* see cynagora.h */
 int cynagora_set(cynagora_t *cynagora, const cynagora_key_t *key, const cynagora_value_t *value) {
-    printf("cynagora_set(%p ,(%s,%s,%s,%s), (%s, %ld))\n", cynagora, key->client, key->session, key->user,
+    printf("cynagora_set(%p ,(%s,%s,%s,%s), (%s, %ld))\n", (void*)cynagora, key->client, key->session, key->user,
            key->permission, value->value, value->expire);
     return 0;
 }
 
 /* see cynagora.h */
 int cynagora_drop(cynagora_t *cynagora, const cynagora_key_t *key) {
-    printf("cynagora_drop(%p ,(%s,%s,%s,%s))\n", cynagora, key->client, key->session, key->user, key->permission);
+    printf("cynagora_drop(%p ,(%s,%s,%s,%s))\n", (void*)cynagora, key->client, key->session, key->user, key->permission);
     return 0;
 }

@@ -57,5 +57,10 @@ const char sec_lsm_manager_default_socket_scheme[] = SEC_LSM_MANAGER_SOCKET_SCHE
 
 /* see sec-lsm-manager-protocol.h */
 const char *sec_lsm_manager_get_socket(const char *value) {
-    return value ?: secure_getenv("SEC_LSM_MANAGER_SOCKET") ?: sec_lsm_manager_default_socket;
+    if (value == NULL) {
+        value = secure_getenv("SEC_LSM_MANAGER_SOCKET");
+        if (value == NULL)
+            value = sec_lsm_manager_default_socket;
+    }
+    return value;
 }
