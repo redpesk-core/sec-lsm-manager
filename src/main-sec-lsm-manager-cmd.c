@@ -66,7 +66,7 @@ static const char helptxt[] =
     "For a list of actions type 'sec-lsm-manager-cmd help'.\n"
     "\n";
 
-static const char versiontxt[] = "sec-lsm-manager-cmd version 0.1\n";
+static const char versiontxt[] = "sec-lsm-manager-cmd version " VERSION;
 
 static const char help_log_text[] =
     "\n"

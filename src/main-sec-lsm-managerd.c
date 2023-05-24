@@ -117,7 +117,7 @@ static const char helptxt[] =
     "    -v, --version         print the version and exit\n"
     "\n";
 
-static const char versiontxt[] = "sec-lsm-managerd version 0.1\n";
+static const char versiontxt[] = "sec-lsm-managerd version " VERSION;
 
 static int isid(const char *text);
 static int ensure_directory(const char *path, int uid, int gid);
