@@ -21,11 +21,13 @@
  * $RP_END_LICENSE$
  */
 
+#include <stdlib.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <string.h>
 #include <sys/statfs.h>
 #include <unistd.h>
 
@@ -61,40 +63,48 @@
 
 #endif
 
-bool mac_enable(const char *path) {
-#if !defined(SIMULATE_SMACK) && !defined(SIMULATE_SELINUX)
-    return 0 == access(path, F_OK);
-#else
-    (void)path;
-    return true;
+/**/
+
+#if defined(SIMULATE_SELINUX)
+#undef SELINUX_FS_PATH
+#define SELINUX_FS_PATH NULL
 #endif
+
+#if defined(SIMULATE_SMACK)
+#undef SMACK_FS_PATH
+#define SMACK_FS_PATH NULL
+#endif
+
+
+static
+bool run_if(int argc, char **argv, char **envp, const char *binary, const char *condpath)
+{
+    (void)(argc); /* avoid unused argument warning */
+
+    if (condpath && access(condpath, F_OK) != 0 && errno == ENOENT)
+        return false;
+
+    fprintf(stdout, ">> Launching %s\n", binary);
+    argv[0] = (char*)binary;
+    execve(binary, argv, envp);
+
+    fprintf(stderr, "error executing %s: %s\n", binary, strerror(errno));
+    return true;
 }
 
 int main(int argc, char **argv, char **envp) {
-    int rc = 0;
-    (void)(argc);
+    bool failed = false;
+
 #ifdef WITH_SELINUX
-    if (mac_enable(SELINUX_FS_PATH)) {
-        fprintf(stdout, ">> Launch %s\n", SELINUX_BYNARY);
-        argv[0] = SELINUX_BYNARY;
-        rc = execve(argv[0], argv, envp);
-        fprintf(stderr, "error execute %s : %m\n", SELINUX_BYNARY);
-    }
+    failed |= run_if(argc, argv, envp, SELINUX_BYNARY, SELINUX_FS_PATH);
 #endif
 #ifdef WITH_SMACK
-    if (mac_enable(SMACK_FS_PATH)) {
-        fprintf(stdout, ">> Launch %s\n", SMACK_BYNARY);
-        argv[0] = SMACK_BYNARY;
-        rc = execve(argv[0], argv, envp);
-        fprintf(stderr, "error execute %s : %m\n", SMACK_BYNARY);
-    }
+    failed |= run_if(argc, argv, envp, SMACK_BYNARY, SMACK_FS_PATH);
 #endif
-
-    if (rc == 0) {
+    if (!failed)
         fprintf(stderr, "no mac found\n");
-    }
 
-    fprintf(stderr, "launch sec-lsm-manager failed\n");
+    fprintf(stderr, "launching sec-lsm-manager failed\n");
 
-    return -1;
+    return EXIT_FAILURE;
 }
