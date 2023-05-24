@@ -175,7 +175,7 @@ endif()
 
 message("[*] Create : ${CMAKE_PROJECT_NAME}d")
 
-add_executable(${CMAKE_PROJECT_NAME}d main-${CMAKE_PROJECT_NAME}d-setup.c)
+add_executable(${CMAKE_PROJECT_NAME}d main-${CMAKE_PROJECT_NAME}d-launch.c)
 
 if(WITH_SMACK)
     target_compile_definitions(${CMAKE_PROJECT_NAME}d PRIVATE WITH_SMACK)

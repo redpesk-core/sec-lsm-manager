@@ -85,7 +85,7 @@ bool run_if(int argc, char **argv, char **envp, const char *binary, const char *
         return false;
 
     fprintf(stdout, ">> Launching %s\n", binary);
-    argv[0] = (char*)binary;
+//    argv[0] = (char*)binary;
     execve(binary, argv, envp);
 
     fprintf(stderr, "error executing %s: %s\n", binary, strerror(errno));
@@ -104,7 +104,7 @@ int main(int argc, char **argv, char **envp) {
     if (!failed)
         fprintf(stderr, "no mac found\n");
 
-    fprintf(stderr, "launching sec-lsm-manager failed\n");
+    fprintf(stderr, "launching sec-lsm-manager implementation failed\n");
 
     return EXIT_FAILURE;
 }
