@@ -106,7 +106,7 @@ static const char helptxt[] =
     "    -G  --groups xxx,yyy  set additional groups\n"
     "    -l, --log             activate log of transactions\n"
     "    -k, --keep-going      continue to run on some errors\n"
-    "    -s, --shutoff VALUE   shuting off time setting\n"
+    "    -s, --shutoff VALUE   shutting off time in seconds\n"
     "\n"
     "    -S, --socketdir xxx   set the base directory xxx for sockets\n"
     "                            (default: %s)\n"
