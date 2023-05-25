@@ -209,7 +209,7 @@ int main(int ac, char **av) {
         return 0;
     }
     if (error)
-        return 1;
+        return EXIT_FAILURE;
 
     /* set the defaults */
     socketdir = socketdir ?: sec_lsm_manager_default_socket_dir;
@@ -222,7 +222,7 @@ int main(int ac, char **av) {
             soff = isid(&shutoff[shutoff[0] == '-']);
             if (soff < 0) {
                 fprintf(stderr, "not a valid shutoff '%s'\n", shutoff);
-                return 1;
+                return EXIT_FAILURE;
             }
             if (shutoff[0] == '-')
                 soff = -1;
@@ -250,7 +250,7 @@ int main(int ac, char **av) {
                       sec_lsm_manager_default_socket_name);
     if (!spec_socket) {
         fprintf(stderr, "can't make socket paths\n");
-        return 1;
+        return EXIT_FAILURE;
     }
 
     /* compute user and group */
@@ -260,7 +260,7 @@ int main(int ac, char **av) {
             pw = getpwnam(user);
             if (pw == NULL) {
                 fprintf(stderr, "can not find user '%s'\n", user);
-                return 1;
+                return EXIT_FAILURE;
             }
             uid = (int)pw->pw_uid;
             gid = (int)pw->pw_gid;
@@ -272,7 +272,7 @@ int main(int ac, char **av) {
             gr = getgrnam(group);
             if (gr == NULL) {
                 fprintf(stderr, "can not find group '%s'\n", group);
-                return 1;
+                return EXIT_FAILURE;
             }
             gid = (int)gr->gr_gid;
         }
@@ -300,7 +300,7 @@ int main(int ac, char **av) {
     if (makesockdir && socketdir[0] != '@') {
         if (ensure_directory(socketdir, ownsockdir ? uid : -1, ownsockdir ? gid : -1) < 0) {
             fprintf(stderr, "error : ensure_directory");
-            return 1;
+            return EXIT_FAILURE;
         }
     }
 
@@ -313,7 +313,7 @@ int main(int ac, char **av) {
         if (rc < 0) {
             fprintf(stderr, "can not change groups: %m\n");
             if (!keepgoing)
-            return 1;
+            return EXIT_FAILURE;
         }
     }
     if (gid >= 0) {
@@ -321,7 +321,7 @@ int main(int ac, char **av) {
         if (rc < 0) {
             fprintf(stderr, "can not change group: %m\n");
             if (!keepgoing)
-            return 1;
+            return EXIT_FAILURE;
         }
     }
     if (uid >= 0) {
@@ -329,7 +329,7 @@ int main(int ac, char **av) {
         if (rc < 0) {
             fprintf(stderr, "can not change user: %m\n");
             if (!keepgoing)
-            return 1;
+            return EXIT_FAILURE;
         }
     }
 
@@ -342,14 +342,14 @@ int main(int ac, char **av) {
     if (cap_set_proc(cap) != 0) {
         fprintf(stderr, "can not change cap: %m\n");
     if (!keepgoing)
-        return 1;
+        return EXIT_FAILURE;
     }
 
     for (size_t i = 0; i < CAP_COUNT; i++) {
         if (cap_set_ambient(cap_vector[i], CAP_SET) != 0) {
             fprintf(stderr, "can not change cap amb: %m\n");
             if (!keepgoing)
-            return 1;
+            return EXIT_FAILURE;
         }
     }
 
@@ -370,7 +370,7 @@ int main(int ac, char **av) {
     rc = sec_lsm_manager_server_create(&server, spec_socket);
     if (rc < 0) {
         fprintf(stderr, "can't initialize server: %m\n");
-        return 1;
+        return EXIT_FAILURE;
     }
 
     /* ready ! */
@@ -380,7 +380,7 @@ int main(int ac, char **av) {
 
     /* serve */
     rc = sec_lsm_manager_server_serve(server, soff);
-    return rc ? 3 : 0;
+    return rc ? EXIT_FAILURE : EXIT_SUCCESS;
 }
 
 /** returns the value of the id for 'text' (positive) or a negative value (-1) */
