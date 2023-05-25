@@ -57,7 +57,11 @@
 #define SHUTOFF_TIME (60 * 3) /* 3 minutes */
 #endif
 
-#define DELIM_GROUPS ","
+#if !defined(SUPL_GROUPS_MAX)
+#define SUPL_GROUPS_MAX 10
+#endif
+
+#define DELIM_GROUPS ", "
 
 #define CAP_COUNT (sizeof cap_vector / sizeof cap_vector[0])
 
@@ -127,18 +131,20 @@ int main(int ac, char **av) {
     int error = 0;
     int uid = -1;
     int gid = -1;
+    int g;
     int soff = SHUTOFF_TIME;
     const char *shutoff = NULL;
     const char *socketdir = NULL;
     const char *user = NULL;
     const char *group = NULL;
     char *groups = NULL;
-    char *g = NULL;
+    char *curg = NULL;
+    char *nxtg = NULL;
     struct passwd *pw;
     struct group *gr;
     sec_lsm_manager_server_t *server;
     char *spec_socket;
-    gid_t gids[10] = {0};
+    gid_t gids[SUPL_GROUPS_MAX] = {0};
     size_t number_groups = 0;
     cap_value_t cap_vector[] = {CAP_MAC_ADMIN,       CAP_DAC_OVERRIDE, CAP_MAC_OVERRIDE, CAP_SYS_ADMIN,
                                 CAP_DAC_READ_SEARCH, CAP_SETFCAP,      CAP_FOWNER};
@@ -260,22 +266,6 @@ int main(int ac, char **av) {
             gid = (int)pw->pw_gid;
         }
     }
-    if (groups) {
-        g = strtok(groups, DELIM_GROUPS);
-        while (g != NULL && number_groups < 10) {
-            gid = isid(g);
-            if (gid < 0) {
-                gr = getgrnam(g);
-                if (gr == NULL) {
-                    fprintf(stderr, "can not find group '%s'\n", g);
-                    return 1;
-                }
-                gids[number_groups] = gr->gr_gid;
-                number_groups++;
-            }
-            g = strtok(NULL, DELIM_GROUPS);
-        }
-    }
     if (group) {
         gid = isid(group);
         if (gid < 0) {
@@ -286,6 +276,24 @@ int main(int ac, char **av) {
             }
             gid = (int)gr->gr_gid;
         }
+    }
+    if (groups) {
+        curg = &groups[strspn(groups, DELIM_GROUPS)];
+        while (curg[0] != '\0' && number_groups < SUPL_GROUPS_MAX) {
+            nxtg = &curg[strcspn(curg, DELIM_GROUPS)];
+            if (nxtg[0] != '\0')
+                (nxtg++)[0] = '\0';
+            g = isid(curg);
+            if (g < 0) {
+                gr = getgrnam(curg);
+                if (gr == NULL) {
+                    fprintf(stderr, "can not find group '%s'\n", curg);
+                    return EXIT_FAILURE;
+                }
+                g = (int)gr->gr_gid;
+            }
+            gids[number_groups++] = (gid_t)g;
+            curg = &nxtg[strspn(nxtg, DELIM_GROUPS)];        }
     }
 
     /* handle directories */
@@ -300,7 +308,7 @@ int main(int ac, char **av) {
     prctl(PR_SET_KEEPCAPS, 1);
 
     /* drop privileges */
-    if (number_groups > 0) {
+    if (groups != NULL) {
         rc = setgroups(number_groups, gids);
         if (rc < 0) {
             fprintf(stderr, "can not change groups: %m\n");
