@@ -45,13 +45,6 @@
 #include "sec-lsm-manager-protocol.h"
 #include "sec-lsm-manager-server.h"
 
-#if !defined(SEC_LSM_MANAGER_USER)
-#define SEC_LSM_MANAGER_USER NULL
-#endif
-#if !defined(SEC_LSM_MANAGER_GROUP)
-#define SEC_LSM_MANAGER_GROUP NULL
-#endif
-
 #if !defined(SYSTEMD_NAME)
 #define SYSTEMD_NAME "sec-lsm-manager"
 #endif
@@ -214,8 +207,6 @@ int main(int ac, char **av) {
 
     /* set the defaults */
     socketdir = socketdir ?: sec_lsm_manager_default_socket_dir;
-    user = user ?: SEC_LSM_MANAGER_USER;
-    group = group ?: SEC_LSM_MANAGER_GROUP;
 
     /* compute shutoff delay */
     if (shutoff != NULL) {
