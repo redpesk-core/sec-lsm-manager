@@ -360,8 +360,6 @@ int main(int ac, char **av) {
     setvbuf(stderr, NULL, _IOLBF, 1000);
     sec_lsm_manager_server_log = (bool)flog;
 
-    printf("LOG = %d\n", sec_lsm_manager_server_log);
-
 #if defined(DEBUG_MODE)
     puts("DEBUG_MODE = 1");
 #endif
