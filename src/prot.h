@@ -43,9 +43,6 @@ extern int prot_create(prot_t **prot);
  *
  * @param prot the protocol handler
  */
-/**
- *
- */
 extern void prot_destroy(prot_t *prot);
 
 /**
