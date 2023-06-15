@@ -1,8 +1,8 @@
-## Permissions
+# Permissions
 
 In the sec-lsm-manager, the following system permission is used : [redpesk-permissions]({% chapter_link application-framework.permissions %})
 
-### Cynagora
+## Cynagora
 
 Permissions are sent and stored in cynagora.
 For example, if we add the permission `urn:AGL:permission::partner:scope-platform`
@@ -16,7 +16,7 @@ demo-app    *           *       urn:AGL:permission::partner:scope-platform      
 For more details on cynagora: [sec-cynagora](https://github.com/redpesk-core/sec-cynagora)
 
 
-### Mandatory Access Control
+## Mandatory Access Control
 
 At this time permissions only have an impact on SELinux.
 They will allow to add additional authorizations to an application.

@@ -1,8 +1,8 @@
-## SMACK
+# SMACK
 
 SMACK (Simplified Mandatory Access Control Kernel) allows to define simple rules to limit a user or a process rights.
 
-### Context
+## Context
 
 The actual user context is defined in the following file :
 
@@ -10,7 +10,7 @@ The actual user context is defined in the following file :
 /proc/$$/attr/current
 ```
 
-### Rules
+## Rules
 
 A rule is defined as follows :
 
@@ -25,7 +25,7 @@ System  User  rwxat
 > ℹ️ The processes System can read, write and execute User objects.
 
 
-#### Possible access
+### Possible access
 
 - r = read
 - w = write
@@ -60,7 +60,7 @@ subject object rwt
 
 Changes are applied on restart.
 
-#### Default smack access rules
+### Default smack access rules
 
 |      | REQUESTED BY             | REQUESTED ON             |
 | ---- | ------------------------ | ------------------------ |
@@ -73,7 +73,7 @@ Changes are applied on restart.
 🛑 All other rules not explicitly defined
 
 
-### Sources
+## Sources
 
 https://www.kernel.org/doc/html/v4.15/admin-guide/LSM/Smack.html
 

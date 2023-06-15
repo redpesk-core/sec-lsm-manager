@@ -1,4 +1,4 @@
-## Usage
+# Usage
 
 Within an application, we can qualify our files according to several types :
 
@@ -17,7 +17,7 @@ Moreover an application can have particular rights, for example for a can socket
 The first thing to do is to send all these informations to the sec-lsm-manager
 so it can proceed with the installation.
 
-### Library
+## Library
 
 To start using the library, we will create an handler for informations :
 
@@ -27,7 +27,7 @@ sec_lsm_manager_t *sec_lsm_manager = NULL;
 sec_lsm_manager_create(&sec_lsm_manager);
 ```
 
-#### Install
+### Install
 
 We need to define an id to identify our application :
 
@@ -76,7 +76,7 @@ And finally we can install our application security context :
 sec_lsm_manager_install(sec_lsm_manager);
 ```
 
-#### Uninstall
+### Uninstall
 
 To uninstall the application security context, you must define its id :
 
@@ -85,7 +85,7 @@ sec_lsm_manager_set_id(sec_lsm_manager, "demo-app");
 sec_lsm_manager_uninstall(sec_lsm_manager);
 ```
 
-#### Additional
+### Additional
 
 It is possible to display the status of a handler with the display function :
 
@@ -106,7 +106,7 @@ sec_lsm_manager_destroy(sec_lsm_manager);
 ```
 
 
-### Command Line
+## Command Line
 
 It is possible to use the previous functions easily on the command line
 thanks to the binary : `sec-lsm-manager-cmd`.
