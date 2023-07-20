@@ -1,8 +1,6 @@
-define( `MUSTACH_IF', `{{#$1}}
-pushdef(`ELSE',`{{/$1}}{{^$1}}')pushdef(`ENDIF',`{{/$1}}popdef(`ELSE',`ENDIF')')')
+define( `MUSTACH_IF', `{{#$1}}pushdef(`ELSE',`{{/$1}}{{^$1}}')pushdef(`ENDIF',`{{/$1}}popdef(`ELSE',`ENDIF')')')
 
-define( `MUSTACH_IF_NOT', `{{^$1}}
-pushdef(`ELSE',`{{/$1}}{{#$1}}')pushdef(`ENDIF',`{{/$1}}popdef(`ELSE',`ENDIF')')')
+define( `MUSTACH_IF_NOT', `{{^$1}}pushdef(`ELSE',`{{/$1}}{{#$1}}')pushdef(`ENDIF',`{{/$1}}popdef(`ELSE',`ENDIF')')')
 
 define( `PERM', `@PREFIX_PERMISSION@permission:$1')
 
