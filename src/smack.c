@@ -71,7 +71,51 @@ __nonnull() __wur static int label_exec(const char *path, const char *label) {
 }
 
 /**
- * @brief Label a file
+ * @brief Remove labels of a path entry
+ *
+ * @param[in] path The path of the file
+ * @return 0 in case of success or a negative -errno value
+ */
+static int unset_smack_labels(const char *path) {
+    bool exists, is_exec, is_dir;
+    get_file_informations(path, &exists, &is_exec, &is_dir);
+
+    DEBUG("%s : exists=%d ; exec=%d ; dir=%d", path, exists, is_exec, is_dir);
+
+    if (!exists) {
+        return -ENOENT;
+    }
+
+    // file
+    int rc = unset_label(path, XATTR_NAME_SMACK);
+    if (rc < 0) {
+        ERROR("unlabel(%s): %d %s", path, -rc, strerror(-rc));
+        return rc;
+    }
+
+    // exec
+    if (is_exec) {
+        rc = unset_label(path, XATTR_NAME_SMACKEXEC);
+        if (rc < 0) {
+            ERROR("unlabel exec(%s): %d %s", path, -rc, strerror(-rc));
+            return rc;
+        }
+    }
+
+    // dir
+    if (is_dir) {
+        rc = unset_label(path, XATTR_NAME_SMACKTRANSMUTE);
+        if (rc < 0) {
+            ERROR("unlabel transmute(%s): %d %s", path, -rc, strerror(-rc));
+            return rc;
+        }
+    }
+
+    return 0;
+}
+
+/**
+ * @brief Label a path entry
  *
  * @param[in] path The path of the file
  * @param[in] label The label of the file
@@ -80,7 +124,7 @@ __nonnull() __wur static int label_exec(const char *path, const char *label) {
  * @return 0 in case of success or a negative -errno value
  */
 __nonnull((1, 2)) __wur
-static int label_path(const char *path, const char *label, int is_executable, int is_transmute) {
+static int set_smack_labels(const char *path, const char *label, bool is_executable, bool is_transmute) {
     bool exists, is_exec, is_dir;
     get_file_informations(path, &exists, &is_exec, &is_dir);
 
@@ -110,12 +154,29 @@ static int label_path(const char *path, const char *label, int is_executable, in
     if (is_transmute && is_dir) {
         rc = set_label(path, XATTR_NAME_SMACKTRANSMUTE, "TRUE");
         if (rc < 0) {
-            ERROR("set_label(%s,%s,%s) : %d %s ", path, XATTR_NAME_SMACKTRANSMUTE, "TRUE", -rc, strerror(-rc));
+            ERROR("set_label(%s,%s,%s) : %d %s", path, XATTR_NAME_SMACKTRANSMUTE, "TRUE", -rc, strerror(-rc));
             return rc;
         }
     }
 
     return 0;
+}
+
+/**
+ * @brief Label a file
+ *
+ * @param[in] path The path of the file
+ * @param[in] label The label of the file
+ * @param[in] is_executable The file is an executable
+ * @param[in] is_transmute The directory is transmute
+ * @return 0 in case of success or a negative -errno value
+ */
+__nonnull((1, 2)) __wur
+static int label_path(const char *path, const char *label, bool is_executable, bool is_transmute) {
+    if (label[0])
+        return set_smack_labels(path, label, is_executable, is_transmute);
+    else
+        return unset_smack_labels(path);
 }
 
 /**
@@ -155,7 +216,7 @@ __nonnull() __wur static int smack_drop_path_labels(const secure_app_t *secure_a
     path_t *path = NULL;
     for (size_t i = 0; i < secure_app->path_set.size; i++) {
         path = secure_app->path_set.paths[i];
-        rc = label_path(path->path, DROP_LABEL, 0, 0);
+        rc = label_path(path->path, DROP_LABEL, false, false);
         if (rc < 0) {
             ERROR("label_path((%s,%s),%s) : %d %s", secure_app->path_set.paths[i]->path,
                   get_path_type_string(secure_app->path_set.paths[i]->path_type), secure_app->id, -rc, strerror(-rc));
