@@ -50,6 +50,15 @@ extern bool valid_label(const char *s) __wur __nonnull();
 extern int set_label(const char *path, const char *xattr, const char *value) __wur __nonnull();
 
 /**
+ * @brief Unset label attr on file
+ *
+ * @param[in] path the path of the file
+ * @param[in] xattr name of the extended attribute
+ * @return 0 in case of success or a negative -errno value
+ */
+extern int unset_label(const char *path, const char *xattr) __wur __nonnull();
+
+/**
  * @brief Check if file exists
  *
  * @param[in] path The path of the file

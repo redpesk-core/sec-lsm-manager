@@ -81,6 +81,20 @@ int set_label(const char *path, const char *xattr, const char *value) {
     return 0;
 }
 
+/* see utils.h */
+int unset_label(const char *path, const char *xattr) {
+    int rc = lremovexattr(path, xattr);
+    if (rc < 0 && errno != ENODATA) {
+        rc = -errno;
+        ERROR("lremovexattr('%s','%s') : %d %s", path, xattr, -rc, strerror(-rc));
+        return rc;
+    }
+
+    DEBUG("drop %s from %s", xattr, path);
+
+    return 0;
+}
+
 void get_file_informations(const char *path, bool *exists, bool *is_exec, bool *is_dir) {
     struct stat s;
     memset(&s, 0, sizeof(s));
