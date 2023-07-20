@@ -32,7 +32,7 @@
 
 static const char *type_strings[number_path_type] =
 {
-[type_none] =	"none",
+[type_unset] =	"<unset>",
 [type_conf] =	"conf",
 [type_data] =	"data",
 [type_exec] =	"exec",
@@ -103,21 +103,21 @@ int path_set_add_path(path_set_t *path_set, const char *path, enum path_type pat
 
 /* see paths.h */
 bool valid_path_type(enum path_type path_type) {
-    return path_type > type_none && path_type < number_path_type;
+    return path_type > type_unset && path_type < number_path_type;
 }
 
 /* see paths.h */
 enum path_type get_path_type(const char *path_type_string) {
     enum path_type type = number_path_type;
-    while (--type != type_none && strcmp(path_type_string, type_strings[type]) != 0);
-    if (type == type_none)
+    while (--type != type_unset && strcmp(path_type_string, type_strings[type]) != 0);
+    if (type == type_unset)
         ERROR("Path type invalid: %s", path_type_string);
     return type;
 }
 
 /* see paths.h */
 const char *get_path_type_string(enum path_type path_type) {
-    if (path_type >= type_none && path_type < number_path_type)
+    if (path_type >= type_unset && path_type < number_path_type)
         return type_strings[path_type];
     ERROR("Path type invalid");
     return "invalid";

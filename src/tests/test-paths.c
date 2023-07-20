@@ -82,7 +82,7 @@ START_TEST(test_path_set_add_path) {
 END_TEST
 
 START_TEST(test_valid_path_type) {
-    ck_assert_int_eq(valid_path_type(type_none), false);
+    ck_assert_int_eq(valid_path_type(type_unset), false);
     ck_assert_int_eq(valid_path_type(0), false);
     ck_assert_int_eq(valid_path_type(type_conf), true);
     ck_assert_int_eq(valid_path_type(type_data), true);
@@ -106,20 +106,20 @@ START_TEST(test_get_path_type) {
     ck_assert_int_eq(get_path_type("lib"), type_lib);
     ck_assert_int_eq(get_path_type("public"), type_public);
 
-    ck_assert_int_eq(get_path_type("co"), type_none);
-    ck_assert_int_eq(get_path_type("dat"), type_none);
-    ck_assert_int_eq(get_path_type("exe"), type_none);
-    ck_assert_int_eq(get_path_type("htt"), type_none);
-    ck_assert_int_eq(get_path_type("ico"), type_none);
-    ck_assert_int_eq(get_path_type("ip"), type_none);
-    ck_assert_int_eq(get_path_type("li"), type_none);
-    ck_assert_int_eq(get_path_type("pub"), type_none);
-    ck_assert_int_eq(get_path_type("zzzz"), type_none);
+    ck_assert_int_eq(get_path_type("co"), type_unset);
+    ck_assert_int_eq(get_path_type("dat"), type_unset);
+    ck_assert_int_eq(get_path_type("exe"), type_unset);
+    ck_assert_int_eq(get_path_type("htt"), type_unset);
+    ck_assert_int_eq(get_path_type("ico"), type_unset);
+    ck_assert_int_eq(get_path_type("ip"), type_unset);
+    ck_assert_int_eq(get_path_type("li"), type_unset);
+    ck_assert_int_eq(get_path_type("pub"), type_unset);
+    ck_assert_int_eq(get_path_type("zzzz"), type_unset);
 }
 END_TEST
 
 START_TEST(test_get_path_type_string) {
-    ck_assert_str_eq(get_path_type_string(type_none), "none");
+    ck_assert_str_eq(get_path_type_string(type_unset), "<unset>");
     ck_assert_str_eq(get_path_type_string(type_conf), "conf");
     ck_assert_str_eq(get_path_type_string(type_data), "data");
     ck_assert_str_eq(get_path_type_string(type_exec), "exec");

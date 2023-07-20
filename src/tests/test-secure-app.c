@@ -108,7 +108,7 @@ START_TEST(test_secure_app_add_path) {
     ck_assert_int_eq((int)secure_app->path_set.paths[0]->path_type, (int)type_conf);
 
     // test bad path type
-    ck_assert_int_eq(secure_app_add_path(secure_app, "/tmp3", type_none), -EINVAL);
+    ck_assert_int_eq(secure_app_add_path(secure_app, "/tmp3", type_unset), -EINVAL);
 
     // test duplicate path
     ck_assert_int_eq(secure_app_add_path(secure_app, "/tmp", type_data), -EINVAL);
