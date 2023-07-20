@@ -38,7 +38,7 @@
 
 static int put(void *closure, const char *name, int escape, FILE *file) {
     (void)escape;
-    const secure_app_t *secure_app = (const secure_app_t *)closure;
+    const secure_app_t *secure_app = *(const secure_app_t**)closure;
     // DEBUG("name : %s", name);
 
     if (!strcmp(name, "id")) {
@@ -51,7 +51,7 @@ static int put(void *closure, const char *name, int escape, FILE *file) {
 }
 
 static int enter(void *closure, const char *name) {
-    const secure_app_t *secure_app = (const secure_app_t *)closure;
+    const secure_app_t *secure_app = *(const secure_app_t**)closure;
     for (size_t i = 0; i < secure_app->permission_set.size; i++) {
         if (!strcasecmp(name, secure_app->permission_set.permissions[i])) {
             return 1;
@@ -90,7 +90,7 @@ int process_template(const char *template_path, const char *dest, const secure_a
         goto end;
     }
 
-    rc = fmustach(template, &itf, (void*)secure_app, f_dest);
+    rc = fmustach(template, &itf, &secure_app, f_dest);
     if (rc < 0) {
         ERROR("fmustach : %d %s", errno, strerror(errno));
     }
