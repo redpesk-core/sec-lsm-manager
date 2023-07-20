@@ -387,12 +387,8 @@ __nonnull((1)) static void onrequest(client_t *cli, unsigned count, const char *
     /* version hand-shake */
     if (!cli->version) {
         if (ckarg(args[0], _sec_lsm_manager_, 0)) {
-            if (count < 2 || !ckarg(args[1], "1", 0)) {
-                send_error(cli, "invalid");
-                if (!cli->relax)
-                    cli->invalid = 1;
-                return;
-            }
+            if (count < 2 || !ckarg(args[1], "1", 0))
+                goto invalid;
             rc = putx(cli, _done_, "1", NULL);
             if (rc < 0) {
                 ERROR("putx : %d %s", -rc, strerror(-rc));
@@ -410,6 +406,7 @@ __nonnull((1)) static void onrequest(client_t *cli, unsigned count, const char *
 
     switch (args[0][0]) {
         case 'c':
+            /* clear */
             if (ckarg(args[0], _clear_, 1) && count == 1) {
                 clear_secure_app(cli->secure_app);
                 send_done(cli);
@@ -417,6 +414,7 @@ __nonnull((1)) static void onrequest(client_t *cli, unsigned count, const char *
             }
             break;
         case 'd':
+            /* display */
             if (ckarg(args[0], _display_, 1) && count == 1) {
                 rc = send_display_secure_app(cli);
                 if (rc >= 0) {
@@ -429,6 +427,7 @@ __nonnull((1)) static void onrequest(client_t *cli, unsigned count, const char *
             }
             break;
         case 'i':
+            /* id */
             if (ckarg(args[0], _id_, 1) && count == 2) {
                 rc = secure_app_set_id(cli->secure_app, args[1]);
                 if (rc >= 0) {
@@ -439,6 +438,7 @@ __nonnull((1)) static void onrequest(client_t *cli, unsigned count, const char *
                 }
                 return;
             }
+            /* install */
             if (ckarg(args[0], _install_, 1) && count == 1) {
                 rc = install(cli);
                 if (rc >= 0) {
@@ -451,6 +451,7 @@ __nonnull((1)) static void onrequest(client_t *cli, unsigned count, const char *
             }
             break;
         case 'l':
+            /* log */
             if (ckarg(args[0], _log_, 1) && count <= 2) {
                 nextlog = sec_lsm_manager_server_log;
                 if (count == 2) {
@@ -471,6 +472,7 @@ __nonnull((1)) static void onrequest(client_t *cli, unsigned count, const char *
             }
             break;
         case 'p':
+            /* path */
             if (ckarg(args[0], _path_, 1) && count == 3) {
                 rc = secure_app_add_path(cli->secure_app, args[1], get_path_type(args[2]));
                 if (rc >= 0) {
@@ -488,6 +490,7 @@ __nonnull((1)) static void onrequest(client_t *cli, unsigned count, const char *
                 }
                 return;
             }
+            /* permission */
             if (ckarg(args[0], _permission_, 1) && count == 2) {
                 rc = secure_app_add_permission(cli->secure_app, args[1]);
                 if (rc >= 0) {
@@ -507,6 +510,7 @@ __nonnull((1)) static void onrequest(client_t *cli, unsigned count, const char *
             }
             break;
         case 'u':
+            /* uninstall */
             if (ckarg(args[0], _uninstall_, 1) && count == 1) {
                 rc = uninstall(cli);
                 if (rc >= 0) {
@@ -517,8 +521,14 @@ __nonnull((1)) static void onrequest(client_t *cli, unsigned count, const char *
                 }
                 return;
             }
+            break;
+        default:
+            break;
     }
-    return;
+invalid:
+    send_error(cli, "invalid");
+    if (!cli->relax)
+        cli->invalid = 1;
 }
 
 /**
