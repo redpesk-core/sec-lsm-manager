@@ -139,7 +139,7 @@ synopsis:
 
 Add the file of PATH with the given PATH-TYPE in the current session.
 
-Valid PATH-TYPE are: conf, data, exec, http, icon, id, lib, public.
+Valid PATH-TYPE are: default, conf, data, exec, http, icon, id, lib, public.
 
 It is an error to add the same path a second time.
 

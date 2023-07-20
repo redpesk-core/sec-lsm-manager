@@ -34,6 +34,7 @@
  * @brief several type path
  *
  * type_unset  : not a type, default init
+ * type_default: reset to some default
  * type_conf   : config files ('conf')
  * type_data   : data files ('data')
  * type_exec   : executable files ('exec')
@@ -46,6 +47,7 @@
  */
 enum path_type {
     type_unset,
+    type_default,
     type_conf,
     type_data,
     type_exec,

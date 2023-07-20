@@ -2,14 +2,15 @@
 
 Within an application, we can qualify our files according to several types :
 
-- conf   : config files
-- data   : data files
-- exec   : executable files
-- http   : http files
-- icon   : icon file
-- id     : basename app directory
-- lib    : libraries files
-- public : public files
+- default: no specific type, use default
+- conf:    config files
+- data:    data files
+- exec:    executable files
+- http:    http files
+- icon:    icon file
+- id:      basename app directory
+- lib:     libraries files
+- public:  public files
 
 Moreover an application can have particular rights, for example for a can socket creation.
 

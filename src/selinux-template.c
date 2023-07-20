@@ -100,6 +100,8 @@ char public_app[] = "redpesk_public_t";
 __nonnull() static void init_selinux_module(selinux_module_t *selinux_module, const secure_app_t *secure_app) {
     memset(selinux_module, 0, sizeof(*selinux_module));
 
+    /* TODO: treat the case type_default or treat when label is "" */
+
     secure_strncpy(selinux_module->selinux_rules_dir, get_selinux_rules_dir(NULL), SEC_LSM_MANAGER_MAX_SIZE_DIR);
 
     secure_strncpy(selinux_module->selinux_te_template_file, get_selinux_te_template_file(NULL),

@@ -84,6 +84,7 @@ END_TEST
 START_TEST(test_valid_path_type) {
     ck_assert_int_eq(valid_path_type(type_unset), false);
     ck_assert_int_eq(valid_path_type(0), false);
+    ck_assert_int_eq(valid_path_type(type_default), true);
     ck_assert_int_eq(valid_path_type(type_conf), true);
     ck_assert_int_eq(valid_path_type(type_data), true);
     ck_assert_int_eq(valid_path_type(type_exec), true);
@@ -97,6 +98,7 @@ START_TEST(test_valid_path_type) {
 END_TEST
 
 START_TEST(test_get_path_type) {
+    ck_assert_int_eq(get_path_type("default"), type_default);
     ck_assert_int_eq(get_path_type("conf"), type_conf);
     ck_assert_int_eq(get_path_type("data"), type_data);
     ck_assert_int_eq(get_path_type("exec"), type_exec);
@@ -106,6 +108,7 @@ START_TEST(test_get_path_type) {
     ck_assert_int_eq(get_path_type("lib"), type_lib);
     ck_assert_int_eq(get_path_type("public"), type_public);
 
+    ck_assert_int_eq(get_path_type("no"), type_unset);
     ck_assert_int_eq(get_path_type("co"), type_unset);
     ck_assert_int_eq(get_path_type("dat"), type_unset);
     ck_assert_int_eq(get_path_type("exe"), type_unset);
@@ -120,6 +123,7 @@ END_TEST
 
 START_TEST(test_get_path_type_string) {
     ck_assert_str_eq(get_path_type_string(type_unset), "<unset>");
+    ck_assert_str_eq(get_path_type_string(type_default), "default");
     ck_assert_str_eq(get_path_type_string(type_conf), "conf");
     ck_assert_str_eq(get_path_type_string(type_data), "data");
     ck_assert_str_eq(get_path_type_string(type_exec), "exec");

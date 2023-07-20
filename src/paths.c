@@ -32,15 +32,16 @@
 
 static const char *type_strings[number_path_type] =
 {
-[type_unset] =	"<unset>",
-[type_conf] =	"conf",
-[type_data] =	"data",
-[type_exec] =	"exec",
-[type_http] =	"http",
-[type_icon] =	"icon",
-[type_id] =	"id",
-[type_lib] =	"lib",
-[type_public] =	"public"
+[type_unset] = "<unset>",
+[type_default] = "default",
+[type_conf] = "conf",
+[type_data] = "data",
+[type_exec] = "exec",
+[type_http] = "http",
+[type_icon] = "icon",
+[type_id] = "id",
+[type_lib] = "lib",
+[type_public] = "public"
 };
 
 /**********************/
