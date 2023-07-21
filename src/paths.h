@@ -34,7 +34,7 @@
  * @brief several type path
  *
  * type_unset  : not a type, default init
- * type_default: reset to some default
+ * type_default: reset to some default, not linked to id
  * type_conf   : config files ('conf')
  * type_data   : data files ('data')
  * type_exec   : executable files ('exec')

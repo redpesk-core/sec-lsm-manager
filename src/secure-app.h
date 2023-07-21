@@ -36,6 +36,7 @@ typedef struct secure_app {
     char label[SEC_LSM_MANAGER_MAX_SIZE_LABEL];
     permission_set_t permission_set;
     path_set_t path_set;
+    bool need_id; /**< flags if id is needed */
     bool error_flag;
 } secure_app_t;
 

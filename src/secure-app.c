@@ -47,6 +47,7 @@ __nonnull() static void init_secure_app(secure_app_t *secure_app) {
     memset(secure_app->label, '\0', SEC_LSM_MANAGER_MAX_SIZE_LABEL);
     init_path_set(&(secure_app->path_set));
     init_permission_set(&(secure_app->permission_set));
+    secure_app->need_id = false;
     secure_app->error_flag = false;
 }
 
@@ -86,6 +87,7 @@ void clear_secure_app(secure_app_t *secure_app) {
 	secure_app->label[0] = secure_app->id_underscore[0] = secure_app->id[0] = '\0';
         free_permission_set(&(secure_app->permission_set));
         free_path_set(&(secure_app->path_set));
+        secure_app->need_id = false;
         secure_app->error_flag = false;
     }
 }
@@ -152,6 +154,7 @@ int secure_app_add_permission(secure_app_t *secure_app, const char *permission) 
         ERROR("permission_set_add_permission : %d %s", -rc, strerror(-rc));
         return rc;
     }
+    secure_app->need_id = true;
 
     return 0;
 }
@@ -180,6 +183,8 @@ int secure_app_add_path(secure_app_t *secure_app, const char *path, enum path_ty
         ERROR("path_set_add_path %d %s", -rc, strerror(-rc));
         return rc;
     }
+    if (path_type != type_default)
+        secure_app->need_id = true;
 
     return 0;
 }
