@@ -24,7 +24,7 @@ static void list(void *closure, const cynagora_key_t *key, const cynagora_value_
     ck_assert_int_eq(permission_set_add_permission(permission_set, key->permission), 0);
 }
 
-int cynagora_get_policies(cynagora_t *cynagora, const char *client, permission_set_t *permission_set) {
+static int cynagora_get_policies(cynagora_t *cynagora, const char *client, permission_set_t *permission_set) {
     init_permission_set(permission_set);
     if (cynagora_enter(cynagora) < 0) {
         return -1;

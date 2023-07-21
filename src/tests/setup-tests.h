@@ -30,7 +30,7 @@ extern void test_secure_app(void);
 extern void test_utils(void);
 
 #if !defined(SIMULATE_CYNAGORA)
-extern void test_cynagora();
+extern void test_cynagora(void);
 #endif
 
 #if defined(WITH_SMACK)
