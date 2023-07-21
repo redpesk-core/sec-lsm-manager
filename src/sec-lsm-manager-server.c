@@ -295,7 +295,7 @@ __nonnull() __wur static int send_display_secure_app(client_t *cli) {
  * @return 0 in case of success or a negative -errno value
  */
 __nonnull() __wur static int update_policy(secure_app_t *secure_app, cynagora_t *cynagora_admin_client) {
-    // drop old policies
+    // drop old policies if any
     int rc = cynagora_drop_policies(cynagora_admin_client, secure_app->label);
     if (rc < 0) {
         ERROR("cynagora_drop_policies %s : %d %s", secure_app->label, -rc, strerror(-rc));

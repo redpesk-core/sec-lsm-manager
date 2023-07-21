@@ -83,7 +83,7 @@ int create_secure_app(secure_app_t **secure_app) {
 /* see secure-app.h */
 void clear_secure_app(secure_app_t *secure_app) {
     if (secure_app) {
-	secure_app->id[0] = '\0';
+	secure_app->label[0] = secure_app->id_underscore[0] = secure_app->id[0] = '\0';
         free_permission_set(&(secure_app->permission_set));
         free_path_set(&(secure_app->path_set));
         secure_app->error_flag = false;
@@ -185,4 +185,6 @@ int secure_app_add_path(secure_app_t *secure_app, const char *path, enum path_ty
 }
 
 /* see secure-app.h */
-void raise_error_flag(secure_app_t *secure_app) { secure_app->error_flag = true; }
+void raise_error_flag(secure_app_t *secure_app) {
+    secure_app->error_flag = true;
+}
