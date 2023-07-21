@@ -315,25 +315,34 @@ __nonnull() __wur static int update_policy(secure_app_t *secure_app, cynagora_t 
 __nonnull() __wur static int install(client_t *cli) {
     if (cli->secure_app->error_flag) {
         ERROR("error flag has been raised, clear secure app");
-        return -EPERM;
+        return -EINVAL;
     }
 
-    int rc = update_policy(cli->secure_app, cli->sec_lsm_manager_server->cynagora_admin_client);
-    if (rc < 0) {
-        ERROR("update_policy : %d %s", -rc, strerror(-rc));
-        return rc;
+    bool has_id = cli->secure_app->id[0] != '\0';
+    if (!has_id && cli->secure_app->need_id) {
+        ERROR("an application identifier is needed");
+        return -EINVAL;
     }
 
-    DEBUG("update_policy success");
+    if (has_id) {
+        int rc = update_policy(cli->secure_app, cli->sec_lsm_manager_server->cynagora_admin_client);
+        if (rc < 0) {
+            ERROR("update_policy : %d %s", -rc, strerror(-rc));
+            return rc;
+        }
+        DEBUG("update_policy success");
+    }
 
-    rc = install_mac(cli->secure_app);
+    int rc = install_mac(cli->secure_app);
     if (rc < 0) {
         ERROR("install_mac : %d %s", -rc, strerror(-rc));
-        int rc2 = cynagora_drop_policies(cli->sec_lsm_manager_server->cynagora_admin_client, cli->secure_app->label);
-        if (rc2 < 0) {
-            ERROR("cannot delete policy : %d %s", -rc2, strerror(-rc2));
-        }
-        return rc;
+	if (has_id) {
+            int rc2 = cynagora_drop_policies(cli->sec_lsm_manager_server->cynagora_admin_client, cli->secure_app->label);
+            if (rc2 < 0) {
+                ERROR("cannot delete policy : %d %s", -rc2, strerror(-rc2));
+            }
+            return rc;
+	}
     }
 
     DEBUG("install success");
@@ -344,18 +353,24 @@ __nonnull() __wur static int install(client_t *cli) {
 __nonnull() __wur static int uninstall(client_t *cli) {
     if (cli->secure_app->error_flag) {
         ERROR("error flag has been raised, clear secure app");
-        return -EPERM;
+        return -EINVAL;
     }
 
-    int rc = cynagora_drop_policies(cli->sec_lsm_manager_server->cynagora_admin_client, cli->secure_app->label);
-
-    if (rc < 0) {
-        ERROR("cynagora_drop_policies : %d %s", -rc, strerror(-rc));
-        return rc;
+    bool has_id = cli->secure_app->id[0] != '\0';
+    if (!has_id && cli->secure_app->need_id) {
+        ERROR("an application identifier is needed");
+        return -EINVAL;
     }
 
-    rc = uninstall_mac(cli->secure_app);
+    if (has_id) {
+        int rc = cynagora_drop_policies(cli->sec_lsm_manager_server->cynagora_admin_client, cli->secure_app->label);
+        if (rc < 0) {
+            ERROR("cynagora_drop_policies : %d %s", -rc, strerror(-rc));
+            return rc;
+        }
+    }
 
+    int rc = uninstall_mac(cli->secure_app);
     if (rc < 0) {
         ERROR("uninstall_mac : %d %s", -rc, strerror(-rc));
         return rc;

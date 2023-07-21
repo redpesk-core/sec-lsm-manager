@@ -233,52 +233,54 @@ __nonnull() __wur static int smack_drop_path_labels(const secure_app_t *secure_a
 
 /* see smack.h */
 int install_smack(const secure_app_t *secure_app) {
-    if (secure_app->id[0] == '\0') {
+    bool has_id = secure_app->id[0] != '\0';
+    if (!has_id && secure_app->need_id) {
         ERROR("id undefined");
         return -EINVAL;
     }
 
-    int rc = create_smack_rules(secure_app);
-    if (rc < 0) {
-        ERROR("create_smack_rules : %d %s", -rc, strerror(-rc));
-        goto end;
+    if (has_id) {
+        int rc = create_smack_rules(secure_app);
+        if (rc < 0) {
+            ERROR("create_smack_rules : %d %s", -rc, strerror(-rc));
+            return rc;
+        }
     }
 
     path_type_definitions_t path_type_definitions[number_path_type];
     init_path_type_definitions(path_type_definitions, secure_app->id);
 
-    rc = smack_set_path_labels(secure_app, path_type_definitions);
-    if (rc < 0) {
+    int rc = smack_set_path_labels(secure_app, path_type_definitions);
+    if (rc >= 0) {
+        DEBUG("install smack success");
+    } else {
         ERROR("smack_process_paths : %d %s", -rc, strerror(-rc));
-        goto error;
+        if (has_id) {
+            if (remove_smack_rules(secure_app) < 0) {
+                ERROR("remove_smack_rules");
+            }
+        }
     }
-
-    DEBUG("install smack success");
-
-    goto end;
-
-error:
-    if (remove_smack_rules(secure_app) < 0) {
-        ERROR("remove_smack_rules");
-    }
-end:
     return rc;
 }
 
 /* see smack.h */
 int uninstall_smack(const secure_app_t *secure_app) {
-    if (secure_app->id[0] == '\0') {
+    bool has_id = secure_app->id[0] != '\0';
+    if (!has_id && secure_app->need_id) {
         ERROR("id undefined");
         return -EINVAL;
     }
 
-    int rc = remove_smack_rules(secure_app);
-    if (rc < 0) {
-        ERROR("remove_smack_rules: %d %s", -rc, strerror(-rc));
-        return rc;
+    if (has_id) {
+        int rc = remove_smack_rules(secure_app);
+        if (rc < 0) {
+            ERROR("remove_smack_rules: %d %s", -rc, strerror(-rc));
+            return rc;
+        }
     }
 
-    rc = smack_drop_path_labels(secure_app);
+    int rc = smack_drop_path_labels(secure_app);
     if (rc < 0) {
         ERROR("smack_drop_path_labels: %d %s", -rc, strerror(-rc));
         return rc;

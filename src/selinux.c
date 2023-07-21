@@ -95,6 +95,7 @@ bool selinux_enabled() {
 
 /* see selinux.h */
 int install_selinux(const secure_app_t *secure_app) {
+    /* TODO: treat the case where !secure_app->need_id */
     if (secure_app->id[0] == '\0') {
         ERROR("id undefined");
         return -EINVAL;
@@ -139,6 +140,7 @@ int install_selinux(const secure_app_t *secure_app) {
 
 /* see selinux.h */
 int uninstall_selinux(const secure_app_t *secure_app) {
+    /* TODO: treat the case where !secure_app->need_id */
     if (secure_app->id[0] == '\0') {
         ERROR("id undefined");
         return -EINVAL;
