@@ -13,7 +13,7 @@ character (SPACE) of binary value 32.
 
 Because SPACE or LF could be present in fields, the protocol use an escaping
 character to hold it. The escaping character is the backslash (\) of binary code 92.
-The 3 characters SPACE, LF and ESCAPE must be escaped if present in fields.
+The 3 characters SPACE, LF and BACKSLASH must be escaped if present in fields.
 Escaping these characters means inserting before it the escaping character backslash.
 
 ```
@@ -35,7 +35,7 @@ In all circumstances, the server SEC-LSM-MANAGER is allowed to close the connect
 
 ### Normal replies and error replies
 
-Normal replies are indicating that no error occured. Normal replies
+Normal replies are indicating that no error occurred. Normal replies
 are generally made of a single status line but it may also include, before
 the status line, several lines of data.
 
@@ -57,11 +57,11 @@ NORMAL-REPLY ::= [ LINE ]... DONE-LINE
 
 ### Session
 
-When a client connect, it establishes a unic and single session linked to the connection.
+When a client connect, it establishes a unique and single session linked to the connection.
 That session handles data related to one application. Action or queries are running in the
 context of the current session and use or modify the current data of it.
 
-When the client disconnect, its session is droped to the trash and can not be recovered
+When the client disconnect, its session is dropped to the trash and can not be recovered
 in any way.
 
 ### Notations
@@ -89,12 +89,12 @@ speak (today version 1 only). The server answer done with the acknowledged
 version it will uses.
 
 If hello is used, it must be the first message. If it is not used, the
-protocol implicitely switch to the default version.
+protocol implicitly switch to the default version.
 
 Later versions will accept more than one version, the server will choose
 the one it supports and return it with done.
 
-If the message is not understood or the version is not suported, the server
+If the message is not understood or the version is not supported, the server
 reply:
 
 	s->c error invalid
@@ -158,6 +158,19 @@ synopsis:
 Add the permission in the current session.
 
 It is an error to add the same permission a second time.
+
+
+### plug
+
+synopsis:
+
+```
+	c->s plug PATH TOID TOPATH
+	s->c done
+```
+
+Plugs the directory of PATH in the directory TOPATH for the application
+of id TOID.
 
 
 ### install

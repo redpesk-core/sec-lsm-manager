@@ -28,17 +28,18 @@ add_compile_definitions(VERSION="${PROJECT_VERSION}")
 # define server sources
 
 set(SERVER_SOURCES
+    cynagora-interface.c
     log.c
-    utils.c
+    mustach/mustach.c
     paths.c
     permissions.c
-    mustach/mustach.c
-    template.c
-    cynagora-interface.c
-    secure-app.c
-    socket.c
+    plugs.c
     pollitem.c
     prot.c
+    secure-app.c
+    socket.c
+    template.c
+    utils.c
     ${CMAKE_PROJECT_NAME}-protocol.c
     ${CMAKE_PROJECT_NAME}-server.c
 )

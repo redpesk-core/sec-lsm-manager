@@ -37,12 +37,27 @@
         return;                                    \
     }
 
-extern const char _sec_lsm_manager_[], _done_[], _error_[], _log_[], _id_[], _permission_[], _path_[], _install_[],
-    _uninstall_[], _display_[], _clear_[], _on_[], _off_[], _string_[];
+extern const char _clear_[];
+extern const char _display_[];
+extern const char _done_[];
+extern const char _error_[];
+extern const char _id_[];
+extern const char _install_[];
+extern const char _log_[];
+extern const char _off_[];
+extern const char _on_[];
+extern const char _path_[];
+extern const char _permission_[];
+extern const char _plug_[];
+extern const char _sec_lsm_manager_[];
+extern const char _string_[];
+extern const char _uninstall_[];
 
 /* predefined names */
-extern const char sec_lsm_manager_default_socket_scheme[], sec_lsm_manager_default_socket_dir[],
-    sec_lsm_manager_default_socket_name[], sec_lsm_manager_default_socket[];
+extern const char sec_lsm_manager_default_socket_scheme[];
+extern const char sec_lsm_manager_default_socket_dir[];
+extern const char sec_lsm_manager_default_socket_name[];
+extern const char sec_lsm_manager_default_socket[];
 
 /**
  * @brief Get the socket specification

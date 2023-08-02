@@ -27,10 +27,22 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-const char _sec_lsm_manager_[] = "sec-lsm-manager", _done_[] = "done", _error_[] = "error", _log_[] = "log",
-           _id_[] = "id", _permission_[] = "permission", _path_[] = "path", _install_[] = "install",
-           _uninstall_[] = "uninstall", _display_[] = "display", _clear_[] = "clear", _on_[] = "on", _off_[] = "off",
-           _string_[] = "string";
+const char _clear_[] = "clear";
+const char _display_[] = "display";
+const char _done_[] = "done";
+const char _error_[] = "error";
+const char _id_[] = "id";
+const char _install_[] = "install";
+const char _log_[] = "log";
+const char _off_[] = "off";
+const char _on_[] = "on";
+const char _path_[] = "path";
+const char _permission_[] = "permission";
+const char _plug_[] = "plug";
+const char _sec_lsm_manager_[] = "sec-lsm-manager";
+const char _string_[] = "string";
+const char _uninstall_[] = "uninstall";
+
 
 #if !defined(SEC_LSM_MANAGER_SOCKET_SCHEME)
 #define SEC_LSM_MANAGER_SOCKET_SCHEME "unix"
@@ -50,10 +62,10 @@ const char _sec_lsm_manager_[] = "sec-lsm-manager", _done_[] = "done", _error_[]
 #define SEC_LSM_MANAGER_SOCKET PREFIX SEC_LSM_MANAGER_SOCKET_NAME
 #endif
 
-const char sec_lsm_manager_default_socket_scheme[] = SEC_LSM_MANAGER_SOCKET_SCHEME,
-           sec_lsm_manager_default_socket_dir[] = SEC_LSM_MANAGER_SOCKET_DIR,
-           sec_lsm_manager_default_socket_name[] = SEC_LSM_MANAGER_SOCKET_NAME,
-           sec_lsm_manager_default_socket[] = SEC_LSM_MANAGER_SOCKET;
+const char sec_lsm_manager_default_socket_scheme[] = SEC_LSM_MANAGER_SOCKET_SCHEME;
+const char sec_lsm_manager_default_socket_dir[] = SEC_LSM_MANAGER_SOCKET_DIR;
+const char sec_lsm_manager_default_socket_name[] = SEC_LSM_MANAGER_SOCKET_NAME;
+const char sec_lsm_manager_default_socket[] = SEC_LSM_MANAGER_SOCKET;
 
 /* see sec-lsm-manager-protocol.h */
 const char *sec_lsm_manager_get_socket(const char *value) {

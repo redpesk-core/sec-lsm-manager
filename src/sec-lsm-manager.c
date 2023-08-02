@@ -480,6 +480,38 @@ ret:
 }
 
 /* see sec-lsm-manager.h */
+__nonnull() __wur
+int sec_lsm_manager_add_plug(sec_lsm_manager_t *sec_lsm_manager, const char *expdir, const char *impid, const char *impdir)
+{
+    CHECK_NO_NULL(sec_lsm_manager, "sec_lsm_manager");
+    CHECK_NO_NULL(expdir, "expdir");
+    CHECK_NO_NULL(impid, "impid");
+    CHECK_NO_NULL(impdir, "impdir");
+
+    if (sec_lsm_manager->synclock)
+        return -EBUSY;
+
+    sec_lsm_manager->synclock = true;
+    int rc = ensure_opened(sec_lsm_manager);
+    if (rc < 0) {
+        goto ret;
+    }
+    rc = putxkv(sec_lsm_manager, _plug_, expdir, impid, impdir, NULL);
+    if (rc < 0) {
+        goto ret;
+    }
+
+    rc = wait_done_or_error(sec_lsm_manager);
+
+ret:
+    sec_lsm_manager->synclock = false;
+    return rc;
+}
+
+
+
+
+/* see sec-lsm-manager.h */
 int sec_lsm_manager_add_permission(sec_lsm_manager_t *sec_lsm_manager, const char *permission) {
     CHECK_NO_NULL(sec_lsm_manager, "sec_lsm_manager");
     CHECK_NO_NULL(permission, "permission");

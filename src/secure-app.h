@@ -29,6 +29,7 @@
 #include "cynagora-interface.h"
 #include "limits.h"
 #include "paths.h"
+#include "plugs.h"
 
 typedef struct secure_app {
     char id[SEC_LSM_MANAGER_MAX_SIZE_ID];
@@ -36,6 +37,7 @@ typedef struct secure_app {
     char label[SEC_LSM_MANAGER_MAX_SIZE_LABEL];
     permission_set_t permission_set;
     path_set_t path_set;
+    plugset_t plugset; /**< set of plug directives */
     bool need_id; /**< flags if id is needed */
     bool error_flag;
 } secure_app_t;
@@ -94,6 +96,18 @@ extern int secure_app_add_permission(secure_app_t *secure_app, const char *permi
  * @return 0 in case of success or a negative -errno value
  */
 extern int secure_app_add_path(secure_app_t *secure_app, const char *path, enum path_type path_type) __wur __nonnull();
+
+/**
+ * @brief Add a new plug definition
+ *
+ * @param[in] secure_app handler
+ * @param[in] expdir   exported directory
+ * @param[in] impid    import appid
+ * @param[in] impdir   import directory
+ * @return 0 in case of success or a negative -errno value
+ */
+__wur __nonnull()
+extern int secure_app_add_plug(secure_app_t *secure_app, const char *expdir, const char *impid, const char *impdir);
 
 /**
  * @brief Set error_flag

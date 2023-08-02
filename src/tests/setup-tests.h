@@ -25,6 +25,7 @@ void create_etc_tmp_file(char *tmp_file);
 
 bool compare_xattr(const char *path, const char *xattr, const char *value);
 extern void test_paths(void);
+extern void test_plugs(void);
 extern void test_permissions(void);
 extern void test_secure_app(void);
 extern void test_utils(void);

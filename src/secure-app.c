@@ -21,14 +21,13 @@
  * $RP_END_LICENSE$
  */
 
-#include "secure-app.h"
-
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/socket.h>
 
+#include "secure-app.h"
 #include "log.h"
 #include "utils.h"
 
@@ -46,6 +45,7 @@ __nonnull() static void init_secure_app(secure_app_t *secure_app) {
     memset(secure_app->id_underscore, '\0', SEC_LSM_MANAGER_MAX_SIZE_ID);
     memset(secure_app->label, '\0', SEC_LSM_MANAGER_MAX_SIZE_LABEL);
     init_path_set(&(secure_app->path_set));
+    plugset_init(&(secure_app->plugset));
     init_permission_set(&(secure_app->permission_set));
     secure_app->need_id = false;
     secure_app->error_flag = false;
@@ -86,6 +86,7 @@ void clear_secure_app(secure_app_t *secure_app) {
     if (secure_app) {
 	secure_app->label[0] = secure_app->id_underscore[0] = secure_app->id[0] = '\0';
         free_permission_set(&(secure_app->permission_set));
+        plugset_deinit(&(secure_app->plugset));
         free_path_set(&(secure_app->path_set));
         secure_app->need_id = false;
         secure_app->error_flag = false;
@@ -160,6 +161,7 @@ int secure_app_add_permission(secure_app_t *secure_app, const char *permission) 
 }
 
 /* see secure-app.h */
+__wur __nonnull()
 int secure_app_add_path(secure_app_t *secure_app, const char *path, enum path_type path_type) {
     if (!valid_path_type(path_type)) {
         ERROR("path_type invalid : %d", path_type);
@@ -186,6 +188,26 @@ int secure_app_add_path(secure_app_t *secure_app, const char *path, enum path_ty
     if (path_type != type_default)
         secure_app->need_id = true;
 
+    return 0;
+}
+
+/* see secure-app.h */
+__wur __nonnull()
+int secure_app_add_plug(secure_app_t *secure_app, const char *expdir, const char *impid, const char *impdir)
+{
+    int rc;
+
+    if (secure_app->error_flag) {
+        ERROR("error flag has been raised");
+        return -EPERM;
+    }
+
+    rc = plugset_add(&(secure_app->plugset), expdir, impid, impdir);
+    if (rc < 0) {
+        ERROR("can't add plug %d %s", -rc, strerror(-rc));
+        return rc;
+    }
+    secure_app->need_id = true;
     return 0;
 }
 

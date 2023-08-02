@@ -42,6 +42,7 @@ endif()
 set(TEST_SOURCES
     setup-tests.c
     test-paths.c
+    test-plugs.c
     test-permissions.c
     test-secure-app.c
     test-utils.c

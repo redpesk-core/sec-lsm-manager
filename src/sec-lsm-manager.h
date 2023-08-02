@@ -81,6 +81,18 @@ extern int sec_lsm_manager_add_path(sec_lsm_manager_t *sec_lsm_manager, const ch
     __nonnull() __wur;
 
 /**
+ * @brief Add a plug to sec_lsm_manager client handler
+ *
+ * @param sec_lsm_manager sec_lsm_manager client handler
+ * @param expdir   exported directory
+ * @param impid    import appid
+ * @param impdir   import directory
+ * @return 0 in case of success or a negative -errno value
+ */
+__nonnull() __wur
+extern int sec_lsm_manager_add_plug(sec_lsm_manager_t *sec_lsm_manager, const char *expdir, const char *impid, const char *impdir);
+
+/**
  * @brief Add a permission to sec_lsm_manager client handler
  *
  * @param[in] sec_lsm_manager sec_lsm_manager client handler

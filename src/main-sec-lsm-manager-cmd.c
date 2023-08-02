@@ -122,6 +122,15 @@ static const char help_path_text[] =
     "Example : path /tmp/file data\n"
     "\n";
 
+static const char help_plug_text[] =
+    "\n"
+    "Command: plug exported-path import-id import-path\n"
+    "\n"
+    "Setup a plug export\n"
+    "\n"
+    "Example : plug /tmp/file data /tmp/file\n"
+    "\n";
+
 static const char help_permission_text[] =
     "\n"
     "Command: permission permission\n"
@@ -149,7 +158,8 @@ static const char help_uninstall_text[] =
 
 static const char help__text[] =
     "\n"
-    "Commands are: log, clear, display, id, path, permission, install, uninstall, quit, help\n"
+    "Commands are: log, clear, display, id, path, plug, permission,\n"
+    "              install, uninstall, quit, help\n"
     "Type 'help command' to get help on the command\n"
     "\n"
     "Example 'help log' to get help on log\n"
@@ -292,6 +302,40 @@ static int do_path(int ac, char **av) {
     return uc;
 }
 
+static int do_plug(int ac, char **av) {
+    int uc, rc;
+    char *export_path = NULL;
+    char *import_id = NULL;
+    char *import_path = NULL;
+    int n = plink(ac, av, &uc, 4);
+
+    if (n < 4) {
+        ERROR("not enough arguments");
+        last_status = -EINVAL;
+        return uc;
+    }
+
+    if (strlen(av[1]) <= 0) {
+        ERROR("bad argument %s", av[1]);
+        last_status = -EINVAL;
+        return uc;
+    }
+
+    export_path = av[1];
+    import_id = av[2];
+    import_path = av[3];
+
+    last_status = rc = sec_lsm_manager_add_plug(sec_lsm_manager, export_path, import_id, import_path);
+
+    if (rc < 0) {
+        ERROR("sec_lsm_manager_add_plug : %d %s", -rc, strerror(-rc));
+    } else {
+        LOG("add plug %s %s %s", export_path, import_id, import_path);
+    }
+
+    return uc;
+}
+
 static int do_permission(int ac, char **av) {
     int uc, rc;
     char *permission = NULL;
@@ -389,31 +433,34 @@ static int do_log(int ac, char **av) {
 }
 
 static int do_help(int ac, char **av) {
+    const char *help = help__text;
+    int rc = 2;
     if (ac > 1 && !strcmp(av[1], "log"))
-        fprintf(stdout, "%s", help_log_text);
+        help = help_log_text;
     else if (ac > 1 && !strcmp(av[1], "quit"))
-        fprintf(stdout, "%s", help_quit_text);
+        help = help_quit_text;
     else if (ac > 1 && !strcmp(av[1], "help"))
-        fprintf(stdout, "%s", help_help_text);
+        help = help_help_text;
     else if (ac > 1 && !strcmp(av[1], "clear"))
-        fprintf(stdout, "%s", help_clear_text);
+        help = help_clear_text;
     else if (ac > 1 && !strcmp(av[1], "display"))
-        fprintf(stdout, "%s", help_display_text);
+        help = help_display_text;
     else if (ac > 1 && !strcmp(av[1], "id"))
-        fprintf(stdout, "%s", help_id_text);
+        help = help_id_text;
     else if (ac > 1 && !strcmp(av[1], "path"))
-        fprintf(stdout, "%s", help_path_text);
+        help = help_path_text;
+    else if (ac > 1 && !strcmp(av[1], "plug"))
+        help = help_plug_text;
     else if (ac > 1 && !strcmp(av[1], "permission"))
-        fprintf(stdout, "%s", help_permission_text);
+        help = help_permission_text;
     else if (ac > 1 && !strcmp(av[1], "install"))
-        fprintf(stdout, "%s", help_install_text);
+        help = help_install_text;
     else if (ac > 1 && !strcmp(av[1], "uninstall"))
-        fprintf(stdout, "%s", help_uninstall_text);
-    else {
-        fprintf(stdout, "%s", help__text);
-        return 1;
-    }
-    return 2;
+        help = help_uninstall_text;
+    else
+        rc = 1;
+    fprintf(stdout, "%s", help);
+    return rc;
 }
 
 static int do_any(int ac, char **av) {
@@ -434,6 +481,9 @@ static int do_any(int ac, char **av) {
 
     if (!strcmp(av[0], "path"))
         return do_path(ac, av);
+
+    if (!strcmp(av[0], "plug"))
+        return do_plug(ac, av);
 
     if (!strcmp(av[0], "permission"))
         return do_permission(ac, av);

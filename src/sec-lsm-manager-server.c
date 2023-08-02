@@ -254,6 +254,7 @@ __nonnull((1)) static void send_error(client_t *cli, const char *errorstr) {
  * @param[in] cli client handler
  */
 __nonnull() __wur static int send_display_secure_app(client_t *cli) {
+    plug_t *plugit;
     int rc = 0;
 
     if (cli->secure_app->error_flag) {
@@ -280,6 +281,13 @@ __nonnull() __wur static int send_display_secure_app(client_t *cli) {
 
     for (size_t i = 0; i < cli->secure_app->permission_set.size; i++) {
         rc = putx(cli, _string_, _permission_, cli->secure_app->permission_set.permissions[i], NULL);
+        if (rc < 0) {
+            ERROR("putx : %d %s", -rc, strerror(-rc));
+        }
+    }
+
+    for (plugit = cli->secure_app->plugset ; plugit != NULL ; plugit = plugit->next) {
+        rc = putx(cli, _string_, _plug_, plugit->expdir, plugit->impid, plugit->impdir, NULL);
         if (rc < 0) {
             ERROR("putx : %d %s", -rc, strerror(-rc));
         }
@@ -520,6 +528,24 @@ __nonnull((1)) static void onrequest(client_t *cli, unsigned count, const char *
                 } else {
                     ERROR("sec_lsm_manager_handle_add_permission : %d %s", -rc, strerror(-rc));
                     send_error(cli, "sec_lsm_manager_handle_add_permission");
+                }
+                return;
+            }
+            /* plug */
+            if (ckarg(args[0], _plug_, 1) && count == 4) {
+                rc = secure_app_add_plug(cli->secure_app, args[1], args[2], args[3]);
+                if (rc >= 0) {
+                    rc = putx(cli, _done_, NULL);
+                    if (rc < 0) {
+                        ERROR("putx : %d %s", -rc, strerror(-rc));
+                    }
+                    rc = flushw(cli);
+                    if (rc < 0) {
+                        ERROR("flushw : %d %s", -rc, strerror(-rc));
+                    }
+                } else {
+                    ERROR("sec_lsm_manager_handle_add_plug : %d %s", -rc, strerror(-rc));
+                    send_error(cli, "sec_lsm_manager_handle_add_plug");
                 }
                 return;
             }
