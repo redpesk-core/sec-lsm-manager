@@ -94,18 +94,6 @@ struct sec_lsm_manager_server {
     pollitem_t socket;
 };
 
-#ifdef WITH_SMACK
-# include "smack.h"
-# define install_mac install_smack
-# define uninstall_mac uninstall_smack
-#elif WITH_SELINUX
-# include "selinux.h"
-# define install_mac install_selinux
-# define uninstall_mac uninstall_selinux
-#else
-# error "unrecognized LSM backend"
-#endif
-
 /***********************/
 /*** PRIVATE METHODS ***/
 /***********************/
@@ -297,99 +285,6 @@ __nonnull() __wur static int send_display_secure_app(client_t *cli) {
 }
 
 /**
- * @brief Update the policy (drop the old and set the new)
- *
- * @param[in] sm_handle sec_lsm_manager_handle handler
- * @return 0 in case of success or a negative -errno value
- */
-__nonnull() __wur static int update_policy(secure_app_t *secure_app, cynagora_t *cynagora_admin_client) {
-    // drop old policies if any
-    int rc = cynagora_drop_policies(cynagora_admin_client, secure_app->label);
-    if (rc < 0) {
-        ERROR("cynagora_drop_policies %s : %d %s", secure_app->label, -rc, strerror(-rc));
-        return rc;
-    }
-
-    // apply new policies
-    rc = cynagora_set_policies(cynagora_admin_client, secure_app->label, &(secure_app->permission_set));
-    if (rc < 0) {
-        ERROR("cynagora_set_policies %s : %d %s", secure_app->label, -rc, strerror(-rc));
-        return rc;
-    }
-
-    return 0;
-}
-
-__nonnull() __wur static int install(client_t *cli) {
-    if (cli->secure_app->error_flag) {
-        ERROR("error flag has been raised, clear secure app");
-        return -EINVAL;
-    }
-
-    bool has_id = cli->secure_app->id[0] != '\0';
-    if (!has_id && cli->secure_app->need_id) {
-        ERROR("an application identifier is needed");
-        return -EINVAL;
-    }
-
-    if (has_id) {
-        int rc = update_policy(cli->secure_app, cli->sec_lsm_manager_server->cynagora_admin_client);
-        if (rc < 0) {
-            ERROR("update_policy : %d %s", -rc, strerror(-rc));
-            return rc;
-        }
-        DEBUG("update_policy success");
-    }
-
-    int rc = install_mac(cli->secure_app);
-    if (rc < 0) {
-        ERROR("install_mac : %d %s", -rc, strerror(-rc));
-	if (has_id) {
-            int rc2 = cynagora_drop_policies(cli->sec_lsm_manager_server->cynagora_admin_client, cli->secure_app->label);
-            if (rc2 < 0) {
-                ERROR("cannot delete policy : %d %s", -rc2, strerror(-rc2));
-            }
-            return rc;
-	}
-    }
-
-    DEBUG("install success");
-
-    return 0;
-}
-
-__nonnull() __wur static int uninstall(client_t *cli) {
-    if (cli->secure_app->error_flag) {
-        ERROR("error flag has been raised, clear secure app");
-        return -EINVAL;
-    }
-
-    bool has_id = cli->secure_app->id[0] != '\0';
-    if (!has_id && cli->secure_app->need_id) {
-        ERROR("an application identifier is needed");
-        return -EINVAL;
-    }
-
-    if (has_id) {
-        int rc = cynagora_drop_policies(cli->sec_lsm_manager_server->cynagora_admin_client, cli->secure_app->label);
-        if (rc < 0) {
-            ERROR("cynagora_drop_policies : %d %s", -rc, strerror(-rc));
-            return rc;
-        }
-    }
-
-    int rc = uninstall_mac(cli->secure_app);
-    if (rc < 0) {
-        ERROR("uninstall_mac : %d %s", -rc, strerror(-rc));
-        return rc;
-    }
-
-    DEBUG("uninstall success");
-
-    return 0;
-}
-
-/**
  * @brief handle a request
  *
  * @param[in] cli client handler
@@ -463,7 +358,7 @@ __nonnull((1)) static void onrequest(client_t *cli, unsigned count, const char *
             }
             /* install */
             if (ckarg(args[0], _install_, 1) && count == 1) {
-                rc = install(cli);
+                rc = secure_app_install(cli->secure_app, cli->sec_lsm_manager_server->cynagora_admin_client);
                 if (rc >= 0) {
                     send_done(cli);
                 } else {
@@ -553,7 +448,7 @@ __nonnull((1)) static void onrequest(client_t *cli, unsigned count, const char *
         case 'u':
             /* uninstall */
             if (ckarg(args[0], _uninstall_, 1) && count == 1) {
-                rc = uninstall(cli);
+                rc = secure_app_uninstall(cli->secure_app, cli->sec_lsm_manager_server->cynagora_admin_client);
                 if (rc >= 0) {
                     send_done(cli);
                 } else {

@@ -50,6 +50,8 @@ set(TEST_SOURCES
 
 if(NOT SIMULATE_CYNAGORA)
     set(TEST_SOURCES ${TEST_SOURCES} test-cynagora.c)
+else()
+    set(TEST_SOURCES ${TEST_SOURCES} ../simulation/cynagora/cynagora.c)
 endif()
 
 if(WITH_SMACK)

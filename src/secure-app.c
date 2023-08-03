@@ -31,6 +31,18 @@
 #include "log.h"
 #include "utils.h"
 
+#ifdef WITH_SMACK
+# include "smack.h"
+# define install_mac install_smack
+# define uninstall_mac uninstall_smack
+#elif WITH_SELINUX
+# include "selinux.h"
+# define install_mac install_selinux
+# define uninstall_mac uninstall_selinux
+#else
+# error "unrecognized LSM backend"
+#endif
+
 /***********************/
 /*** PRIVATE METHODS ***/
 /***********************/
@@ -214,4 +226,104 @@ int secure_app_add_plug(secure_app_t *secure_app, const char *expdir, const char
 /* see secure-app.h */
 void raise_error_flag(secure_app_t *secure_app) {
     secure_app->error_flag = true;
+}
+
+/**
+ * @brief Update the policy (drop the old and set the new)
+ *
+ * @param[in] sm_handle sec_lsm_manager_handle handler
+ * @return 0 in case of success or a negative -errno value
+ */
+__nonnull() __wur static
+int update_policy(secure_app_t *secure_app, cynagora_t *cynagora) {
+    // drop old policies if any
+    int rc = cynagora_drop_policies(cynagora, secure_app->label);
+    if (rc < 0) {
+        ERROR("cynagora_drop_policies %s : %d %s", secure_app->label, -rc, strerror(-rc));
+        return rc;
+    }
+
+    // apply new policies
+    rc = cynagora_set_policies(cynagora, secure_app->label, &(secure_app->permission_set));
+    if (rc < 0) {
+        ERROR("cynagora_set_policies %s : %d %s", secure_app->label, -rc, strerror(-rc));
+        return rc;
+    }
+
+    return 0;
+}
+
+/* see secure-app.h */
+__nonnull() __wur
+int secure_app_install(secure_app_t *secure_app, cynagora_t *cynagora)
+{
+    if (secure_app->error_flag) {
+        ERROR("error flag has been raised, clear secure app");
+        return -EINVAL;
+    }
+
+    bool has_id = secure_app->id[0] != '\0';
+    if (!has_id && secure_app->need_id) {
+        ERROR("an application identifier is needed");
+        return -EINVAL;
+    }
+
+    if (has_id) {
+        int rc = update_policy(secure_app, cynagora);
+        if (rc < 0) {
+            ERROR("update_policy : %d %s", -rc, strerror(-rc));
+            return rc;
+        }
+        DEBUG("update_policy success");
+    }
+
+    int rc = install_mac(secure_app);
+    if (rc < 0) {
+        ERROR("install_mac : %d %s", -rc, strerror(-rc));
+	if (has_id) {
+            int rc2 = cynagora_drop_policies(cynagora, secure_app->label);
+            if (rc2 < 0) {
+                ERROR("cannot delete policy : %d %s", -rc2, strerror(-rc2));
+            }
+            return rc;
+	}
+    }
+
+    DEBUG("install success");
+
+    return 0;
+}
+
+/* see secure-app.h */
+__nonnull() __wur
+int secure_app_uninstall(secure_app_t *secure_app, cynagora_t *cynagora)
+{
+    if (secure_app->error_flag) {
+        ERROR("error flag has been raised, clear secure app");
+        return -EINVAL;
+    }
+
+    bool has_id = secure_app->id[0] != '\0';
+    if (!has_id && secure_app->need_id) {
+        ERROR("an application identifier is needed");
+        return -EINVAL;
+    }
+
+    if (has_id) {
+        int rc = cynagora_drop_policies(cynagora, secure_app->label);
+        if (rc < 0) {
+            ERROR("cynagora_drop_policies : %d %s", -rc, strerror(-rc));
+            return rc;
+        }
+    }
+
+    int rc = uninstall_mac(secure_app);
+    if (rc < 0) {
+        ERROR("uninstall_mac : %d %s", -rc, strerror(-rc));
+        return rc;
+    }
+
+    DEBUG("uninstall success");
+
+    return 0;
 }

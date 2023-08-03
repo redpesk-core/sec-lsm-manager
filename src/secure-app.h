@@ -116,4 +116,26 @@ extern int secure_app_add_plug(secure_app_t *secure_app, const char *expdir, con
  */
 extern void raise_error_flag(secure_app_t *secure_app) __nonnull();
 
+/**
+ * @brief Install the application
+ *
+ * @param[in] secure_app the application to be installed
+ * @param[in] cynagora handler to cynagora access
+ * @return 0 in case of success or a negative -errno value
+ */
+__nonnull() __wur
+extern int secure_app_install(secure_app_t *secure_app, cynagora_t *cynagora);
+
+
+/**
+ * @brief Uninstall the application
+ *
+ * @param[in] secure_app the application to be uninstalled
+ * @param[in] cynagora handler to cynagora access
+ * @return 0 in case of success or a negative -errno value
+ */
+__nonnull() __wur
+extern int secure_app_uninstall(secure_app_t *secure_app, cynagora_t *cynagora);
+
+
 #endif

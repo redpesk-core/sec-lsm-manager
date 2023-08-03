@@ -22,6 +22,7 @@
  */
 
 #include "../secure-app.c"
+#include "../cynagora-interface.c"
 #include "setup-tests.h"
 
 START_TEST(test_init_secure_app) {
