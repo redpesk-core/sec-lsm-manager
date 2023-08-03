@@ -53,21 +53,6 @@ char *secure_strncpy(char *dest, const char *src, size_t n) {
 }
 
 /* see utils.h */
-bool valid_label(const char *s) {
-    if (!s)
-        return false;
-
-    for (size_t i = 0; i < strlen(s); i++) {
-        if (!isalnum(s[i]) && s[i] != '-' && s[i] != '_') {
-            ERROR("invalid label : need to only contain alphanumeric or '-' or '_'");
-            return false;
-        }
-    }
-
-    return true;
-}
-
-/* see utils.h */
 int set_label(const char *path, const char *xattr, const char *value) {
     int rc = lsetxattr(path, xattr, value, strlen(value), 0);
     if (rc < 0) {

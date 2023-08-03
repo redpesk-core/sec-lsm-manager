@@ -66,20 +66,6 @@ __nonnull() static void init_secure_app(secure_app_t *secure_app) {
 }
 
 /**
- * @brief Turns dash into underscore
- *
- * @param[in] s String to parse
- */
-__nonnull() static void dash_to_underscore(char *s) {
-    while (*s) {
-        if (*s == '-') {
-            *s = '_';
-        }
-        s++;
-    }
-}
-
-/**
  * @brief Set and validate the ids from the source
  *
  * @param[in] src the source id

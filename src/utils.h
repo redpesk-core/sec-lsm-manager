@@ -33,13 +33,6 @@
 extern char *secure_strncpy(char *dest, const char *src, size_t n) __nonnull((1, 2));
 
 /**
- * @brief Check if string is valid label
- *
- * @param[in] s String to check
- */
-extern bool valid_label(const char *s) __wur __nonnull();
-
-/**
  * @brief Set label attr on file
  *
  * @param[in] path the path of the file
