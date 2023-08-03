@@ -28,6 +28,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <stdio.h>
 
 #include "log.h"
 #include "smack-template.h"
@@ -287,4 +288,12 @@ int uninstall_smack(const secure_app_t *secure_app) {
     }
 
     return 0;
+}
+
+/* see smack.h */
+__nonnull()
+void app_label_smack(char label[SEC_LSM_MANAGER_MAX_SIZE_LABEL + 1], const char *appid, const char *app_id)
+{
+    (void)app_id;
+    snprintf(label, SEC_LSM_MANAGER_MAX_SIZE_LABEL + 1, "App:%s", appid);
 }

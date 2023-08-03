@@ -35,10 +35,12 @@
 # include "smack.h"
 # define install_mac install_smack
 # define uninstall_mac uninstall_smack
+# define app_label_mac app_label_smack
 #elif WITH_SELINUX
 # include "selinux.h"
 # define install_mac install_selinux
 # define uninstall_mac uninstall_selinux
+# define app_label_mac app_label_selinux
 #else
 # error "unrecognized LSM backend"
 #endif
@@ -139,11 +141,7 @@ int secure_app_set_id(secure_app_t *secure_app, const char *id) {
     secure_strncpy(secure_app->id_underscore, id, SEC_LSM_MANAGER_MAX_SIZE_ID);
     dash_to_underscore(secure_app->id_underscore);
 
-#if defined(WITH_SMACK)
-    snprintf(secure_app->label, SEC_LSM_MANAGER_MAX_SIZE_LABEL, "App:%s", secure_app->id);
-#elif defined(WITH_SELINUX)
-    snprintf(secure_app->label, SEC_LSM_MANAGER_MAX_SIZE_LABEL, "system_u:system_r:%s_t:s0", secure_app->id_underscore);
-#endif
+    app_label_mac(secure_app->label, secure_app->id, secure_app->id_underscore);
 
     return 0;
 }

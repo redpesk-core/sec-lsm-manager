@@ -41,4 +41,15 @@ extern int install_smack(const secure_app_t *secure_app) __wur __nonnull();
  * @return 0 in case of success or a negative -errno value
  */
 extern int uninstall_smack(const secure_app_t *secure_app) __wur __nonnull();
+
+/**
+ * @brief get the security label of the application
+ *
+ * @param[inout] label array receicing the label
+ * @param[in] appid the application identifier
+ * @param[in] app_id the application identifier with underscores
+ */
+__nonnull()
+extern void app_label_smack(char label[SEC_LSM_MANAGER_MAX_SIZE_LABEL + 1], const char *appid, const char *app_id);
+
 #endif

@@ -28,6 +28,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/xattr.h>
+#include <stdio.h>
 
 #include "log.h"
 #include "selinux-template.h"
@@ -183,4 +184,12 @@ int uninstall_selinux(const secure_app_t *secure_app) {
     DEBUG("success check module removed");
 
     return 0;
+}
+
+/* see selinux.h */
+__nonnull()
+void app_label_selinux(char label[SEC_LSM_MANAGER_MAX_SIZE_LABEL + 1], const char *appid, const char *app_id)
+{
+    (void)appid;
+    snprintf(label, SEC_LSM_MANAGER_MAX_SIZE_LABEL + 1, "system_u:system_r:%s_t:s0", app_id);
 }
