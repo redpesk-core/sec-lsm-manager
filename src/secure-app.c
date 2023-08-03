@@ -79,6 +79,53 @@ __nonnull() static void dash_to_underscore(char *s) {
     }
 }
 
+/**
+ * @brief Set and validate the ids from the source
+ *
+ * @param[in] src the source id
+ * @param[out] id output of the id
+ * @param[out] id_underscore output of the id with underscores for dashes
+ * @param[out] label output of the LSM id for the application
+ * @return 0 in case of success or a negative value when an error occurs
+ */
+__nonnull()
+static int setids(
+    const char *src,
+    char id[SEC_LSM_MANAGER_MAX_SIZE_ID + 1],
+    char id_underscore[SEC_LSM_MANAGER_MAX_SIZE_ID + 1],
+    char label[SEC_LSM_MANAGER_MAX_SIZE_LABEL + 1]
+) {
+    char car;
+    int idx;
+
+    /* copy the id */
+    for (idx = 0 ; (car = src[idx]) != '\0' ; idx++) {
+        /* validate length isn't too big */
+        if (idx >= SEC_LSM_MANAGER_MAX_SIZE_ID) {
+            ERROR("invalid id size, bigger than %d for %s", SEC_LSM_MANAGER_MAX_SIZE_ID, src);
+            return -ENAMETOOLONG;
+        }
+        /* validate character is valid */
+        if (!isalnum(car) && car != '-' && car != '_') {
+            ERROR("invalid id, only alphanumeric, '-', '_', but %s", src);
+            return -EINVAL;
+        }
+        /* set the copied character */
+        id[idx] = car;
+        id_underscore[idx] = car == '-' ? '_' : car;
+    }
+    /* validate length isn't too small */
+    if (idx < SEC_LSM_MANAGER_MIN_SIZE_ID) {
+        ERROR("invalid id size, at least %d characters are needed, but %s", SEC_LSM_MANAGER_MIN_SIZE_ID, src);
+        return -EINVAL;
+    }
+    /* end mark */
+    id[idx] = id_underscore[idx] = 0;
+    app_label_mac(label, id, id_underscore);
+    return 0;
+}
+
+
 /**********************/
 /*** PUBLIC METHODS ***/
 /**********************/
@@ -98,7 +145,7 @@ int create_secure_app(secure_app_t **secure_app) {
 /* see secure-app.h */
 void clear_secure_app(secure_app_t *secure_app) {
     if (secure_app) {
-	secure_app->label[0] = secure_app->id_underscore[0] = secure_app->id[0] = '\0';
+        secure_app->label[0] = secure_app->id_underscore[0] = secure_app->id[0] = '\0';
         free_permission_set(&(secure_app->permission_set));
         plugset_deinit(&(secure_app->plugset));
         free_path_set(&(secure_app->path_set));
@@ -115,35 +162,25 @@ void destroy_secure_app(secure_app_t *secure_app) {
 
 /* see secure-app.h */
 int secure_app_set_id(secure_app_t *secure_app, const char *id) {
-    if (secure_app->id[0] != '\0') {
-        ERROR("id already set");
-        return -EINVAL;
-    }
-
-    size_t len_id = strlen(id);
-
-    if (len_id < 2 || len_id >= SEC_LSM_MANAGER_MAX_SIZE_ID) {
-        ERROR("invalid id size : %ld", len_id);
-        return -EINVAL;
-    }
-
-    if (!valid_label(id)) {
-        ERROR("invalid id : %s", id);
-        return -EINVAL;
-    }
+    int rc;
 
     if (secure_app->error_flag) {
         ERROR("error flag has been raised");
-        return -EPERM;
+        rc = -ENOTRECOVERABLE;
     }
 
-    secure_strncpy(secure_app->id, id, SEC_LSM_MANAGER_MAX_SIZE_ID);
-    secure_strncpy(secure_app->id_underscore, id, SEC_LSM_MANAGER_MAX_SIZE_ID);
-    dash_to_underscore(secure_app->id_underscore);
+    else if (secure_app->id[0] != '\0') {
+        ERROR("id already set");
+        rc = -EBUSY;
+    }
 
-    app_label_mac(secure_app->label, secure_app->id, secure_app->id_underscore);
+    else {
+        rc = setids(id, secure_app->id, secure_app->id_underscore, secure_app->label);
+        if (rc < 0)
+            secure_app->id[0] = secure_app->id_underscore[0] = secure_app->label[0] = '\0';
+    }
 
-    return 0;
+    return rc;
 }
 
 /* see secure-app.h */
@@ -278,13 +315,13 @@ int secure_app_install(secure_app_t *secure_app, cynagora_t *cynagora)
     int rc = install_mac(secure_app);
     if (rc < 0) {
         ERROR("install_mac : %d %s", -rc, strerror(-rc));
-	if (has_id) {
+        if (has_id) {
             int rc2 = cynagora_drop_policies(cynagora, secure_app->label);
             if (rc2 < 0) {
                 ERROR("cannot delete policy : %d %s", -rc2, strerror(-rc2));
             }
             return rc;
-	}
+        }
     }
 
     DEBUG("install success");
