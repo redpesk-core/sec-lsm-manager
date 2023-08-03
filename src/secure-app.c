@@ -278,6 +278,7 @@ int update_policy(secure_app_t *secure_app, cynagora_t *cynagora) {
 __nonnull() __wur
 int secure_app_install(secure_app_t *secure_app, cynagora_t *cynagora)
 {
+    int rc;
     if (secure_app->error_flag) {
         ERROR("error flag has been raised, clear secure app");
         return -EINVAL;
@@ -289,8 +290,12 @@ int secure_app_install(secure_app_t *secure_app, cynagora_t *cynagora)
         return -EINVAL;
     }
 
+    rc = secure_app_check(secure_app, cynagora);
+    if (rc < 0)
+        return rc;
+
     if (has_id) {
-        int rc = update_policy(secure_app, cynagora);
+        rc = update_policy(secure_app, cynagora);
         if (rc < 0) {
             ERROR("update_policy : %d %s", -rc, strerror(-rc));
             return rc;
@@ -298,7 +303,7 @@ int secure_app_install(secure_app_t *secure_app, cynagora_t *cynagora)
         DEBUG("update_policy success");
     }
 
-    int rc = install_mac(secure_app);
+    rc = install_mac(secure_app);
     if (rc < 0) {
         ERROR("install_mac : %d %s", -rc, strerror(-rc));
         if (has_id) {
@@ -306,8 +311,8 @@ int secure_app_install(secure_app_t *secure_app, cynagora_t *cynagora)
             if (rc2 < 0) {
                 ERROR("cannot delete policy : %d %s", -rc2, strerror(-rc2));
             }
-            return rc;
         }
+        return rc;
     }
 
     DEBUG("install success");
@@ -347,4 +352,78 @@ int secure_app_uninstall(secure_app_t *secure_app, cynagora_t *cynagora)
     DEBUG("uninstall success");
 
     return 0;
+}
+
+/**
+ * @brief Check if application plugs can be installed
+ *
+ * @param[in] secure_app the application to be checked
+ * @param[in] cynagora handler to cynagora access
+ * @return 0 in case of success or a negative -errno value
+ */
+__nonnull() __wur
+static int check_plugs(secure_app_t *secure_app, cynagora_t *cynagora)
+{
+    static const char perm_public_plug[] = "urn:redpesk:permission::public:plugs";
+    static const char perm_export_template[] = "urn:redpesk:permission::%s:export:plug:%s";
+    static const char scope_public[] = "public";
+    static const char scope_partner[] = "partner";
+
+    char permission[SEC_LSM_MANAGER_MAX_SIZE_ID + sizeof perm_export_template + sizeof scope_partner];
+    char id[SEC_LSM_MANAGER_MAX_SIZE_ID + 1];
+    char _id_[SEC_LSM_MANAGER_MAX_SIZE_ID + 1];
+    char label[SEC_LSM_MANAGER_MAX_SIZE_LABEL + 1];
+    cynagora_key_t cynkey;
+    plug_t *plugit;
+    const char *scope;
+    char **parray;
+    size_t idxp, nrp;
+    int sts;
+    int rc = 0;
+
+    /* iterate over the plug requests */
+    for(plugit = secure_app->plugset ; plugit != NULL ; plugit = plugit->next) {
+
+        /* compute the label of the application importing the plug */
+        sts = setids(plugit->impid, id, _id_, label);
+        if (sts == 0) {
+            /* check if importing application (its label) has urn:redpesk:permission::public:plug */
+            cynkey.client = label;
+            cynkey.session = "*";
+            cynkey.user = "*";
+            cynkey.permission = perm_public_plug;
+            sts = cynagora_check(cynagora, &cynkey, 0);
+            if (sts < 0) {
+                ERROR("can't query cynagora");
+            }
+            else {
+                /* compute the scope of the required permision */
+                scope = sts ? scope_public : scope_partner;
+                /* compute the required permision */
+                snprintf(permission, sizeof permission, perm_export_template, scope, id);
+                /* check if the permision is granted for the app */
+                parray = secure_app->permission_set.permissions;
+                nrp = secure_app->permission_set.size;
+                idxp = 0;
+                while (idxp < nrp && strcmp(permission, parray[idxp]) != 0)
+                    idxp++;
+                if (idxp < nrp)
+                    sts = 0;
+                else {
+                    ERROR("no permission to install plugs for %s", id);
+                    sts = -EPERM;
+                }
+            }
+        }
+        if (sts < 0 && rc == 0)
+            rc = sts;
+    }
+    return rc;
+}
+
+/* see secure-app.h */
+__nonnull() __wur
+int secure_app_check(secure_app_t *secure_app, cynagora_t *cynagora)
+{
+    return check_plugs(secure_app, cynagora);
 }
