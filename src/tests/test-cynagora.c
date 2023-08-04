@@ -53,7 +53,7 @@ START_TEST(test_cynagora_set_policies) {
     ck_assert_int_eq(permission_set_add_permission(&permission_set, "perm1"), 0);
     ck_assert_int_eq(permission_set_add_permission(&permission_set, "perm2"), 0);
 
-    ck_assert_int_eq(cynagora_set_policies(cynagora_admin_client, id, &permission_set), 0);
+    ck_assert_int_eq(cynagora_set_policies(cynagora_admin_client, id, &permission_set, 0), 0);
 
     int found = 0;
     permission_set_t permission_set2;
@@ -89,7 +89,7 @@ START_TEST(test_cynagora_drop_policies) {
     ck_assert_int_eq(permission_set_add_permission(&permission_set, "perm1"), 0);
     ck_assert_int_eq(permission_set_add_permission(&permission_set, "perm2"), 0);
 
-    ck_assert_int_eq(cynagora_set_policies(cynagora_admin_client, id, &permission_set), 0);
+    ck_assert_int_eq(cynagora_set_policies(cynagora_admin_client, id, &permission_set, 0), 0);
 
     ck_assert_int_eq(cynagora_drop_policies(cynagora_admin_client, id), 0);
 

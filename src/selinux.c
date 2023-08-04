@@ -87,7 +87,7 @@ __nonnull() __wur static int selinux_process_paths(const secure_app_t *secure_ap
 /**********************/
 
 /* see selinux-label.h */
-bool selinux_enabled() {
+bool selinux_enabled(void) {
     if (is_selinux_enabled() == 1) {
         return true;
     }

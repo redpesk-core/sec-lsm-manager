@@ -29,6 +29,7 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <stdio.h>
+#include <unistd.h>
 
 #include "log.h"
 #include "smack-template.h"

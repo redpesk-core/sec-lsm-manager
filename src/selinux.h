@@ -32,7 +32,7 @@
  * @return true if enabled
  * @return false if not
  */
-extern bool selinux_enabled() __wur;
+extern bool selinux_enabled(void) __wur;
 
 /**
  * @brief Install a secure app for selinux
