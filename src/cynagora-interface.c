@@ -45,70 +45,64 @@
 /**********************/
 
 /* see cynagora-interface.h */
-int cynagora_set_policies(cynagora_t *cynagora, const char *label, const permission_set_t *permission_set) {
-    // enter to modify policies cynagora
-    int rc = cynagora_enter(cynagora);
+__wur __nonnull((1,2))
+int cynagora_set_policies(cynagora_t *cynagora, const char *label, const permission_set_t *permission_set, int drop_before) {
+    size_t i;
+    int rc2, rc;
+    cynagora_key_t key;
+    cynagora_value_t val;
+
+    /* enter to modify policies cynagora */
+    rc = cynagora_enter(cynagora);
     if (rc < 0) {
         ERROR("cynagora_enter : %d %s", -rc, strerror(-rc));
         return rc;
     }
 
-    size_t i = 0;
-    cynagora_key_t k = {
-        .client = label,
-        .session = CYNAGORA_INSERT_ALL,
-        .user = CYNAGORA_INSERT_ALL,
-        .permission = NULL};
-    cynagora_value_t v = {
-        .value = CYNAGORA_AUTHORIZED,
-        .expire = 0 /* infinite */};
+    /* init client */
+    key.client = label;
 
-    while (i < permission_set->size) {
-        k.permission = permission_set->permissions[i];
-        rc = cynagora_set(cynagora, &k, &v);
-        if (rc < 0) {
-            ERROR("cynagora_set : %d %s", -rc, strerror(-rc));
-            break;
-        }
-        i++;
+    /* drop previous rules for the application of label */
+    if (drop_before) {
+        key.session = CYNAGORA_SELECT_ALL;
+        key.user = CYNAGORA_SELECT_ALL;
+        key.permission = CYNAGORA_SELECT_ALL;
+        rc = cynagora_drop(cynagora, &key);
+        if (rc < 0)
+            ERROR("cynagora_drop : %d %s", -rc, strerror(-rc));
     }
 
-    // leave and apply modification
-    int rc2 = cynagora_leave(cynagora, rc == 0);
-    if (rc2 < 0)
-        ERROR("cynagora_leave : %d %s", -rc, strerror(-rc));
-    if (rc == 0)
-        rc = rc2;
+    /* add permissions */
+    if (permission_set != NULL) {
+	/* init key and val */
+        key.session = CYNAGORA_INSERT_ALL;
+        key.user = CYNAGORA_INSERT_ALL;
+        val.value = CYNAGORA_AUTHORIZED;
+        val.expire = 0; /* infinite */
+
+        for (i = 0 ; rc >= 0 && i < permission_set->size ; i++) {
+            key.permission = permission_set->permissions[i];
+            rc = cynagora_set(cynagora, &key, &val);
+            if (rc < 0) {
+                ERROR("cynagora_set : %d %s", -rc, strerror(-rc));
+            }
+        }
+    }
+
+    /* leave and apply modification */
+    rc2 = cynagora_leave(cynagora, rc == 0);
+    if (rc2 < 0) {
+        ERROR("cynagora_leave : %d %s", -rc2, strerror(-rc2));
+        if (rc == 0)
+            rc = rc2;
+    }
 
     return rc;
 }
 
 /* see cynagora-interface.h */
 int cynagora_drop_policies(cynagora_t *cynagora, const char *label) {
-    // enter to modify policies cynagora
-    int rc = cynagora_enter(cynagora);
-    if (rc < 0) {
-        ERROR("cynagora_enter : %d %s", -rc, strerror(-rc));
-        return rc;
-    }
-
-    cynagora_key_t key = {
-        .client = label,
-        .session = CYNAGORA_SELECT_ALL,
-        .user = CYNAGORA_SELECT_ALL,
-        .permission = CYNAGORA_SELECT_ALL};
-    rc = cynagora_drop(cynagora, &key);
-    if (rc < 0)
-        ERROR("cynagora_drop : %d %s", -rc, strerror(-rc));
-
-    // leave and apply modification
-    int rc2 = cynagora_leave(cynagora, rc == 0);
-    if (rc2 < 0)
-        ERROR("cynagora_leave : %d %s", -rc2, strerror(-rc2));
-    if (rc == 0)
-        rc = rc2;
-
-    return rc;
+    return cynagora_set_policies(cynagora, label, NULL, 1);
 }
 
 /* see cynagora-interface.h */

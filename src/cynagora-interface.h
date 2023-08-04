@@ -37,11 +37,12 @@
  *
  * @param[in] cynagora cynagora admin client
  * @param[in] label label of the application
- * @param[in] permission_set array of permission_set_t
+ * @param[in] permission_set array of permission_set_t (can be NULL)
+ * @param[in] drop_before if not zero, a drop is done before
  * @return 0 in case of success or a negative -errno value
  */
-extern int cynagora_set_policies(cynagora_t *cynagora, const char *label, const permission_set_t *permission_set)
-    __wur __nonnull();
+__wur __nonnull((1,2))
+extern int cynagora_set_policies(cynagora_t *cynagora, const char *label, const permission_set_t *permission_set, int drop_before);
 
 /**
  * @brief Drop old policies of cynagora for a label (client)

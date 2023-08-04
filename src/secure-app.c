@@ -249,31 +249,6 @@ void raise_error_flag(secure_app_t *secure_app) {
     secure_app->error_flag = true;
 }
 
-/**
- * @brief Update the policy (drop the old and set the new)
- *
- * @param[in] sm_handle sec_lsm_manager_handle handler
- * @return 0 in case of success or a negative -errno value
- */
-__nonnull() __wur static
-int update_policy(secure_app_t *secure_app, cynagora_t *cynagora) {
-    // drop old policies if any
-    int rc = cynagora_drop_policies(cynagora, secure_app->label);
-    if (rc < 0) {
-        ERROR("cynagora_drop_policies %s : %d %s", secure_app->label, -rc, strerror(-rc));
-        return rc;
-    }
-
-    // apply new policies
-    rc = cynagora_set_policies(cynagora, secure_app->label, &(secure_app->permission_set));
-    if (rc < 0) {
-        ERROR("cynagora_set_policies %s : %d %s", secure_app->label, -rc, strerror(-rc));
-        return rc;
-    }
-
-    return 0;
-}
-
 /* see secure-app.h */
 __nonnull() __wur
 int secure_app_install(secure_app_t *secure_app, cynagora_t *cynagora)
@@ -295,12 +270,12 @@ int secure_app_install(secure_app_t *secure_app, cynagora_t *cynagora)
         return rc;
 
     if (has_id) {
-        rc = update_policy(secure_app, cynagora);
+        rc = cynagora_set_policies(cynagora, secure_app->label, &(secure_app->permission_set), 1);
         if (rc < 0) {
-            ERROR("update_policy : %d %s", -rc, strerror(-rc));
+            ERROR("cynagora_set_policies : %d %s", -rc, strerror(-rc));
             return rc;
         }
-        DEBUG("update_policy success");
+        DEBUG("cynagora_set_policies success");
     }
 
     rc = install_mac(secure_app);
