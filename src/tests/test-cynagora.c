@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-#include "../cynagora-interface.c"
+#include "../cynagora-interface.h"
 #include "setup-tests.h"
 
 static void list(void *closure, const cynagora_key_t *key, const cynagora_value_t *value) {

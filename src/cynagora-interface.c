@@ -23,18 +23,6 @@
 
 #include "cynagora-interface.h"
 
-#if !defined(CYNAGORA_SELECT_ALL)
-#define CYNAGORA_SELECT_ALL "#"
-#endif
-
-#if !defined(CYNAGORA_INSERT_ALL)
-#define CYNAGORA_INSERT_ALL "*"
-#endif
-
-#if !defined(CYNAGORA_AUTHORIZED)
-#define CYNAGORA_AUTHORIZED "yes"
-#endif
-
 #include <errno.h>
 #include <string.h>
 
