@@ -44,19 +44,19 @@ int srun(const char *log_file) {
     return nerr;
 }
 
-void create_tmp_dir(char *tmp_dir) {
+void create_tmp_dir(char tmp_dir[TMP_MIN_LENGTH]) {
     secure_strncpy(tmp_dir, "/tmp/sec-lsm-XXXXXX", 20);
     ck_assert_ptr_ne(mkdtemp(tmp_dir), NULL);
 }
 
-void create_tmp_file(char *tmp_file) {
+void create_tmp_file(char tmp_file[TMP_MIN_LENGTH]) {
     secure_strncpy(tmp_file, "/tmp/sec-lsm-XXXXXX", 20);
     int fd = mkstemp(tmp_file);
     ck_assert_int_gt(fd, 0);
     close(fd);
 }
 
-void create_etc_tmp_file(char *tmp_file) {
+void create_etc_tmp_file(char tmp_file[TMP_MIN_LENGTH]) {
     secure_strncpy(tmp_file, "/etc/sec-lsm-XXXXXX", 20);
     int fd = mkstemp(tmp_file);
     ck_assert_int_gt(fd, 0);

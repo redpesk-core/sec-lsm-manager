@@ -474,17 +474,31 @@ end:
 
 /* see selinux-template.h */
 const char *get_selinux_te_template_file(const char *value) {
-    return value ?: secure_getenv("SELINUX_TE_TEMPLATE_FILE") ?: default_selinux_te_template_file;
+    if (value == NULL) {
+        value = secure_getenv("SELINUX_TE_TEMPLATE_FILE");
+        if (value == NULL)
+            value = default_selinux_te_template_file;
+    }
+    return value;
 }
 
 /* see selinux-template.h */
 const char *get_selinux_if_template_file(const char *value) {
-    return value ?: secure_getenv("SELINUX_IF_TEMPLATE_FILE") ?: default_selinux_if_template_file;
+    if (value == NULL) {
+        value = secure_getenv("SELINUX_IF_TEMPLATE_FILE");
+        if (value == NULL)
+            value = default_selinux_if_template_file;
+    }
+    return value;
 }
 
 /* see selinux-template.h */
 const char *get_selinux_rules_dir(const char *value) {
-    value = value ?: secure_getenv("SELINUX_RULES_DIR") ?: default_selinux_rules_dir;
+    if (value == NULL) {
+        value = secure_getenv("SELINUX_RULES_DIR");
+        if (value == NULL)
+            value = default_selinux_rules_dir;
+    }
     if (strlen(value) >= SEC_LSM_MANAGER_MAX_SIZE_DIR) {
         value = NULL;
         ERROR("selinux_rules_dir too long");

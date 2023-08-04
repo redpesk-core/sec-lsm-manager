@@ -17,11 +17,12 @@ void addtest(const TTest *fun);
 
 int srun(const char *log_file);
 
-void create_tmp_dir(char *tmp_dir);
+#define TMP_MIN_LENGTH 20
+void create_tmp_dir(char tmp_dir[TMP_MIN_LENGTH]);
 
-void create_tmp_file(char *tmp_file);
+void create_tmp_file(char tmp_file[TMP_MIN_LENGTH]);
 
-void create_etc_tmp_file(char *tmp_file);
+void create_etc_tmp_file(char tmp_file[TMP_MIN_LENGTH]);
 
 bool compare_xattr(const char *path, const char *xattr, const char *value);
 extern void test_paths(void);

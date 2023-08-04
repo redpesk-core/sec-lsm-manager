@@ -49,7 +49,7 @@ START_TEST(test_selinux_process_paths) {
 END_TEST
 
 START_TEST(test_selinux_install) {
-    char tmp_dir[SEC_LSM_MANAGER_MAX_SIZE_DIR] = {'\0'};
+    char tmp_dir[TMP_MIN_LENGTH + 10] = {'\0'};
     create_tmp_dir(tmp_dir);
 
     char data_dir[SEC_LSM_MANAGER_MAX_SIZE_DIR];
