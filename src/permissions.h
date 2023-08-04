@@ -57,4 +57,14 @@ extern void free_permission_set(permission_set_t *permission_set) __nonnull();
  */
 extern int permission_set_add_permission(permission_set_t *permission_set, const char *permission) __wur __nonnull();
 
+/**
+ * @brief check if the permission set has the permission
+ *
+ * @param[in] secure_app the application to be uninstalled
+ * @param[in] permission the permission to check
+ * @return 1 when permission is granted or, otherwise, 0
+ */
+__nonnull() __wur
+extern int permission_set_has_permission(const permission_set_t *permission_set, const char *permission);
+
 #endif

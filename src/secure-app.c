@@ -354,6 +354,13 @@ int secure_app_uninstall(secure_app_t *secure_app, cynagora_t *cynagora)
     return 0;
 }
 
+/* see secure-app.h */
+__nonnull() __wur
+int secure_app_has_permission(const secure_app_t *secure_app, const char *permission)
+{
+    return permission_set_has_permission(&secure_app->permission_set, permission);
+}
+
 /**
  * @brief Check if application plugs can be installed
  *
@@ -376,8 +383,6 @@ static int check_plugs(secure_app_t *secure_app, cynagora_t *cynagora)
     cynagora_key_t cynkey;
     plug_t *plugit;
     const char *scope;
-    char **parray;
-    size_t idxp, nrp;
     int sts;
     int rc = 0;
 
@@ -402,14 +407,8 @@ static int check_plugs(secure_app_t *secure_app, cynagora_t *cynagora)
                 /* compute the required permision */
                 snprintf(permission, sizeof permission, perm_export_template, scope, id);
                 /* check if the permision is granted for the app */
-                parray = secure_app->permission_set.permissions;
-                nrp = secure_app->permission_set.size;
-                idxp = 0;
-                while (idxp < nrp && strcmp(permission, parray[idxp]) != 0)
-                    idxp++;
-                if (idxp < nrp)
-                    sts = 0;
-                else {
+                sts = secure_app_has_permission(secure_app, permission);
+                if (!sts) {
                     ERROR("no permission to install plugs for %s", id);
                     sts = -EPERM;
                 }

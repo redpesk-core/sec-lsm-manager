@@ -24,6 +24,12 @@
 #include "log.h"
 #include "utils.h"
 
+#if PERMISSIONS_DISTINCT_CASE
+# define compare_permission strcmp
+#else
+# define compare_permission strcasecmp
+#endif
+
 /**********************/
 /*** PUBLIC METHODS ***/
 /**********************/
@@ -43,6 +49,22 @@ void free_permission_set(permission_set_t *permission_set) {
         permission_set->permissions = NULL;
     }
 }
+
+/* see permissions.h */
+__nonnull() __wur
+int permission_set_has_permission(const permission_set_t *permission_set, const char *permission)
+{
+    char **parray = permission_set->permissions;
+    size_t nrp = permission_set->size;
+    size_t idxp = 0;
+    while (idxp < nrp)
+        if (compare_permission(permission, parray[idxp]) == 0)
+            return 1;
+        else
+            idxp++;
+    return 0;
+}
+
 
 /* see permissions.h */
 int permission_set_add_permission(permission_set_t *permission_set, const char *permission) {

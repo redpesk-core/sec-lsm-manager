@@ -126,6 +126,15 @@ extern void raise_error_flag(secure_app_t *secure_app) __nonnull();
 __nonnull() __wur
 extern int secure_app_install(secure_app_t *secure_app, cynagora_t *cynagora);
 
+/**
+ * @brief check if the application has the permission
+ *
+ * @param[in] secure_app the application to be uninstalled
+ * @param[in] permission the permission to check
+ * @return 1 when permission is granted or, otherwise, 0
+ */
+__nonnull() __wur
+extern int secure_app_has_permission(const secure_app_t *secure_app, const char *permission);
 
 /**
  * @brief Uninstall the application
