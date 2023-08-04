@@ -32,7 +32,7 @@
  */
 extern void log_function(const char *msg, ...) __attribute__((format(printf, 1, 2)));
 
-#define LOG(...) log_function(__VA_ARGS__);
+#define LOG(...) log_function(__VA_ARGS__)
 
 /**
  * @brief Print a message and arguments when debugging mode
@@ -42,7 +42,7 @@ extern void log_function(const char *msg, ...) __attribute__((format(printf, 1, 
  */
 extern void debug_function(const char *msg, ...) __attribute__((format(printf, 1, 2)));
 
-#define DEBUG(...) debug_function(__VA_ARGS__);
+#define DEBUG(...) debug_function(__VA_ARGS__)
 
 /**
  * @brief Display an error with details
@@ -54,6 +54,6 @@ extern void debug_function(const char *msg, ...) __attribute__((format(printf, 1
  */
 extern void error_function(const char *file, const int line, const char *msg, ...) __attribute__((format(printf, 3, 4)));
 
-#define ERROR(...) error_function(__FILE__, __LINE__, __VA_ARGS__);
+#define ERROR(...) error_function(__FILE__, __LINE__, __VA_ARGS__)
 
 #endif

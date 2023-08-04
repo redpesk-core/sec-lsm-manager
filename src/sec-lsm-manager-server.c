@@ -551,7 +551,7 @@ __wur static int create_client(client_t **pcli, int fd, sec_lsm_manager_server_t
     /* create protocol object */
     rc = prot_create(&((*pcli)->prot));
     if (rc < 0) {
-        ERROR("prot_create : %d %s", -rc, strerror(-rc))
+        ERROR("prot_create : %d %s", -rc, strerror(-rc));
         goto error1;
     }
 

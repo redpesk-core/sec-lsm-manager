@@ -50,7 +50,7 @@
 __nonnull() __wur static int label_exec(const char *path, const char *label) {
     char *test_exec = strstr(label, suffix_exec);
     if (test_exec == NULL || strcmp(test_exec, suffix_exec)) {
-        ERROR("%s not end with %s", label, suffix_exec)
+        ERROR("%s not end with %s", label, suffix_exec);
         return -EINVAL;
     }
 
