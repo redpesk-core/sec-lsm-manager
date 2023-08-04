@@ -136,11 +136,14 @@ const char *get_smack_policy_dir(const char *value) {
         if (value == NULL)
             value = default_smack_policy_dir;
     }
-    if (strlen(value) >= SEC_LSM_MANAGER_MAX_SIZE_DIR) {
-        value = NULL;
-        ERROR("smack_policy_dir too long");
-    }
     return value;
+}
+
+static int get_smack_rule_path(char rule_path[SEC_LSM_MANAGER_MAX_SIZE_PATH + 1], const char *id)
+{
+    int len = snprintf(rule_path, SEC_LSM_MANAGER_MAX_SIZE_PATH + 1,
+                   "%s/%s.%s", get_smack_policy_dir(NULL), id, SMACK_EXTENSION);
+    return len < 0 ? len : len > SEC_LSM_MANAGER_MAX_SIZE_PATH ? -ENAMETOOLONG : len;
 }
 
 /* see smack-label.h */
@@ -185,16 +188,16 @@ int create_smack_rules(const secure_app_t *secure_app) {
     int rc = 0;
     int rc2 = 0;
     struct smack_accesses *smack_accesses = NULL;
-    char smack_policy_dir[SEC_LSM_MANAGER_MAX_SIZE_DIR];
-    char smack_rules_file[SEC_LSM_MANAGER_MAX_SIZE_PATH];
-    char smack_template_file[SEC_LSM_MANAGER_MAX_SIZE_PATH];
+    char smack_rules_file[SEC_LSM_MANAGER_MAX_SIZE_PATH + 1];
+    const char *smack_template_file;
 
-    secure_strncpy(smack_policy_dir, get_smack_policy_dir(NULL), SEC_LSM_MANAGER_MAX_SIZE_DIR);
-    secure_strncpy(smack_template_file, get_smack_template_file(NULL), SEC_LSM_MANAGER_MAX_SIZE_PATH);
+    rc = get_smack_rule_path(smack_rules_file, secure_app->id);
+    if (rc < 0) {
+        ERROR("get_smack_rule_path: %d %s", -rc, strerror(-rc));
+        goto end;
+    }
 
-    snprintf(smack_rules_file, SEC_LSM_MANAGER_MAX_SIZE_PATH, "%s/%s.%s", smack_policy_dir, secure_app->id,
-             SMACK_EXTENSION);
-
+    smack_template_file = get_smack_template_file(NULL);
     rc = process_template(smack_template_file, smack_rules_file, secure_app);
     if (rc < 0) {
         ERROR("process_template : %d %s", -rc, strerror(-rc));
@@ -245,12 +248,13 @@ end:
 /* see smack-template.h */
 int remove_smack_rules(const secure_app_t *secure_app) {
     int rc = 0;
-    char smack_policy_dir[SEC_LSM_MANAGER_MAX_SIZE_DIR];
-    char smack_rules_file[SEC_LSM_MANAGER_MAX_SIZE_PATH];
+    char smack_rules_file[SEC_LSM_MANAGER_MAX_SIZE_PATH + 1];
 
-    secure_strncpy(smack_policy_dir, get_smack_policy_dir(NULL), SEC_LSM_MANAGER_MAX_SIZE_DIR);
-    snprintf(smack_rules_file, SEC_LSM_MANAGER_MAX_SIZE_PATH, "%s/%s.%s", smack_policy_dir, secure_app->id,
-             SMACK_EXTENSION);
+    rc = get_smack_rule_path(smack_rules_file, secure_app->id);
+    if (rc < 0) {
+        ERROR("get_smack_rule_path: %d %s", -rc, strerror(-rc));
+        return rc;
+    }
 
     if (smack_enabled()) {
         rc = remove_load_rules(smack_rules_file);
