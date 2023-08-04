@@ -27,3 +27,12 @@ App:{{id}} App:{{id}}:Exec rx
 
 # Access User:Home ==> /home/0/
 App:{{id}} User:Home rx
+
+{{#plugs}}
+# allows exportation
+App:{{impid}} App:{{id}}:Lib r
+App:{{impid}} App:{{id}}:Exec rx
+App:{{impid}} App:{{id}}:Data r
+App:{{impid}} App:{{id}}:Conf r
+App:{{impid}} App:{{id}}:Http r
+{{/plugs}}

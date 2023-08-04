@@ -38,6 +38,7 @@
 
 typedef struct {
         const secure_app_t *secure_app;
+        const plug_t *plug;
     }
         template_data_t;
 
@@ -57,6 +58,12 @@ static int put(void *closure, const char *name, int escape, FILE *file) {
     else if (!strcmp(name, "_id_"))
         txt = data->secure_app->id;
 
+    else if (!strcmp(name, "impid") && data->plug != NULL)
+        txt = data->plug->impid;
+
+    else if (!strcmp(name, "_impid_") && data->plug != NULL)
+        txt = data->plug->impid;
+
     if (txt != NULL) {
         if (*name != '_')
             fputs(txt, file);
@@ -75,23 +82,34 @@ static int enter(void *closure, const char *name) {
 
     template_data_t *data = closure;
 
+    if (data->plug != NULL) /* avoid stacking in plugs ATM */
+        return 0;
+
     if (!strncmp(name, permission_key, permission_key_length)) {
         return secure_app_has_permission(data->secure_app, &name[permission_key_length]);
+    }
+
+    if (!strcmp(name, "plug")) {
+        data->plug = data->secure_app->plugset;
+        return data->plug != NULL;
     }
 
     return 0;
 }
 
 static int leave(void *closure) {
-    (void)closure;
+    template_data_t *data = closure;
     DEBUG("leave");
+    data->plug = NULL;
     return 0;
 }
 
 static int next(void *closure) {
-    (void)closure;
+    template_data_t *data = closure;
     DEBUG("next");
-    return 0;
+    if (data->plug != NULL)
+        data->plug = data->plug->next;
+    return data->plug != NULL;
 }
 
 static struct mustach_itf itf = {.enter = enter, .put = put, .next = next, .leave = leave};
@@ -99,7 +117,7 @@ static struct mustach_itf itf = {.enter = enter, .put = put, .next = next, .leav
 int process_template(const char *template_path, const char *dest, const secure_app_t *secure_app) {
     int rc = 0;
     int rc2 = 0;
-    template_data_t data = { .secure_app = secure_app };
+    template_data_t data = { .secure_app = secure_app, .plug = NULL };
 
     char *template = read_file(template_path);
     if (template == NULL) {
