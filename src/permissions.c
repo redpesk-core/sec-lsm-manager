@@ -65,31 +65,47 @@ int permission_set_has_permission(const permission_set_t *permission_set, const 
     return 0;
 }
 
-
 /* see permissions.h */
 int permission_set_add_permission(permission_set_t *permission_set, const char *permission) {
-    size_t permission_len = strlen(permission);
-    if (permission_len < 2 || permission_len >= SEC_LSM_MANAGER_MAX_SIZE_PERMISSION) {
-        ERROR("invalid permission size : %ld", permission_len);
+
+    size_t size;
+    void *ptr, *perm;
+
+    /* avoid duplication of permisssion */
+    if (permission_set_has_permission(permission_set, permission))
+        return 0;
+
+    /* check length */
+    size = strlen(permission);
+    if (size < SEC_LSM_MANAGER_MIN_SIZE_PERMISSION
+     || size > SEC_LSM_MANAGER_MAX_SIZE_PERMISSION) {
+        ERROR("invalid permission size: %ld", size);
         return -EINVAL;
     }
 
-    size_t size = (permission_set->size + 1) * (sizeof(char*) * SEC_LSM_MANAGER_MAX_SIZE_PERMISSION);
-
-    char **permissions_tmp = realloc(permission_set->permissions, size);
-    if (permissions_tmp == NULL) {
-        ERROR("realloc permissions_tmp");
+    /* copy the permission */
+    perm = malloc(1 + size);
+    if (perm == NULL) {
+        ERROR("malloc perm");
         return -ENOMEM;
     }
-    permission_set->permissions = permissions_tmp;
+    memcpy(perm, permission, 1 + size);
 
-    char *perm_tmp = malloc(1 + permission_len);
-    if (perm_tmp == NULL) {
-        ERROR("malloc perm_tmp");
-        return -ENOMEM;
+    /*
+     * ensure rooms for storing the fresh permission copy
+     * allocation is made by block of 8 items
+     */
+    if ((permission_set->size & 7) == 0) {
+        size = (permission_set->size + 8) * sizeof * permission_set->permissions;
+        ptr = realloc(permission_set->permissions, size);
+        if (ptr == NULL) {
+            free(perm);
+            ERROR("realloc ptr");
+            return -ENOMEM;
+        }
+        permission_set->permissions = ptr;
     }
-    secure_strncpy(perm_tmp, permission, 1 + permission_len);
-    permission_set->permissions[permission_set->size++] = perm_tmp;
+    permission_set->permissions[permission_set->size++] = perm;
 
     return 0;
 }
