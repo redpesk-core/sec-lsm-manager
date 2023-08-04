@@ -52,4 +52,16 @@ extern int cynagora_set_policies(cynagora_t *cynagora, const char *label, const 
  */
 extern int cynagora_drop_policies(cynagora_t *cynagora, const char *label) __wur __nonnull();
 
+/**
+ * @brief Check if application of label has the permission
+ *
+ * @param[in] cynagora handler to cynagora access
+ * @param[in] label label of the application
+ * @param[in] permission permission to check
+ * @return 0 when permission is not granted, 1 when it is granted
+ *         or a negative -errno value in case of failure
+ */
+__nonnull() __wur
+extern int cynagora_check_permission(cynagora_t *cynagora, const char *label, const char *permission);
+
 #endif

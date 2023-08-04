@@ -110,3 +110,16 @@ int cynagora_drop_policies(cynagora_t *cynagora, const char *label) {
 
     return rc;
 }
+
+/* see cynagora-interface.h */
+__nonnull() __wur
+int cynagora_check_permission(cynagora_t *cynagora, const char *label, const char *permission)
+{
+    cynagora_key_t key = {
+        .client = label,
+        .session = "-",
+        .user = "-",
+        .permission = permission
+    };
+    return cynagora_check(cynagora, &key, 0);
+}

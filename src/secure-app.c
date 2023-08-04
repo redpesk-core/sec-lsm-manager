@@ -380,7 +380,6 @@ static int check_plugs(secure_app_t *secure_app, cynagora_t *cynagora)
     char id[SEC_LSM_MANAGER_MAX_SIZE_ID + 1];
     char _id_[SEC_LSM_MANAGER_MAX_SIZE_ID + 1];
     char label[SEC_LSM_MANAGER_MAX_SIZE_LABEL + 1];
-    cynagora_key_t cynkey;
     plug_t *plugit;
     const char *scope;
     int sts;
@@ -392,12 +391,7 @@ static int check_plugs(secure_app_t *secure_app, cynagora_t *cynagora)
         /* compute the label of the application importing the plug */
         sts = setids(plugit->impid, id, _id_, label);
         if (sts == 0) {
-            /* check if importing application (its label) has urn:redpesk:permission::public:plug */
-            cynkey.client = label;
-            cynkey.session = "*";
-            cynkey.user = "*";
-            cynkey.permission = perm_public_plug;
-            sts = cynagora_check(cynagora, &cynkey, 0);
+            sts = cynagora_check_permission(cynagora, label, perm_public_plug);
             if (sts < 0) {
                 ERROR("can't query cynagora");
             }
