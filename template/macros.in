@@ -4,6 +4,6 @@ define( `MUSTACH_IF_NOT', `{{^$1}}pushdef(`ELSE',`{{/$1}}{{#$1}}')pushdef(`ENDIF
 
 define( `PERM', `@PREFIX_PERMISSION@permission:$1')
 
-define( `IF_PERM', `MUSTACH_IF(PERM($1))')
+define( `IF_PERM', `MUSTACH_IF(p=PERM($1))')
 
-define( `IF_NOT_PERM', `MUSTACH_IF_NOT(PERM($1))')
+define( `IF_NOT_PERM', `MUSTACH_IF_NOT(p=PERM($1))')

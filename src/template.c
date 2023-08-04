@@ -36,27 +36,49 @@
 #include "utils.h"
 #include "template.h"
 
+typedef struct {
+        const secure_app_t *secure_app;
+    }
+        template_data_t;
+
 static int put(void *closure, const char *name, int escape, FILE *file) {
     (void)escape;
-    const secure_app_t *secure_app = *(const secure_app_t**)closure;
+    template_data_t *data = closure;
+    const char *txt = NULL;
+
     // DEBUG("name : %s", name);
 
-    if (!strcmp(name, "id")) {
-        fputs(secure_app->id, file);
-    } else if (!strcmp(name, "id_underscore")) {
-        fputs(secure_app->id_underscore, file);
-    }
+    if (!strcmp(name, "id"))
+        txt = data->secure_app->id;
 
+    else if (!strcmp(name, "id_underscore"))
+        txt = data->secure_app->id_underscore;
+
+    else if (!strcmp(name, "_id_"))
+        txt = data->secure_app->id;
+
+    if (txt != NULL) {
+        if (*name != '_')
+            fputs(txt, file);
+        else {
+            for ( ; *txt ; txt++)
+                fputc(*txt == '-' ? '_' : *txt, file);
+        }
+    }
     return 0;
 }
 
 static int enter(void *closure, const char *name) {
-    const secure_app_t *secure_app = *(const secure_app_t**)closure;
-    for (size_t i = 0; i < secure_app->permission_set.size; i++) {
-        if (!strcasecmp(name, secure_app->permission_set.permissions[i])) {
-            return 1;
-        }
+
+    static const char permission_key[] = "p=";
+    const size_t permission_key_length = sizeof permission_key - 1;
+
+    template_data_t *data = closure;
+
+    if (!strncmp(name, permission_key, permission_key_length)) {
+        return secure_app_has_permission(data->secure_app, &name[permission_key_length]);
     }
+
     return 0;
 }
 
@@ -77,6 +99,8 @@ static struct mustach_itf itf = {.enter = enter, .put = put, .next = next, .leav
 int process_template(const char *template_path, const char *dest, const secure_app_t *secure_app) {
     int rc = 0;
     int rc2 = 0;
+    template_data_t data = { .secure_app = secure_app };
+
     char *template = read_file(template_path);
     if (template == NULL) {
         ERROR("read_file : %s", template_path);
@@ -90,7 +114,7 @@ int process_template(const char *template_path, const char *dest, const secure_a
         goto end;
     }
 
-    rc = fmustach(template, &itf, &secure_app, f_dest);
+    rc = fmustach(template, &itf, &data, f_dest);
     if (rc < 0) {
         ERROR("fmustach : %d %s", errno, strerror(errno));
     }
