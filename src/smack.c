@@ -228,66 +228,160 @@ __nonnull() __wur static int smack_drop_path_labels(const secure_app_t *secure_a
     return 0;
 }
 
+/**
+* @brief Installs the files for plugs
+*
+* @param[in] secure_app the application specification
+ * @return 0 in case of success or a negative -errno value
+*/
+__nonnull() __wur
+static int install_smack_plugs(const secure_app_t *secure_app)
+{
+    char label[SEC_LSM_MANAGER_MAX_SIZE_LABEL + 1];
+    char buffer[PATH_MAX + 1];
+    plug_t *plugit;
+    int rc2, rc = 0;
+
+    for (plugit = secure_app->plugset ; plugit != NULL ; plugit = plugit->next) {
+        rc2 = snprintf(buffer, sizeof buffer, "%s/%s", plugit->impdir, secure_app->id);
+        if (rc2 > PATH_MAX)
+            rc2 = -ENAMETOOLONG;
+        if (rc2 < 0)
+            ERROR("install_smack_plugs: can't set name: %d, %s", -rc2, strerror(-rc2));
+        else {
+            rc2 = symlink(plugit->expdir, buffer);
+            if (rc2 < 0) {
+                rc2 = -errno;
+                ERROR("install_smack_plugs: can't create link: %d, %s", -rc2, strerror(-rc2));
+            }
+            else {
+                app_label_smack(label, secure_app->id, secure_app->id_underscore);
+                rc2 = set_label(buffer, XATTR_NAME_SMACK, label);
+            }
+        }
+        if (rc2 < 0 && rc == 0)
+            rc = rc2;
+    }
+    return rc;
+}
+
+/**
+* @brief Uninstalls the files for plugs
+*
+* @param[in] secure_app the application specification
+ * @return 0 in case of success or a negative -errno value
+*/
+__nonnull() __wur
+static int uninstall_smack_plugs(const secure_app_t *secure_app)
+{
+    char buffer[PATH_MAX + 1];
+    plug_t *plugit;
+    int rc2, rc = 0;
+
+    for (plugit = secure_app->plugset ; plugit != NULL ; plugit = plugit->next) {
+        rc2 = snprintf(buffer, sizeof buffer, "%s/%s", plugit->impdir, secure_app->id);
+        if (rc2 > PATH_MAX)
+            rc2 = -ENAMETOOLONG;
+        if (rc2 < 0)
+            ERROR("uninstall_smack_plugs: can't set name: %d, %s", -rc2, strerror(-rc2));
+        else {
+            rc2 = unlink(buffer);
+            if (rc2 < 0) {
+                if (errno == ENOENT)
+                    rc2 = 0;
+                else {
+                    rc2 = -errno;
+                    ERROR("uninstall_smack_plugs: can't unlink: %d, %s", -rc2, strerror(-rc2));
+                }
+            }
+        }
+        if (rc2 < 0 && rc == 0)
+            rc = rc2;
+    }
+    return rc;
+}
+
+/**
+ * @brief Uninstall a secure app for smack without stopping on failure
+ *
+ * @param[in] secure_app secure app handler
+ * @return 0 in case of success or a negative -errno value
+ */
+static int force_uninstall_smack(const secure_app_t *secure_app)
+{
+    int rc2, rc;
+
+    rc = smack_drop_path_labels(secure_app);
+    if (rc < 0)
+        ERROR("smack_drop_path_labels: %d %s", -rc, strerror(-rc));
+
+    if (secure_app->id[0] != '\0') {
+        rc2 = uninstall_smack_plugs(secure_app);
+        if (rc2 < 0) {
+            rc = rc2;
+            ERROR("uninstall_smack_plugs: %d %s", -rc, strerror(-rc));
+        }
+        rc2 = remove_smack_rules(secure_app);
+        if (rc2 < 0) {
+            rc = rc2;
+            ERROR("remove_smack_rules: %d %s", -rc, strerror(-rc));
+        }
+    }
+
+    return rc;
+}
+
+
 /**********************/
 /*** PUBLIC METHODS ***/
 /**********************/
 
 /* see smack.h */
 int install_smack(const secure_app_t *secure_app) {
-    bool has_id = secure_app->id[0] != '\0';
+    int rc = 0;
+    bool has_id;
+    path_type_definitions_t path_type_definitions[number_path_type];
+
+    has_id = secure_app->id[0] != '\0';
     if (!has_id && secure_app->need_id) {
         ERROR("id undefined");
         return -EINVAL;
     }
 
-    if (has_id) {
-        int rc = create_smack_rules(secure_app);
-        if (rc < 0) {
-            ERROR("create_smack_rules : %d %s", -rc, strerror(-rc));
-            return rc;
-        }
-    }
-
-    path_type_definitions_t path_type_definitions[number_path_type];
     init_path_type_definitions(path_type_definitions, secure_app->id);
-
-    int rc = smack_set_path_labels(secure_app, path_type_definitions);
-    if (rc >= 0) {
-        DEBUG("install smack success");
-    } else {
-        ERROR("smack_process_paths : %d %s", -rc, strerror(-rc));
-        if (has_id) {
-            if (remove_smack_rules(secure_app) < 0) {
-                ERROR("remove_smack_rules");
-            }
+    if (has_id) {
+        rc = create_smack_rules(secure_app);
+        if (rc < 0)
+            ERROR("create_smack_rules failed: %d %s", -rc, strerror(-rc));
+        else {
+            rc = install_smack_plugs(secure_app);
+            if (rc < 0)
+                ERROR("install_smack_plugs failed: %d %s", -rc, strerror(-rc));
         }
     }
+
+    if (rc >= 0) {
+        rc = smack_set_path_labels(secure_app, path_type_definitions);
+        if (rc < 0)
+            ERROR("smack_set_path_labels failed: %d %s", -rc, strerror(-rc));
+        else
+            DEBUG("install smack success");
+    }
+
+    if (rc < 0)
+        force_uninstall_smack(secure_app);
+
     return rc;
 }
 
 /* see smack.h */
 int uninstall_smack(const secure_app_t *secure_app) {
-    bool has_id = secure_app->id[0] != '\0';
-    if (!has_id && secure_app->need_id) {
+    if (secure_app->id[0] == '\0' && secure_app->need_id) {
         ERROR("id undefined");
         return -EINVAL;
     }
 
-    if (has_id) {
-        int rc = remove_smack_rules(secure_app);
-        if (rc < 0) {
-            ERROR("remove_smack_rules: %d %s", -rc, strerror(-rc));
-            return rc;
-        }
-    }
-
-    int rc = smack_drop_path_labels(secure_app);
-    if (rc < 0) {
-        ERROR("smack_drop_path_labels: %d %s", -rc, strerror(-rc));
-        return rc;
-    }
-
-    return 0;
+    return force_uninstall_smack(secure_app);
 }
 
 /* see smack.h */
