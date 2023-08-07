@@ -347,7 +347,7 @@ __nonnull() __wur
 static int check_plugs(secure_app_t *secure_app, cynagora_t *cynagora)
 {
     static const char perm_public_plug[] = "urn:redpesk:permission::public:plugs";
-    static const char perm_export_template[] = "urn:redpesk:permission::%s:export:plug:%s";
+    static const char perm_export_template[] = "urn:redpesk:permission:%s:%s:export:plug";
     static const char scope_public[] = "public";
     static const char scope_partner[] = "partner";
 
@@ -374,7 +374,7 @@ static int check_plugs(secure_app_t *secure_app, cynagora_t *cynagora)
                 /* compute the scope of the required permision */
                 scope = sts ? scope_public : scope_partner;
                 /* compute the required permision */
-                snprintf(permission, sizeof permission, perm_export_template, scope, id);
+                snprintf(permission, sizeof permission, perm_export_template, id, scope);
                 /* check if the permision is granted for the app */
                 sts = secure_app_has_permission(secure_app, permission);
                 if (!sts) {
