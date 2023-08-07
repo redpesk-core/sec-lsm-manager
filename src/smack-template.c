@@ -62,6 +62,7 @@ char suffix_exec[] = ":Exec";  // see label_exec before remove this line
 char suffix_icon[] = ":Icon";
 char suffix_data[] = ":Data";
 char suffix_http[] = ":Http";
+char suffix_plug[] = ":Plug";
 char user_home[] = "User:Home";
 char public_app[] = "System:Shared";
 
@@ -170,6 +171,9 @@ void init_path_type_definitions(path_type_definitions_t path_type_definitions[nu
     snprintf(path_type_definitions[type_id].label, SEC_LSM_MANAGER_MAX_SIZE_LABEL, "%s%s", prefix_app, id);
     snprintf(path_type_definitions[type_lib].label, SEC_LSM_MANAGER_MAX_SIZE_LABEL, "%s%s%s", prefix_app, id,
              suffix_lib);
+    snprintf(path_type_definitions[type_plug].label, SEC_LSM_MANAGER_MAX_SIZE_LABEL, "%s%s%s", prefix_app, id,
+             suffix_plug);
+
     secure_strncpy(path_type_definitions[type_public].label, public_app, SEC_LSM_MANAGER_MAX_SIZE_LABEL);
 
     // executable

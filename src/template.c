@@ -77,21 +77,22 @@ static int put(void *closure, const char *name, int escape, FILE *file) {
 
 static int enter(void *closure, const char *name) {
 
-    static const char permission_key[] = "p=";
-    const size_t permission_key_length = sizeof permission_key - 1;
-
     template_data_t *data = closure;
 
     if (data->plug != NULL) /* avoid stacking in plugs ATM */
         return 0;
 
-    if (!strncmp(name, permission_key, permission_key_length)) {
-        return secure_app_has_permission(data->secure_app, &name[permission_key_length]);
+    if (!strcmp(name, "has-plugs")) {
+        return data->secure_app->plugset != NULL;
     }
 
-    if (!strcmp(name, "plug")) {
+    if (!strcmp(name, "plugs")) {
         data->plug = data->secure_app->plugset;
         return data->plug != NULL;
+    }
+
+    if (name[0] == 'p' && name[1] == '=') { /* permission checks are prefixed by p= */
+        return secure_app_has_permission(data->secure_app, &name[2]);
     }
 
     return 0;

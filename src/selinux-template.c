@@ -522,6 +522,8 @@ void init_path_type_definitions(path_type_definitions_t path_type_definitions[nu
              suffix_id);
     snprintf(path_type_definitions[type_lib].label, SEC_LSM_MANAGER_MAX_SIZE_LABEL, "system_u:object_r:%s%s", id,
              suffix_lib);
+    snprintf(path_type_definitions[type_plug].label, SEC_LSM_MANAGER_MAX_SIZE_LABEL, "system_u:object_r:%s",
+             public_app); /* TODO: plug is ATM mapped as public */
     snprintf(path_type_definitions[type_public].label, SEC_LSM_MANAGER_MAX_SIZE_LABEL, "system_u:object_r:%s",
              public_app);
 }

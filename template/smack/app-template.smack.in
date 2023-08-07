@@ -28,8 +28,15 @@ App:{{id}} App:{{id}}:Exec rx
 # Access User:Home ==> /home/0/
 App:{{id}} User:Home rx
 
+{{#has-plugs}}
+# Access plug
+App:{{id}} App:{{id}}:Plug rx
+{{/has-plugs}}
+
 {{#plugs}}
-# allows exportation
+
+# export to {{impid}}
+App:{{impid}} App:{{id}}:Plug r
 App:{{impid}} App:{{id}}:Lib r
 App:{{impid}} App:{{id}}:Exec rx
 App:{{impid}} App:{{id}}:Data r

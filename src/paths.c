@@ -41,6 +41,7 @@ static const char *type_strings[number_path_type] =
 [type_icon] = "icon",
 [type_id] = "id",
 [type_lib] = "lib",
+[type_plug] = "plug",
 [type_public] = "public"
 };
 

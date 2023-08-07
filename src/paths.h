@@ -42,8 +42,8 @@
  * type_icon   : icon file ('icon)
  * type_id     : basename app directory ('id')
  * type_lib    : libraries files ('lib')
+ * type_plug   : plug in/out exported directory ('plug')
  * type_public : public files ('public')
- *
  */
 enum path_type {
     type_unset,
@@ -55,6 +55,7 @@ enum path_type {
     type_icon,
     type_id,
     type_lib,
+    type_plug,
     type_public,
     number_path_type
 };
