@@ -287,15 +287,15 @@ __nonnull() __wur static int wait_any_reply(sec_lsm_manager_t *sec_lsm_manager) 
  *
  * @param[in] sec_lsm_manager  the handler of the client
  *
- * @return  0 in case of success or a negative -errno value
+ * @return  the count of fields in case of success or a negative -errno value
  *          -ECANCELED when received an error status
  */
-__nonnull() __wur static int wait_done_or_error(sec_lsm_manager_t *sec_lsm_manager) {
+__nonnull() __wur static int raw_wait_done_or_error(sec_lsm_manager_t *sec_lsm_manager) {
     int rc = wait_any_reply(sec_lsm_manager);
 
     if (rc > 0) {
         if (!strcmp(sec_lsm_manager->reply.fields[0], _done_)) {
-            return 0;
+            return rc;
         } else if (!strcmp(sec_lsm_manager->reply.fields[0], _error_)) {
             ERROR("%s", sec_lsm_manager->reply.fields[1]);
             return -1;
@@ -304,6 +304,19 @@ __nonnull() __wur static int wait_done_or_error(sec_lsm_manager_t *sec_lsm_manag
         }
     }
     return rc;
+}
+
+/**
+ * @brief Wait the reply "done" or "error"
+ *
+ * @param[in] sec_lsm_manager  the handler of the client
+ *
+ * @return  0 in case of success or a negative -errno value
+ *          -ECANCELED when received an error status
+ */
+__nonnull() __wur static int wait_done_or_error(sec_lsm_manager_t *sec_lsm_manager) {
+    int rc = raw_wait_done_or_error(sec_lsm_manager);
+    return rc < 0 ? rc : 0;
 }
 
 /**
@@ -523,7 +536,7 @@ int sec_lsm_manager_uninstall(sec_lsm_manager_t *sec_lsm_manager) {
  */
 static int wait_log_reply(sec_lsm_manager_t *sec_lsm_manager)
 {
-    int rc = wait_done_or_error(sec_lsm_manager);
+    int rc = raw_wait_done_or_error(sec_lsm_manager);
     if (rc > 0)
         rc = sec_lsm_manager->reply.count >= 2 && !strcmp(sec_lsm_manager->reply.fields[1], _on_);
     return rc;
