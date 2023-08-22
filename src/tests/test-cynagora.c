@@ -18,6 +18,8 @@
 #include "../cynagora-interface.h"
 #include "setup-tests.h"
 
+#define CYNAGORA_SELECT_ALL "#"
+
 static void list(void *closure, const cynagora_key_t *key, const cynagora_value_t *value) {
     (void)value;
     permission_set_t *permission_set = closure;

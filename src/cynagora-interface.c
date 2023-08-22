@@ -28,6 +28,10 @@
 
 #include "log.h"
 
+#define CYNAGORA_SELECT_ALL "#"
+#define CYNAGORA_INSERT_ALL "*"
+#define CYNAGORA_AUTHORIZED "yes"
+
 /**********************/
 /*** PUBLIC METHODS ***/
 /**********************/
