@@ -24,7 +24,7 @@
 #ifndef SEC_LSM_MANAGER_H
 #define SEC_LSM_MANAGER_H
 
-#include <stdint.h>
+#include <features.h>
 
 typedef struct sec_lsm_manager sec_lsm_manager_t;
 
