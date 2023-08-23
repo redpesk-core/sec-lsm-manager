@@ -35,7 +35,7 @@
 #define BINARY_DIR "/usr/bin"
 #endif
 
-#if defined(WITH_SELINUX)
+#if WITH_SELINUX
 
 #if !defined(SELINUX_FS_PATH)
 #define SELINUX_FS_PATH "/sys/fs/selinux"
@@ -49,7 +49,7 @@
 
 #endif
 
-#if defined(WITH_SMACK)
+#if WITH_SMACK
 
 #if !defined(SMACK_FS_PATH)
 #define SMACK_FS_PATH "/sys/fs/smackfs"
@@ -65,12 +65,12 @@
 
 /**/
 
-#if defined(SIMULATE_SELINUX)
+#if SIMULATE_SELINUX
 #undef SELINUX_FS_PATH
 #define SELINUX_FS_PATH NULL
 #endif
 
-#if defined(SIMULATE_SMACK)
+#if SIMULATE_SMACK
 #undef SMACK_FS_PATH
 #define SMACK_FS_PATH NULL
 #endif
@@ -95,10 +95,10 @@ bool run_if(int argc, char **argv, char **envp, const char *binary, const char *
 int main(int argc, char **argv, char **envp) {
     bool failed = false;
 
-#ifdef WITH_SELINUX
+#if WITH_SELINUX
     failed |= run_if(argc, argv, envp, SELINUX_BYNARY, SELINUX_FS_PATH);
 #endif
-#ifdef WITH_SMACK
+#if WITH_SMACK
     failed |= run_if(argc, argv, envp, SMACK_BYNARY, SMACK_FS_PATH);
 #endif
     if (!failed)

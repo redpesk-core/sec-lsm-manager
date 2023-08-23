@@ -33,7 +33,7 @@ int get_socket_info(int fd, socket_info_t *socket_info) {
         goto ret;
     }
 
-#ifdef WITH_SMACK
+#if WITH_SMACK
     rc = (int)smack_new_label_from_socket(fd, &(socket_info->label));
     if (rc < 0) {
         rc = -errno;

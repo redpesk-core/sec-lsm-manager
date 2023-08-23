@@ -98,18 +98,18 @@ int main(int argc, char const *argv[]) {
     addtcase("utils");
     test_utils();
 
-#if !defined(SIMULATE_CYNAGORA)
+#if !SIMULATE_CYNAGORA
     addtcase("cynagora");
     test_cynagora();
 #endif
 
-#if defined(WITH_SMACK)
+#if WITH_SMACK
     addtcase("smack");
     test_smack();
     test_smack_label();
 #endif
 
-#if defined(WITH_SELINUX)
+#if WITH_SELINUX
     addtcase("selinux");
     test_selinux_template();
     test_selinux();

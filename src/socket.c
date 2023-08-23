@@ -41,7 +41,7 @@
 
 #include "utils.h"
 
-#if defined(WITH_SYSTEMD)
+#if WITH_SYSTEMD
 #include <systemd/sd-daemon.h>
 #endif
 
@@ -205,7 +205,7 @@ static int open_tcp(const char *spec, int server) {
  * @return the file descriptor number of the socket or -1 in case of error
  */
 static int open_systemd(__attribute__((unused)) const char *spec) {
-#if defined(WITH_SYSTEMD)
+#if WITH_SYSTEMD
     char **names;
     int fd = -1;
     int c = sd_listen_fds_with_names(0, &names);

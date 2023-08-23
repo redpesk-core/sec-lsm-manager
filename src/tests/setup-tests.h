@@ -31,16 +31,16 @@ extern void test_permissions(void);
 extern void test_secure_app(void);
 extern void test_utils(void);
 
-#if !defined(SIMULATE_CYNAGORA)
+#if !SIMULATE_CYNAGORA
 extern void test_cynagora(void);
 #endif
 
-#if defined(WITH_SMACK)
+#if WITH_SMACK
 extern void test_smack(void);
 extern void test_smack_label(void);
 #endif
 
-#if defined(WITH_SELINUX)
+#if WITH_SELINUX
 extern void test_selinux_template(void);
 extern void test_selinux(void);
 #endif

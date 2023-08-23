@@ -31,7 +31,7 @@
 #include "log.h"
 #include "utils.h"
 
-#ifdef WITH_SMACK
+#if WITH_SMACK
 # include "smack.h"
 # define install_mac install_smack
 # define uninstall_mac uninstall_smack

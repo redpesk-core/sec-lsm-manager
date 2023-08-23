@@ -31,7 +31,7 @@ add_compile_definitions(VERSION="${PROJECT_VERSION}")
 
 message("\n[*] Create : libsec-lsm-manager")
 
-add_library(sec-lsm-manager SHARED
+add_library(sec-lsm-manager STATIC
     utils.c
     prot.c
     socket.c
@@ -39,20 +39,6 @@ add_library(sec-lsm-manager SHARED
     sec-lsm-manager-protocol.c
     sec-lsm-manager.c
 )
-
-if(WITH_SYSTEMD)
-    target_link_libraries(sec-lsm-manager ${libsystemd_LDFLAGS} ${libsystemd_LINK_LIBRARIES})
-    target_include_directories(sec-lsm-manager PRIVATE ${libsystemd_INCLUDE_DIRS})
-    target_compile_options(sec-lsm-manager PRIVATE ${libsystemd_CFLAGS})
-    message("[-] Link : libsystemd")
-endif()
-
-set_target_properties(sec-lsm-manager PROPERTIES
-    VERSION ${SEC_LSM_MANAGER_VERSION}
-    SOVERSION ${SEC_LSM_MANAGER_SOVERSION}
-    LINK_FLAGS -Wl,--version-script=${CMAKE_CURRENT_SOURCE_DIR}/export-sec-lsm-manager.map
-)
-
 install(TARGETS sec-lsm-manager LIBRARY DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR})
 install(FILES sec-lsm-manager.h DESTINATION ${CMAKE_INSTALL_FULL_INCLUDEDIR})
 
@@ -112,6 +98,7 @@ function(build_daemon_for_mac MAC_NAME)
     if(${MAC_NAME} STREQUAL "smack")
         add_executable(sec-lsm-manager-smackd main-sec-lsm-managerd.c ${SERVER_SOURCES_SMACK})
         target_compile_definitions(sec-lsm-manager-smackd PRIVATE WITH_SMACK)
+
         if(NOT SIMULATE_SMACK)
             target_link_libraries(sec-lsm-manager-smackd ${libsmack_LDFLAGS} ${libsmack_LINK_LIBRARIES})
             target_include_directories(sec-lsm-manager-smackd PRIVATE ${libsmack_INCLUDE_DIRS})
@@ -145,6 +132,7 @@ function(build_daemon_for_mac MAC_NAME)
     endif()
 
     if(WITH_SYSTEMD)
+        target_compile_definitions(sec-lsm-manager-${MAC_NAME}d PRIVATE WITH_SYSTEMD=1)
         target_link_libraries(sec-lsm-manager-${MAC_NAME}d ${libsystemd_LDFLAGS} ${libsystemd_LINK_LIBRARIES})
         target_include_directories(sec-lsm-manager-${MAC_NAME}d PRIVATE ${libsystemd_INCLUDE_DIRS})
         target_compile_options(sec-lsm-manager-${MAC_NAME}d PRIVATE ${libsystemd_CFLAGS})
@@ -174,12 +162,12 @@ message("[*] Create : sec-lsm-managerd")
 add_executable(sec-lsm-managerd main-sec-lsm-managerd-launch.c)
 
 if(WITH_SMACK)
-    target_compile_definitions(sec-lsm-managerd PRIVATE WITH_SMACK)
+    target_compile_definitions(sec-lsm-managerd PRIVATE WITH_SMACK=1)
     target_compile_definitions(sec-lsm-managerd PRIVATE SMACK_BYNARY_NAME="sec-lsm-manager-smackd")
 endif()
 
 if(WITH_SELINUX)
-    target_compile_definitions(sec-lsm-managerd PRIVATE WITH_SELINUX)
+    target_compile_definitions(sec-lsm-managerd PRIVATE WITH_SELINUX=1)
     target_compile_definitions(sec-lsm-managerd PRIVATE SELINUX_BYNARY_NAME="sec-lsm-manager-selinuxd")
 endif()
 

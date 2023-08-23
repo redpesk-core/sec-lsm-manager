@@ -38,7 +38,7 @@
 
 #include "limits.h"
 
-#if defined(WITH_SYSTEMD)
+#if WITH_SYSTEMD
 #include <systemd/sd-daemon.h>
 #endif
 
@@ -232,7 +232,7 @@ int main(int ac, char **av) {
 
     /* compute socket specs */
     spec_socket = 0;
-#if defined(WITH_SYSTEMD)
+#if WITH_SYSTEMD
     {
         char **names = 0;
         rc = sd_listen_fds_with_names(0, &names);
@@ -361,7 +361,7 @@ int main(int ac, char **av) {
     setvbuf(stderr, NULL, _IOLBF, 1000);
     sec_lsm_manager_server_log = (bool)flog;
 
-#if defined(DEBUG_MODE)
+#if DEBUG_MODE
     puts("DEBUG_MODE = 1");
 #endif
 
@@ -373,7 +373,7 @@ int main(int ac, char **av) {
     }
 
     /* ready ! */
-#if defined(WITH_SYSTEMD)
+#if WITH_SYSTEMD
     sd_notify(0, "READY=1");
 #endif
 

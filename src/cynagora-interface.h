@@ -26,10 +26,10 @@
 
 #include "permissions.h"
 
-#ifndef SIMULATE_CYNAGORA
-#include <cynagora.h>
-#else
+#if SIMULATE_CYNAGORA
 #include "simulation/cynagora/cynagora.h"
+#else
+#include <cynagora.h>
 #endif
 
 /**

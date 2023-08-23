@@ -26,12 +26,12 @@
 
 #include "secure-app.h"
 
-#ifndef SIMULATE_SELINUX
+#if SIMULATE_SELINUX
+#include "simulation/selinux/selinux.h"
+#else
 #include <selinux/restorecon.h>
 #include <selinux/selinux.h>
 #include <semanage/semanage.h>
-#else
-#include "simulation/selinux/selinux.h"
 #endif
 
 typedef struct path_type_definitions {

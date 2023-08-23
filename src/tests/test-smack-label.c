@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-#if defined(SIMULATE_SMACK)
+#if SIMULATE_SMACK
 #include "../simulation/smack/smack.c"
 #endif
 

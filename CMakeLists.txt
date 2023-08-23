@@ -125,16 +125,10 @@ endfunction()
 add_compile_definitions_and_print(SEC_LSM_MANAGER_DATADIR="${SEC_LSM_MANAGER_DATADIR}")
 add_compile_definitions_and_print(SEC_LSM_MANAGER_SOCKET_NAME="${SEC_LSM_MANAGER_SOCKET_NAME}")
 
-# SYSTEMD
-
-if(WITH_SYSTEMD)
-    add_compile_definitions_and_print(WITH_SYSTEMD)
-endif()
-
 # CYNAGORA
 
 if(SIMULATE_CYNAGORA)
-    add_compile_definitions_and_print(SIMULATE_CYNAGORA)
+    add_compile_definitions_and_print(SIMULATE_CYNAGORA=1)
 endif()
 
 # SMACK
@@ -143,7 +137,7 @@ if(WITH_SMACK)
     add_compile_definitions_and_print(TEMPLATE_FILE="${TEMPLATE_FILE}")
     add_compile_definitions_and_print(SMACK_FS_PATH="${SMACK_FS_PATH}")
     if(SIMULATE_SMACK)
-        add_compile_definitions_and_print(SIMULATE_SMACK)
+        add_compile_definitions_and_print(SIMULATE_SMACK=1)
         add_compile_definitions_and_print(SMACK_POLICY_DIR="${SIMULATION_SMACK_POLICY_DIR}")
     else()
         add_compile_definitions_and_print(SMACK_POLICY_DIR="${DEFAULT_SMACK_POLICY_DIR}")
@@ -158,7 +152,7 @@ if(WITH_SELINUX)
     add_compile_definitions_and_print(IF_TEMPLATE_FILE="${IF_TEMPLATE_FILE}")
     add_compile_definitions_and_print(SELINUX_FS_PATH="${SELINUX_FS_PATH}")
     if(SIMULATE_SELINUX)
-        add_compile_definitions_and_print(SIMULATE_SELINUX)
+        add_compile_definitions_and_print(SIMULATE_SELINUX=1)
         add_compile_definitions_and_print(SIMULATION_SELINUX_POLICY_DIR="${SIMULATION_SELINUX_POLICY_DIR}")
     endif()
 endif()
@@ -189,7 +183,7 @@ message("\n######################## COMPILE OPTIONS ########################\n")
 
 if(DEBUG)
     set(CMAKE_BUILD_TYPE "DEBUG")
-    add_compile_definitions(DEBUG_MODE)
+    add_compile_definitions(DEBUG_MODE=1)
 else()
     set(CMAKE_BUILD_TYPE "RELEASE")
 endif()

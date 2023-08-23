@@ -28,10 +28,10 @@
 
 #include "secure-app.h"
 
-#ifndef SIMULATE_SMACK
-#include <sys/smack.h>
-#else
+#if SIMULATE_SMACK
 #include "simulation/smack/smack.h"
+#else
+#include <sys/smack.h>
 #endif
 
 extern char suffix_exec[];

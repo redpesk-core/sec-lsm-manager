@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-#if defined(SIMULATE_SELINUX)
+#if SIMULATE_SELINUX
 #include "../simulation/selinux/selinux.c"
 #else
 #include "../selinux-compile.c"
