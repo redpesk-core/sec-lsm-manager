@@ -564,7 +564,7 @@ __wur static int create_client(client_t **pcli, int fd, sec_lsm_manager_server_t
 
     /* records the file descriptor */
     (*pcli)->version = 0; /* version not set */
-    (*pcli)->relax = 0;   /* relax on error */
+    (*pcli)->relax = 0;   /* not relax on error */
     (*pcli)->invalid = 0; /* not invalid */
     (*pcli)->pollitem.handler = on_client_event;
     (*pcli)->pollitem.closure = (*pcli);
