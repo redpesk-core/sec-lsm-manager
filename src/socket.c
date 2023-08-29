@@ -26,6 +26,8 @@
 /******************************************************************************/
 /******************************************************************************/
 
+#include "socket.h"
+
 #include <stddef.h>
 #include <assert.h>
 #include <endian.h>
@@ -44,8 +46,6 @@
 #if WITH_SYSTEMD
 #include <systemd/sd-daemon.h>
 #endif
-
-#include "socket.h"
 
 #define BACKLOG 8
 

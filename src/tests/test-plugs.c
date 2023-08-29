@@ -21,10 +21,9 @@
  * $RP_END_LICENSE$
  */
 
-#include <stdio.h>
-
-#include "../plugs.c"
 #include "setup-tests.h"
+
+#include "plugs.h"
 
 START_TEST(test_plugset_init)
 {

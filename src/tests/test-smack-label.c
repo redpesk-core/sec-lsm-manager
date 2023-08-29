@@ -15,12 +15,9 @@
  * limitations under the License.
  */
 
-#if SIMULATE_SMACK
-#include "../simulation/smack/smack.c"
-#endif
-
-#include "../smack-template.c"
 #include "setup-tests.h"
+
+#include "smack-template.h"
 
 START_TEST(test_init_path_type_definitions) {
     path_type_definitions_t path_type_definitions[number_path_type];

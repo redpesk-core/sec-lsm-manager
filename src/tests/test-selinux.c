@@ -15,14 +15,6 @@
  * limitations under the License.
  */
 
-#if SIMULATE_SELINUX
-#include "../simulation/selinux/selinux.c"
-#else
-#include "../selinux-compile.c"
-#endif
-
-#include "../selinux.c"
-#include "./test-selinux-template.c"
 #include "setup-tests.h"
 
 START_TEST(test_selinux_process_paths) {

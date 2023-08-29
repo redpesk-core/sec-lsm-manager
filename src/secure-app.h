@@ -43,6 +43,13 @@ typedef struct secure_app {
 } secure_app_t;
 
 /**
+ * @brief Initialize the fields 'id', 'id_underscore', 'permission_set', 'path_set' and error_flag
+ *
+ * @param[in] secure_app handler
+ */
+extern void init_secure_app(secure_app_t *secure_app) __nonnull();
+
+/**
  * @brief Create the secure app and init it
  *
  * This secure app need to be destroy at the end

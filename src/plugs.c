@@ -21,13 +21,14 @@
  * $RP_END_LICENSE$
  */
 
+#include "plugs.h"
+
 #include <errno.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "log.h"
 #include "utils.h"
-#include "plugs.h"
 
 __nonnull()
 void plugset_init(plugset_t *plugset)

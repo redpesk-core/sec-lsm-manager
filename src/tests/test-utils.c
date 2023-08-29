@@ -26,8 +26,9 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-#include "../utils.c"
 #include "setup-tests.h"
+
+#include "utils.h"
 
 START_TEST(test_check_file_exists) {
     bool exists;

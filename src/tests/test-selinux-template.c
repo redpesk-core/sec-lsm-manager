@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 
-#include "../selinux-template.c"
 #include "setup-tests.h"
 
 #define TESTID "testid-binding"

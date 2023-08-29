@@ -48,7 +48,7 @@
  * @param[in] label The label that will be used when exec
  * @return 0 in case of success or a negative -errno value
  */
-__nonnull() __wur static int label_exec(const char *path, const char *label) {
+__nonnull() __wur int label_exec(const char *path, const char *label) {
     char *test_exec = strstr(label, suffix_exec);
     if (test_exec == NULL || strcmp(test_exec, suffix_exec)) {
         ERROR("%s not end with %s", label, suffix_exec);
@@ -174,7 +174,7 @@ static int set_smack_labels(const char *path, const char *label, bool is_executa
  * @return 0 in case of success or a negative -errno value
  */
 __nonnull((1, 2)) __wur
-static int label_path(const char *path, const char *label, bool is_executable, bool is_transmute) {
+int label_path(const char *path, const char *label, bool is_executable, bool is_transmute) {
     if (label[0])
         return set_smack_labels(path, label, is_executable, is_transmute);
     else

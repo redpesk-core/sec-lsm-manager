@@ -28,12 +28,6 @@
 
 #include "secure-app.h"
 
-#if SIMULATE_SMACK
-#include "simulation/smack/smack.h"
-#else
-#include <sys/smack.h>
-#endif
-
 extern char suffix_exec[];
 
 typedef struct path_type_definitions {

@@ -15,9 +15,9 @@
  * limitations under the License.
  */
 
-#include "../cynagora-interface.h"
 #include "setup-tests.h"
 
+#include "../cynagora-interface.h"
 #define CYNAGORA_SELECT_ALL "#"
 
 static void list(void *closure, const cynagora_key_t *key, const cynagora_value_t *value) {

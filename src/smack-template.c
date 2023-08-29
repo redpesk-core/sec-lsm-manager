@@ -30,6 +30,12 @@
 #include <string.h>
 #include <unistd.h>
 
+#if SIMULATE_SMACK
+#include "simulation/smack/smack.h"
+#else
+#include <sys/smack.h>
+#endif
+
 #include "log.h"
 #include "template.h"
 #include "utils.h"

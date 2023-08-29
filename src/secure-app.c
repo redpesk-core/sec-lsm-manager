@@ -21,13 +21,14 @@
  * $RP_END_LICENSE$
  */
 
+#include "secure-app.h"
+
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/socket.h>
 
-#include "secure-app.h"
 #include "log.h"
 #include "utils.h"
 
@@ -54,7 +55,7 @@
  *
  * @param[in] secure_app handler
  */
-__nonnull() static void init_secure_app(secure_app_t *secure_app) {
+__nonnull() void init_secure_app(secure_app_t *secure_app) {
     memset(secure_app->id, '\0', SEC_LSM_MANAGER_MAX_SIZE_ID);
     memset(secure_app->id_underscore, '\0', SEC_LSM_MANAGER_MAX_SIZE_ID);
     memset(secure_app->label, '\0', SEC_LSM_MANAGER_MAX_SIZE_LABEL);

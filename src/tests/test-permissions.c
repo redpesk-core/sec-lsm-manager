@@ -15,8 +15,9 @@
  * limitations under the License.
  */
 
-#include "../permissions.c"
 #include "setup-tests.h"
+
+#include "permissions.h"
 
 START_TEST(test_init_permission_set) {
     permission_set_t permission_set;

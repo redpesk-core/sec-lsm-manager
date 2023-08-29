@@ -21,6 +21,8 @@
  * $RP_END_LICENSE$
  */
 
+#include "template.h"
+
 #include <errno.h>
 #include <fcntl.h>
 #include <stdio.h>
@@ -34,7 +36,6 @@
 #include "mustach/mustach.h"
 #include "secure-app.h"
 #include "utils.h"
-#include "template.h"
 
 typedef struct {
         const secure_app_t *secure_app;

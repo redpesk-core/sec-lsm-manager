@@ -21,9 +21,11 @@
  * $RP_END_LICENSE$
  */
 
-#include "../secure-app.c"
-#include "../cynagora-interface.c"
 #include "setup-tests.h"
+
+#include <errno.h>
+
+#include "secure-app.h"
 
 START_TEST(test_init_secure_app) {
     secure_app_t secure_app;

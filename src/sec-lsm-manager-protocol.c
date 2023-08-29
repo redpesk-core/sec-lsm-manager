@@ -24,7 +24,6 @@
 
 #include "sec-lsm-manager-protocol.h"
 
-#include <stdio.h>
 #include <stdlib.h>
 
 const char _clear_[] = "clear";

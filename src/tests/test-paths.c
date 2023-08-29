@@ -21,10 +21,12 @@
  * $RP_END_LICENSE$
  */
 
-#include <stdio.h>
-
-#include "../paths.c"
 #include "setup-tests.h"
+
+#include <stdio.h>
+#include <errno.h>
+
+#include "paths.h"
 
 START_TEST(test_init_path_set) {
     path_set_t path_set;

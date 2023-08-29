@@ -32,12 +32,12 @@ add_compile_definitions(VERSION="${PROJECT_VERSION}")
 message("\n[*] Create : libsec-lsm-manager")
 
 add_library(sec-lsm-manager STATIC
-    utils.c
-    prot.c
-    socket.c
     log.c
-    sec-lsm-manager-protocol.c
+    prot.c
     sec-lsm-manager.c
+    sec-lsm-manager-protocol.c
+    socket.c
+    utils.c
 )
 install(TARGETS sec-lsm-manager LIBRARY DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR})
 install(FILES sec-lsm-manager.h DESTINATION ${CMAKE_INSTALL_FULL_INCLUDEDIR})
@@ -48,10 +48,8 @@ message("[x] Done : libsec-lsm-manager\n")
 # build and install sec-lsm-manager-smackd and sec-lsm-manager-selinuxd
 #######################################################################
 
-##########################################################################
-# define server sources
-
-set(SERVER_SOURCES
+# common sources
+add_library(common-lib OBJECT
     cynagora-interface.c
     log.c
     mustach/mustach.c
@@ -60,97 +58,83 @@ set(SERVER_SOURCES
     plugs.c
     pollitem.c
     prot.c
-    secure-app.c
-    socket.c
-    template.c
-    utils.c
+    sec-lsm-manager.c
     sec-lsm-manager-protocol.c
     sec-lsm-manager-server.c
+    template.c
+    utils.c
 )
-
 if(SIMULATE_CYNAGORA)
-    set(SERVER_SOURCES ${SERVER_SOURCES} simulation/cynagora/cynagora.c)
+    target_sources(common-lib PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/simulation/cynagora/cynagora.c)
+else()
+    target_link_libraries(common-lib PUBLIC ${cynagora_LDFLAGS} ${cynagora_LINK_LIBRARIES})
+    target_include_directories(common-lib PUBLIC ${cynagora_INCLUDE_DIRS})
+    target_compile_options(common-lib PUBLIC ${cynagora_CFLAGS})
+    message("[-] Link : cynagora")
 endif()
-
 if(SIMULATE_SMACK)
-    set(SERVER_SOURCES ${SERVER_SOURCES} simulation/smack/smack.c)
+    target_sources(common-lib PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/simulation/smack/smack.c)
 endif()
-
 if(SIMULATE_SELINUX)
-    set(SERVER_SOURCES ${SERVER_SOURCES} simulation/selinux/selinux.c)
+    target_sources(common-lib PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/simulation/selinux/selinux.c)
 endif()
 
+# socket (without or with systemd)
+add_library(socket-std  OBJECT socket.c)
+add_library(socket-srv  OBJECT socket.c)
+if(WITH_SYSTEMD)
+    target_compile_definitions(socket-srv PUBLIC WITH_SYSTEMD=1)
+    target_link_libraries(socket-srv PUBLIC ${libsystemd_LDFLAGS} ${libsystemd_LINK_LIBRARIES})
+    target_include_directories(socket-srv PUBLIC ${libsystemd_INCLUDE_DIRS})
+    target_compile_options(socket-srv PUBLIC ${libsystemd_CFLAGS})
+    message("[-] Link : libsystemd")
+endif()
+
+# smack part
 if(WITH_SMACK)
-    set(SERVER_SOURCES_SMACK ${SERVER_SOURCES} smack-template.c smack.c)
+    add_library(app-smack OBJECT secure-app.c smack-template.c smack.c)
+    target_compile_definitions(app-smack PUBLIC WITH_SMACK)
+
+    if(NOT SIMULATE_SMACK)
+        target_link_libraries(app-smack PUBLIC ${libsmack_LDFLAGS} ${libsmack_LINK_LIBRARIES})
+        target_include_directories(app-smack PUBLIC ${libsmack_INCLUDE_DIRS})
+        target_compile_options(app-smack PUBLIC ${libsmack_CFLAGS})
+        message("[-] Link : libsmack")
+    endif()
 endif()
 
+# selinux part
 if(WITH_SELINUX)
-    set(SERVER_SOURCES_SELINUX ${SERVER_SOURCES} selinux.c selinux-template.c)
+    add_library(app-selinux OBJECT secure-app.c selinux.c selinux-template.c)
+    target_compile_definitions(app-selinux PRIVATE WITH_SELINUX)
+
+    if(NOT SIMULATE_SELINUX)
+        target_sources(app-selinux PUBLIC selinux-compile.c)
+        target_link_libraries(app-selinux PUBLIC ${libselinux_LDFLAGS} ${libselinux_LINK_LIBRARIES})
+        target_include_directories(app-selinux PUBLIC ${libselinux_INCLUDE_DIRS})
+        target_compile_options(app-selinux PUBLIC ${libselinux_CFLAGS})
+        target_link_libraries(app-selinux PUBLIC ${libsemanage_LDFLAGS} ${libsemanage_LINK_LIBRARIES})
+        target_include_directories(app-selinux PUBLIC ${libsemanage_INCLUDE_DIRS})
+        target_compile_options(app-selinux PUBLIC ${libsemanage_CFLAGS})
+        message("[-] Link : libselinux")
+        message("[-] Link : libsemanage")
+    endif()
 endif()
 
-if((NOT SIMULATE_SELINUX) AND WITH_SELINUX)
-    set(SERVER_SOURCES_SELINUX ${SERVER_SOURCES_SELINUX} selinux-compile.c)
-endif()
-
-
-function(build_daemon_for_mac MAC_NAME)
+function(daemon_for_mac MAC_NAME)
     message("[*] Create : sec-lsm-manager-${MAC_NAME}d")
-    if(${MAC_NAME} STREQUAL "smack")
-        add_executable(sec-lsm-manager-smackd main-sec-lsm-managerd.c ${SERVER_SOURCES_SMACK})
-        target_compile_definitions(sec-lsm-manager-smackd PRIVATE WITH_SMACK)
-
-        if(NOT SIMULATE_SMACK)
-            target_link_libraries(sec-lsm-manager-smackd ${libsmack_LDFLAGS} ${libsmack_LINK_LIBRARIES})
-            target_include_directories(sec-lsm-manager-smackd PRIVATE ${libsmack_INCLUDE_DIRS})
-            target_compile_options(sec-lsm-manager-smackd PRIVATE ${libsmack_CFLAGS})
-            message("[-] Link : libsmack")
-        endif()
-    endif()
-
-    if(${MAC_NAME} STREQUAL "selinux")
-        add_executable(sec-lsm-manager-selinuxd main-sec-lsm-managerd.c ${SERVER_SOURCES_SELINUX})
-        target_compile_definitions(sec-lsm-manager-selinuxd PRIVATE WITH_SELINUX)
-        if(NOT SIMULATE_SELINUX)
-            target_link_libraries(sec-lsm-manager-selinuxd ${libselinux_LDFLAGS} ${libselinux_LINK_LIBRARIES})
-            target_include_directories(sec-lsm-manager-selinuxd PRIVATE ${libselinux_INCLUDE_DIRS})
-            target_compile_options(sec-lsm-manager-selinuxd PRIVATE ${libselinux_CFLAGS})
-            target_link_libraries(sec-lsm-manager-selinuxd ${libsemanage_LDFLAGS} ${libsemanage_LINK_LIBRARIES})
-            target_include_directories(sec-lsm-manager-selinuxd PRIVATE ${libsemanage_INCLUDE_DIRS})
-            target_compile_options(sec-lsm-manager-selinuxd PRIVATE ${libsemanage_CFLAGS})
-            message("[-] Link : libselinux")
-            message("[-] Link : libsemanage")
-        endif()
-    endif()
-
-    target_link_libraries(sec-lsm-manager-${MAC_NAME}d cap)
-
-    if(NOT SIMULATE_CYNAGORA)
-        target_link_libraries(sec-lsm-manager-${MAC_NAME}d ${cynagora_LDFLAGS} ${cynagora_LINK_LIBRARIES})
-        target_include_directories(sec-lsm-manager-${MAC_NAME}d PRIVATE ${cynagora_INCLUDE_DIRS})
-        target_compile_options(sec-lsm-manager-${MAC_NAME}d PRIVATE ${cynagora_CFLAGS})
-        message("[-] Link : cynagora")
-    endif()
-
-    if(WITH_SYSTEMD)
-        target_compile_definitions(sec-lsm-manager-${MAC_NAME}d PRIVATE WITH_SYSTEMD=1)
-        target_link_libraries(sec-lsm-manager-${MAC_NAME}d ${libsystemd_LDFLAGS} ${libsystemd_LINK_LIBRARIES})
-        target_include_directories(sec-lsm-manager-${MAC_NAME}d PRIVATE ${libsystemd_INCLUDE_DIRS})
-        target_compile_options(sec-lsm-manager-${MAC_NAME}d PRIVATE ${libsystemd_CFLAGS})
-        message("[-] Link : libsystemd")
-    endif()
-
-    install(TARGETS sec-lsm-manager-${MAC_NAME}d
-        RUNTIME DESTINATION ${CMAKE_INSTALL_FULL_BINDIR})
-
+    add_executable(sec-lsm-manager-${MAC_NAME}d main-sec-lsm-managerd.c)
+    target_link_libraries(sec-lsm-manager-${MAC_NAME}d PUBLIC cap common-lib socket-srv app-${MAC_NAME})
+    install(TARGETS sec-lsm-manager-${MAC_NAME}d RUNTIME DESTINATION ${CMAKE_INSTALL_FULL_BINDIR})
     message("[x] Done : sec-lsm-manager-${MAC_NAME}d\n")
 endfunction()
 
 if(WITH_SMACK)
-    build_daemon_for_mac("smack")
+    daemon_for_mac(smack)
 endif()
 
 if(WITH_SELINUX)
-    build_daemon_for_mac("selinux")
+    daemon_for_mac(selinux)
 endif()
 
 ####################################

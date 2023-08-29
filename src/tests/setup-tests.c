@@ -17,9 +17,12 @@
 
 #include "setup-tests.h"
 
-#include "../log.c"
-#include "../mustach/mustach.c"
-#include "../template.c"
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/xattr.h>
+#include <unistd.h>
+
+#include "utils.h"
 
 Suite *suite;
 TCase *tcase;

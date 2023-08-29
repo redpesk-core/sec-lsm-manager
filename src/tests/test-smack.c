@@ -15,9 +15,24 @@
  * limitations under the License.
  */
 
-#include "../smack.c"
-#include "./test-smack-label.c"
 #include "setup-tests.h"
+
+#include <stdio.h>
+#include <unistd.h>
+#include <sys/stat.h>
+#include <errno.h>
+#include <linux/xattr.h>
+
+#if SIMULATE_SMACK
+#include "simulation/smack/smack.h"
+#else
+#include <sys/smack.h>
+#endif
+
+#include "utils.h"
+#include "secure-app.h"
+#include "smack.h"
+#include "smack-template.h"
 
 // START_TEST(test_label_file) {
 //     char label[SEC_LSM_MANAGER_MAX_SIZE_LABEL] = {'\0'};
