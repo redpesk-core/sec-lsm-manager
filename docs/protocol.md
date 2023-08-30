@@ -17,7 +17,7 @@ The 3 characters SPACE, LF and BACKSLASH must be escaped if present in fields.
 Escaping these characters means inserting before it the escaping character backslash.
 
 ```
-          LINE ::= FIELD [ SPACE FILED ]... LF
+          LINE ::= FIELD [ SPACE FIELD ]... LF
 
          FIELD ::= [ FIELD-CHAR ]...
 
