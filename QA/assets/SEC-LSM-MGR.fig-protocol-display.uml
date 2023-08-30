@@ -1,0 +1,12 @@
+@startebnf
+
+DISPLAY-QUERY = "display";
+
+DISPLAY-REPLY = { "string", ( "error", "on"
+                            | "id", ID
+                            | "path", PATH, TYPE
+                            | "permission", PERMISSION
+                            | "plug", PATH, ID, PATH ) },
+                ( "done" | "error", "internal" );
+
+@endebnf

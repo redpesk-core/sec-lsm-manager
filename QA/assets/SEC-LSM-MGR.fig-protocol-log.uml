@@ -1,0 +1,7 @@
+@startebnf
+
+LOG-QUERY = "log", [( "on" | "off" )];
+
+LOG-REPLY = "done", ( "on" | "off" );
+
+@endebnf

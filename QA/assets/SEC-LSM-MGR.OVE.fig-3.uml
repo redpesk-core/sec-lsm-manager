@@ -1,0 +1,20 @@
+@startuml
+
+package "Application Manager" as appmgr {
+   class logical_policy
+}
+
+package "Linux Kernel" as linux {
+   class real_policy
+}
+
+logical_policy - real_policy
+(logical_policy, real_policy) .. secmgr
+
+class "SEC-LSM-MANAGER" as secmgr {
+   instanciate()
+   deinstanciate()
+}
+
+@enduml
+

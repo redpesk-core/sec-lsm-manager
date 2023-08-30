@@ -1,0 +1,7 @@
+@startebnf
+
+CLEAR-QUERY = "clear";
+
+CLEAR-REPLY = "done";
+
+@endebnf

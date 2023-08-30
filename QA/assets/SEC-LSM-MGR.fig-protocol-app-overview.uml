@@ -1,0 +1,8 @@
+@startebnf
+
+'title Protocol of SEC-LSM-MANAGER, overview
+
+PROTOCOL = [ HELLO ], { ( INFO | SETTING | ACTION ) };
+
+
+@endebnf

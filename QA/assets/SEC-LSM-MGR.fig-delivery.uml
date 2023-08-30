@@ -1,0 +1,16 @@
+@startuml
+
+component "SEC-LSM-MGR" {
+artifact service
+artifact library
+artifact tool
+artifact documentation
+}
+
+"SEC-LSM-MGR" -- service
+"SEC-LSM-MGR" -- library
+"SEC-LSM-MGR" -- tool
+"SEC-LSM-MGR" -- documentation
+
+@enduml
+

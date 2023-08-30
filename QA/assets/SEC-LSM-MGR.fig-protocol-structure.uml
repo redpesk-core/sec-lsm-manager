@@ -1,0 +1,7 @@
+@startebnf
+
+QUERY = KEY, { "SP", ARG }, "LF";
+
+REPLY = [ KEY, { "SP", DATA }, "LF" ], ( "done" | "error" ), { "SP", VALUE }, "LF";
+
+@endebnf

@@ -1,0 +1,26 @@
+@startuml
+
+component SEC-LSM-MGR {
+  () API
+  [server]
+  [protocol]
+  [configuration]
+  [permission]
+  [template]
+  [system]
+  [tool]
+  [library]
+  tool -> API
+  API - library
+  library -- protocol
+  protocol -- server
+  server -- permission
+  server - system
+  system - template
+}
+system --- [linux kernel]
+system --- [file system]
+permission --- [CYNAGORA]
+
+@enduml
+

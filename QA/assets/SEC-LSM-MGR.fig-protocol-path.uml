@@ -1,0 +1,13 @@
+@startebnf
+
+PATH-QUERY = "path", PATH, PATH-TYPE;
+
+PATH-REPLY = "done" | "error", ( "invalid"
+                               | "already-set"
+                               | "not-found"
+                               | "no-access"
+                               | "not-recoverable"
+                               | "internal" );
+
+
+@endebnf

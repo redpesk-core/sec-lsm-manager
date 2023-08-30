@@ -1,0 +1,7 @@
+@startebnf
+
+ID-QUERY = "id", ID;
+
+ID-REPLY = "done" | "error", ( "invalid" | "already-set" | "not-recoverable" | "internal" );
+
+@endebnf

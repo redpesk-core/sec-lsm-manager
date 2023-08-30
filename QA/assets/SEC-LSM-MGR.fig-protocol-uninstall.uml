@@ -1,0 +1,7 @@
+@startebnf
+
+UNINSTALL-QUERY = "uninstall";
+
+UNINSTALL-REPLY = "done" | "error", ( "invalid" | "not-recoverable" | "internal" );
+
+@endebnf

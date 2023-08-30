@@ -1,0 +1,13 @@
+@startebnf
+
+'title Protocol of SEC-LSM-MANAGER, presentation
+
+STREAM = { LINE };
+
+LINE = [ FIELD, { "SPACE", FIELD } ], "LF";
+
+FIELD = { ( "any character except SPACE, LF or BACKSLASH"
+     | "BACKSLASH", [ ( "SPACE" | "LF" | "BACKSLASH" ) ] ) };
+
+@endebnf
+

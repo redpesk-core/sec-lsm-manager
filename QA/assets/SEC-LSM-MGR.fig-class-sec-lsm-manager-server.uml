@@ -1,0 +1,32 @@
+@startuml
+
+class "sec-lsm-manager-server" as slms {
+  - fd
+  - synclock
+  - prot
+  - reply
+  + {static} create(socketspec)
+  + destroy()
+  + disconnect()
+  + clear()
+  + set_id(id)
+  + add_path(path,type)
+  + add_permission(permission)
+  + add_plug(path,id,topath)
+  + install()
+  + uninstall()
+  + log(on,off)
+  + display()
+}
+
+class prot
+
+slm *-right- prot
+
+class socket {
+  + open(spec)
+}
+
+slm -left- socket
+
+@enduml

@@ -1,0 +1,24 @@
+@startuml
+
+state no_install_possible {
+   state empty : no property received
+   state need_id : received property needing an ID\nBut not received any ID
+}
+state install_allowed {
+  state no_id : received properties not needing ID
+  state has_id : received an ID
+}
+
+[*] -> empty
+
+empty --> no_id
+empty --> need_id
+empty --> has_id
+
+no_id --> need_id
+no_id --> has_id
+
+need_id --> has_id
+
+@enduml
+

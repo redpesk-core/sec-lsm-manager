@@ -1,0 +1,28 @@
+@startuml
+
+left to right direction
+
+[Linux kernel] as kernel
+() SELinux
+() SMACK
+SELinux -- kernel
+SMACK -- kernel
+
+[SEC-LSM-MANAGER] as seclsm
+() setup as seclsmadm
+seclsmadm -- seclsm
+
+[CYNAGORA] as cynagora
+() query as cynque
+() admin as cynadm
+cynque -- cynagora
+cynadm -- cynagora
+
+seclsm --> SELinux
+seclsm --> SMACK
+seclsm --> cynadm
+
+note top of seclsmadm : restricted access
+
+@enduml
+

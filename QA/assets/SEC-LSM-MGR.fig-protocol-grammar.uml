@@ -1,0 +1,23 @@
+@startebnf
+
+!pragma compact
+
+PROTOCOL = [ HELLO ], { ( INFO | SETTING | ACTION ) };
+
+HELLO = Q, "sec-lsm-manager", "1", R, ( "done", "1" | "error", "protocol" );
+
+INFO = Q, ( "log", [( "on" | "off" )], R, "done", ( "on" | "off" )
+          | "display", R, { "string", ("id", ID | "path", PATH, TYPE
+                                      | "permission", PERMISSION | "plug", PATH, ID, PATH ) }, 
+                            ( "done" | "error", TEXT ));
+
+SETTING = Q, ( "id", ID
+               | "path", PATH, TYPE
+               | "permission", PERMISSION
+               | "plug", PATH, ID, PATH ),
+               R, ("done" | "error", TEXT );
+
+ACTION = Q, ( "clear", R, "done"
+            | ( "install" | "uninstall" ), R, ( "done" | "error", TEXT ) );
+
+@endebnf

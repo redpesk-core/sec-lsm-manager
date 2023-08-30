@@ -1,0 +1,18 @@
+@startuml
+
+hide empty description
+
+'title States of the protocol
+
+state init
+state run
+state error
+
+init  --> run : HELLO
+init  -[dotted]-> run
+run   --> run : success
+run   --> error : error
+error --> error
+error --> run : CLEAR
+
+@enduml

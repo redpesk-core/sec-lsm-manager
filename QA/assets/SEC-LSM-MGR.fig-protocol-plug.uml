@@ -1,0 +1,13 @@
+@startebnf
+
+PLUG-QUERY = "plug", EXPORTED, APPID, IMPORT;
+
+PLUG-REPLY = "done" | "error", ( "invalid"
+                               | "already-set"
+                               | "not-found"
+                               | "no-access"
+                               | "not-dir"
+                               | "not-recoverable"
+                               | "internal" );
+
+@endebnf

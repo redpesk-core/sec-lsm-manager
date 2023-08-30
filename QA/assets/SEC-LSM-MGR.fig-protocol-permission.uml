@@ -1,0 +1,11 @@
+@startebnf
+
+PERMISSION-QUERY = "permission", PERMISSION;
+
+PERMISSION-REPLY = "done"
+                 | "error", ( "bad-permission"
+                            | "permission-already-set"
+                            | "not-recoverable"
+                            | "internal" );
+
+@endebnf

@@ -1,0 +1,7 @@
+@startebnf
+
+HELLO-QUERY = "sec-lsm-manager", "1";
+
+HELLO-REPLY = "done", "1" | "error", "protocol";
+
+@endebnf

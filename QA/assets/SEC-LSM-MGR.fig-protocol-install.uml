@@ -1,0 +1,7 @@
+@startebnf
+
+INSTALL-QUERY = "install";
+
+INSTALL-REPLY = "done" | "error", ( "invalid" | "forbidden" | "not-recoverable" | "internal" );
+
+@endebnf

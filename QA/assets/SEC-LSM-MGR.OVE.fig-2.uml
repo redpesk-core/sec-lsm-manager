@@ -1,0 +1,15 @@
+@startuml
+
+left to right direction
+
+[SEC-LSM-MANAGER] as seclsm
+() setup as seclsmadm
+seclsmadm -- seclsm
+
+[application\nmanager] as appmgr
+appmgr --> seclsmadm
+
+note top of seclsmadm : restricted access
+
+@enduml
+

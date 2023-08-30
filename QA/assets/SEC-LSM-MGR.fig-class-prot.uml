@@ -1,0 +1,64 @@
+@startuml
+class prot {
+  - inbuf: buf
+  - outbuf: buf
+  - outfields
+  - cancelidx
+  - allow_empty
+  - fields: fields
+  ..
+  - FIELD_SEPARATOR = SPACE (32)
+  - RECORD_SEPARATOR = LINE-FEED (10)
+  - ESCAPE = ESCAPE (27)
+  ..
+  - MAX_FIELDS = 20
+  - MAX_BUFFER_LENGTH = 2000
+  --
+  .. life cycle ..
+  + {static} create()
+  + destroy()
+  + reset()
+  .. setting ..
+  + prot_is_empty_allowed
+  + prot_set_allow_empty
+  .. composition ..
+  + put_cancel()
+  + put_end()
+  + put_field(field)
+  + put_fields(count,fields[])
+  + put(count,fields[])
+  + putx(field,...)
+  .. writing ..
+  + should_write()
+  + write(fdout)
+  .. reading ..
+  + can_read()
+  + read(fdin)
+  .. extracting ..
+  + get(out fields[]): count
+  + next()
+}
+
+class buf {
+  # pos
+  # count
+  # content[MAX_BUFFER_LENGTH]
+  # put_car(car)
+  # put_string(string)
+  # write(fdout)
+  # get_fields(inout fields)
+  # scan_end_record()
+  # crop()
+  # read(fdin)
+}
+
+class fields {
+  # count
+  # fields[MAX_FIELDS]
+}
+
+prot o-right- buf
+prot o-left- fields
+
+@enduml
+
