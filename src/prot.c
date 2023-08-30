@@ -336,13 +336,9 @@ void prot_put_cancel(prot_t *prot) {
 int prot_put_end(prot_t *prot) {
     int rc;
 
-    if (!prot->outfields)
-        rc = 0;
-    else {
-        rc = buf_put_car(&prot->outbuf, RECORD_SEPARATOR);
-        if (rc == 0)
-            prot->outfields = 0;
-    }
+    rc = buf_put_car(&prot->outbuf, RECORD_SEPARATOR);
+    if (rc == 0)
+        prot->outfields = 0;
     return rc;
 }
 
