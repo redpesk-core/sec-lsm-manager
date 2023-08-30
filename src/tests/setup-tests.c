@@ -37,10 +37,10 @@ void addtcase(const char *name) {
 
 void addtest(const TTest *fun) { tcase_add_test(tcase, fun); }
 
-int srun(const char *log_file) {
+int srun(const char *tapfile) {
     int nerr;
     SRunner *srunner = srunner_create(suite);
-    srunner_set_tap(srunner, log_file);
+    srunner_set_tap(srunner, tapfile);
     srunner_run_all(srunner, CK_NORMAL);
     nerr = srunner_ntests_failed(srunner);
     srunner_free(srunner);
@@ -79,13 +79,7 @@ bool compare_xattr(const char *path, const char *xattr, const char *value) {
 }
 
 int main(int argc, char const *argv[]) {
-    char log_file[SEC_LSM_MANAGER_MAX_SIZE_PATH];
-    if (argc != 2) {
-        printf("Usage : %s log_file.tap\n", argv[0]);
-        return -1;
-    }
-
-    secure_strncpy(log_file, argv[1], SEC_LSM_MANAGER_MAX_SIZE_PATH);
+    const char *tapfile = argc > 1 ? argv[1] : "/dev/stdout";
 
     mksuite("tests");
 
@@ -118,5 +112,5 @@ int main(int argc, char const *argv[]) {
     test_selinux();
 #endif
 
-    return !!srun(log_file);
+    return !!srun(tapfile);
 }

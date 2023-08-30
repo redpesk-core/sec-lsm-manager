@@ -2,17 +2,6 @@
 #include <check.h>
 #include <stdbool.h>
 
-/*
-#include <fcntl.h>
-#include <linux/xattr.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <sys/xattr.h>
-#include <unistd.h>
-*/
-
 extern void mksuite(const char *name);
 
 extern void addtcase(const char *name);
