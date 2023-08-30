@@ -18,6 +18,8 @@ extern void create_tmp_file(char tmp_file[TMP_MIN_LENGTH]);
 extern void create_etc_tmp_file(char tmp_file[TMP_MIN_LENGTH]);
 
 extern bool compare_xattr(const char *path, const char *xattr, const char *value);
+
+extern void test_prot(void);
 extern void test_paths(void);
 extern void test_plugs(void);
 extern void test_permissions(void);

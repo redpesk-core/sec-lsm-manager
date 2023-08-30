@@ -83,6 +83,9 @@ int main(int argc, char const *argv[]) {
 
     mksuite("tests");
 
+    addtcase("prot");
+    test_prot();
+
     addtcase("paths");
     test_paths();
 
