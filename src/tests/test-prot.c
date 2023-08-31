@@ -44,8 +44,8 @@ const char *data[] = {
 	"", "second", "third", "", "fifth", NULL,
 
 	/* escaping chars */
-	"\\  sec\\\\ond th\\\nird \\  fi\\ fth\n",
-	" ", "sec\\ond", "th\nird", " ", "fi fth", NULL,
+	"\\  sec\\ond th\\\nird \\  fi\\ fth\\\\\n",
+	" ", "sec\\ond", "th\nird", " ", "fi fth\\", NULL,
 
 	/* end */
 	NULL
@@ -139,6 +139,59 @@ static void test_writing(void (*put)(prot_t *prot, const char **fields, int coun
 }
 
 
+static void test_reading(void) {
+
+    const char **fields;
+    int i, j, n, sts, fds[2];
+    prot_t *prot = NULL;
+
+    // create the prot object
+    prot_create(&prot);
+    ck_assert_ptr_ne(NULL, prot);
+
+    // creates the pipe
+    sts = pipe(fds);
+    ck_assert_int_eq(0, sts);
+
+    // iterate over samples
+    for (i = 0; data[i] != NULL ; i = i + n + 2) {
+
+        // write the pipe
+        n = (int)strlen(data[i]);
+        sts = (int)write(fds[1], data[i], (unsigned)n);
+        ck_assert_int_eq(sts, n);
+
+        // read the buffer
+        sts = prot_read(prot, fds[0]);
+        ck_assert_int_eq(sts, n);
+
+        // receive fields
+        n = prot_get(prot, &fields);
+        ck_assert_int_le(0, n);
+
+        // check each field
+        for (j = 0 ; j < n ; j++)
+            ck_assert_str_eq(data[i + j + 1], fields[j]);
+
+        // check count
+        ck_assert_ptr_eq(NULL, data[i + n + 1]);
+
+        // check it remains
+        j = prot_get(prot, NULL);
+        ck_assert_int_eq(j, n);
+
+        // check it is cleaned
+        prot_next(prot);
+        j = prot_get(prot, NULL);
+        ck_assert_int_eq(-EAGAIN, j);
+    }
+    // cleaning
+    close(fds[0]);
+    close(fds[1]);
+    prot_destroy(prot);
+}
+
+
 START_TEST(test_prot_create) {
     prot_t *prot = NULL;
     prot_create(&prot);
@@ -163,9 +216,15 @@ START_TEST(test_prot_put_all) {
 }
 END_TEST
 
+START_TEST(test_prot_read) {
+    test_reading();
+}
+END_TEST
+
 void test_prot(void) {
     addtest(test_prot_create);
     addtest(test_prot_put_field_by_field);
     addtest(test_prot_put_all_fields);
     addtest(test_prot_put_all);
+    addtest(test_prot_read);
 }

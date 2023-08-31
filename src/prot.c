@@ -119,7 +119,7 @@ static int buf_put_car(buf_t *buf, char car) {
  *  - -ECANCELED if there is not enought space in the buffer
  */
 static int buf_put_string(buf_t *buf, const char *string) {
-    unsigned pos, remain;
+    unsigned pos, remain, escape = 0;
     char c;
 
     remain = buf->count;
@@ -131,12 +131,20 @@ static int buf_put_string(buf_t *buf, const char *string) {
     /* put all chars of the string */
     while ((c = *string++)) {
         /* escape special characters */
-        if (c == FIELD_SEPARATOR || c == RECORD_SEPARATOR || c == ESCAPE) {
+        if (c == FIELD_SEPARATOR || c == RECORD_SEPARATOR)
+            escape = 1;
+        else if (c == ESCAPE)
+            escape = *string == 0
+                  || *string == FIELD_SEPARATOR
+                  || *string == RECORD_SEPARATOR
+                  || *string == ESCAPE;
+        if (escape) {
             if (!remain--)
                 goto cancel;
             buf->content[pos++] = ESCAPE;
             if (pos == MAX_BUFFER_LENGTH)
                 pos = 0;
+            escape = 0;
         }
         /* put the char */
         if (!remain--)
