@@ -87,6 +87,9 @@ struct prot {
     /** cancel index when putting values */
     unsigned cancelidx;
 
+    /** allow empty records */
+    int allow_empty;
+
     /** the fields */
     fields_t fields;
 };
@@ -327,6 +330,19 @@ void prot_reset(prot_t *prot) {
     prot->outbuf.pos = prot->outbuf.count = 0;
     prot->outfields = 0;
     prot->fields.count = -1;
+    prot->allow_empty = 0;
+}
+
+/* see prot.h */
+int prot_is_empty_allowed(prot_t *prot)
+{
+	return prot->allow_empty;
+}
+
+/* see prot.h */
+void prot_set_allow_empty(prot_t *prot, int value)
+{
+	prot->allow_empty = !!value;
 }
 
 /* see prot.h */
@@ -342,11 +358,13 @@ void prot_put_cancel(prot_t *prot) {
 
 /* see prot.h */
 int prot_put_end(prot_t *prot) {
-    int rc;
+    int rc = 0;
 
-    rc = buf_put_car(&prot->outbuf, RECORD_SEPARATOR);
-    if (rc == 0)
-        prot->outfields = 0;
+    if (prot->outfields || prot->allow_empty) {
+        rc = buf_put_car(&prot->outbuf, RECORD_SEPARATOR);
+        if (rc == 0)
+            prot->outfields = 0;
+    }
     return rc;
 }
 
@@ -430,14 +448,20 @@ int prot_read(prot_t *prot, int fdin) { return inbuf_read(&prot->inbuf, fdin); }
 
 /* see prot.h */
 int prot_get(prot_t *prot, const char ***fields) {
-    if (prot->fields.count < 0) {
-        if (!buf_scan_end_record(&prot->inbuf))
-            return -EAGAIN;
-        buf_get_fields(&prot->inbuf, &prot->fields);
+    for (;;) {
+        if (prot->fields.count < 0) {
+            if (!buf_scan_end_record(&prot->inbuf))
+                return -EAGAIN;
+            buf_get_fields(&prot->inbuf, &prot->fields);
+        }
+        if (prot->fields.count == 0 && !prot->allow_empty)
+            prot_next(prot);
+        else {
+            if (fields)
+                *fields = prot->fields.fields;
+            return (int)prot->fields.count;
+        }
     }
-    if (fields)
-        *fields = prot->fields.fields;
-    return (int)prot->fields.count;
 }
 
 /* see prot.h */

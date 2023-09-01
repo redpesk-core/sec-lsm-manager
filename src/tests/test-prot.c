@@ -29,33 +29,33 @@
 
 #include "prot.h"
 
-/* the format is LINE [ FIELDS...] NULL until a NULL line */
+/* the format is STREAM [ FIELDS...] NULL until a NULL line */
 const char *data[] = {
-	/* empty lines are allowed */
-	"\n",
-	NULL,
+    /* empty records might be allowed */
+    "\n",
+    NULL,
 
-	/* some arguments */
-	"first second third forth fifth\n",
-	"first", "second", "third", "forth", "fifth", NULL,
+    /* some arguments */
+    "first second third forth fifth\n",
+    "first", "second", "third", "forth", "fifth", NULL,
 
-	/* empty arguments */
-	" second third  fifth\n",
-	"", "second", "third", "", "fifth", NULL,
+    /* empty arguments */
+    " second third  fifth\n",
+    "", "second", "third", "", "fifth", NULL,
 
-	/* escaping chars */
-	"\\  sec\\ond th\\\nird \\  fi\\ fth\\\\\n",
-	" ", "sec\\ond", "th\nird", " ", "fi fth\\", NULL,
+    /* escaping chars */
+    "\\  sec\\ond th\\\nird \\  fi\\ fth\\\\\n",
+    " ", "sec\\ond", "th\nird", " ", "fi fth\\", NULL,
 
-	/* end */
-	NULL
+    /* end */
+    NULL
 };
 
 static int is_reset_state(prot_t *prot)
 {
-	return prot_should_write(prot) == 0
-		&& prot_can_read(prot) != 0
-		&& prot_get(prot, NULL) == -EAGAIN;
+    return prot_should_write(prot) == 0
+        && prot_can_read(prot) != 0
+        && prot_get(prot, NULL) == -EAGAIN;
 }
 
 static void put_all(prot_t *prot, const char **fields, int count) {
@@ -92,7 +92,7 @@ static void put_field_by_field(prot_t *prot, const char **fields, int count) {
     ck_assert_int_eq(0, sts);
 }
 
-static void test_writing(void (*put)(prot_t *prot, const char **fields, int count)) {
+static void test_writing(int allow_empty, void (*put)(prot_t *prot, const char **fields, int count)) {
 
     char buffer[1000];
     int i, n, sts, nrd, fds[2];
@@ -101,6 +101,11 @@ static void test_writing(void (*put)(prot_t *prot, const char **fields, int coun
     // create the prot object
     prot_create(&prot);
     ck_assert_ptr_ne(NULL, prot);
+
+    // set and check allow_empty
+    ck_assert_int_eq(0, prot_is_empty_allowed(prot));
+    prot_set_allow_empty(prot, allow_empty);
+    ck_assert_int_eq(!!allow_empty, prot_is_empty_allowed(prot));
 
     // creates the pipe
     sts = pipe(fds);
@@ -113,12 +118,16 @@ static void test_writing(void (*put)(prot_t *prot, const char **fields, int coun
         sts = prot_should_write(prot);
         ck_assert_int_eq(0, sts);
 
-        // emits field by field
-	for (n = 0 ; data[i + n + 1] != NULL ; n++);
-	put(prot, &data[i + 1], n);
+        // emits fields
+        for (n = 0 ; data[i + n + 1] != NULL ; n++);
+        put(prot, &data[i + 1], n);
 
         // check there is something to write
         sts = prot_should_write(prot);
+        if (n == 0 && !allow_empty) {
+            ck_assert_int_eq(0, sts);
+            continue;
+        }
         ck_assert_int_eq(1, sts);
 
         // write on the pipe
@@ -139,7 +148,7 @@ static void test_writing(void (*put)(prot_t *prot, const char **fields, int coun
 }
 
 
-static void test_reading(void) {
+static void test_reading(int allow_empty) {
 
     const char **fields;
     int i, j, n, sts, fds[2];
@@ -148,6 +157,11 @@ static void test_reading(void) {
     // create the prot object
     prot_create(&prot);
     ck_assert_ptr_ne(NULL, prot);
+
+    // set and check allow_empty
+    ck_assert_int_eq(0, prot_is_empty_allowed(prot));
+    prot_set_allow_empty(prot, allow_empty);
+    ck_assert_int_eq(!!allow_empty, prot_is_empty_allowed(prot));
 
     // creates the pipe
     sts = pipe(fds);
@@ -167,6 +181,10 @@ static void test_reading(void) {
 
         // receive fields
         n = prot_get(prot, &fields);
+        if (!allow_empty && !strcmp(data[i], "\n")) {
+            ck_assert_int_le(-EAGAIN, n);
+            n = 0;
+        }
         ck_assert_int_le(0, n);
 
         // check each field
@@ -177,14 +195,99 @@ static void test_reading(void) {
         ck_assert_ptr_eq(NULL, data[i + n + 1]);
 
         // check it remains
-        j = prot_get(prot, NULL);
-        ck_assert_int_eq(j, n);
+        if (n > 0 || allow_empty) {
+            j = prot_get(prot, NULL);
+            ck_assert_int_eq(j, n);
+        }
 
         // check it is cleaned
         prot_next(prot);
         j = prot_get(prot, NULL);
         ck_assert_int_eq(-EAGAIN, j);
     }
+    // cleaning
+    close(fds[0]);
+    close(fds[1]);
+    prot_destroy(prot);
+}
+
+static void test_write_read(int allow_empty, int urge) {
+
+    const char **fields;
+    int i, j, n, sts, fds[2];
+    prot_t *prot = NULL;
+
+    // create the prot object
+    prot_create(&prot);
+    ck_assert_ptr_ne(NULL, prot);
+
+    // set and check allow_empty
+    ck_assert_int_eq(0, prot_is_empty_allowed(prot));
+    prot_set_allow_empty(prot, allow_empty);
+    ck_assert_int_eq(!!allow_empty, prot_is_empty_allowed(prot));
+
+    // creates the pipe
+    sts = pipe(fds);
+    ck_assert_int_eq(0, sts);
+
+    // send all
+    for (i = 0; data[i] != NULL ; i = i + n + 2) {
+
+        // emits field by field
+        for (n = 0 ; data[i + n + 1] != NULL ; n++);
+        sts = prot_put(prot, (unsigned)n, &data[i + 1]);
+        ck_assert_int_eq(0, sts);
+
+        // write if required
+        if (urge && prot_should_write(prot)) {
+            sts = prot_write(prot, fds[1]);
+            ck_assert_int_le(0, sts);
+            ck_assert_int_eq(sts, (int)strlen(data[i]));
+        }
+    }
+
+    // write all if required
+    while (prot_should_write(prot)) {
+        sts = prot_write(prot, fds[1]);
+        ck_assert_int_le(0, sts);
+    }
+
+    // receive all
+    for (i = 0; data[i] != NULL ; i = i + n + 2) {
+
+        // skip empty line if not received nor transmitted
+        if (data[i + 1] == NULL && !allow_empty) {
+            n = 0;
+            continue;
+        }
+
+        // read the record
+        n = prot_get(prot, &fields);
+        if (n == -EAGAIN) {
+            // read the buffer
+            sts = prot_read(prot, fds[0]);
+            ck_assert_int_gt(sts, 0);
+            n = prot_get(prot, &fields);
+        }
+        ck_assert_int_ge(n, 0);
+
+        // check each field
+        for (j = 0 ; j < n ; j++)
+            ck_assert_str_eq(data[i + j + 1], fields[j]);
+
+        // check count
+        ck_assert_ptr_eq(NULL, data[i + n + 1]);
+
+        // check it remains
+        if (n > 0 || allow_empty) {
+            j = prot_get(prot, NULL);
+            ck_assert_int_eq(j, n);
+        }
+
+        // check it is cleaned
+        prot_next(prot);
+    }
+
     // cleaning
     close(fds[0]);
     close(fds[1]);
@@ -202,22 +305,34 @@ START_TEST(test_prot_create) {
 END_TEST
 
 START_TEST(test_prot_put_field_by_field) {
-    test_writing(put_field_by_field);
+    test_writing(0, put_field_by_field);
+    test_writing(1, put_field_by_field);
 }
 END_TEST
 
 START_TEST(test_prot_put_all_fields) {
-    test_writing(put_all_fields);
+    test_writing(0, put_all_fields);
+    test_writing(1, put_all_fields);
 }
 END_TEST
 
 START_TEST(test_prot_put_all) {
-    test_writing(put_all);
+    test_writing(0, put_all);
+    test_writing(1, put_all);
 }
 END_TEST
 
 START_TEST(test_prot_read) {
-    test_reading();
+    test_reading(0);
+    test_reading(1);
+}
+END_TEST
+
+START_TEST(test_prot_write_read) {
+    test_write_read(0, 0);
+    test_write_read(0, 1);
+    test_write_read(1, 0);
+    test_write_read(1, 1);
 }
 END_TEST
 
@@ -227,4 +342,11 @@ void test_prot(void) {
     addtest(test_prot_put_all_fields);
     addtest(test_prot_put_all);
     addtest(test_prot_read);
+    addtest(test_prot_write_read);
 }
+
+
+
+
+
+

@@ -46,6 +46,26 @@ extern int prot_create(prot_t **prot);
 extern void prot_destroy(prot_t *prot);
 
 /**
+ * @brief Reset the protocol handler 'prot'.
+ * Buffers are cleared and allow_empty reset to no (0).
+ *
+ * @param prot the protocol handler
+ * @return 0 when empties are not allowed or 1 otherwise
+ */
+extern int prot_is_empty_allowed(prot_t *prot);
+
+/**
+ * @brief Set whether protocol handler 'prot' transmits
+ * or not the empty records. When allowed (not the default),
+ * empty records are sent and received. When disallowed
+ * (the default), empty record are not sent nor reported.
+ *
+ * @param prot the protocol handler
+ * @param value 0 for not transmitting or not zero for transmitting
+ */
+extern void prot_set_allow_empty(prot_t *prot, int value);
+
+/**
  * @brief Reset the protocol handler 'prot'
  *
  * @param prot the protocol handler
