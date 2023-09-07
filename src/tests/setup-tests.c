@@ -35,7 +35,11 @@ void addtcase(const char *name) {
     suite_add_tcase(suite, tcase);
 }
 
+#if (CHECK_MAJOR_VERSION <= 0) && (CHECK_MINOR_VERSION < 13)
+void addtest(TFun *fun) { tcase_add_test(tcase, fun); }
+#else
 void addtest(const TTest *fun) { tcase_add_test(tcase, fun); }
+#endif
 
 int srun(const char *tapfile) {
     int nerr;

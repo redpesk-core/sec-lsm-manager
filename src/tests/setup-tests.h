@@ -1,12 +1,16 @@
 
-#include <check.h>
 #include <stdbool.h>
+#include <check.h>
 
 extern void mksuite(const char *name);
 
 extern void addtcase(const char *name);
 
+#if (CHECK_MAJOR_VERSION <= 0) && (CHECK_MINOR_VERSION < 13)
+extern void addtest(TFun *fun);
+#else
 extern void addtest(const TTest *fun);
+#endif
 
 extern int srun(const char *log_file);
 
