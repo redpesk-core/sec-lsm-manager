@@ -106,4 +106,21 @@ extern bool check_module_in_policy(const secure_app_t *secure_app) __wur __nonnu
  */
 extern int remove_selinux_rules(const secure_app_t *secure_app) __wur __nonnull();
 
+/************************ FOR TESTING ************************/
+typedef struct selinux_module {
+    char selinux_te_file[SEC_LSM_MANAGER_MAX_SIZE_PATH];           ///////////////////
+    char selinux_if_file[SEC_LSM_MANAGER_MAX_SIZE_PATH];           //   PATH MODULE //
+    char selinux_fc_file[SEC_LSM_MANAGER_MAX_SIZE_PATH];           //      FILE     //
+    char selinux_pp_file[SEC_LSM_MANAGER_MAX_SIZE_PATH];           ///////////////////
+    char selinux_rules_dir[SEC_LSM_MANAGER_MAX_SIZE_DIR];          // Store te, if, fc, pp files
+    char selinux_te_template_file[SEC_LSM_MANAGER_MAX_SIZE_PATH];  // te base template
+    char selinux_if_template_file[SEC_LSM_MANAGER_MAX_SIZE_PATH];  // if base template
+} selinux_module_t;
+
+__nonnull() __wur
+extern int generate_app_module_fc(const char *selinux_fc_file, const secure_app_t *secure_app, path_type_definitions_t path_type_definitions[number_path_type]);
+
+__nonnull() __wur
+int generate_app_module_files(const selinux_module_t *selinux_module, const secure_app_t *secure_app, path_type_definitions_t path_type_definitions[number_path_type]);
+
 #endif

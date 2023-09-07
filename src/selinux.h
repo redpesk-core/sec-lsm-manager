@@ -60,4 +60,9 @@ extern int uninstall_selinux(const secure_app_t *secure_app) __wur __nonnull();
 __nonnull()
 extern void app_label_selinux(char label[SEC_LSM_MANAGER_MAX_SIZE_LABEL + 1], const char *appid, const char *app_id);
 
+/************************ FOR TESTING ************************/
+#include "selinux-template.h"
+__nonnull() __wur
+extern int selinux_process_paths(const secure_app_t *secure_app,
+                                            path_type_definitions_t path_type_definitions[number_path_type]);
 #endif

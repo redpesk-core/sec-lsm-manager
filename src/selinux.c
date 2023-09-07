@@ -64,8 +64,8 @@ __nonnull() __wur static int label_file(const char *path, const char *label) {
  * @param[in] secure_app secure app handler
  * @return 0 in case of success or a negative -errno value
  */
-__nonnull() __wur static int selinux_process_paths(const secure_app_t *secure_app,
-                                                   path_type_definitions_t path_type_definitions[number_path_type]) {
+__nonnull() __wur int selinux_process_paths(const secure_app_t *secure_app,
+                                            path_type_definitions_t path_type_definitions[number_path_type]) {
     path_t *path = NULL;
     char label[SEC_LSM_MANAGER_MAX_SIZE_LABEL + 3];
     for (size_t i = 0; i < secure_app->path_set.size; i++) {

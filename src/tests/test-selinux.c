@@ -17,6 +17,25 @@
 
 #include "setup-tests.h"
 
+#include <stdio.h>
+#include <unistd.h>
+#include <sys/stat.h>
+#include <errno.h>
+#include <linux/xattr.h>
+
+#if SIMULATE_SELINUX
+#include "simulation/selinux/selinux.h"
+#else
+#include <selinux/selinux.h>
+#endif
+
+#include "utils.h"
+#include "secure-app.h"
+#include "selinux.h"
+#include "selinux-template.h"
+
+#define TESTID "testid-binding"
+
 START_TEST(test_selinux_process_paths) {
     char etc_tmp_file[SEC_LSM_MANAGER_MAX_SIZE_PATH] = {'\0'};
     create_etc_tmp_file(etc_tmp_file);
@@ -118,7 +137,7 @@ START_TEST(test_selinux_install) {
 }
 END_TEST
 
-void test_selinux() {
+void test_selinux(void) {
     addtest(test_selinux_process_paths);
     addtest(test_selinux_install);
 }

@@ -67,24 +67,14 @@ const char default_selinux_rules_dir[] = SELINUX_RULES_DIR;
 const char default_selinux_te_template_file[] = SELINUX_TE_TEMPLATE_FILE;
 const char default_selinux_if_template_file[] = SELINUX_IF_TEMPLATE_FILE;
 
-typedef struct selinux_module {
-    char selinux_te_file[SEC_LSM_MANAGER_MAX_SIZE_PATH];           ///////////////////
-    char selinux_if_file[SEC_LSM_MANAGER_MAX_SIZE_PATH];           //   PATH MODULE //
-    char selinux_fc_file[SEC_LSM_MANAGER_MAX_SIZE_PATH];           //      FILE     //
-    char selinux_pp_file[SEC_LSM_MANAGER_MAX_SIZE_PATH];           ///////////////////
-    char selinux_rules_dir[SEC_LSM_MANAGER_MAX_SIZE_DIR];          // Store te, if, fc, pp files
-    char selinux_te_template_file[SEC_LSM_MANAGER_MAX_SIZE_PATH];  // te base template
-    char selinux_if_template_file[SEC_LSM_MANAGER_MAX_SIZE_PATH];  // if base template
-} selinux_module_t;
-
-char suffix_id[] = "_t";
-char suffix_lib[] = "_lib_t";
-char suffix_conf[] = "_conf_t";
-char suffix_exec[] = "_exec_t";
-char suffix_icon[] = "_icon_t";
-char suffix_data[] = "_data_t";
-char suffix_http[] = "_http_t";
-char public_app[] = "redpesk_public_t";
+const char suffix_id[] = "_t";
+const char suffix_lib[] = "_lib_t";
+const char suffix_conf[] = "_conf_t";
+const char suffix_exec[] = "_exec_t";
+const char suffix_icon[] = "_icon_t";
+const char suffix_data[] = "_data_t";
+const char suffix_http[] = "_http_t";
+const char public_app[] = "redpesk_public_t";
 
 /***********************/
 /*** PRIVATE METHODS ***/
@@ -130,7 +120,8 @@ __nonnull() static void init_selinux_module(selinux_module_t *selinux_module, co
  * @param[in] secure_app secure_app handler
  * @return 0 in case of success or a negative -errno value
  */
-__nonnull() __wur static int generate_app_module_fc(const char *selinux_fc_file, const secure_app_t *secure_app,
+__nonnull() __wur
+int generate_app_module_fc(const char *selinux_fc_file, const secure_app_t *secure_app,
                                                     path_type_definitions_t path_type_definitions[number_path_type]) {
     int rc = 0;
     int rc2 = 0;
@@ -177,7 +168,7 @@ ret:
  * @return 0 in case of success or a negative -errno value
  */
 __nonnull() __wur
-    static int generate_app_module_files(const selinux_module_t *selinux_module, const secure_app_t *secure_app,
+int generate_app_module_files(const selinux_module_t *selinux_module, const secure_app_t *secure_app,
                                          path_type_definitions_t path_type_definitions[number_path_type]) {
     int rc = 0;
     int rc2 = 0;

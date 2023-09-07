@@ -17,6 +17,24 @@
 
 #include "setup-tests.h"
 
+#include <stdio.h>
+#include <unistd.h>
+#include <sys/stat.h>
+#include <errno.h>
+#include <linux/xattr.h>
+
+#if SIMULATE_SELINUX
+#include "simulation/selinux/selinux.h"
+#else
+#include <selinux/selinux.h>
+#endif
+
+#include "log.h"
+#include "utils.h"
+#include "secure-app.h"
+#include "selinux.h"
+#include "selinux-template.h"
+
 #define TESTID "testid-binding"
 #define TESTID_SELINUX "testid_binding"
 
@@ -78,7 +96,7 @@ START_TEST(test_generate_app_module_files) {
 }
 END_TEST
 
-void test_selinux_template() {
+void test_selinux_template(void) {
     addtest(test_generate_app_module_fc);
     addtest(test_generate_app_module_files);
 }

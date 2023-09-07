@@ -64,6 +64,8 @@ endif()
 function(build_tests_for_mac MAC_NAME)
     message("[*] Create : tests-${MAC_NAME}")
     add_executable(tests-${MAC_NAME} ${TEST_SOURCES} ${TEST_SOURCES_${MAC_NAME}})
+    target_compile_definitions(tests-${MAC_NAME} PRIVATE $<TARGET_PROPERTY:app-${MAC_NAME},INTERFACE_COMPILE_DEFINITIONS>)
+    target_include_directories(tests-${MAC_NAME} PRIVATE $<TARGET_PROPERTY:app-${MAC_NAME},INTERFACE_INCLUDE_DIRECTORIES>)
     target_link_libraries(tests-${MAC_NAME} PRIVATE cap common-lib socket-std app-${MAC_NAME})
 
     target_compile_options(tests-${MAC_NAME} PRIVATE --coverage)
