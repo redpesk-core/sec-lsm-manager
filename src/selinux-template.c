@@ -28,7 +28,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "limits.h"
+#include "sizes.h"
 #include "log.h"
 #include "selinux-compile.h"
 #include "template.h"

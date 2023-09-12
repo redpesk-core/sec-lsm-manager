@@ -23,6 +23,7 @@
 
 #include "log.h"
 #include "utils.h"
+#include "sizes.h"
 
 #if PERMISSIONS_DISTINCT_CASE
 # define compare_permission strcmp

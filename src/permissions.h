@@ -22,8 +22,6 @@
 #include <stdint.h>
 #include <time.h>
 
-#include "limits.h"
-
 /**
  * @brief Structure of permission_set
  * permission_set contains several permission

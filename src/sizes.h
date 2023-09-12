@@ -21,8 +21,8 @@
  * $RP_END_LICENSE$
  */
 
-#ifndef SEC_LSM_MANAGER_LIMITS_H
-#define SEC_LSM_MANAGER_LIMITS_H
+#ifndef SEC_LSM_MANAGER_SIZES_H
+#define SEC_LSM_MANAGER_SIZES_H
 
 #include <limits.h>
 

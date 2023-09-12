@@ -29,6 +29,7 @@
 #include "setup-tests.h"
 
 #include "utils.h"
+#include "sizes.h"
 
 START_TEST(test_check_file_exists) {
     bool exists;

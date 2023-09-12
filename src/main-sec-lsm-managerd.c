@@ -36,7 +36,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-#include "limits.h"
+#include "sizes.h"
 
 #if WITH_SYSTEMD
 #include <systemd/sd-daemon.h>

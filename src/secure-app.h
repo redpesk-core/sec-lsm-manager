@@ -27,7 +27,7 @@
 #include <sys/types.h>
 
 #include "cynagora-interface.h"
-#include "limits.h"
+#include "sizes.h"
 #include "paths.h"
 #include "plugs.h"
 

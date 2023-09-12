@@ -36,7 +36,7 @@
 #include <sys/uio.h>
 #include <unistd.h>
 
-#include "limits.h"
+#include "sizes.h"
 
 #define MAX_FIELDS 20
 #define MAX_BUFFER_LENGTH 2000

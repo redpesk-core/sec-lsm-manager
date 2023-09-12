@@ -28,8 +28,6 @@
 #include <stddef.h>
 #include <sys/cdefs.h>
 
-#include "limits.h"
-
 /**
  * @brief Structure of plug
  */

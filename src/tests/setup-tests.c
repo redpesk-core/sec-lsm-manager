@@ -23,6 +23,7 @@
 #include <unistd.h>
 
 #include "utils.h"
+#include "sizes.h"
 
 Suite *suite;
 TCase *tcase;
