@@ -314,7 +314,7 @@ int main(int ac, char **av) {
         if (rc < 0) {
             fprintf(stderr, "can not change groups: %s\n", strerror(errno));
             if (!keepgoing)
-            return EXIT_FAILURE;
+                return EXIT_FAILURE;
         }
     }
     if (gid >= 0) {
@@ -322,7 +322,7 @@ int main(int ac, char **av) {
         if (rc < 0) {
             fprintf(stderr, "can not change group: %s\n", strerror(errno));
             if (!keepgoing)
-            return EXIT_FAILURE;
+                return EXIT_FAILURE;
         }
     }
     if (uid >= 0) {
@@ -330,7 +330,7 @@ int main(int ac, char **av) {
         if (rc < 0) {
             fprintf(stderr, "can not change user: %s\n", strerror(errno));
             if (!keepgoing)
-            return EXIT_FAILURE;
+                return EXIT_FAILURE;
         }
     }
 
@@ -342,15 +342,15 @@ int main(int ac, char **av) {
 
     if (cap_set_proc(cap) != 0) {
         fprintf(stderr, "can not change cap: %s\n", strerror(errno));
-    if (!keepgoing)
-        return EXIT_FAILURE;
+        if (!keepgoing)
+            return EXIT_FAILURE;
     }
 
     for (size_t i = 0; i < CAP_COUNT; i++) {
         if (cap_set_ambient(cap_vector[i], CAP_SET) != 0) {
             fprintf(stderr, "can not change cap amb: %s\n", strerror(errno));
             if (!keepgoing)
-            return EXIT_FAILURE;
+                return EXIT_FAILURE;
         }
     }
 
