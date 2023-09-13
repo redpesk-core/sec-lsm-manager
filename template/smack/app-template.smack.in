@@ -36,10 +36,10 @@ App:{{id}} App:{{id}}:Plug rx
 {{#plugs}}
 
 # export to {{impid}}
-App:{{impid}} App:{{id}}:Plug r
-App:{{impid}} App:{{id}}:Lib r
+App:{{impid}} App:{{id}}:Plug rx
+App:{{impid}} App:{{id}}:Lib rx
 App:{{impid}} App:{{id}}:Exec rx
-App:{{impid}} App:{{id}}:Data r
-App:{{impid}} App:{{id}}:Conf r
-App:{{impid}} App:{{id}}:Http r
+App:{{impid}} App:{{id}}:Data rx
+App:{{impid}} App:{{id}}:Conf rx
+App:{{impid}} App:{{id}}:Http rx
 {{/plugs}}
