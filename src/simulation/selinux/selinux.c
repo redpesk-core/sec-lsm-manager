@@ -45,6 +45,7 @@ static int ptr = 0;
 #include <sys/stat.h>
 #include <sys/types.h>
 
+#include "../../sizes.h"
 #include "../../utils.h"
 
 struct semanage_module_info {
