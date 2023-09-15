@@ -105,16 +105,18 @@ struct sec_lsm_manager_server {
  * @param[in] count count of fields
  * @param[in] fields the fields
  */
-__nonnull((1)) static void dolog_protocol(client_t *cli, int c2s, unsigned count, const char *fields[]) {
-    if (!sec_lsm_manager_server_log)
-        return;
-
+__nonnull((1))
+static void dolog_protocol(client_t *cli, int c2s, unsigned count, const char *fields[])
+{
     static const char dir[2] = {'>', '<'};
     unsigned i;
 
-    fprintf(stderr, "%p%c%c%s", (void*)cli, dir[!c2s], dir[!c2s], "server");
-    for (i = 0; i < count; i++) fprintf(stderr, " %s", fields[i]);
-    fprintf(stderr, "\n");
+    if (sec_lsm_manager_server_log) {
+        fprintf(stderr, "%p%c%c%s", (void*)cli, dir[!c2s], dir[!c2s], "server");
+        for (i = 0; i < count; i++)
+            fprintf(stderr, " %s", fields[i]);
+        fprintf(stderr, "\n");
+    }
 }
 
 /**
@@ -126,7 +128,9 @@ __nonnull((1)) static void dolog_protocol(client_t *cli, int c2s, unsigned count
  * @return true if matching
  * @return false if not
  */
-__nonnull() __wur static bool ckarg(const char *arg, const char *value, unsigned offset) {
+__nonnull() __wur
+static bool ckarg(const char *arg, const char *value, unsigned offset)
+{
     while (arg[offset])
         if (arg[offset] == value[offset])
             offset++;
@@ -141,26 +145,37 @@ __nonnull() __wur static bool ckarg(const char *arg, const char *value, unsigned
  * @param[in] cli client handler
  * @return 0 in case of success or a negative -errno value
  */
-__nonnull() __wur static int flushw(client_t *cli) {
+__nonnull()
+static int flushw(client_t *cli)
+{
     int rc;
     struct pollfd pfd;
 
     for (;;) {
         rc = prot_should_write(cli->prot);
-        if (!rc)
-            break;
-        rc = prot_write(cli->prot, cli->pollitem.fd);
-        if (rc == -EAGAIN) {
-            pfd.fd = cli->pollitem.fd;
-            pfd.events = POLLOUT;
-            do {
-                rc = poll(&pfd, 1, 0);
-            } while (rc < 0 && errno == EINTR);
-            if (rc < 0)
-                rc = -errno;
-        }
         if (rc < 0)
-            break;
+            ERROR("flushw: should write returned error %s", strerror(-rc));
+	else if (rc > 0) {
+            rc = prot_write(cli->prot, cli->pollitem.fd);
+            if (rc >= 0)
+                continue;
+	    if (rc == -ENODATA)
+                rc = 0;
+	    else if (rc != -EAGAIN)
+                ERROR("flushw: write returned error %s", strerror(-rc));
+	    else {
+                pfd.fd = cli->pollitem.fd;
+                pfd.events = POLLOUT;
+                do {
+                    rc = poll(&pfd, 1, 0);
+                } while (rc < 0 && errno == EINTR);
+                if (rc >= 0)
+                    continue;
+                rc = -errno;
+                ERROR("flushw: poll returned error %s", strerror(-rc));
+            }
+        }
+        break;
     }
     return rc;
 }
@@ -212,10 +227,7 @@ __nonnull() static void send_done(client_t *cli) {
     if (rc < 0) {
         ERROR("putx: %d %s", -rc, strerror(-rc));
     }
-    rc = flushw(cli);
-    if (rc < 0) {
-        ERROR("flushw: %d %s", -rc, strerror(-rc));
-    }
+    flushw(cli);
 }
 
 /**
@@ -230,10 +242,7 @@ __nonnull((1)) static void send_error(client_t *cli, const char *errorstr) {
     if (rc < 0) {
         ERROR("putx: %d %s", -rc, strerror(-rc));
     }
-    rc = flushw(cli);
-    if (rc < 0) {
-        ERROR("flushw: %d %s", -rc, strerror(-rc));
-    }
+    flushw(cli);
 }
 
 /**
@@ -311,10 +320,7 @@ __nonnull((1)) static void onrequest(client_t *cli, unsigned count, const char *
             if (rc < 0) {
                 ERROR("putx: %d %s", -rc, strerror(-rc));
             }
-            rc = flushw(cli);
-            if (rc < 0) {
-                ERROR("flushw: %d %s", -rc, strerror(-rc));
-            }
+            flushw(cli);
             cli->version = 1;
             return;
         }
@@ -381,10 +387,7 @@ __nonnull((1)) static void onrequest(client_t *cli, unsigned count, const char *
                 if (rc < 0) {
                     ERROR("putx: %d %s", -rc, strerror(-rc));
                 }
-                rc = flushw(cli);
-                if (rc < 0) {
-                    ERROR("flushw: %d %s", -rc, strerror(-rc));
-                }
+                flushw(cli);
                 sec_lsm_manager_server_log = nextlog;
                 return;
             }
@@ -398,10 +401,7 @@ __nonnull((1)) static void onrequest(client_t *cli, unsigned count, const char *
                     if (rc < 0) {
                         ERROR("putx: %d %s", -rc, strerror(-rc));
                     }
-                    rc = flushw(cli);
-                    if (rc < 0) {
-                        ERROR("flushw: %d %s", -rc, strerror(-rc));
-                    }
+                    flushw(cli);
                 } else {
                     ERROR("sec_lsm_manager_handle_add_path: %d %s", -rc, strerror(-rc));
                     send_error(cli, "sec_lsm_manager_handle_add_path");
@@ -416,10 +416,7 @@ __nonnull((1)) static void onrequest(client_t *cli, unsigned count, const char *
                     if (rc < 0) {
                         ERROR("putx: %d %s", -rc, strerror(-rc));
                     }
-                    rc = flushw(cli);
-                    if (rc < 0) {
-                        ERROR("flushw: %d %s", -rc, strerror(-rc));
-                    }
+                    flushw(cli);
                 } else {
                     ERROR("sec_lsm_manager_handle_add_permission: %d %s", -rc, strerror(-rc));
                     send_error(cli, "sec_lsm_manager_handle_add_permission");
@@ -434,10 +431,7 @@ __nonnull((1)) static void onrequest(client_t *cli, unsigned count, const char *
                     if (rc < 0) {
                         ERROR("putx: %d %s", -rc, strerror(-rc));
                     }
-                    rc = flushw(cli);
-                    if (rc < 0) {
-                        ERROR("flushw: %d %s", -rc, strerror(-rc));
-                    }
+                    flushw(cli);
                 } else {
                     ERROR("sec_lsm_manager_handle_add_plug: %d %s", -rc, strerror(-rc));
                     send_error(cli, "sec_lsm_manager_handle_add_plug");
