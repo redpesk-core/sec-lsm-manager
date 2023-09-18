@@ -579,3 +579,39 @@ static int wait_display_replies(sec_lsm_manager_t *sec_lsm_manager)
 int sec_lsm_manager_display(sec_lsm_manager_t *sec_lsm_manager) {
     return sync_send_do(sec_lsm_manager, wait_display_replies, _display_, NULL);
 }
+
+/* see sec-lsm-manager.h */
+int sec_lsm_manager_error_message(sec_lsm_manager_t *sec_lsm_manager, char **message)
+{
+    int idx;
+    size_t size;
+    char *text;
+
+    /* check state */
+    if (sec_lsm_manager->reply.count < 1
+     || strcmp(sec_lsm_manager->reply.fields[0], _error_)) {
+        *message = NULL;
+        return -EINVAL;
+    }
+
+    /* compute size */
+    size = 0;
+    for (idx = 1 ; idx < sec_lsm_manager->reply.count ; idx++)
+        size = strlen(sec_lsm_manager->reply.fields[idx]) + (idx > 1);
+
+    /* allocate */
+    *message = text = malloc(size + 1);
+    if (text == NULL)
+        return -ENOMEM;
+
+    /* compute size */
+    *text = 0;
+    for (idx = 1 ; idx < sec_lsm_manager->reply.count ; idx++) {
+        if (idx > 1)
+            *text++ = ' ';
+        strcpy(text, sec_lsm_manager->reply.fields[idx]);
+        while (*text)
+            text++;
+    }
+    return 0;
+}
