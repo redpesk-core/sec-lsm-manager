@@ -200,6 +200,24 @@ static int plink(int ac, char **av, int *used, int maxi) {
     return r;
 }
 
+static int show_status(int used_count, const char *oper, int rc, const char *extra)
+{
+    last_status = rc;
+    if (rc >= 0) {
+        LOG(extra != NULL ? "ok %s" : "ok", extra);
+    }
+    else if (rc == -EPROTO) {
+        char *message;
+        sec_lsm_manager_error_message(sec_lsm_manager, &message);
+        LOG("%s, error: %s", oper, message);
+        free(message);
+    }
+    else {
+        ERROR("%s, unexpected error: %s", oper, strerror(-rc));
+    }
+    return used_count;
+}
+
 static int do_clear(int ac, char **av) {
     int used_count, rc;
     int n = plink(ac, av, &used_count, 1);
@@ -210,15 +228,8 @@ static int do_clear(int ac, char **av) {
         return used_count;
     }
 
-    last_status = rc = sec_lsm_manager_clear(sec_lsm_manager);
-
-    if (rc < 0) {
-        ERROR("sec_lsm_manager_clear : %d %s", -rc, strerror(-rc));
-    } else {
-        LOG("clear success");
-    }
-
-    return used_count;
+    rc = sec_lsm_manager_clear(sec_lsm_manager);
+    return show_status(used_count, "clear", rc, NULL);
 }
 
 static int do_display(int ac, char **av) {
@@ -231,13 +242,8 @@ static int do_display(int ac, char **av) {
         return used_count;
     }
 
-    last_status = rc = sec_lsm_manager_display(sec_lsm_manager);
-
-    if (rc < 0) {
-        ERROR("sec_lsm_manager_display : %d %s", -rc, strerror(-rc));
-    }
-
-    return used_count;
+    rc = sec_lsm_manager_display(sec_lsm_manager);
+    return show_status(used_count, "display", rc, NULL);
 }
 
 static int do_id(int ac, char **av) {
@@ -258,16 +264,8 @@ static int do_id(int ac, char **av) {
     }
 
     id = av[1];
-    last_status = rc = sec_lsm_manager_set_id(sec_lsm_manager, id);
-
-    if (rc < 0) {
-        ERROR("sec_lsm_manager_set_id : %d %s", -rc, strerror(-rc));
-        return used_count;
-    }
-
-    LOG("id set");
-
-    return used_count;
+    rc = sec_lsm_manager_set_id(sec_lsm_manager, id);
+    return show_status(used_count, "id", rc, NULL);
 }
 
 static int do_path(int ac, char **av) {
@@ -291,15 +289,8 @@ static int do_path(int ac, char **av) {
     path = av[1];
     path_type = av[2];
 
-    last_status = rc = sec_lsm_manager_add_path(sec_lsm_manager, path, path_type);
-
-    if (rc < 0) {
-        ERROR("sec_lsm_manager_add_path : %d %s", -rc, strerror(-rc));
-    } else {
-        LOG("add path '%s' with type %s", path, path_type);
-    }
-
-    return used_count;
+    rc = sec_lsm_manager_add_path(sec_lsm_manager, path, path_type);
+    return show_status(used_count, "path", rc, NULL);
 }
 
 static int do_plug(int ac, char **av) {
@@ -325,15 +316,8 @@ static int do_plug(int ac, char **av) {
     import_id = av[2];
     import_path = av[3];
 
-    last_status = rc = sec_lsm_manager_add_plug(sec_lsm_manager, export_path, import_id, import_path);
-
-    if (rc < 0) {
-        ERROR("sec_lsm_manager_add_plug : %d %s", -rc, strerror(-rc));
-    } else {
-        LOG("add plug %s %s %s", export_path, import_id, import_path);
-    }
-
-    return used_count;
+    rc = sec_lsm_manager_add_plug(sec_lsm_manager, export_path, import_id, import_path);
+    return show_status(used_count, "plug", rc, NULL);
 }
 
 static int do_permission(int ac, char **av) {
@@ -355,14 +339,8 @@ static int do_permission(int ac, char **av) {
 
     permission = av[1];
 
-    last_status = rc = sec_lsm_manager_add_permission(sec_lsm_manager, permission);
-    if (rc < 0) {
-        ERROR("sec_lsm_manager_add_permission : %d %s", -rc, strerror(-rc));
-    } else {
-        LOG("add permission %s", permission);
-    }
-
-    return used_count;
+    rc = sec_lsm_manager_add_permission(sec_lsm_manager, permission);
+    return show_status(used_count, "permission", rc, NULL);
 }
 
 static int do_install(int ac, char **av) {
@@ -375,15 +353,8 @@ static int do_install(int ac, char **av) {
         return used_count;
     }
 
-    last_status = rc = sec_lsm_manager_install(sec_lsm_manager);
-
-    if (rc < 0) {
-        ERROR("sec_lsm_manager_install : %d %s", -rc, strerror(-rc));
-    } else {
-        LOG("install success");
-    }
-
-    return used_count;
+    rc = sec_lsm_manager_install(sec_lsm_manager);
+    return show_status(used_count, "install", rc, NULL);
 }
 
 static int do_uninstall(int ac, char **av) {
@@ -396,15 +367,8 @@ static int do_uninstall(int ac, char **av) {
         return used_count;
     }
 
-    last_status = rc = sec_lsm_manager_uninstall(sec_lsm_manager);
-
-    if (rc < 0) {
-        ERROR("sec_lsm_manager_uninstall : %d %s", -rc, strerror(-rc));
-    } else {
-        LOG("uninstall success");
-    }
-
-    return used_count;
+    rc = sec_lsm_manager_uninstall(sec_lsm_manager);
+    return show_status(used_count, "uninstall", rc, NULL);
 }
 
 static int do_log(int ac, char **av) {
@@ -421,15 +385,8 @@ static int do_log(int ac, char **av) {
         }
     }
 
-    last_status = rc = sec_lsm_manager_log(sec_lsm_manager, on, off);
-
-    if (rc < 0) {
-        ERROR("sec_lsm_manager_log : %d %s", -rc, strerror(-rc));
-    } else {
-        LOG("logging %s", rc ? "on" : "off");
-    }
-
-    return used_count;
+    rc = sec_lsm_manager_log(sec_lsm_manager, on, off);
+    return show_status(used_count, "log", rc, rc == 1 ? "on" : "off");
 }
 
 static int do_help(int ac, char **av) {
