@@ -297,8 +297,7 @@ __nonnull() __wur static int raw_wait_done_or_error(sec_lsm_manager_t *sec_lsm_m
         if (!strcmp(sec_lsm_manager->reply.fields[0], _done_)) {
             return rc;
         } else if (!strcmp(sec_lsm_manager->reply.fields[0], _error_)) {
-            ERROR("%s", sec_lsm_manager->reply.fields[1]);
-            return -1;
+            return -EPROTO;
         } else {
             return -ECANCELED;
         }
@@ -404,7 +403,7 @@ static int sync_send_do(sec_lsm_manager_t *sec_lsm_manager, int (*aftersend)(sec
             fields[nf] = va_arg(va, const char *);
             if (fields[nf] == NULL)
                 break;
-	}
+        }
         va_end(va);
 
         /* send the reply */
