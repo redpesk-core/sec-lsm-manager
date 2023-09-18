@@ -201,13 +201,13 @@ static int plink(int ac, char **av, int *used, int maxi) {
 }
 
 static int do_clear(int ac, char **av) {
-    int uc, rc;
-    int n = plink(ac, av, &uc, 1);
+    int used_count, rc;
+    int n = plink(ac, av, &used_count, 1);
 
     if (n < 1) {
         ERROR("not enough arguments");
         last_status = -EINVAL;
-        return uc;
+        return used_count;
     }
 
     last_status = rc = sec_lsm_manager_clear(sec_lsm_manager);
@@ -218,17 +218,17 @@ static int do_clear(int ac, char **av) {
         LOG("clear success");
     }
 
-    return uc;
+    return used_count;
 }
 
 static int do_display(int ac, char **av) {
-    int uc, rc;
-    int n = plink(ac, av, &uc, 1);
+    int used_count, rc;
+    int n = plink(ac, av, &used_count, 1);
 
     if (n < 1) {
         ERROR("not enough arguments");
         last_status = -EINVAL;
-        return uc;
+        return used_count;
     }
 
     last_status = rc = sec_lsm_manager_display(sec_lsm_manager);
@@ -237,24 +237,24 @@ static int do_display(int ac, char **av) {
         ERROR("sec_lsm_manager_display : %d %s", -rc, strerror(-rc));
     }
 
-    return uc;
+    return used_count;
 }
 
 static int do_id(int ac, char **av) {
-    int uc, rc;
+    int used_count, rc;
     char *id = NULL;
-    int n = plink(ac, av, &uc, 2);
+    int n = plink(ac, av, &used_count, 2);
 
     if (n < 2) {
         ERROR("not enough arguments");
         last_status = -EINVAL;
-        return uc;
+        return used_count;
     }
 
     if (strlen(av[1]) <= 0) {
         ERROR("bad argument %s", av[1]);
         last_status = -EINVAL;
-        return uc;
+        return used_count;
     }
 
     id = av[1];
@@ -262,30 +262,30 @@ static int do_id(int ac, char **av) {
 
     if (rc < 0) {
         ERROR("sec_lsm_manager_set_id : %d %s", -rc, strerror(-rc));
-        return uc;
+        return used_count;
     }
 
     LOG("id set");
 
-    return uc;
+    return used_count;
 }
 
 static int do_path(int ac, char **av) {
-    int uc, rc;
+    int used_count, rc;
     char *path = NULL;
     char *path_type = NULL;
-    int n = plink(ac, av, &uc, 3);
+    int n = plink(ac, av, &used_count, 3);
 
     if (n < 3) {
         ERROR("not enough arguments");
         last_status = -EINVAL;
-        return uc;
+        return used_count;
     }
 
     if (strlen(av[1]) <= 0) {
         ERROR("bad argument %s", av[1]);
         last_status = -EINVAL;
-        return uc;
+        return used_count;
     }
 
     path = av[1];
@@ -299,26 +299,26 @@ static int do_path(int ac, char **av) {
         LOG("add path '%s' with type %s", path, path_type);
     }
 
-    return uc;
+    return used_count;
 }
 
 static int do_plug(int ac, char **av) {
-    int uc, rc;
+    int used_count, rc;
     char *export_path = NULL;
     char *import_id = NULL;
     char *import_path = NULL;
-    int n = plink(ac, av, &uc, 4);
+    int n = plink(ac, av, &used_count, 4);
 
     if (n < 4) {
         ERROR("not enough arguments");
         last_status = -EINVAL;
-        return uc;
+        return used_count;
     }
 
     if (strlen(av[1]) <= 0) {
         ERROR("bad argument %s", av[1]);
         last_status = -EINVAL;
-        return uc;
+        return used_count;
     }
 
     export_path = av[1];
@@ -333,24 +333,24 @@ static int do_plug(int ac, char **av) {
         LOG("add plug %s %s %s", export_path, import_id, import_path);
     }
 
-    return uc;
+    return used_count;
 }
 
 static int do_permission(int ac, char **av) {
-    int uc, rc;
+    int used_count, rc;
     char *permission = NULL;
-    int n = plink(ac, av, &uc, 2);
+    int n = plink(ac, av, &used_count, 2);
 
     if (n < 2) {
         ERROR("not enough arguments");
         last_status = -EINVAL;
-        return uc;
+        return used_count;
     }
 
     if (strlen(av[1]) <= 0) {
         ERROR("bad argument %s", av[1]);
         last_status = -EINVAL;
-        return uc;
+        return used_count;
     }
 
     permission = av[1];
@@ -362,17 +362,17 @@ static int do_permission(int ac, char **av) {
         LOG("add permission %s", permission);
     }
 
-    return uc;
+    return used_count;
 }
 
 static int do_install(int ac, char **av) {
-    int uc, rc;
-    int n = plink(ac, av, &uc, 1);
+    int used_count, rc;
+    int n = plink(ac, av, &used_count, 1);
 
     if (n < 1) {
         ERROR("not enough arguments");
         last_status = -EINVAL;
-        return uc;
+        return used_count;
     }
 
     last_status = rc = sec_lsm_manager_install(sec_lsm_manager);
@@ -383,17 +383,17 @@ static int do_install(int ac, char **av) {
         LOG("install success");
     }
 
-    return uc;
+    return used_count;
 }
 
 static int do_uninstall(int ac, char **av) {
-    int uc, rc;
-    int n = plink(ac, av, &uc, 1);
+    int used_count, rc;
+    int n = plink(ac, av, &used_count, 1);
 
     if (n < 1) {
         ERROR("not enough arguments");
         last_status = -EINVAL;
-        return uc;
+        return used_count;
     }
 
     last_status = rc = sec_lsm_manager_uninstall(sec_lsm_manager);
@@ -404,20 +404,20 @@ static int do_uninstall(int ac, char **av) {
         LOG("uninstall success");
     }
 
-    return uc;
+    return used_count;
 }
 
 static int do_log(int ac, char **av) {
-    int uc, rc;
+    int used_count, rc;
     int on = 0, off = 0;
-    int n = plink(ac, av, &uc, 2);
+    int n = plink(ac, av, &used_count, 2);
 
     if (n > 1) {
         on = !strcmp(av[1], "on");
         off = !strcmp(av[1], "off");
         if (!on && !off) {
             fprintf(stderr, "bad argument '%s'\n", av[1]);
-            return uc;
+            return used_count;
         }
     }
 
@@ -429,7 +429,7 @@ static int do_log(int ac, char **av) {
         LOG("logging %s", rc ? "on" : "off");
     }
 
-    return uc;
+    return used_count;
 }
 
 static int do_help(int ac, char **av) {
