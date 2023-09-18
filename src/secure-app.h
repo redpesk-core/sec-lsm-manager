@@ -109,11 +109,18 @@ extern int secure_app_add_permission(secure_app_t *secure_app, const char *permi
  *
  * @param[in] secure_app handler
  * @param[in] path The path to add
- * @param[in] path_type The path type to add
- * @return 0 in case of success or a negative -errno value
+ * @param[in] type The path type of the path to add
+ * @return
+ *    * 0              success
+ *    * -EINVAL        bad type or bad path
+ *    * -EEXIST        the path is already added
+ *    * -ENOMEM        out of memory
+ *    * -ENOENT        the path is not existing
+ *    * -EACCES        the path can't be accessed
+ *    * -ENOTRECOVERABLE state unrecoverable
  */
 __wur __nonnull()
-extern int secure_app_add_path(secure_app_t *secure_app, const char *path, enum path_type path_type);
+extern int secure_app_add_path(secure_app_t *secure_app, const char *path, const char *type);
 
 /**
  * @brief Add a new plug definition

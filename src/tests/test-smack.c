@@ -167,14 +167,14 @@ START_TEST(test_smack_install) {
     // create secure app
     secure_app_t *secure_app = NULL;
     ck_assert_int_eq(create_secure_app(&secure_app), 0);
-    ck_assert_int_eq(secure_app_add_path(secure_app, data_dir, type_data), 0);
-    ck_assert_int_eq(secure_app_add_path(secure_app, data_file, type_data), 0);
-    ck_assert_int_eq(secure_app_add_path(secure_app, exec_dir, type_exec), 0);
-    ck_assert_int_eq(secure_app_add_path(secure_app, exec_file, type_exec), 0);
-    ck_assert_int_eq(secure_app_add_path(secure_app, id_dir, type_id), 0);
-    ck_assert_int_eq(secure_app_add_path(secure_app, id_file, type_id), 0);
-    ck_assert_int_eq(secure_app_add_path(secure_app, public_dir, type_public), 0);
-    ck_assert_int_eq(secure_app_add_path(secure_app, public_file, type_public), 0);
+    ck_assert_int_eq(secure_app_add_path(secure_app, data_dir, "data"), 0);
+    ck_assert_int_eq(secure_app_add_path(secure_app, data_file, "data"), 0);
+    ck_assert_int_eq(secure_app_add_path(secure_app, exec_dir, "exec"), 0);
+    ck_assert_int_eq(secure_app_add_path(secure_app, exec_file, "exec"), 0);
+    ck_assert_int_eq(secure_app_add_path(secure_app, id_dir, "id"), 0);
+    ck_assert_int_eq(secure_app_add_path(secure_app, id_file, "id"), 0);
+    ck_assert_int_eq(secure_app_add_path(secure_app, public_dir, "public"), 0);
+    ck_assert_int_eq(secure_app_add_path(secure_app, public_file, "public"), 0);
     ck_assert_int_eq(secure_app_add_permission(secure_app, "perm1"), 0);
     ck_assert_int_eq(secure_app_add_permission(secure_app, "perm2"), 0);
     ck_assert_int_eq(secure_app_set_id(secure_app, "testid"), 0);
@@ -228,8 +228,8 @@ START_TEST(test_smack_uninstall) {
     // create secure app
     secure_app_t *secure_app = NULL;
     ck_assert_int_eq(create_secure_app(&secure_app), 0);
-    ck_assert_int_eq(secure_app_add_path(secure_app, data_dir, type_data), 0);
-    ck_assert_int_eq(secure_app_add_path(secure_app, data_file, type_data), 0);
+    ck_assert_int_eq(secure_app_add_path(secure_app, data_dir, "data"), 0);
+    ck_assert_int_eq(secure_app_add_path(secure_app, data_file, "data"), 0);
     ck_assert_int_eq(secure_app_set_id(secure_app, "testid"), 0);
     ck_assert_int_eq(install_smack(secure_app), 0);
 

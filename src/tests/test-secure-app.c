@@ -105,21 +105,21 @@ START_TEST(test_secure_app_add_path) {
     secure_app_t *secure_app = NULL;
     ck_assert_int_eq(create_secure_app(&secure_app), 0);
     // test add path
-    ck_assert_int_eq(secure_app_add_path(secure_app, "/tmp", type_conf), 0);
+    ck_assert_int_eq(secure_app_add_path(secure_app, "/tmp", "conf"), 0);
     ck_assert_int_eq((int)secure_app->path_set.size, 1);
     ck_assert_str_eq(secure_app->path_set.paths[0]->path, "/tmp");
     ck_assert_int_eq((int)secure_app->path_set.paths[0]->path_type, (int)type_conf);
 
     // test bad path type
-    ck_assert_int_eq(secure_app_add_path(secure_app, "/tmp3", type_unset), -EINVAL);
+    ck_assert_int_eq(secure_app_add_path(secure_app, "/tmp3", "<unset>"), -EINVAL);
 
     // test duplicate path
-    ck_assert_int_eq(secure_app_add_path(secure_app, "/tmp", type_data), -EINVAL);
-    ck_assert_int_eq(secure_app_add_path(secure_app, "/tmp", type_conf), -EINVAL);
+    ck_assert_int_eq(secure_app_add_path(secure_app, "/tmp", "data"), -EINVAL);
+    ck_assert_int_eq(secure_app_add_path(secure_app, "/tmp", "conf"), -EINVAL);
 
     // test error flag raise
     raise_error_flag(secure_app);
-    ck_assert_int_eq(secure_app_add_path(secure_app, "/tmp2", type_conf), -EPERM);
+    ck_assert_int_eq(secure_app_add_path(secure_app, "/tmp2", "conf"), -EPERM);
     destroy_secure_app(secure_app);
 }
 END_TEST
@@ -128,7 +128,7 @@ START_TEST(test_free_secure_app) {
     secure_app_t *secure_app = NULL;
     ck_assert_int_eq(create_secure_app(&secure_app), 0);
     ck_assert_int_eq(secure_app_set_id(secure_app, "id"), 0);
-    ck_assert_int_eq(secure_app_add_path(secure_app, "/tmp", type_conf), 0);
+    ck_assert_int_eq(secure_app_add_path(secure_app, "/tmp", "conf"), 0);
     ck_assert_int_eq(secure_app_add_permission(secure_app, "perm"), 0);
     clear_secure_app(secure_app);
     ck_assert_int_eq((int)secure_app->path_set.size, 0);
@@ -141,7 +141,7 @@ START_TEST(test_destroy_secure_app) {
     secure_app_t *secure_app = NULL;
     ck_assert_int_eq(create_secure_app(&secure_app), 0);
     ck_assert_int_eq(secure_app_set_id(secure_app, "id"), 0);
-    ck_assert_int_eq(secure_app_add_path(secure_app, "/tmp", type_conf), 0);
+    ck_assert_int_eq(secure_app_add_path(secure_app, "/tmp", "conf"), 0);
     ck_assert_int_eq(secure_app_add_permission(secure_app, "perm"), 0);
     destroy_secure_app(secure_app);
 }

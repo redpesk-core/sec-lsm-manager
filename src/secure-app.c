@@ -27,7 +27,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/socket.h>
+#include <unistd.h>
 
 #include "log.h"
 #include "utils.h"
@@ -188,7 +188,7 @@ int secure_app_add_permission(secure_app_t *secure_app, const char *permission) 
 
     int rc = permission_set_add_permission(&(secure_app->permission_set), permission);
     if (rc < 0) {
-        ERROR("permission_set_add_permission : %d %s", -rc, strerror(-rc));
+        ERROR("permission_set_add_permission: %d %s", -rc, strerror(-rc));
         return rc;
     }
     secure_app->need_id = true;
@@ -198,29 +198,53 @@ int secure_app_add_permission(secure_app_t *secure_app, const char *permission) 
 
 /* see secure-app.h */
 __wur __nonnull()
-int secure_app_add_path(secure_app_t *secure_app, const char *path, enum path_type path_type) {
+int secure_app_add_path(secure_app_t *secure_app, const char *path, const char *type)
+{
+    enum path_type path_type;
+    size_t i;
+    int rc;
+
+    /* check error state */
+    if (secure_app->error_flag) {
+        ERROR("error flag has been raised");
+        return -ENOTRECOVERABLE;
+    }
+
+    /* check type validity */
+    path_type = get_path_type(type);
     if (!valid_path_type(path_type)) {
-        ERROR("path_type invalid : %d", path_type);
+        ERROR("type invalid: %d", path_type);
         return -EINVAL;
     }
 
-    if (secure_app->error_flag) {
-        ERROR("error flag has been raised");
-        return -EPERM;
-    }
-
-    for (size_t i = 0; i < secure_app->path_set.size; i++) {
+    /* check duplication */
+    for (i = 0; i < secure_app->path_set.size; i++) {
         if (!strcmp(secure_app->path_set.paths[i]->path, path)) {
-            ERROR("path already defined");
-            return -EINVAL;
+            ERROR("path already added");
+            return -EEXIST;
         }
     }
 
-    int rc = path_set_add_path(&(secure_app->path_set), path, path_type);
-    if (rc < 0) {
-        ERROR("path_set_add_path %d %s", -rc, strerror(-rc));
+    /* check existing path */
+    if (access(path, F_OK) < 0) {
+        ERROR("path %s isn't accessible: %s", path, strerror(errno));
+	switch (errno) {
+	case ENOENT:
+	case ENOTDIR: rc = -ENOENT; break;
+	case ENOMEM: rc = -ENOMEM; break;
+	default: rc = -EACCES; break;
+	}
         return rc;
     }
+
+    /* add the path to the set */
+    rc = path_set_add_path(&(secure_app->path_set), path, path_type);
+    if (rc < 0) {
+        ERROR("can't add path %s: %d %s", path, -rc, strerror(-rc));
+        return rc;
+    }
+
+    /* compute the new need of id */
     if (path_type != type_default)
         secure_app->need_id = true;
 
@@ -275,7 +299,7 @@ int secure_app_install(secure_app_t *secure_app, cynagora_t *cynagora)
     if (has_id) {
         rc = cynagora_set_policies(cynagora, secure_app->label, &(secure_app->permission_set), 1);
         if (rc < 0) {
-            ERROR("cynagora_set_policies : %d %s", -rc, strerror(-rc));
+            ERROR("cynagora_set_policies: %d %s", -rc, strerror(-rc));
             return rc;
         }
         DEBUG("cynagora_set_policies success");
@@ -283,11 +307,11 @@ int secure_app_install(secure_app_t *secure_app, cynagora_t *cynagora)
 
     rc = install_mac(secure_app);
     if (rc < 0) {
-        ERROR("install_mac : %d %s", -rc, strerror(-rc));
+        ERROR("install_mac: %d %s", -rc, strerror(-rc));
         if (has_id) {
             int rc2 = cynagora_drop_policies(cynagora, secure_app->label);
             if (rc2 < 0) {
-                ERROR("cannot delete policy : %d %s", -rc2, strerror(-rc2));
+                ERROR("cannot delete policy: %d %s", -rc2, strerror(-rc2));
             }
         }
         return rc;
@@ -316,14 +340,14 @@ int secure_app_uninstall(secure_app_t *secure_app, cynagora_t *cynagora)
     if (has_id) {
         int rc = cynagora_drop_policies(cynagora, secure_app->label);
         if (rc < 0) {
-            ERROR("cynagora_drop_policies : %d %s", -rc, strerror(-rc));
+            ERROR("cynagora_drop_policies: %d %s", -rc, strerror(-rc));
             return rc;
         }
     }
 
     int rc = uninstall_mac(secure_app);
     if (rc < 0) {
-        ERROR("uninstall_mac : %d %s", -rc, strerror(-rc));
+        ERROR("uninstall_mac: %d %s", -rc, strerror(-rc));
         return rc;
     }
 

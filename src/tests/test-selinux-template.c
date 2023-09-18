@@ -47,9 +47,9 @@ START_TEST(test_generate_app_module_fc) {
 
     secure_app_t *secure_app = NULL;
     ck_assert_int_eq(create_secure_app(&secure_app), 0);
-    ck_assert_int_eq(secure_app_add_path(secure_app, "/tmp/data", type_data), 0);
-    ck_assert_int_eq(secure_app_add_path(secure_app, "/tmp/conf", type_conf), 0);
-    ck_assert_int_eq(secure_app_add_path(secure_app, "/tmp/lib", type_lib), 0);
+    ck_assert_int_eq(secure_app_add_path(secure_app, "/tmp/data", "data"), 0);
+    ck_assert_int_eq(secure_app_add_path(secure_app, "/tmp/conf", "conf"), 0);
+    ck_assert_int_eq(secure_app_add_path(secure_app, "/tmp/lib", "lib"), 0);
     ck_assert_int_lt(generate_app_module_fc(fs_file, secure_app, path_type_definitions), 0);
 
     create_tmp_file(tmp_file);
@@ -65,7 +65,7 @@ START_TEST(test_generate_app_module_files) {
     secure_app_t *secure_app = NULL;
     ck_assert_int_eq(create_secure_app(&secure_app), 0);
     ck_assert_int_eq(secure_app_set_id(secure_app, TESTID), 0);
-    ck_assert_int_eq(secure_app_add_path(secure_app, "/tmp", type_conf), 0);
+    ck_assert_int_eq(secure_app_add_path(secure_app, "/tmp", "conf"), 0);
 
     selinux_module_t selinux_module = {0};
     path_type_definitions_t path_type_definitions[number_path_type];

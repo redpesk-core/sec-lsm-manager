@@ -378,13 +378,23 @@ __nonnull((1)) static void onrequest(client_t *cli, unsigned count, const char *
         case 'p':
             /* path */
             if (ckarg(args[0], _path_, 1) && count == 3) {
-                rc = secure_app_add_path(cli->secure_app, args[1], get_path_type(args[2]));
+                rc = secure_app_add_path(cli->secure_app, args[1], args[2]);
                 if (rc >= 0) {
                     putx(cli, _done_, NULL);
                     flushw(cli);
                 } else {
-                    ERROR("sec_lsm_manager_handle_add_path: %d %s", -rc, strerror(-rc));
-                    send_error(cli, "sec_lsm_manager_handle_add_path");
+                    const char *errtxt;
+                    switch (-rc) {
+                    case ENOTRECOVERABLE: errtxt = "not-recoverable"; break;
+                    case EINVAL:       errtxt = "bad-path-or-type"; break;
+                    case EEXIST:       errtxt = "path-already-set"; break;
+                    case ENOMEM:       errtxt = "out-of-memory"; break;
+                    case ENOENT:       errtxt = "path-not-found"; break;
+                    case EACCES:       errtxt = "no-path-access"; break;
+                    default:           errtxt = "?"; break;
+                    }
+                    ERROR("error when adding path: %s", errtxt);
+                    send_error(cli, errtxt);
                 }
                 return;
             }

@@ -45,13 +45,13 @@ START_TEST(test_selinux_process_paths) {
 
     secure_app_t *secure_app = NULL;
     ck_assert_int_eq(create_secure_app(&secure_app), 0);
-    ck_assert_int_eq(secure_app_add_path(secure_app, etc_tmp_file, type_id), 0);
+    ck_assert_int_eq(secure_app_add_path(secure_app, etc_tmp_file, "id"), 0);
 
     ck_assert_int_eq(selinux_process_paths(secure_app, path_type_definitions), 0);
 
     ck_assert_int_eq(compare_xattr(etc_tmp_file, XATTR_NAME_SELINUX, "system_u:object_r:testid-binding_t:s0"), true);
 
-    ck_assert_int_eq(secure_app_add_path(secure_app, "bad_path", type_id), 0);
+    ck_assert_int_eq(secure_app_add_path(secure_app, "bad_path", "id"), 0);
 
     ck_assert_int_eq(selinux_process_paths(secure_app, path_type_definitions), -ENOENT);
 
@@ -99,14 +99,14 @@ START_TEST(test_selinux_install) {
 
     ck_assert_int_lt(install_selinux(secure_app), 0);
 
-    ck_assert_int_eq(secure_app_add_path(secure_app, data_dir, type_data), 0);
-    ck_assert_int_eq(secure_app_add_path(secure_app, data_file, type_data), 0);
-    ck_assert_int_eq(secure_app_add_path(secure_app, exec_dir, type_exec), 0);
-    ck_assert_int_eq(secure_app_add_path(secure_app, exec_file, type_exec), 0);
-    ck_assert_int_eq(secure_app_add_path(secure_app, id_dir, type_id), 0);
-    ck_assert_int_eq(secure_app_add_path(secure_app, id_file, type_id), 0);
-    ck_assert_int_eq(secure_app_add_path(secure_app, public_dir, type_public), 0);
-    ck_assert_int_eq(secure_app_add_path(secure_app, public_file, type_public), 0);
+    ck_assert_int_eq(secure_app_add_path(secure_app, data_dir, "data"), 0);
+    ck_assert_int_eq(secure_app_add_path(secure_app, data_file, "data"), 0);
+    ck_assert_int_eq(secure_app_add_path(secure_app, exec_dir, "exec"), 0);
+    ck_assert_int_eq(secure_app_add_path(secure_app, exec_file, "exec"), 0);
+    ck_assert_int_eq(secure_app_add_path(secure_app, id_dir, "id"), 0);
+    ck_assert_int_eq(secure_app_add_path(secure_app, id_file, "id"), 0);
+    ck_assert_int_eq(secure_app_add_path(secure_app, public_dir, "public"), 0);
+    ck_assert_int_eq(secure_app_add_path(secure_app, public_file, "public"), 0);
     ck_assert_int_eq(secure_app_add_permission(secure_app, "perm1"), 0);
     ck_assert_int_eq(secure_app_add_permission(secure_app, "perm2"), 0);
     ck_assert_int_eq(secure_app_set_id(secure_app, "testid-binding"), 0);
