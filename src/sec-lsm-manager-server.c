@@ -336,8 +336,15 @@ __nonnull((1)) static void onrequest(client_t *cli, unsigned count, const char *
                 if (rc >= 0) {
                     send_done(cli);
                 } else {
-                    ERROR("sec_lsm_manager_handle_set_id: %d %s", -rc, strerror(-rc));
-                    send_error(cli, "sec_lsm_manager_handle_set_id");
+                    const char *errtxt;
+                    switch (-rc) {
+                    case ENOTRECOVERABLE: errtxt = "not-recoverable"; break;
+                    case EINVAL:       errtxt = "bad-id"; break;
+                    case EEXIST:       errtxt = "id-already-set"; break;
+                    default:           errtxt = "?"; break;
+                    }
+                    ERROR("sec_lsm_manager_handle_set_id: %s", errtxt);
+                    send_error(cli, errtxt);
                 }
                 return;
             }

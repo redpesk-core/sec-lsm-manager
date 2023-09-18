@@ -85,7 +85,11 @@ extern void destroy_secure_app(secure_app_t *secure_app);
  *
  * @param[in] secure_app handler
  * @param[in] id The id to copy
- * @return 0 in case of success or a negative -errno value
+ * @return
+ *    * 0              success
+ *    * -EINVAL        bad id
+ *    * -EEXIST        the id is already set
+ *    * -ENOTRECOVERABLE state unrecoverable
  */
 __wur __nonnull()
 extern int secure_app_set_id(secure_app_t *secure_app, const char *id);

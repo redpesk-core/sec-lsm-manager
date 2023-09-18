@@ -73,7 +73,9 @@ __nonnull() void init_secure_app(secure_app_t *secure_app) {
  * @param[out] id output of the id
  * @param[out] id_underscore output of the id with underscores for dashes
  * @param[out] label output of the LSM id for the application
- * @return 0 in case of success or a negative value when an error occurs
+ * @return
+ *    * 0 in case of success
+ *    * -EINVAL        the id has bad characters
  */
 __nonnull()
 static int setids(
@@ -90,7 +92,7 @@ static int setids(
         /* validate length isn't too big */
         if (idx >= SEC_LSM_MANAGER_MAX_SIZE_ID) {
             ERROR("invalid id size, bigger than %d for %s", SEC_LSM_MANAGER_MAX_SIZE_ID, src);
-            return -ENAMETOOLONG;
+            return -EINVAL;
         }
         /* validate character is valid */
         if (!isalnum(car) && car != '-' && car != '_') {
@@ -158,7 +160,7 @@ int secure_app_set_id(secure_app_t *secure_app, const char *id) {
 
     else if (secure_app->id[0] != '\0') {
         ERROR("id already set");
-        rc = -EBUSY;
+        rc = -EEXIST;
     }
 
     else {
