@@ -187,7 +187,7 @@ static int flushw(client_t *cli)
  * @param[in] ... strings to send or NULL
  * @return 0 in case of success or a negative -errno value
  */
-__nonnull((1)) __wur static int putx(client_t *cli, ...) {
+__nonnull((1)) static int putx(client_t *cli, ...) {
     const char *p, *fields[MAX_PUTX_ITEMS];
     unsigned n;
     va_list l;
@@ -198,8 +198,10 @@ __nonnull((1)) __wur static int putx(client_t *cli, ...) {
     va_start(l, cli);
     p = va_arg(l, const char *);
     while (p) {
-        if (n == MAX_PUTX_ITEMS)
+        if (n == MAX_PUTX_ITEMS) {
+            ERROR("putx: Unexpected big count of args");
             return -EINVAL;
+        }
         fields[n++] = p;
         p = va_arg(l, const char *);
     }
@@ -211,8 +213,15 @@ __nonnull((1)) __wur static int putx(client_t *cli, ...) {
     rc = prot_put(cli->prot, n, fields);
     if (rc == -ECANCELED) {
         rc = flushw(cli);
-        if (rc == 0)
+        if (rc == 0) {
             rc = prot_put(cli->prot, n, fields);
+            if (rc < 0)
+                goto put_error;
+        }
+    }
+    else if (rc < 0) {
+put_error:
+        ERROR("putx: prot_put returned the error %s", strerror(-rc));
     }
     return rc;
 }
@@ -223,10 +232,7 @@ __nonnull((1)) __wur static int putx(client_t *cli, ...) {
  * @param[in] cli client handler
  */
 __nonnull() static void send_done(client_t *cli) {
-    int rc = putx(cli, _done_, NULL);
-    if (rc < 0) {
-        ERROR("putx: %d %s", -rc, strerror(-rc));
-    }
+    putx(cli, _done_, NULL);
     flushw(cli);
 }
 
@@ -238,10 +244,7 @@ __nonnull() static void send_done(client_t *cli) {
  */
 __nonnull((1)) static void send_error(client_t *cli, const char *errorstr) {
     raise_error_flag(cli->secure_app);
-    int rc = putx(cli, _error_, errorstr, NULL);
-    if (rc < 0) {
-        ERROR("putx: %d %s", -rc, strerror(-rc));
-    }
+    putx(cli, _error_, errorstr, NULL);
     flushw(cli);
 }
 
@@ -252,43 +255,22 @@ __nonnull((1)) static void send_error(client_t *cli, const char *errorstr) {
  */
 __nonnull() __wur static int send_display_secure_app(client_t *cli) {
     plug_t *plugit;
-    int rc = 0;
 
-    if (cli->secure_app->error_flag) {
-        rc = putx(cli, _string_, _error_, _on_, NULL);
-        if (rc < 0) {
-            ERROR("putx: %d %s", -rc, strerror(-rc));
-        }
-    }
+    if (cli->secure_app->error_flag)
+        putx(cli, _string_, _error_, _on_, NULL);
 
-    if (cli->secure_app->id[0] != '\0') {
-        rc = putx(cli, _string_, _id_, cli->secure_app->id, NULL);
-        if (rc < 0) {
-            ERROR("putx: %d %s", -rc, strerror(-rc));
-        }
-    }
+    if (cli->secure_app->id[0] != '\0')
+        putx(cli, _string_, _id_, cli->secure_app->id, NULL);
 
-    for (size_t i = 0; i < cli->secure_app->path_set.size; i++) {
-        rc = putx(cli, _string_, _path_, cli->secure_app->path_set.paths[i]->path,
+    for (size_t i = 0; i < cli->secure_app->path_set.size; i++)
+        putx(cli, _string_, _path_, cli->secure_app->path_set.paths[i]->path,
                   get_path_type_string(cli->secure_app->path_set.paths[i]->path_type), NULL);
-        if (rc < 0) {
-            ERROR("putx: %d %s", -rc, strerror(-rc));
-        }
-    }
 
-    for (size_t i = 0; i < cli->secure_app->permission_set.size; i++) {
-        rc = putx(cli, _string_, _permission_, cli->secure_app->permission_set.permissions[i], NULL);
-        if (rc < 0) {
-            ERROR("putx: %d %s", -rc, strerror(-rc));
-        }
-    }
+    for (size_t i = 0; i < cli->secure_app->permission_set.size; i++)
+        putx(cli, _string_, _permission_, cli->secure_app->permission_set.permissions[i], NULL);
 
-    for (plugit = cli->secure_app->plugset ; plugit != NULL ; plugit = plugit->next) {
-        rc = putx(cli, _string_, _plug_, plugit->expdir, plugit->impid, plugit->impdir, NULL);
-        if (rc < 0) {
-            ERROR("putx: %d %s", -rc, strerror(-rc));
-        }
-    }
+    for (plugit = cli->secure_app->plugset ; plugit != NULL ; plugit = plugit->next)
+        putx(cli, _string_, _plug_, plugit->expdir, plugit->impid, plugit->impdir, NULL);
 
     return 0;
 }
@@ -316,10 +298,7 @@ __nonnull((1)) static void onrequest(client_t *cli, unsigned count, const char *
         if (ckarg(args[0], _sec_lsm_manager_, 0)) {
             if (count < 2 || !ckarg(args[1], "1", 0))
                 goto invalid;
-            rc = putx(cli, _done_, "1", NULL);
-            if (rc < 0) {
-                ERROR("putx: %d %s", -rc, strerror(-rc));
-            }
+            putx(cli, _done_, "1", NULL);
             flushw(cli);
             cli->version = 1;
             return;
@@ -383,10 +362,7 @@ __nonnull((1)) static void onrequest(client_t *cli, unsigned count, const char *
                         break;
                     nextlog = ckarg(args[1], _on_, 0);
                 }
-                rc = putx(cli, _done_, nextlog ? _on_ : _off_, NULL);
-                if (rc < 0) {
-                    ERROR("putx: %d %s", -rc, strerror(-rc));
-                }
+                putx(cli, _done_, nextlog ? _on_ : _off_, NULL);
                 flushw(cli);
                 sec_lsm_manager_server_log = nextlog;
                 return;
@@ -397,10 +373,7 @@ __nonnull((1)) static void onrequest(client_t *cli, unsigned count, const char *
             if (ckarg(args[0], _path_, 1) && count == 3) {
                 rc = secure_app_add_path(cli->secure_app, args[1], get_path_type(args[2]));
                 if (rc >= 0) {
-                    rc = putx(cli, _done_, NULL);
-                    if (rc < 0) {
-                        ERROR("putx: %d %s", -rc, strerror(-rc));
-                    }
+                    putx(cli, _done_, NULL);
                     flushw(cli);
                 } else {
                     ERROR("sec_lsm_manager_handle_add_path: %d %s", -rc, strerror(-rc));
@@ -412,10 +385,7 @@ __nonnull((1)) static void onrequest(client_t *cli, unsigned count, const char *
             if (ckarg(args[0], _permission_, 1) && count == 2) {
                 rc = secure_app_add_permission(cli->secure_app, args[1]);
                 if (rc >= 0) {
-                    rc = putx(cli, _done_, NULL);
-                    if (rc < 0) {
-                        ERROR("putx: %d %s", -rc, strerror(-rc));
-                    }
+                    putx(cli, _done_, NULL);
                     flushw(cli);
                 } else {
                     ERROR("sec_lsm_manager_handle_add_permission: %d %s", -rc, strerror(-rc));
@@ -427,10 +397,7 @@ __nonnull((1)) static void onrequest(client_t *cli, unsigned count, const char *
             if (ckarg(args[0], _plug_, 1) && count == 4) {
                 rc = secure_app_add_plug(cli->secure_app, args[1], args[2], args[3]);
                 if (rc >= 0) {
-                    rc = putx(cli, _done_, NULL);
-                    if (rc < 0) {
-                        ERROR("putx: %d %s", -rc, strerror(-rc));
-                    }
+                    putx(cli, _done_, NULL);
                     flushw(cli);
                 } else {
                     ERROR("sec_lsm_manager_handle_add_plug: %d %s", -rc, strerror(-rc));
