@@ -176,13 +176,13 @@ int secure_app_set_id(secure_app_t *secure_app, const char *id) {
 int secure_app_add_permission(secure_app_t *secure_app, const char *permission) {
     if (secure_app->error_flag) {
         ERROR("error flag has been raised");
-        return -EPERM;
+        return -ENOTRECOVERABLE;
     }
 
     for (size_t i = 0; i < secure_app->permission_set.size; i++) {
         if (!strcmp(secure_app->permission_set.permissions[i], permission)) {
             ERROR("permission already defined");
-            return -EINVAL;
+            return -EEXIST;
         }
     }
 

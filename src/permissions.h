@@ -51,7 +51,10 @@ extern void free_permission_set(permission_set_t *permission_set) __nonnull();
  *
  * @param[in] permission_set The permission_set handler
  * @param[in] permission The permission to add
- * @return 0 in case of success or a negative -errno value
+ * @return
+ *    * 0              success
+ *    * -EINVAL        bad type or bad path
+ *    * -ENOMEM        out of memory
  */
 extern int permission_set_add_permission(permission_set_t *permission_set, const char *permission) __wur __nonnull();
 

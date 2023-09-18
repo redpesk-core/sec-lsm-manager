@@ -99,7 +99,12 @@ extern int secure_app_set_id(secure_app_t *secure_app, const char *id);
  *
  * @param[in] secure_app handler
  * @param[in] permission The permission to add
- * @return 0 in case of success or a negative -errno value
+ * @return
+ *    * 0              success
+ *    * -EINVAL        bad bad permission
+ *    * -EEXIST        the permission is already added
+ *    * -ENOMEM        out of memory
+ *    * -ENOTRECOVERABLE state unrecoverable
  */
 __wur __nonnull()
 extern int secure_app_add_permission(secure_app_t *secure_app, const char *permission);

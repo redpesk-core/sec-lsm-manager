@@ -284,6 +284,7 @@ __nonnull() __wur static int send_display_secure_app(client_t *cli) {
  */
 __nonnull((1)) static void onrequest(client_t *cli, unsigned count, const char *args[]) {
     int nextlog, rc;
+    const char *errtxt;
 
     /* just ignore empty lines */
     if (count == 0)
@@ -336,7 +337,6 @@ __nonnull((1)) static void onrequest(client_t *cli, unsigned count, const char *
                 if (rc >= 0) {
                     send_done(cli);
                 } else {
-                    const char *errtxt;
                     switch (-rc) {
                     case ENOTRECOVERABLE: errtxt = "not-recoverable"; break;
                     case EINVAL:       errtxt = "bad-id"; break;
@@ -383,7 +383,6 @@ __nonnull((1)) static void onrequest(client_t *cli, unsigned count, const char *
                     putx(cli, _done_, NULL);
                     flushw(cli);
                 } else {
-                    const char *errtxt;
                     switch (-rc) {
                     case ENOTRECOVERABLE: errtxt = "not-recoverable"; break;
                     case EINVAL:       errtxt = "bad-path-or-type"; break;
@@ -405,8 +404,15 @@ __nonnull((1)) static void onrequest(client_t *cli, unsigned count, const char *
                     putx(cli, _done_, NULL);
                     flushw(cli);
                 } else {
-                    ERROR("sec_lsm_manager_handle_add_permission: %d %s", -rc, strerror(-rc));
-                    send_error(cli, "sec_lsm_manager_handle_add_permission");
+                    switch (-rc) {
+                    case ENOTRECOVERABLE: errtxt = "not-recoverable"; break;
+                    case EINVAL:       errtxt = "bad-permission"; break;
+                    case EEXIST:       errtxt = "permission-already-set"; break;
+                    case ENOMEM:       errtxt = "out-of-memory"; break;
+                    default:           errtxt = "?"; break;
+                    }
+                    ERROR("error when adding permission: %s", errtxt);
+                    send_error(cli, errtxt);
                 }
                 return;
             }
