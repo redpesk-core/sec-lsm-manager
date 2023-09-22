@@ -38,6 +38,8 @@
 #include "sec-lsm-manager.h"
 #include "utils.h"
 
+#define ISSEP(x) (((x)[0] == ';') && ((x)[1] == '\0'))
+
 #define _ECHO_ 'e'
 #define _HELP_ 'h'
 #define _KEEP_GOING_ 'k'
@@ -192,15 +194,12 @@ static int nstr = 0;
 static int echo = 0;
 static int last_status = 0;
 
+
 static int plink(int ac, char **av, int *used, int maxi) {
-    int r = 0;
+    int r = 0, nrm = maxi < ac ? maxi : ac;
 
-    if (maxi < ac)
-        ac = maxi;
-    while (r < ac && strcmp(av[r], ";")) r++;
-
-    *used = r + (r < ac);
-    return r;
+    while (r < nrm && !ISSEP(av[r])) r++;
+    return *used = r;
 }
 
 static int show_status(int used_count, const char *oper, int rc, const char *extra)
@@ -424,6 +423,9 @@ static int do_help(int ac, char **av) {
 }
 
 static int do_any(int ac, char **av) {
+    while (ac && ISSEP(av[0]))
+        ac--, av++;
+
     if (!ac)
         return 0;
 
@@ -460,7 +462,7 @@ static int do_any(int ac, char **av) {
     if (!strcmp(av[0], "help") || !strcmp(av[0], "?"))
         return do_help(ac, av);
 
-    fprintf(stderr, "unknown command %s (try help)\n", av[0]);
+    fprintf(stderr, "unknown command '%s' (try help)\n", av[0]);
     return 1;
 }
 
