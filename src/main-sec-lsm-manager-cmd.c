@@ -40,26 +40,29 @@
 
 #define _ECHO_ 'e'
 #define _HELP_ 'h'
+#define _KEEP_GOING_ 'k'
 #define _SOCKET_ 's'
 #define _VERSION_ 'v'
 
-static const char shortopts[] = "c:ehs:v";
+static const char shortopts[] = "c:ehks:v";
 
 static const struct option longopts[] = {{"echo", 0, NULL, _ECHO_},
                                          {"help", 0, NULL, _HELP_},
+                                         {"keep-going", 0, NULL, _KEEP_GOING_},
                                          {"socket", 1, NULL, _SOCKET_},
                                          {"version", 0, NULL, _VERSION_},
                                          {NULL, 0, NULL, 0}};
 
 static const char helptxt[] =
     "\n"
-    "usage: sec-lsm-manager-cmd [options]... [action [arguments]]\n"
+    "usage: sec-lsm-manager-cmd [options]... [action [arguments]]...\n"
     "\n"
     "otpions:\n"
     "    -s, --socket xxx      set the base xxx for sockets\n"
     "    -e, --echo            print the evaluated command\n"
     "    -h, --help            print this help and exit\n"
     "    -v, --version         print the version and exit\n"
+    "    -k, --keep-going      don't stop on error if actions given\n"
     "\n"
     "When action is given, sec-lsm-manager-cmd performs the action and exits.\n"
     "Otherwise sec-lsm-manager-cmd continuously read its input to get the actions.\n"
@@ -483,6 +486,7 @@ int main(int ac, char **av) {
     int rc;
     int help = 0;
     int version = 0;
+    int keep_going = 0;
     int error = 0;
     char *socket = NULL;
     char *p;
@@ -501,6 +505,9 @@ int main(int ac, char **av) {
                 break;
             case _HELP_:
                 help = 1;
+                break;
+            case _KEEP_GOING_:
+                keep_going = 1;
                 break;
             case _SOCKET_:
                 socket = optarg;
@@ -539,7 +546,7 @@ int main(int ac, char **av) {
     LOG("initialization success");
 
     if (optind < ac) {
-        do_all(ac - optind, av + optind, 1);
+        do_all(ac - optind, av + optind, !keep_going);
         return 0;
     }
 
