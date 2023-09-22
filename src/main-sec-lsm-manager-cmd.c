@@ -194,11 +194,21 @@ static int nstr = 0;
 static int echo = 0;
 static int last_status = 0;
 
+static void _echo_(int ac, char **av)
+{
+    if (echo && ac) {
+        fprintf(stdout, "%s", *av++);
+        while(--ac)
+            fprintf(stdout, " %s", *av++);
+        fprintf(stdout, "\n");
+    }
+}
 
 static int plink(int ac, char **av, int *used, int maxi) {
     int r = 0, nrm = maxi < ac ? maxi : ac;
 
     while (r < nrm && !ISSEP(av[r])) r++;
+    _echo_(r, av);
     return *used = r;
 }
 
@@ -418,6 +428,7 @@ static int do_help(int ac, char **av) {
         help = help_uninstall_text;
     else
         rc = 1;
+    _echo_(rc, av);
     fprintf(stdout, "%s", help);
     return rc;
 }
@@ -456,8 +467,10 @@ static int do_any(int ac, char **av) {
     if (!strcmp(av[0], "uninstall"))
         return do_uninstall(ac, av);
 
-    if (!strcmp(av[0], "quit"))
+    if (!strcmp(av[0], "quit")) {
+        _echo_(1, av);
         exit(0);
+    }
 
     if (!strcmp(av[0], "help") || !strcmp(av[0], "?"))
         return do_help(ac, av);
@@ -469,10 +482,6 @@ static int do_any(int ac, char **av) {
 static void do_all(int ac, char **av, int quit) {
     int rc;
 
-    if (echo) {
-        for (rc = 0; rc < ac; rc++) fprintf(stdout, "%s%s", rc ? " " : "", av[rc]);
-        fprintf(stdout, "\n");
-    }
     while (ac) {
         last_status = 0;
         rc = do_any(ac, av);
