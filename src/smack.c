@@ -48,7 +48,8 @@
  * @param[in] label The label that will be used when exec
  * @return 0 in case of success or a negative -errno value
  */
-__nonnull() __wur int label_exec(const char *path, const char *label) {
+__nonnull() __wur
+int label_exec(const char *path, const char *label) {
     char *test_exec = strstr(label, suffix_exec);
     if (test_exec == NULL || strcmp(test_exec, suffix_exec)) {
         ERROR("%s not end with %s", label, suffix_exec);
