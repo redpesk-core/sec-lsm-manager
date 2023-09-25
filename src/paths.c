@@ -75,7 +75,7 @@ int path_set_add_path(path_set_t *path_set, const char *path, enum path_type pat
 
     size_t path_len = strlen(path);
 
-    if (path_len < 2 || path_len >= SEC_LSM_MANAGER_MAX_SIZE_PATH) {
+    if (path_len < 1 || path_len >= SEC_LSM_MANAGER_MAX_SIZE_PATH) {
         ERROR("invalid path size : %ld", path_len);
         return -EINVAL;
     }
@@ -94,8 +94,8 @@ int path_set_add_path(path_set_t *path_set, const char *path, enum path_type pat
     }
     
     secure_strncpy(path_item->path, path, path_len + 1);
-    if (path_item->path[path_len - 1] == '/') {
-        path_item->path[path_len - 1] = '\0';
+    while (path_len > 1 && path_item->path[path_len - 1] == '/') {
+        path_item->path[--path_len] = '\0';
     }
 
     path_item->path_type = path_type;
