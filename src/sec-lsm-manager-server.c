@@ -94,6 +94,19 @@ struct sec_lsm_manager_server {
     pollitem_t socket;
 };
 
+static int display_id(void *cli, const char *id);
+static int display_path(void *cli, const char *path, const char *type);
+static int display_permission(void *cli, const char *permission);
+static int display_plug(void *cli, const char *expdir, const char *impid, const char *impdir);
+
+/** visitor interface for displaying secure app */
+static const secure_app_visitor_itf_t display_visitor_itf = {
+    .id = display_id,
+    .path = display_path,
+    .permission = display_permission,
+    .plug = display_plug
+};
+
 /***********************/
 /*** PRIVATE METHODS ***/
 /***********************/
@@ -248,31 +261,47 @@ __nonnull((1)) static void send_error(client_t *cli, const char *errorstr) {
     flushw(cli);
 }
 
+/* visitor's id callback for displaying secure app */
+static int display_id(void *cli, const char *id)
+{
+    return putx((client_t*)cli, _string_, _id_, id, NULL);
+}
+
+/* visitor's path callback for displaying secure app */
+static int display_path(void *cli, const char *path, const char *type)
+{
+    return putx((client_t*)cli, _string_, _path_, path, type, NULL);
+}
+
+/* visitor's permission callback for displaying secure app */
+static int display_permission(void *cli, const char *permission)
+{
+    return putx((client_t*)cli, _string_, _permission_, permission, NULL);
+}
+
+/* visitor's plug callback for displaying secure app */
+static int display_plug(void *cli, const char *expdir, const char *impid, const char *impdir)
+{
+    return putx((client_t*)cli, _string_, _plug_, expdir, impid, impdir, NULL);
+}
+
 /**
- * @brief emit the content of secure app to display it
+ * @brief emit the reply to a display query
  *
  * @param[in] cli client handler
  */
-__nonnull() __wur static int send_display_secure_app(client_t *cli) {
-    plug_t *plugit;
+__nonnull() __wur
+static int send_display(client_t *cli) {
 
+    int rc = 0;
+    
     if (secure_app_has_error(cli->secure_app))
-        putx(cli, _string_, _error_, _on_, NULL);
+        rc = putx(cli, _string_, _error_, _on_, NULL);
 
-    if (cli->secure_app->id[0] != '\0')
-        putx(cli, _string_, _id_, cli->secure_app->id, NULL);
+    if (rc == 0)
+        rc = secure_app_visit(cli->secure_app, cli, &display_visitor_itf);
 
-    for (size_t i = 0; i < cli->secure_app->path_set.size; i++)
-        putx(cli, _string_, _path_, cli->secure_app->path_set.paths[i]->path,
-                  get_path_type_string(cli->secure_app->path_set.paths[i]->path_type), NULL);
-
-    for (size_t i = 0; i < cli->secure_app->permission_set.size; i++)
-        putx(cli, _string_, _permission_, cli->secure_app->permission_set.permissions[i], NULL);
-
-    for (plugit = cli->secure_app->plugset ; plugit != NULL ; plugit = plugit->next)
-        putx(cli, _string_, _plug_, plugit->expdir, plugit->impid, plugit->impdir, NULL);
-
-    return 0;
+    return rc;
 }
 
 /**
@@ -320,12 +349,12 @@ __nonnull((1)) static void onrequest(client_t *cli, unsigned count, const char *
         case 'd':
             /* display */
             if (ckarg(args[0], _display_, 1) && count == 1) {
-                rc = send_display_secure_app(cli);
+                rc = send_display(cli);
                 if (rc >= 0) {
                     send_done(cli);
                 } else {
                     ERROR("send_display_secure_app: %d %s", -rc, strerror(-rc));
-                    send_error(cli, "send_display_secure_app");
+                    send_error(cli, "write-error");
                 }
                 return;
             }

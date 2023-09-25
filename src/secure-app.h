@@ -193,4 +193,31 @@ extern int secure_app_uninstall(secure_app_t *secure_app, cynagora_t *cynagora);
 __nonnull() __wur
 extern int secure_app_check(secure_app_t *secure_app, cynagora_t *cynagora);
 
+/**
+ * Structure of callback functions for visiting secure_app
+ */
+typedef
+    struct {
+        int (*id)(void* /*visitor*/, const char* /*id*/);
+        int (*path)(void* /*visitor*/, const char* /*id*/, const char* /*id*/);
+        int (*permission)(void* /*visitor*/, const char* /*permission*/);
+        int (*plug)(void* /*visitor*/, const char* /*id*/, const char* /*id*/, const char* /*id*/);
+    }
+    secure_app_visitor_itf_t;
+
+/**
+ * @brief Visit values of secure_app until non zero return
+ *
+ * @param[in] secure_app the application to be visited
+ * @param[in] visitor a visitor pointer
+ * @param[in] itf the visitor functions
+ *
+ */
+__nonnull((1,2)) __wur
+extern int secure_app_visit(
+    secure_app_t *secure_app,
+    void *visitor,
+    const secure_app_visitor_itf_t *itf);
+
+
 #endif

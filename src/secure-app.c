@@ -427,3 +427,32 @@ int secure_app_check(secure_app_t *secure_app, cynagora_t *cynagora)
 {
     return check_plugs(secure_app, cynagora);
 }
+
+/* see secure-app.h */
+__nonnull((1,2)) __wur
+int secure_app_visit(secure_app_t *secure_app, void *visitor, const secure_app_visitor_itf_t *itf)
+{
+    plug_t *plugit;
+    size_t i;
+    int rc = 0;
+
+    if (itf->id != NULL && secure_app->id[0] != '\0')
+        rc = itf->id(visitor, secure_app->id);
+
+    if (itf->path != NULL)
+        for (i = 0; !rc && i < secure_app->path_set.size; i++)
+            rc = itf->path(visitor,
+                        secure_app->path_set.paths[i]->path,
+                        get_path_type_string(secure_app->path_set.paths[i]->path_type));
+
+    if (itf->permission != NULL)
+        for (i = 0; !rc && i < secure_app->permission_set.size; i++)
+            rc = itf->permission(visitor, secure_app->permission_set.permissions[i]);
+
+    if (itf->plug != NULL)
+        for (plugit = secure_app->plugset ; !rc && plugit != NULL ; plugit = plugit->next)
+            rc = itf->plug(visitor, plugit->expdir, plugit->impid, plugit->impdir);
+
+    return rc;
+}
+
