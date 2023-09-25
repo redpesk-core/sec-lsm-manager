@@ -63,6 +63,15 @@ __nonnull() __wur
 extern int create_secure_app(secure_app_t **pointer);
 
 /**
+ * @brief Destroy the secure app
+ * Free secure app handler and content
+ *
+ * @param[in] secure_app handler
+ */
+__nonnull()
+extern void destroy_secure_app(secure_app_t *secure_app);
+
+/**
  * @brief Free id, paths and permissions
  * The pointer is not free
  *
@@ -72,13 +81,18 @@ __nonnull()
 extern void clear_secure_app(secure_app_t *secure_app);
 
 /**
- * @brief Destroy the secure app
- * Free secure app handler and content
- *
- * @param[in] secure_app handler
+ * @brief Set error_flag
+ * The secure_app can't be installed after
+ * You need to clear to return in create state
  */
 __nonnull()
-extern void destroy_secure_app(secure_app_t *secure_app);
+extern void secure_app_raise_error(secure_app_t *secure_app);
+
+/**
+ * @brief Checks if an error was raise
+ */
+__nonnull()
+extern bool secure_app_has_error(secure_app_t *secure_app);
 
 /**
  * @brief Alloc and copy id in secure app
@@ -138,13 +152,6 @@ extern int secure_app_add_path(secure_app_t *secure_app, const char *path, const
  */
 __wur __nonnull()
 extern int secure_app_add_plug(secure_app_t *secure_app, const char *expdir, const char *impid, const char *impdir);
-
-/**
- * @brief Set error_flag
- * The secure_app can't be installed after
- * You need to clear to return in create state
- */
-extern void raise_error_flag(secure_app_t *secure_app);
 
 /**
  * @brief Install the application

@@ -243,7 +243,7 @@ __nonnull() static void send_done(client_t *cli) {
  * @param[in] errorstr string error to send
  */
 __nonnull((1)) static void send_error(client_t *cli, const char *errorstr) {
-    raise_error_flag(cli->secure_app);
+    secure_app_raise_error(cli->secure_app);
     putx(cli, _error_, errorstr, NULL);
     flushw(cli);
 }
@@ -256,7 +256,7 @@ __nonnull((1)) static void send_error(client_t *cli, const char *errorstr) {
 __nonnull() __wur static int send_display_secure_app(client_t *cli) {
     plug_t *plugit;
 
-    if (cli->secure_app->error_flag)
+    if (secure_app_has_error(cli->secure_app))
         putx(cli, _string_, _error_, _on_, NULL);
 
     if (cli->secure_app->id[0] != '\0')

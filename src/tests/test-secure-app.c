@@ -77,7 +77,9 @@ START_TEST(test_secure_app_set_id) {
 
     ck_assert_int_eq(create_secure_app(&secure_app), 0);
     // test error flag raise
-    raise_error_flag(secure_app);
+    ck_assert_int_eq((int)secure_app_has_error(secure_app), 0);
+    secure_app_raise_error(secure_app);
+    ck_assert_int_eq((int)secure_app_has_error(secure_app), 1);
     ck_assert_int_eq(secure_app_set_id(secure_app, "id3"), -EPERM);
     destroy_secure_app(secure_app);
 }
@@ -95,7 +97,9 @@ START_TEST(test_secure_app_add_permission) {
     ck_assert_int_eq(secure_app_add_permission(secure_app, "perm"), -EINVAL);
 
     // test error flag raise
-    raise_error_flag(secure_app);
+    ck_assert_int_eq((int)secure_app_has_error(secure_app), 0);
+    secure_app_raise_error(secure_app);
+    ck_assert_int_eq((int)secure_app_has_error(secure_app), 1);
     ck_assert_int_eq(secure_app_add_permission(secure_app, "perm2"), -EPERM);
     destroy_secure_app(secure_app);
 }
@@ -118,7 +122,9 @@ START_TEST(test_secure_app_add_path) {
     ck_assert_int_eq(secure_app_add_path(secure_app, "/tmp", "conf"), -EINVAL);
 
     // test error flag raise
-    raise_error_flag(secure_app);
+    ck_assert_int_eq((int)secure_app_has_error(secure_app), 0);
+    secure_app_raise_error(secure_app);
+    ck_assert_int_eq((int)secure_app_has_error(secure_app), 1);
     ck_assert_int_eq(secure_app_add_path(secure_app, "/tmp2", "conf"), -EPERM);
     destroy_secure_app(secure_app);
 }

@@ -132,6 +132,12 @@ int create_secure_app(secure_app_t **secure_app) {
 }
 
 /* see secure-app.h */
+void destroy_secure_app(secure_app_t *secure_app) {
+    clear_secure_app(secure_app);
+    free(secure_app);
+}
+
+/* see secure-app.h */
 void clear_secure_app(secure_app_t *secure_app) {
     if (secure_app) {
         secure_app->label[0] = secure_app->id_underscore[0] = secure_app->id[0] = '\0';
@@ -144,9 +150,13 @@ void clear_secure_app(secure_app_t *secure_app) {
 }
 
 /* see secure-app.h */
-void destroy_secure_app(secure_app_t *secure_app) {
-    clear_secure_app(secure_app);
-    free(secure_app);
+void secure_app_raise_error(secure_app_t *secure_app) {
+    secure_app->error_flag = true;
+}
+
+/* see secure-app.h */
+bool secure_app_has_error(secure_app_t *secure_app) {
+    return secure_app->error_flag;
 }
 
 /* see secure-app.h */
@@ -269,11 +279,6 @@ int secure_app_add_plug(secure_app_t *secure_app, const char *expdir, const char
     }
     secure_app->need_id = true;
     return 0;
-}
-
-/* see secure-app.h */
-void raise_error_flag(secure_app_t *secure_app) {
-    secure_app->error_flag = true;
 }
 
 /* see secure-app.h */
