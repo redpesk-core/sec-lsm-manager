@@ -71,24 +71,6 @@
 // }
 // END_TEST
 
-START_TEST(test_label_exec) {
-    char path[SEC_LSM_MANAGER_MAX_SIZE_PATH] = {'\0'};
-    char label[SEC_LSM_MANAGER_MAX_SIZE_LABEL] = {'\0'};
-    char tmp_dir[SEC_LSM_MANAGER_MAX_SIZE_DIR] = {'\0'};
-    // create dir
-    create_tmp_dir(tmp_dir);
-    // set path
-    snprintf(path, sizeof path, "%s/test.bin", tmp_dir);
-    ck_assert_int_eq(create_file(path), 0);
-    ck_assert_int_eq(label_exec(path, label), -EINVAL);
-    // set label with suffix :Exec
-    snprintf(label, SEC_LSM_MANAGER_MAX_SIZE_LABEL, "label%s", suffix_exec);
-    ck_assert_int_eq(label_exec(path, label), 0);
-    remove(path);
-    rmdir(tmp_dir);
-}
-END_TEST
-
 START_TEST(test_label_path) {
     char path[SEC_LSM_MANAGER_MAX_SIZE_PATH] = {'\0'};
     char path2[SEC_LSM_MANAGER_MAX_SIZE_PATH] = {'\0'};
@@ -241,8 +223,6 @@ START_TEST(test_smack_uninstall) {
 END_TEST
 
 void test_smack() {
-    // addtest(test_set_smack);
-    addtest(test_label_exec);
     addtest(test_label_path);
     addtest(test_smack_install);
     addtest(test_smack_uninstall);
