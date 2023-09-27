@@ -97,8 +97,8 @@ START_TEST(test_label_path) {
 
     // path not set + file and dir not created
     secure_strncpy(label, "label", SEC_LSM_MANAGER_MAX_SIZE_LABEL);
-    ck_assert_int_lt(label_path(tmp_dir, label, 0, 1), 0);
-    ck_assert_int_lt(label_path(path, label, 1, 1), 0);
+    ck_assert_int_lt(set_path_labels(tmp_dir, label, 0, 1), 0);
+    ck_assert_int_lt(set_path_labels(path, label, label, 1), 0);
 
     // create dir
     create_tmp_dir(tmp_dir);
@@ -107,22 +107,16 @@ START_TEST(test_label_path) {
     ck_assert_int_eq(create_file(path), 0);
 
     // label dir with label and transmute
-    ck_assert_int_eq(label_path(tmp_dir, label, 0, 1), 0);
+    ck_assert_int_eq(set_path_labels(tmp_dir, label, 0, 1), 0);
     // label file with label
-    ck_assert_int_eq(label_path(path, label, 0, 0), 0);
+    ck_assert_int_eq(set_path_labels(path, label, 0, 0), 0);
 
     snprintf(path2, SEC_LSM_MANAGER_MAX_SIZE_PATH, "%s/test.bin", tmp_dir);
     // create file 2
     ck_assert_int_eq(create_file(path2), 0);
 
-    // label file 2 with label and executable
-    ck_assert_int_eq(label_path(path2, label, 1, 0), -EINVAL);
-
-    // set label with suffix :Exec
-    snprintf(label, SEC_LSM_MANAGER_MAX_SIZE_LABEL, "label%s", suffix_exec);
-
     // label file 2 with label+suffix and executable
-    ck_assert_int_eq(label_path(path2, label, 1, 0), 0);
+    ck_assert_int_eq(set_path_labels(path2, label, label, 0), 0);
 
     remove(path);
     remove(path2);

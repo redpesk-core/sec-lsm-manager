@@ -80,7 +80,7 @@ int label_exec(const char *path, const char *label) {
  * @return 0 in case of success or a negative -errno value
  */
 __nonnull()
-static int unset_smack_labels(const char *path) {
+static int unset_path_labels(const char *path) {
     bool exists, is_exec, is_dir;
     get_file_informations(path, &exists, &is_exec, &is_dir);
 
@@ -167,6 +167,46 @@ static int set_smack_labels(const char *path, const char *label, bool is_executa
 }
 
 /**
+ * @brief Sets labels of a path entry
+ *
+ * @param[in] path The path of the file
+ * @param[in] label The label of the file
+ * @param[in] execlabel The execution label or NULL
+ * @param[in] transmute True if transmuting
+ * @return 0 in case of success or a negative -errno value
+ */
+__nonnull((1, 2)) __wur
+int set_path_labels(const char *path, const char *label, const char *execlabel, bool transmute)
+{
+    // access
+    int rc = set_label(path, XATTR_NAME_SMACK, label);
+    if (rc < 0) {
+        ERROR("set_label(%s,%s,%s) : %d %s", path, XATTR_NAME_SMACK, label, -rc, strerror(-rc));
+        return rc;
+    }
+
+    // exec
+    if (execlabel) {
+        rc = set_label(path, XATTR_NAME_SMACKEXEC, execlabel);
+        if (rc < 0) {
+            ERROR("set_smack(%s,%s,%s) : %d %s", path, XATTR_NAME_SMACKEXEC, execlabel, -rc, strerror(-rc));
+            return rc;
+        }
+    }
+
+    // transmute
+    if (transmute) {
+        rc = set_label(path, XATTR_NAME_SMACKTRANSMUTE, "TRUE");
+        if (rc < 0) {
+            ERROR("set_label(%s,%s,%s) : %d %s", path, XATTR_NAME_SMACKTRANSMUTE, "TRUE", -rc, strerror(-rc));
+            return rc;
+        }
+    }
+
+    return 0;
+}
+
+/**
  * @brief Label a file
  *
  * @param[in] path The path of the file
@@ -180,7 +220,7 @@ int label_path(const char *path, const char *label, bool is_executable, bool is_
     if (label[0])
         return set_smack_labels(path, label, is_executable, is_transmute);
     else
-        return unset_smack_labels(path);
+        return unset_path_labels(path);
 }
 
 /**
@@ -190,19 +230,37 @@ int label_path(const char *path, const char *label, bool is_executable, bool is_
  * @return 0 in case of success or a negative -errno value
  */
 __nonnull() __wur
-static int smack_set_path_labels(const secure_app_t *secure_app,
-                                                 const path_type_definitions_t path_type_definitions[number_path_type]) {
+static int label_all_paths(const secure_app_t *secure_app, bool set)
+{
+    size_t i;
     int rc = 0;
-    path_t *path = NULL;
-    for (size_t i = 0; i < secure_app->path_set.size; i++) {
-        path = secure_app->path_set.paths[i];
-        rc = label_path(path->path, path_type_definitions[path->path_type].label,
-                        path_type_definitions[path->path_type].is_executable,
-                        path_type_definitions[path->path_type].is_transmute);
+    path_t *path;
+    bool exists, is_exec, is_dir;
+    path_type_definitions_t path_type_definitions[number_path_type];
+    path_type_definitions_t *def;
+    const char *exec_label;
 
+    init_path_type_definitions(path_type_definitions, secure_app->id);
+    exec_label = path_type_definitions[type_id].label;
+    for (i = 0; i < secure_app->path_set.size; i++) {
+
+        path = secure_app->path_set.paths[i];
+        def = &path_type_definitions[path->path_type];
+
+        get_file_informations(path->path, &exists, &is_exec, &is_dir);
+        DEBUG("%s : exists=%d ; exec=%d ; dir=%d", path->path, exists, is_exec, is_dir);
+        if (!exists)
+            rc = -ENOENT;
+        else if (!set)
+            rc = unset_path_labels(path->path);
+        else
+            rc = set_path_labels(path->path,
+                                 def->label,
+                                 is_exec && def->is_executable ? exec_label : NULL,
+                                 is_dir && def->is_transmute);
         if (rc < 0) {
-            ERROR("label_path((%s,%s),%s) : %d %s", secure_app->path_set.paths[i]->path,
-                  get_path_type_string(secure_app->path_set.paths[i]->path_type), secure_app->id, -rc, strerror(-rc));
+            ERROR("%sset_path_labels(%s,%s,%s) : %d %s", set ? "" : "un", path->path,
+                                    def->label, secure_app->id, -rc, strerror(-rc));
             return rc;
         }
     }
@@ -222,7 +280,7 @@ static int smack_drop_path_labels(const secure_app_t *secure_app) {
     path_t *path = NULL;
     for (size_t i = 0; i < secure_app->path_set.size; i++) {
         path = secure_app->path_set.paths[i];
-        rc = label_path(path->path, DROP_LABEL, false, false);
+        rc = set_path_labels(path->path, DROP_LABEL, NULL, false);
         if (rc < 0) {
             ERROR("label_path((%s,%s),%s) : %d %s", secure_app->path_set.paths[i]->path,
                   get_path_type_string(secure_app->path_set.paths[i]->path_type), secure_app->id, -rc, strerror(-rc));
@@ -364,14 +422,12 @@ static int install_status(const secure_app_t *secure_app, int rc)
 __nonnull()
 static int install_smack_with_id(const secure_app_t *secure_app) {
     int rc;
-    path_type_definitions_t path_type_definitions[number_path_type];
 
-    init_path_type_definitions(path_type_definitions, secure_app->id);
     rc = create_smack_rules(secure_app);
     if (rc >= 0)
         rc = install_smack_plugs(secure_app);
     if (rc >= 0)
-        rc = smack_set_path_labels(secure_app, path_type_definitions);
+        rc = label_all_paths(secure_app, true);
 
     return install_status(secure_app, rc);
 }
@@ -385,15 +441,13 @@ static int install_smack_with_id(const secure_app_t *secure_app) {
 __nonnull()
 static int install_smack_no_id(const secure_app_t *secure_app) {
     int rc;
-    path_type_definitions_t path_type_definitions[number_path_type];
 
     if (secure_app->need_id) {
         ERROR("id is needed");
         rc = -EINVAL;
     }
     else {
-        init_path_type_definitions(path_type_definitions, secure_app->id);
-        rc = smack_set_path_labels(secure_app, path_type_definitions);
+        rc = label_all_paths(secure_app, false);
     }
     return install_status(secure_app, rc);
 }

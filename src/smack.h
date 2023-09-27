@@ -54,5 +54,5 @@ extern void app_label_smack(char label[SEC_LSM_MANAGER_MAX_SIZE_LABEL + 1], cons
 
 /************************ FOR TESTING ************************/
 __nonnull() __wur extern int label_exec(const char *path, const char *label);
-__nonnull((1, 2)) __wur int label_path(const char *path, const char *label, bool is_executable, bool is_transmute);
+__nonnull((1, 2)) __wur int set_path_labels(const char *path, const char *label, const char *execlabel, bool transmute);
 #endif
