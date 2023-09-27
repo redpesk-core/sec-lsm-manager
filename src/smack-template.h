@@ -28,8 +28,6 @@
 
 #include "secure-app.h"
 
-extern char suffix_exec[];
-
 typedef struct path_type_definitions {
     char label[SEC_LSM_MANAGER_MAX_SIZE_LABEL];
     bool is_executable;

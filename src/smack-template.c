@@ -61,16 +61,24 @@
 const char default_smack_template_file[] = SMACK_TEMPLATE_FILE;
 const char default_smack_policy_dir[] = SMACK_POLICY_DIR;
 
-char prefix_app[] = "App:";
-char suffix_lib[] = ":Lib";
-char suffix_conf[] = ":Conf";
-char suffix_exec[] = ":Exec";  // see label_exec before remove this line
-char suffix_icon[] = ":Icon";
-char suffix_data[] = ":Data";
-char suffix_http[] = ":Http";
-char suffix_plug[] = ":Plug";
-char user_home[] = "User:Home";
-char public_app[] = "System:Shared";
+static const struct {
+    const char *label;
+    bool exec;
+    bool transmute;
+} patterns[number_path_type] =
+{
+    [type_unset]   = { "",              false, false },
+    [type_default] = { "",              false, false },
+    [type_conf]    = { "App:%s:Conf",   false, false },
+    [type_data]    = { "App:%s:Data",   false, true },
+    [type_exec]    = { "App:%s:Exec",   true,  false },
+    [type_http]    = { "App:%s:Http",   false, true },
+    [type_icon]    = { "App:%s:Icon",   false, false },
+    [type_id]      = { "App:%s",        false, true },
+    [type_lib]     = { "App:%s:Lib",    false, true },
+    [type_plug]    = { "App:%s:Plug",   false, false },
+    [type_public]  = { "System:Shared", false, true },
+};
 
 /***********************/
 /*** PRIVATE METHODS ***/
@@ -163,35 +171,14 @@ bool smack_enabled() {
 }
 
 /* see smack-label.h */
-void init_path_type_definitions(path_type_definitions_t path_type_definitions[number_path_type], const char *id) {
-    memset(path_type_definitions, 0, sizeof(path_type_definitions_t) * number_path_type);
-    snprintf(path_type_definitions[type_conf].label, SEC_LSM_MANAGER_MAX_SIZE_LABEL, "%s%s%s", prefix_app, id,
-             suffix_conf);
-    snprintf(path_type_definitions[type_data].label, SEC_LSM_MANAGER_MAX_SIZE_LABEL, "%s%s%s", prefix_app, id,
-             suffix_data);
-    snprintf(path_type_definitions[type_exec].label, SEC_LSM_MANAGER_MAX_SIZE_LABEL, "%s%s%s", prefix_app, id,
-             suffix_exec);
-    snprintf(path_type_definitions[type_http].label, SEC_LSM_MANAGER_MAX_SIZE_LABEL, "%s%s%s", prefix_app, id,
-             suffix_http);
-    snprintf(path_type_definitions[type_icon].label, SEC_LSM_MANAGER_MAX_SIZE_LABEL, "%s%s%s", prefix_app, id,
-             suffix_icon);
-    snprintf(path_type_definitions[type_id].label, SEC_LSM_MANAGER_MAX_SIZE_LABEL, "%s%s", prefix_app, id);
-    snprintf(path_type_definitions[type_lib].label, SEC_LSM_MANAGER_MAX_SIZE_LABEL, "%s%s%s", prefix_app, id,
-             suffix_lib);
-    snprintf(path_type_definitions[type_plug].label, SEC_LSM_MANAGER_MAX_SIZE_LABEL, "%s%s%s", prefix_app, id,
-             suffix_plug);
-
-    secure_strncpy(path_type_definitions[type_public].label, public_app, SEC_LSM_MANAGER_MAX_SIZE_LABEL);
-
-    // executable
-    path_type_definitions[type_exec].is_executable = true;
-
-    // transmute
-    path_type_definitions[type_data].is_transmute = true;
-    path_type_definitions[type_http].is_transmute = true;
-    path_type_definitions[type_id].is_transmute = true;
-    path_type_definitions[type_lib].is_transmute = true;
-    path_type_definitions[type_public].is_transmute = true;
+void init_path_type_definitions(path_type_definitions_t path_type_definitions[number_path_type], const char *id)
+{
+    int idx;
+    for (idx = 0 ; idx < number_path_type ; idx++) {
+        snprintf(path_type_definitions[idx].label, SEC_LSM_MANAGER_MAX_SIZE_LABEL, patterns[idx].label, id);
+        path_type_definitions[idx].is_executable = patterns[idx].exec;
+        path_type_definitions[idx].is_transmute = patterns[idx].transmute;
+    }
 }
 
 /* see smack-template.h */
