@@ -79,6 +79,7 @@ int label_exec(const char *path, const char *label) {
  * @param[in] path The path of the file
  * @return 0 in case of success or a negative -errno value
  */
+__nonnull()
 static int unset_smack_labels(const char *path) {
     bool exists, is_exec, is_dir;
     get_file_informations(path, &exists, &is_exec, &is_dir);
@@ -188,8 +189,9 @@ int label_path(const char *path, const char *label, bool is_executable, bool is_
  * @param[in] secure_app secure app handler
  * @return 0 in case of success or a negative -errno value
  */
-__nonnull() __wur static int smack_set_path_labels(const secure_app_t *secure_app,
-                                                 path_type_definitions_t path_type_definitions[number_path_type]) {
+__nonnull() __wur
+static int smack_set_path_labels(const secure_app_t *secure_app,
+                                                 const path_type_definitions_t path_type_definitions[number_path_type]) {
     int rc = 0;
     path_t *path = NULL;
     for (size_t i = 0; i < secure_app->path_set.size; i++) {
@@ -214,7 +216,8 @@ __nonnull() __wur static int smack_set_path_labels(const secure_app_t *secure_ap
  * @param[in] secure_app secure app handler
  * @return 0 in case of success or a negative -errno value
  */
-__nonnull() __wur static int smack_drop_path_labels(const secure_app_t *secure_app) {
+__nonnull() __wur
+static int smack_drop_path_labels(const secure_app_t *secure_app) {
     int rc = 0;
     path_t *path = NULL;
     for (size_t i = 0; i < secure_app->path_set.size; i++) {

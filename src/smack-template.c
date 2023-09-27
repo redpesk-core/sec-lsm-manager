@@ -82,7 +82,8 @@ char public_app[] = "System:Shared";
  * @param[in] file The path of the file to remove
  * @return 0 in case of success or a negative -errno value
  */
-__nonnull() __wur static int remove_load_rules(const char *file) {
+__nonnull() __wur
+static int remove_load_rules(const char *file) {
     int rc = 0;
     int rc2 = 0;
     struct smack_accesses *smack_access = NULL;
