@@ -336,6 +336,67 @@ static int force_uninstall_smack(const secure_app_t *secure_app)
     return rc;
 }
 
+/**
+ * @brief check the install status and cleanup if its bad
+ *
+ * @param[in] secure_app the secure app handler
+ * @param[in] rc          the status of the installation
+ * @return rc
+ */
+__nonnull()
+static int install_status(const secure_app_t *secure_app, int rc)
+{
+    if (rc >= 0)
+        DEBUG("smack install success");
+    else {
+        ERROR("smack install failed: %d %s", -rc, strerror(-rc));
+        force_uninstall_smack(secure_app);
+    }
+    return rc;
+}
+
+/**
+ * @brief install procedure when id is given
+ *
+ * @param[in] secure_app the secure app handler
+ * @return the installation status
+ */
+__nonnull()
+static int install_smack_with_id(const secure_app_t *secure_app) {
+    int rc;
+    path_type_definitions_t path_type_definitions[number_path_type];
+
+    init_path_type_definitions(path_type_definitions, secure_app->id);
+    rc = create_smack_rules(secure_app);
+    if (rc >= 0)
+        rc = install_smack_plugs(secure_app);
+    if (rc >= 0)
+        rc = smack_set_path_labels(secure_app, path_type_definitions);
+
+    return install_status(secure_app, rc);
+}
+
+/**
+ * @brief install procedure when no id is given
+ *
+ * @param[in] secure_app the secure app handler
+ * @return the installation status
+ */
+__nonnull()
+static int install_smack_no_id(const secure_app_t *secure_app) {
+    int rc;
+    path_type_definitions_t path_type_definitions[number_path_type];
+
+    if (secure_app->need_id) {
+        ERROR("id is needed");
+        rc = -EINVAL;
+    }
+    else {
+        init_path_type_definitions(path_type_definitions, secure_app->id);
+        rc = smack_set_path_labels(secure_app, path_type_definitions);
+    }
+    return install_status(secure_app, rc);
+}
 
 /**********************/
 /*** PUBLIC METHODS ***/
@@ -343,40 +404,10 @@ static int force_uninstall_smack(const secure_app_t *secure_app)
 
 /* see smack.h */
 int install_smack(const secure_app_t *secure_app) {
-    int rc = 0;
-    bool has_id;
-    path_type_definitions_t path_type_definitions[number_path_type];
-
-    has_id = secure_app->id[0] != '\0';
-    if (!has_id && secure_app->need_id) {
-        ERROR("id undefined");
-        return -EINVAL;
-    }
-
-    init_path_type_definitions(path_type_definitions, secure_app->id);
-    if (has_id) {
-        rc = create_smack_rules(secure_app);
-        if (rc < 0)
-            ERROR("create_smack_rules failed: %d %s", -rc, strerror(-rc));
-        else {
-            rc = install_smack_plugs(secure_app);
-            if (rc < 0)
-                ERROR("install_smack_plugs failed: %d %s", -rc, strerror(-rc));
-        }
-    }
-
-    if (rc >= 0) {
-        rc = smack_set_path_labels(secure_app, path_type_definitions);
-        if (rc < 0)
-            ERROR("smack_set_path_labels failed: %d %s", -rc, strerror(-rc));
-        else
-            DEBUG("install smack success");
-    }
-
-    if (rc < 0)
-        force_uninstall_smack(secure_app);
-
-    return rc;
+    if (secure_app->id[0] != '\0')
+        return install_smack_with_id(secure_app);
+    else
+        return install_smack_no_id(secure_app);
 }
 
 /* see smack.h */
