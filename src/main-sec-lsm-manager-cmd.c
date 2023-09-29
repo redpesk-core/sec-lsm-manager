@@ -122,6 +122,7 @@ static const char help_path_text[] =
     "   - icon\n"
     "   - id\n"
     "   - lib\n"
+    "   - plug\n"
     "   - public\n"
     "\n"
     "Example : path /tmp/file data\n"

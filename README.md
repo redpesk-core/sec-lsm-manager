@@ -1,18 +1,12 @@
 # SEC-LSM-MANAGER
 
-<div align="center">
-<img src="https://img.shields.io/badge/project-redpesk-red" alt="test-coverage">
-<img src="https://img.shields.io/badge/version-2.0-blue" alt="version">
-<img src="https://img.shields.io/badge/build smack-success-success" alt="build-smack">
-<img src="https://img.shields.io/badge/build selinux-success-success" alt="build-selinux">
-<img src="https://img.shields.io/badge/tests_coverage-90-green" alt="test-coverage">
-</div>
+![Project](https://img.shields.io/badge/project-redpesk-red)
+![Version](https://img.shields.io/badge/version-2.0-blue)
+![SMACK build](https://img.shields.io/badge/build_smack-success-success)
+![SELinux build](https://img.shields.io/badge/build_selinux-success-success)
+![Test coverage](https://img.shields.io/badge/tests_coverage-90-green)
 
-## Logo
-
-<div align="center">
-<img src="./logo_sec_lsm_manager.png" alt="logo">
-</div>
+![Logo](./logo_sec_lsm_manager.png)
 
 ## Overview
 
@@ -27,18 +21,18 @@ The sec-lsm-manager project is a redesign of the [security-manager](https://gith
 
 The project produces binaries :
 
-- sec-lsm-managerd (lauch smack or selinux daemon)
-- sec-lsm-manager-smackd (lauch smack daemon)
-- sec-lsm-manager-selinuxd (lauch selinux daemon)
-- sec-lsm-manager-cmd (Allows the client to communicate with the daemon in command line)
+- `sec-lsm-managerd` (lauch smack or selinux daemon)
+- `sec-lsm-manager-smackd` (lauch smack daemon)
+- `sec-lsm-manager-selinuxd` (lauch selinux daemon)
+- `sec-lsm-manager-cmd` (Allows the client to communicate with the daemon in command line)
 
 And a shared library :
 
-- libsec-lsm-manager.so
+- `libsec-lsm-manager.so`
 
 It is possible to access this library through the `sec-lsm-manager.h` file and the associated pkgconfig.
 
-For more informations about usage : [Usage.md](./docs/Usage.md)
+For more information about usage : [Usage.md](./docs/Usage.md)
 
 ## How to compile?
 
@@ -71,12 +65,10 @@ cmake -DWITH_SELINUX=ON -DWITH_SMACK=ON ..
 make
 ```
 
-For more informations about compilation : [Compilation.md](./docs/Compilation.md)
+For more information about compilation : [Compilation.md](./docs/Compilation.md)
 
 ## Architecture
 
-<div align="center">
-<img src="./docs/images/sec-lsm-manager.png" alt="architecture">
-</div>
+![Architecture](./docs/images/sec-lsm-manager.png)
 
-For more informations about architecture : [Architecture.md](./docs/Architecture.md)
+For more information about architecture : [Architecture.md](./docs/Architecture.md)
