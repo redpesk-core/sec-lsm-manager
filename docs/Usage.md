@@ -25,7 +25,7 @@ To start using the library, we will create an handler for information:
 ```c
 #include <sec-lsm-manager.h>
 sec_lsm_manager_t *sec_lsm_manager = NULL;
-sec_lsm_manager_create(&sec_lsm_manager);
+sec_lsm_manager_create(&sec_lsm_manager, NULL);
 ```
 
 ### Install
@@ -41,22 +41,22 @@ sec_lsm_manager_set_id(sec_lsm_manager, "demo-app");
 We will then qualify the different files of our application:
 
 ```c
-sec_lsm_manager_add_path(sec_lsm_manager, "/opt/demo-app/", type_id);
+sec_lsm_manager_add_path(sec_lsm_manager, "/opt/demo-app/", "id");
 
-sec_lsm_manager_add_path(sec_lsm_manager, "/opt/demo-app/bin/", type_exec);
-sec_lsm_manager_add_path(sec_lsm_manager, "/opt/demo-app/bin/launcher.sh", type_exec);
+sec_lsm_manager_add_path(sec_lsm_manager, "/opt/demo-app/bin/", "exec");
+sec_lsm_manager_add_path(sec_lsm_manager, "/opt/demo-app/bin/launcher.sh", "exec");
 
-sec_lsm_manager_add_path(sec_lsm_manager, "/opt/demo-app/data/", type_data);
-sec_lsm_manager_add_path(sec_lsm_manager, "/opt/demo-app/data/db.sqlite", type_data);
-sec_lsm_manager_add_path(sec_lsm_manager, "/opt/demo-app/data/info.json", type_data);
+sec_lsm_manager_add_path(sec_lsm_manager, "/opt/demo-app/data/", "data");
+sec_lsm_manager_add_path(sec_lsm_manager, "/opt/demo-app/data/db.sqlite", "data");
+sec_lsm_manager_add_path(sec_lsm_manager, "/opt/demo-app/data/info.json", "data");
 
-sec_lsm_manager_add_path(sec_lsm_manager, "/opt/demo-app/etc/", type_conf);
-sec_lsm_manager_add_path(sec_lsm_manager, "/opt/demo-app/etc/file1.conf", type_conf);
-sec_lsm_manager_add_path(sec_lsm_manager, "/opt/demo-app/etc/file2.config", type_conf);
+sec_lsm_manager_add_path(sec_lsm_manager, "/opt/demo-app/etc/", "conf");
+sec_lsm_manager_add_path(sec_lsm_manager, "/opt/demo-app/etc/file1.conf", "conf");
+sec_lsm_manager_add_path(sec_lsm_manager, "/opt/demo-app/etc/file2.config", "conf");
 
-sec_lsm_manager_add_path(sec_lsm_manager, "/opt/demo-app/www/", type_http);
-sec_lsm_manager_add_path(sec_lsm_manager, "/opt/demo-app/www/index.html", type_http);
-sec_lsm_manager_add_path(sec_lsm_manager, "/opt/demo-app/www/style.css", type_http);
+sec_lsm_manager_add_path(sec_lsm_manager, "/opt/demo-app/www/", "http");
+sec_lsm_manager_add_path(sec_lsm_manager, "/opt/demo-app/www/index.html", "http");
+sec_lsm_manager_add_path(sec_lsm_manager, "/opt/demo-app/www/style.css", "http");
 ```
 
 > A path must be composed of at least two characters.
@@ -79,12 +79,15 @@ sec_lsm_manager_install(sec_lsm_manager);
 
 ### Uninstall
 
-To uninstall the application security context, you must define its id:
+To uninstall the application security context, you must define its id and the installed paths:
 
 ```c
 sec_lsm_manager_set_id(sec_lsm_manager, "demo-app");
+sec_lsm_manager_add_path(....)...
 sec_lsm_manager_uninstall(sec_lsm_manager);
 ```
+
+Permissions will be automatically removed by just knowing the id.
 
 ### Additional
 
