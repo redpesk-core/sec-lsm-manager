@@ -53,7 +53,7 @@ START_TEST(test_path_set_add_path) {
 
     ck_assert_int_eq(path_set_add_path(&paths, "/test", 10000), -EINVAL);
 
-    ck_assert_int_eq(path_set_add_path(&paths, "/", type_data), -EINVAL);
+    ck_assert_int_eq(path_set_add_path(&paths, "", type_data), -EINVAL);
 
     ck_assert_int_eq(path_set_add_path(&paths, "/test", type_data), 0);
 
