@@ -95,6 +95,17 @@ __nonnull()
 extern bool secure_app_has_error(secure_app_t *secure_app);
 
 /**
+ * @brief Validate the application id
+ *
+ * @param[in] id the application id to be validated
+ * @return
+ *    * the length of the id on validation (greater than zero)
+ *    * -EINVAL        the id has bad characters
+ */
+__nonnull() __wur
+extern int secure_app_is_valid_id(const char *id);
+
+/**
  * @brief Alloc and copy id in secure app
  *
  * @param[in] secure_app handler

@@ -160,6 +160,43 @@ bool secure_app_has_error(secure_app_t *secure_app) {
 }
 
 /* see secure-app.h */
+int secure_app_is_valid_id(const char *id)
+{
+    char car;
+    int idx;
+
+    for (idx = 0;; idx++) {
+
+        /* validate length isn't too big */
+        if (idx >= SEC_LSM_MANAGER_MAX_SIZE_ID) {
+            ERROR("invalid id size, bigger than %d for %.*s...",
+                SEC_LSM_MANAGER_MAX_SIZE_ID, SEC_LSM_MANAGER_MAX_SIZE_ID, id);
+            return -EINVAL;
+        }
+
+        /* get the character */
+        car = id[idx];
+        if (car == '\0') {
+            /* validate length isn't too small */
+            if (idx < SEC_LSM_MANAGER_MIN_SIZE_ID) {
+                ERROR("invalid id size, at least %d characters are needed, but %s",
+                    SEC_LSM_MANAGER_MIN_SIZE_ID, id);
+                return -EINVAL;
+            }
+            /* return the legth */
+            return idx;
+        }
+
+        /* validate character is valid */
+        if (!isalnum(car) && car != '-' && car != '_') {
+            ERROR("invalid id, only alphanumeric, '-', '_', but %s", id);
+            return -EINVAL;
+        }
+    }
+}
+
+
+/* see secure-app.h */
 int secure_app_set_id(secure_app_t *secure_app, const char *id) {
     int rc;
 
