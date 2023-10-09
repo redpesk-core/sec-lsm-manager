@@ -85,33 +85,17 @@ static int setids(
     char label[SEC_LSM_MANAGER_MAX_SIZE_LABEL + 1]
 ) {
     char car;
-    int idx;
-
-    /* copy the id */
-    for (idx = 0 ; (car = src[idx]) != '\0' ; idx++) {
-        /* validate length isn't too big */
-        if (idx >= SEC_LSM_MANAGER_MAX_SIZE_ID) {
-            ERROR("invalid id size, bigger than %d for %s", SEC_LSM_MANAGER_MAX_SIZE_ID, src);
-            return -EINVAL;
+    int rc = secure_app_is_valid_id(src);
+    if (rc >= 0) {
+        memcpy(id, src, (unsigned)rc);
+        id_underscore[rc] = 0;
+        while (rc) {
+            car = id[--rc];
+            id_underscore[rc] = car == '-' ? '_' : car;
         }
-        /* validate character is valid */
-        if (!isalnum(car) && car != '-' && car != '_') {
-            ERROR("invalid id, only alphanumeric, '-', '_', but %s", src);
-            return -EINVAL;
-        }
-        /* set the copied character */
-        id[idx] = car;
-        id_underscore[idx] = car == '-' ? '_' : car;
+        app_label_mac(label, id, id_underscore);
     }
-    /* validate length isn't too small */
-    if (idx < SEC_LSM_MANAGER_MIN_SIZE_ID) {
-        ERROR("invalid id size, at least %d characters are needed, but %s", SEC_LSM_MANAGER_MIN_SIZE_ID, src);
-        return -EINVAL;
-    }
-    /* end mark */
-    id[idx] = id_underscore[idx] = 0;
-    app_label_mac(label, id, id_underscore);
-    return 0;
+    return rc;
 }
 
 
