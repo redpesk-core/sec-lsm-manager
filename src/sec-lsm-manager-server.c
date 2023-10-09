@@ -47,7 +47,14 @@
 
 typedef struct client client_t;
 
-#define MAX_PUTX_ITEMS 15
+#define VERSION_BITS              3
+#define _STR_(x)                  #x
+#define PROTOCOL_STRING(x)        _STR_(x)
+#define PROTOCOL_VERSION_1        1
+#define PROTOCOL_VERSION_1_STRING PROTOCOL_STRING(PROTOCOL_VERSION_1)
+#define DEFAULT_PROTOCOL_VERSION  PROTOCOL_VERSION_1
+
+#define MAX_PUTX_ITEMS            15
 
 /** should log? */
 int sec_lsm_manager_server_log = 0;
@@ -61,7 +68,7 @@ struct client {
     secure_app_t *secure_app;
 
     /** the version of the protocol used */
-    unsigned version: 1;
+    unsigned version: VERSION_BITS;
 
     /** is relaxed version of the protocol */
     unsigned relax: 1;
@@ -324,17 +331,24 @@ __nonnull((1)) static void onrequest(client_t *cli, unsigned count, const char *
     dolog_protocol(cli, 1, count, args);
 
     /* version hand-shake */
-    if (!cli->version) {
+    if (cli->version == 0) {
         if (ckarg(args[0], _sec_lsm_manager_, 0)) {
-            if (count < 2 || !ckarg(args[1], "1", 0))
-                goto invalid;
-            putx(cli, _done_, "1", NULL);
+            unsigned version = 0, idx = count;
+            while (version == 0) {
+                if (--idx == 0) {
+                    cli->relax = 0; /* not relax on protocol mismatch */
+                    goto invalid;
+                }
+                if (ckarg(args[idx], PROTOCOL_VERSION_1_STRING, 0))
+                    version = PROTOCOL_VERSION_1;
+            }
+            putx(cli, _done_, args[idx], NULL);
             flushw(cli);
-            cli->version = 1;
+            cli->version = version & ((1 << VERSION_BITS) - 1);
             return;
         }
         /* switch automatically to version 1 */
-        cli->version = 1;
+        cli->version = DEFAULT_PROTOCOL_VERSION;
     }
 
     switch (args[0][0]) {
