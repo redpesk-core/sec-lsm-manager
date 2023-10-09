@@ -382,9 +382,9 @@ __nonnull((1)) static void onrequest(client_t *cli, unsigned count, const char *
                 } else {
                     switch (-rc) {
                     case ENOTRECOVERABLE: errtxt = "not-recoverable"; break;
-                    case EINVAL:       errtxt = "bad-id"; break;
-                    case EEXIST:       errtxt = "id-already-set"; break;
-                    default:           errtxt = "?"; break;
+                    case EINVAL:       errtxt = "invalid"; break;
+                    case EEXIST:       errtxt = "already-set"; break;
+                    default:           errtxt = "internal"; break;
                     }
                     ERROR("sec_lsm_manager_handle_set_id: %s", errtxt);
                     send_error(cli, errtxt);
@@ -428,12 +428,11 @@ __nonnull((1)) static void onrequest(client_t *cli, unsigned count, const char *
                 } else {
                     switch (-rc) {
                     case ENOTRECOVERABLE: errtxt = "not-recoverable"; break;
-                    case EINVAL:       errtxt = "bad-path-or-type"; break;
-                    case EEXIST:       errtxt = "path-already-set"; break;
-                    case ENOMEM:       errtxt = "out-of-memory"; break;
-                    case ENOENT:       errtxt = "path-not-found"; break;
-                    case EACCES:       errtxt = "no-path-access"; break;
-                    default:           errtxt = "?"; break;
+                    case EINVAL:       errtxt = "invalid"; break;
+                    case EEXIST:       errtxt = "already-set"; break;
+                    case ENOENT:       errtxt = "not-found"; break;
+                    case EACCES:       errtxt = "no-access"; break;
+                    default:           errtxt = "internal"; break;
                     }
                     ERROR("error when adding path: %s", errtxt);
                     send_error(cli, errtxt);
@@ -449,10 +448,9 @@ __nonnull((1)) static void onrequest(client_t *cli, unsigned count, const char *
                 } else {
                     switch (-rc) {
                     case ENOTRECOVERABLE: errtxt = "not-recoverable"; break;
-                    case EINVAL:       errtxt = "bad-permission"; break;
-                    case EEXIST:       errtxt = "permission-already-set"; break;
-                    case ENOMEM:       errtxt = "out-of-memory"; break;
-                    default:           errtxt = "?"; break;
+                    case EINVAL:       errtxt = "invalid"; break;
+                    case EEXIST:       errtxt = "already-set"; break;
+                    default:           errtxt = "internal"; break;
                     }
                     ERROR("error when adding permission: %s", errtxt);
                     send_error(cli, errtxt);
