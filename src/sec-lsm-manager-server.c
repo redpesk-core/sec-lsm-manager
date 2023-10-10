@@ -251,8 +251,8 @@ put_error:
  *
  * @param[in] cli client handler
  */
-__nonnull() static void send_done(client_t *cli) {
-    putx(cli, _done_, NULL);
+__nonnull((1)) static void send_done(client_t *cli, const char *arg) {
+    putx(cli, _done_, arg, NULL);
     flushw(cli);
 }
 
@@ -342,9 +342,8 @@ __nonnull((1)) static void onrequest(client_t *cli, unsigned count, const char *
                 if (ckarg(args[idx], PROTOCOL_VERSION_1_STRING, 0))
                     version = PROTOCOL_VERSION_1;
             }
-            putx(cli, _done_, args[idx], NULL);
-            flushw(cli);
             cli->version = version & ((1 << VERSION_BITS) - 1);
+            send_done(cli, args[idx]);
             return;
         }
         /* switch automatically to version 1 */
@@ -356,7 +355,7 @@ __nonnull((1)) static void onrequest(client_t *cli, unsigned count, const char *
             /* clear */
             if (ckarg(args[0], _clear_, 1) && count == 1) {
                 clear_secure_app(cli->secure_app);
-                send_done(cli);
+                send_done(cli, NULL);
                 return;
             }
             break;
@@ -365,10 +364,10 @@ __nonnull((1)) static void onrequest(client_t *cli, unsigned count, const char *
             if (ckarg(args[0], _display_, 1) && count == 1) {
                 rc = send_display(cli);
                 if (rc >= 0) {
-                    send_done(cli);
+                    send_done(cli, NULL);
                 } else {
+                    send_error(cli, "internal");
                     ERROR("send_display_secure_app: %d %s", -rc, strerror(-rc));
-                    send_error(cli, "write-error");
                 }
                 return;
             }
@@ -378,7 +377,7 @@ __nonnull((1)) static void onrequest(client_t *cli, unsigned count, const char *
             if (ckarg(args[0], _id_, 1) && count == 2) {
                 rc = secure_app_set_id(cli->secure_app, args[1]);
                 if (rc >= 0) {
-                    send_done(cli);
+                    send_done(cli, NULL);
                 } else {
                     switch (-rc) {
                     case ENOTRECOVERABLE: errtxt = "not-recoverable"; break;
@@ -386,8 +385,8 @@ __nonnull((1)) static void onrequest(client_t *cli, unsigned count, const char *
                     case EEXIST:       errtxt = "already-set"; break;
                     default:           errtxt = "internal"; break;
                     }
-                    ERROR("sec_lsm_manager_handle_set_id: %s", errtxt);
                     send_error(cli, errtxt);
+                    ERROR("sec_lsm_manager_handle_set_id: %s", errtxt);
                 }
                 return;
             }
@@ -395,10 +394,10 @@ __nonnull((1)) static void onrequest(client_t *cli, unsigned count, const char *
             if (ckarg(args[0], _install_, 1) && count == 1) {
                 rc = secure_app_install(cli->secure_app, cli->sec_lsm_manager_server->cynagora_admin_client);
                 if (rc >= 0) {
-                    send_done(cli);
+                    send_done(cli, NULL);
                 } else {
-                    ERROR("sec_lsm_manager_handle_install: %d %s", -rc, strerror(-rc));
                     send_error(cli, "sec_lsm_manager_handle_install");
+                    ERROR("sec_lsm_manager_handle_install: %d %s", -rc, strerror(-rc));
                 }
                 return;
             }
@@ -409,11 +408,10 @@ __nonnull((1)) static void onrequest(client_t *cli, unsigned count, const char *
                 nextlog = sec_lsm_manager_server_log;
                 if (count == 2) {
                     if (!ckarg(args[1], _on_, 0) && !ckarg(args[1], _off_, 0))
-                        break;
+                        goto invalid;
                     nextlog = ckarg(args[1], _on_, 0);
                 }
-                putx(cli, _done_, nextlog ? _on_ : _off_, NULL);
-                flushw(cli);
+                send_done(cli, nextlog ? _on_ : _off_);
                 sec_lsm_manager_server_log = nextlog;
                 return;
             }
@@ -423,8 +421,7 @@ __nonnull((1)) static void onrequest(client_t *cli, unsigned count, const char *
             if (ckarg(args[0], _path_, 1) && count == 3) {
                 rc = secure_app_add_path(cli->secure_app, args[1], args[2]);
                 if (rc >= 0) {
-                    putx(cli, _done_, NULL);
-                    flushw(cli);
+                    send_done(cli, NULL);
                 } else {
                     switch (-rc) {
                     case ENOTRECOVERABLE: errtxt = "not-recoverable"; break;
@@ -434,8 +431,8 @@ __nonnull((1)) static void onrequest(client_t *cli, unsigned count, const char *
                     case EACCES:       errtxt = "no-access"; break;
                     default:           errtxt = "internal"; break;
                     }
-                    ERROR("error when adding path: %s", errtxt);
                     send_error(cli, errtxt);
+                    ERROR("error when adding path: %s", errtxt);
                 }
                 return;
             }
@@ -443,8 +440,7 @@ __nonnull((1)) static void onrequest(client_t *cli, unsigned count, const char *
             if (ckarg(args[0], _permission_, 1) && count == 2) {
                 rc = secure_app_add_permission(cli->secure_app, args[1]);
                 if (rc >= 0) {
-                    putx(cli, _done_, NULL);
-                    flushw(cli);
+                    send_done(cli, NULL);
                 } else {
                     switch (-rc) {
                     case ENOTRECOVERABLE: errtxt = "not-recoverable"; break;
@@ -452,8 +448,8 @@ __nonnull((1)) static void onrequest(client_t *cli, unsigned count, const char *
                     case EEXIST:       errtxt = "already-set"; break;
                     default:           errtxt = "internal"; break;
                     }
-                    ERROR("error when adding permission: %s", errtxt);
                     send_error(cli, errtxt);
+                    ERROR("error when adding permission: %s", errtxt);
                 }
                 return;
             }
@@ -461,8 +457,7 @@ __nonnull((1)) static void onrequest(client_t *cli, unsigned count, const char *
             if (ckarg(args[0], _plug_, 1) && count == 4) {
                 rc = secure_app_add_plug(cli->secure_app, args[1], args[2], args[3]);
                 if (rc >= 0) {
-                    putx(cli, _done_, NULL);
-                    flushw(cli);
+                    send_done(cli, NULL);
                 } else {
                     switch (-rc) {
                     case ENOTRECOVERABLE: errtxt = "not-recoverable"; break;
@@ -473,8 +468,8 @@ __nonnull((1)) static void onrequest(client_t *cli, unsigned count, const char *
                     case ENOTDIR:      errtxt = "not-dir"; break;
                     default:           errtxt = "internal"; break;
                     }
-                    ERROR("error when adding plug: %s", errtxt);
                     send_error(cli, errtxt);
+                    ERROR("error when adding plug: %s", errtxt);
                 }
                 return;
             }
@@ -484,10 +479,10 @@ __nonnull((1)) static void onrequest(client_t *cli, unsigned count, const char *
             if (ckarg(args[0], _uninstall_, 1) && count == 1) {
                 rc = secure_app_uninstall(cli->secure_app, cli->sec_lsm_manager_server->cynagora_admin_client);
                 if (rc >= 0) {
-                    send_done(cli);
+                    send_done(cli, NULL);
                 } else {
-                    ERROR("sec_lsm_manager_handle_uninstall: %d %s", -rc, strerror(-rc));
                     send_error(cli, "sec_lsm_manager_handle_uninstall");
+                    ERROR("sec_lsm_manager_handle_uninstall: %d %s", -rc, strerror(-rc));
                 }
                 return;
             }
