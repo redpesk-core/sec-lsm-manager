@@ -287,12 +287,42 @@ __wur __nonnull()
 int secure_app_add_plug(secure_app_t *secure_app, const char *expdir, const char *impid, const char *impdir)
 {
     int rc;
+    plug_t *iter;
 
+    /* check error state */
     if (secure_app->error_flag) {
         ERROR("error flag has been raised");
-        return -EPERM;
+        return -ENOTRECOVERABLE;
     }
 
+    /* check duplication */
+    for (iter = secure_app->plugset; iter != NULL ; iter = iter->next) {
+        if (!strcmp(iter->impdir, impdir)) {
+            ERROR("import directory already added");
+            return -EEXIST;
+        }
+    }
+
+    /* check validity of id */
+    rc = secure_app_is_valid_id(impid);
+    if (rc < 0) {
+        ERROR("invalid plug id %s", impid);
+        return rc;
+    }
+
+    /* check directories */
+    rc = check_directory_exists(expdir);
+    if (rc < 0) {
+        ERROR("invalid exported directory %s", expdir);
+        return rc;
+    }
+    rc = check_directory_exists(impdir);
+    if (rc < 0) {
+        ERROR("invalid import directory %s", impdir);
+        return rc;
+    }
+
+    /* add the plug property */
     rc = plugset_add(&(secure_app->plugset), expdir, impid, impdir);
     if (rc < 0) {
         ERROR("can't add plug %d %s", -rc, strerror(-rc));

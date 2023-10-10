@@ -159,7 +159,15 @@ extern int secure_app_add_path(secure_app_t *secure_app, const char *path, const
  * @param[in] expdir   exported directory
  * @param[in] impid    import appid
  * @param[in] impdir   import directory
- * @return 0 in case of success or a negative -errno value
+ * @return
+ *    * 0  on success
+ *    * -EINVAL if a parameter is invalid
+ *    * -EEXIST a plug is already added for impdir
+ *    * -ENOMEM on allocation failure or when no more kernel memory
+ *    * -ENOENT  it doesn't exist
+ *    * -EACCES  not allowed to access it
+ *    * -ENOTDIR path exists but is not a directory
+ *    * -ENOTRECOVERABLE state unrecoverable
  */
 __wur __nonnull()
 extern int secure_app_add_plug(secure_app_t *secure_app, const char *expdir, const char *impid, const char *impdir);

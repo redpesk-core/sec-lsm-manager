@@ -113,4 +113,17 @@ extern int get_path_property(const char path[]);
 __nonnull() __wur
 extern int check_path_exists(const char path[]);
 
+/**
+ * @brief Check if the path exists and is a directory
+ * @param[in] path the path to check
+ * @return
+ *   - 0        it exists
+ *   - -ENOENT  it doesn't exist
+ *   - -EACCES  not allowed to access it
+ *   - -ENOMEM  no more kernel memory
+ *   - -ENOTDIR path exists but is not a directory
+ */
+__nonnull() __wur
+extern int check_directory_exists(const char path[]);
+
 #endif

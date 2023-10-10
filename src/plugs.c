@@ -29,6 +29,7 @@
 
 #include "log.h"
 #include "utils.h"
+#include "sizes.h"
 
 __nonnull()
 void plugset_init(plugset_t *plugset)
@@ -55,22 +56,29 @@ int plugset_add(plugset_t *plugset, const char *expdir, const char *impid, const
     plug_t *plug;
 
     /* comute length of strings */
-    size_t len_expdir = 1 + strlen(expdir);
-    size_t len_impid  = 1 + strlen(impid);
-    size_t len_impdir = 1 + strlen(impdir);
+    size_t len_expdir = strlen(expdir);
+    size_t len_impdir = strlen(impdir);
+    size_t len_impid  = strlen(impid);
+
+    /* check bound of sizes */
+    if (len_expdir < 1 || len_expdir > SEC_LSM_MANAGER_MAX_SIZE_PATH
+     || len_impdir < 1 || len_impdir > SEC_LSM_MANAGER_MAX_SIZE_PATH
+     || len_impid < SEC_LSM_MANAGER_MIN_SIZE_ID || len_impid > SEC_LSM_MANAGER_MAX_SIZE_ID)
+        return -EINVAL;
 
     /* allocate the new plug structure */
-    plug = malloc(len_expdir + len_impid + len_impdir + sizeof *plug);
+    plug = malloc(len_expdir + len_impid + len_impdir + 3 + sizeof *plug);
     if (plug == NULL)
         return -ENOMEM;
 
     /* initialize strings of the new plug structure */
     ptr = (char*)(&plug[1]);
-    plug->expdir = memcpy(ptr, expdir, len_expdir);
-    ptr += len_expdir;
-    plug->impdir = memcpy(ptr, impdir, len_impdir);
-    ptr += len_impdir;
-    plug->impid = memcpy(ptr, impid, len_impid);
+    plug->expdir = ptr;
+    ptr = mempcpy(ptr, expdir, len_expdir + 1);
+    plug->impdir = ptr;
+    ptr = mempcpy(ptr, impdir, len_impdir + 1);
+    plug->impid  = ptr;
+    mempcpy(ptr, impid, len_impid + 1);
 
     /* link the new plug structure in the set */
     plug->next = *plugset;

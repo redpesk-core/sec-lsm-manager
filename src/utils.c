@@ -219,3 +219,10 @@ int check_path_exists(const char path[])
     int rc = get_path_property(path);
     return rc < 0 ? rc : 0;
 }
+
+/* see utils.h */
+int check_directory_exists(const char path[])
+{
+    int rc = get_path_property(path);
+    return rc < 0 ? rc : rc == PATH_DIRECTORY ? 0 : -ENOTDIR;
+}

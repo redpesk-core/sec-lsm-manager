@@ -67,7 +67,10 @@ extern void plugset_deinit(plugset_t *plugset);
  * @param[in] expdir   exported directory
  * @param[in] impid    import appid
  * @param[in] impdir   import directory
- * @return 0 in case of success or a negative -errno value
+ * @return
+ *    * 0  on success
+ *    * -EINVAL if out of bound sizes
+ *    * -ENOMEM on allocation failure
  */
 __wur __nonnull()
 extern int plugset_add(plugset_t *plugset, const char *expdir, const char *impid, const char *impdir);
