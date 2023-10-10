@@ -262,14 +262,9 @@ int secure_app_add_path(secure_app_t *secure_app, const char *path, const char *
     }
 
     /* check existing path */
-    if (access(path, F_OK) < 0) {
-        ERROR("path %s isn't accessible: %s", path, strerror(errno));
-        switch (errno) {
-        case ENOENT:
-        case ENOTDIR: rc = -ENOENT; break;
-        case ENOMEM: rc = -ENOMEM; break;
-        default: rc = -EACCES; break;
-        }
+    rc = check_path_exists(path);
+    if (rc < 0) {
+        ERROR("path %s isn't accessible: %s", path, strerror(-rc));
         return rc;
     }
 

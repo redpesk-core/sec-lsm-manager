@@ -212,3 +212,10 @@ int get_path_property(const char path[])
         rc = PATH_FILE_DATA;
     return rc;
 }
+
+/* see utils.h */
+int check_path_exists(const char path[])
+{
+    int rc = get_path_property(path);
+    return rc < 0 ? rc : 0;
+}

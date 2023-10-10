@@ -101,4 +101,16 @@ extern int get_path_property(const char path[]);
 #define PATH_FILE_EXEC 1
 #define PATH_DIRECTORY 2
 
+/**
+ * @brief Check if the path exists
+ * @param[in] path the path to check
+ * @return
+ *   - 0        it exists
+ *   - -ENOENT  it doesn't exist
+ *   - -EACCES  not allowed to access it
+ *   - -ENOMEM  no more kernel memory
+ */
+__nonnull() __wur
+extern int check_path_exists(const char path[]);
+
 #endif
