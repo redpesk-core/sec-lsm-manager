@@ -140,7 +140,7 @@ static void dolog_protocol(client_t *cli, int c2s, unsigned count, const char *f
 }
 
 /**
- * @brief Check 'arg' against 'value' beginning at offset accepting it if 'arg' prefixes 'value'
+ * @brief Check 'arg' against 'value' beginning at offset accepting it if 'arg' equals 'value'
  *
  * @param[in] arg argument to compare
  * @param[in] value value to compare
@@ -156,7 +156,7 @@ static bool ckarg(const char *arg, const char *value, unsigned offset)
             offset++;
         else
             return false;
-    return true;
+    return !value[offset];
 }
 
 /**
