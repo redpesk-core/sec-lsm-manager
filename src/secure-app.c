@@ -179,45 +179,50 @@ int secure_app_is_valid_id(const char *id)
     }
 }
 
-
 /* see secure-app.h */
 int secure_app_set_id(secure_app_t *secure_app, const char *id) {
     int rc;
 
-    if (secure_app->error_flag) {
-        ERROR("error flag has been raised");
-        rc = -ENOTRECOVERABLE;
-    }
-
-    else if (secure_app->id[0] != '\0') {
-        ERROR("id already set");
-        rc = -EEXIST;
-    }
-
-    else {
-        rc = setids(id, secure_app->id, secure_app->id_underscore, secure_app->label);
-        if (rc < 0)
-            secure_app->id[0] = secure_app->id_underscore[0] = secure_app->label[0] = '\0';
-    }
-
-    return rc;
-}
-
-/* see secure-app.h */
-int secure_app_add_permission(secure_app_t *secure_app, const char *permission) {
+    /* check error state */
     if (secure_app->error_flag) {
         ERROR("error flag has been raised");
         return -ENOTRECOVERABLE;
     }
 
-    for (size_t i = 0; i < secure_app->permission_set.size; i++) {
+    /* check duplication */
+    if (secure_app->id[0] != '\0') {
+        ERROR("id already set");
+        return -EEXIST;
+    }
+
+    rc = setids(id, secure_app->id, secure_app->id_underscore, secure_app->label);
+    if (rc < 0)
+        secure_app->id[0] = secure_app->id_underscore[0] = secure_app->label[0] = '\0';
+
+    return rc;
+}
+
+/* see secure-app.h */
+int secure_app_add_permission(secure_app_t *secure_app, const char *permission)
+{
+    size_t i;
+    int rc;
+
+    /* check error state */
+    if (secure_app->error_flag) {
+        ERROR("error flag has been raised");
+        return -ENOTRECOVERABLE;
+    }
+
+    /* check duplication */
+    for (i = 0; i < secure_app->permission_set.size; i++) {
         if (!strcmp(secure_app->permission_set.permissions[i], permission)) {
             ERROR("permission already defined");
             return -EEXIST;
         }
     }
 
-    int rc = permission_set_add_permission(&(secure_app->permission_set), permission);
+    rc = permission_set_add_permission(&(secure_app->permission_set), permission);
     if (rc < 0) {
         ERROR("permission_set_add_permission: %d %s", -rc, strerror(-rc));
         return rc;
