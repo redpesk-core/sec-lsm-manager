@@ -83,4 +83,22 @@ extern int remove_file(const char *path) __wur __nonnull();
  */
 extern char *read_file(const char *path);
 
+/**
+ * @brief Get property of the path
+ *
+ * @param[in] path the path of the file
+ * @return
+ *   - PATH_FILE_DATA == 0  it exists and is a simple file
+ *   - PATH_FILE_EXEC == 1  it exists and is an executable file
+ *   - PATH_DIRECTORY == 2  it exists and is a directory
+ *   - -ENOENT  it doesn't exist
+ *   - -EACCES  not allowed to access it
+ *   - -ENOMEM  no more kernel memory
+ */
+__nonnull() __wur
+extern int get_path_property(const char path[]);
+#define PATH_FILE_DATA 0
+#define PATH_FILE_EXEC 1
+#define PATH_DIRECTORY 2
+
 #endif

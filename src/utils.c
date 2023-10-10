@@ -189,3 +189,26 @@ end2:
 end:
     return result;
 }
+
+/* see utils.h */
+__nonnull()
+int get_path_property(const char path[])
+{
+    struct stat s;
+    int rc = stat(path, &s);
+    if (rc < 0) {
+        switch (errno) {
+        case ENOENT:
+        case ENOTDIR: rc = -ENOENT; break;
+        case ENOMEM: rc = -ENOMEM; break;
+        default: rc = -EACCES; break;
+        }
+    }
+    else if (S_ISDIR(s.st_mode))
+        rc = PATH_DIRECTORY;
+    else if ((s.st_mode & (S_IXUSR | S_IXGRP | S_IXOTH)) != 0)
+        rc = PATH_FILE_EXEC;
+    else
+        rc = PATH_FILE_DATA;
+    return rc;
+}

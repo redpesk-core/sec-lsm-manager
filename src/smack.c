@@ -49,24 +49,22 @@
  */
 __nonnull()
 static int unset_path_labels(const char *path) {
-    bool exists, is_exec, is_dir;
-    get_file_informations(path, &exists, &is_exec, &is_dir);
+    int rc, pp = get_path_property(path);
 
-    DEBUG("%s : exists=%d ; exec=%d ; dir=%d", path, exists, is_exec, is_dir);
+    DEBUG("unset_path_labels %s pp=%d", path, pp);
 
-    if (!exists) {
-        return -ENOENT;
-    }
+    if (pp < 0)
+        return pp;
 
     // file
-    int rc = unset_label(path, XATTR_NAME_SMACK);
+    rc = unset_label(path, XATTR_NAME_SMACK);
     if (rc < 0) {
         ERROR("unlabel(%s): %d %s", path, -rc, strerror(-rc));
         return rc;
     }
 
     // exec
-    if (is_exec) {
+    if (pp == PATH_FILE_EXEC) {
         rc = unset_label(path, XATTR_NAME_SMACKEXEC);
         if (rc < 0) {
             ERROR("unlabel exec(%s): %d %s", path, -rc, strerror(-rc));
@@ -75,7 +73,7 @@ static int unset_path_labels(const char *path) {
     }
 
     // dir
-    if (is_dir) {
+    if (pp == PATH_DIRECTORY) {
         rc = unset_label(path, XATTR_NAME_SMACKTRANSMUTE);
         if (rc < 0) {
             ERROR("unlabel transmute(%s): %d %s", path, -rc, strerror(-rc));
@@ -136,9 +134,8 @@ __nonnull() __wur
 static int label_all_paths(const secure_app_t *secure_app, bool set)
 {
     size_t i;
-    int rc = 0;
+    int pp, rc = 0;
     path_t *path;
-    bool exists, is_exec, is_dir;
     path_type_definitions_t path_type_definitions[number_path_type];
     path_type_definitions_t *def;
     const char *exec_label;
@@ -150,19 +147,19 @@ static int label_all_paths(const secure_app_t *secure_app, bool set)
         path = secure_app->path_set.paths[i];
         def = &path_type_definitions[path->path_type];
 
-        get_file_informations(path->path, &exists, &is_exec, &is_dir);
-        DEBUG("%s : exists=%d ; exec=%d ; dir=%d", path->path, exists, is_exec, is_dir);
-        if (!exists)
-            rc = -ENOENT;
+        pp = get_path_property(path->path);
+        DEBUG("labbelling %s pp=%d", path->path, pp);
+        if (pp < 0)
+            rc = pp;
         else if (!set)
             rc = unset_path_labels(path->path);
         else
             rc = set_path_labels(path->path,
                                  def->label,
-                                 is_exec && def->is_executable ? exec_label : NULL,
-                                 is_dir && def->is_transmute);
+                                 (pp == PATH_FILE_EXEC) && def->is_executable ? exec_label : NULL,
+                                 (pp == PATH_DIRECTORY) && def->is_transmute);
         if (rc < 0) {
-            ERROR("%sset_path_labels(%s,%s,%s) : %d %s", set ? "" : "un", path->path,
+            ERROR("%sset_path_labels(%s,%s,%s): %d %s", set ? "" : "un", path->path,
                                     def->label, secure_app->id, -rc, strerror(-rc));
             return rc;
         }
