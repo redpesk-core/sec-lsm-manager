@@ -80,27 +80,18 @@ int unset_label(const char *path, const char *xattr) {
     return 0;
 }
 
+/* see utils.h */
 void get_file_informations(const char *path, bool *exists, bool *is_exec, bool *is_dir) {
-    struct stat s;
-    memset(&s, 0, sizeof(s));
+    int rc = get_path_property(path);
 
     if (exists)
-        *exists = false;
-    if (is_exec)
-        *is_exec = false;
-    if (is_dir)
-        *is_dir = false;
+        *exists = rc >= 0;
 
-    if (stat(path, &s) != 0) {
-        return;
-    }
-
-    if (exists)
-        *exists = true;
     if (is_exec)
-        *is_exec = __S_ISTYPE(s.st_mode, __S_IFREG) && (s.st_mode & S_IXUSR || s.st_mode & S_IXGRP);
+        *is_exec = rc == PATH_FILE_EXEC;
+
     if (is_dir)
-        *is_dir = __S_ISTYPE(s.st_mode, __S_IFDIR);
+        *is_dir = rc == PATH_DIRECTORY;
 }
 
 /* see utils.h */
