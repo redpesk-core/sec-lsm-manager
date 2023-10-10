@@ -336,22 +336,28 @@ int secure_app_add_plug(secure_app_t *secure_app, const char *expdir, const char
 __nonnull() __wur
 int secure_app_install(secure_app_t *secure_app, cynagora_t *cynagora)
 {
-    int rc;
+    int rc, rc2;
+    bool has_id;
+
+    /* check error state */
     if (secure_app->error_flag) {
         ERROR("error flag has been raised, clear secure app");
-        return -EINVAL;
+        return -ENOTRECOVERABLE;
     }
 
-    bool has_id = secure_app->id[0] != '\0';
+    /* check application id need */
+    has_id = secure_app->id[0] != '\0';
     if (!has_id && secure_app->need_id) {
         ERROR("an application identifier is needed");
         return -EINVAL;
     }
 
+    /* check consistency */
     rc = secure_app_check(secure_app, cynagora);
     if (rc < 0)
         return rc;
 
+    /* set cynagora policies */
     if (has_id) {
         rc = cynagora_set_policies(cynagora, secure_app->label, &(secure_app->permission_set), 1);
         if (rc < 0) {
@@ -361,11 +367,12 @@ int secure_app_install(secure_app_t *secure_app, cynagora_t *cynagora)
         DEBUG("cynagora_set_policies success");
     }
 
+    /* set LSM / MAC policies */
     rc = install_mac(secure_app);
     if (rc < 0) {
         ERROR("install_mac: %d %s", -rc, strerror(-rc));
         if (has_id) {
-            int rc2 = cynagora_drop_policies(cynagora, secure_app->label);
+            rc2 = cynagora_drop_policies(cynagora, secure_app->label);
             if (rc2 < 0) {
                 ERROR("cannot delete policy: %d %s", -rc2, strerror(-rc2));
             }
@@ -373,8 +380,8 @@ int secure_app_install(secure_app_t *secure_app, cynagora_t *cynagora)
         return rc;
     }
 
+    /* success */
     DEBUG("install success");
-
     return 0;
 }
 
@@ -382,17 +389,20 @@ int secure_app_install(secure_app_t *secure_app, cynagora_t *cynagora)
 __nonnull() __wur
 int secure_app_uninstall(secure_app_t *secure_app, cynagora_t *cynagora)
 {
+    /* check error state */
     if (secure_app->error_flag) {
         ERROR("error flag has been raised, clear secure app");
-        return -EINVAL;
+        return -ENOTRECOVERABLE;
     }
 
+    /* check application id need */
     bool has_id = secure_app->id[0] != '\0';
     if (!has_id && secure_app->need_id) {
         ERROR("an application identifier is needed");
         return -EINVAL;
     }
 
+    /* drop cynagora policies */
     if (has_id) {
         int rc = cynagora_drop_policies(cynagora, secure_app->label);
         if (rc < 0) {
@@ -401,6 +411,7 @@ int secure_app_uninstall(secure_app_t *secure_app, cynagora_t *cynagora)
         }
     }
 
+    /* drop LSM / MAC policies */
     int rc = uninstall_mac(secure_app);
     if (rc < 0) {
         ERROR("uninstall_mac: %d %s", -rc, strerror(-rc));
@@ -408,7 +419,6 @@ int secure_app_uninstall(secure_app_t *secure_app, cynagora_t *cynagora)
     }
 
     DEBUG("uninstall success");
-
     return 0;
 }
 

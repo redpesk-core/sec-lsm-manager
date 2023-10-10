@@ -396,8 +396,14 @@ __nonnull((1)) static void onrequest(client_t *cli, unsigned count, const char *
                 if (rc >= 0) {
                     send_done(cli, NULL);
                 } else {
-                    send_error(cli, "sec_lsm_manager_handle_install");
-                    ERROR("sec_lsm_manager_handle_install: %d %s", -rc, strerror(-rc));
+                    switch (-rc) {
+                    case ENOTRECOVERABLE: errtxt = "not-recoverable"; break;
+                    case EINVAL:       errtxt = "invalid"; break;
+                    case EPERM:        errtxt = "forbidden"; break;
+                    default:           errtxt = "internal"; break;
+                    }
+                    send_error(cli, errtxt);
+                    ERROR("sec_lsm_manager_handle_install: %s", errtxt);
                 }
                 return;
             }
@@ -481,8 +487,13 @@ __nonnull((1)) static void onrequest(client_t *cli, unsigned count, const char *
                 if (rc >= 0) {
                     send_done(cli, NULL);
                 } else {
-                    send_error(cli, "sec_lsm_manager_handle_uninstall");
-                    ERROR("sec_lsm_manager_handle_uninstall: %d %s", -rc, strerror(-rc));
+                    switch (-rc) {
+                    case ENOTRECOVERABLE: errtxt = "not-recoverable"; break;
+                    case EINVAL:       errtxt = "invalid"; break;
+                    default:           errtxt = "internal"; break;
+                    }
+                    send_error(cli, errtxt);
+                    ERROR("sec_lsm_manager_handle_uninstall: %s", errtxt);
                 }
                 return;
             }
