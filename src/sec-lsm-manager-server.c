@@ -175,15 +175,15 @@ static int flushw(client_t *cli)
         rc = prot_should_write(cli->prot);
         if (rc < 0)
             ERROR("flushw: should write returned error %s", strerror(-rc));
-	else if (rc > 0) {
+        else if (rc > 0) {
             rc = prot_write(cli->prot, cli->pollitem.fd);
             if (rc >= 0)
                 continue;
-	    if (rc == -ENODATA)
+            if (rc == -ENODATA)
                 rc = 0;
-	    else if (rc != -EAGAIN)
+            else if (rc != -EAGAIN)
                 ERROR("flushw: write returned error %s", strerror(-rc));
-	    else {
+            else {
                 pfd.fd = cli->pollitem.fd;
                 pfd.events = POLLOUT;
                 do {
@@ -767,9 +767,9 @@ __wur int sec_lsm_manager_server_serve(sec_lsm_manager_server_t *server, int shu
     server->stopped = 0;
     while (!server->stopped) {
         rc = pollitem_wait_dispatch(server->pollfd, tempo);
-	if ((rc < 0 && errno != EINTR)
-	 || (rc == 0 && server->count == 0))
-	    sec_lsm_manager_server_stop(server, rc);
+        if ((rc < 0 && errno != EINTR)
+         || (rc == 0 && server->count == 0))
+            sec_lsm_manager_server_stop(server, rc);
     }
     return server->stopped == INT_MIN ? 0 : server->stopped;
 }
