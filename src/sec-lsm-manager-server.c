@@ -312,6 +312,22 @@ static int send_display(client_t *cli) {
 }
 
 /**
+ * @brief checks utf8 validity of received fields
+ *
+ * @param[in] count The number or arguments
+ * @param[in] args Arguments
+ * @return true when all are valid utf8, false otherwise
+ */
+__nonnull() __wur
+static bool check_utf8(unsigned count, const char *args[])
+{
+    while(count)
+        if (!is_utf8(args[--count]))
+            return false;
+    return true;
+}
+
+/**
  * @brief handle a request
  *
  * @param[in] cli client handler
@@ -327,8 +343,11 @@ __nonnull((1)) static void onrequest(client_t *cli, unsigned count, const char *
         return;
 
     /* emit the log */
-
     dolog_protocol(cli, 1, count, args);
+
+    /* check utf8 validity */
+    if (!check_utf8(count, args))
+        goto invalid_protocol;
 
     /* version hand-shake */
     if (cli->version == 0) {

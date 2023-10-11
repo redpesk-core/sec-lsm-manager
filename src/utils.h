@@ -126,4 +126,12 @@ extern int check_path_exists(const char path[]);
 __nonnull() __wur
 extern int check_directory_exists(const char path[]);
 
+/**
+ * Check if text is a valid UTF8 encoded text
+ * @param[in] text the text to check
+ * @return true when valid, false otherwise
+ */
+__nonnull() __wur
+extern bool is_utf8(const char *text);
+
 #endif

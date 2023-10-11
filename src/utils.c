@@ -217,3 +217,29 @@ int check_directory_exists(const char path[])
     int rc = get_path_property(path);
     return rc < 0 ? rc : rc == PATH_DIRECTORY ? 0 : -ENOTDIR;
 }
+
+/* see utils.h */
+bool is_utf8(const char *text)
+{
+    unsigned len;
+    const unsigned char *iter = (const unsigned char *)text;
+    while (*iter) {
+        if (*iter <= 0x7f)
+            len = 0;
+        else if (*iter <= 0xbf)
+            return false;
+        else if (*iter <= 0xdf)
+            len = 1;
+        else if (*iter <= 0xef)
+            len = 2;
+        else if (*iter <= 0xf7)
+            len = 3;
+        else
+            return false;
+        for (iter++; len ; len--, iter++)
+            if (*iter < 0x80 || *iter > 0xbf)
+                return false;
+    }
+    return true;
+}
+
