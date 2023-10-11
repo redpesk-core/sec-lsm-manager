@@ -337,7 +337,7 @@ __nonnull((1)) static void onrequest(client_t *cli, unsigned count, const char *
             while (version == 0) {
                 if (--idx == 0) {
                     cli->relax = 0; /* not relax on protocol mismatch */
-                    goto invalid;
+                    goto invalid_protocol;
                 }
                 if (ckarg(args[idx], PROTOCOL_VERSION_1_STRING, 0))
                     version = PROTOCOL_VERSION_1;
@@ -414,7 +414,7 @@ __nonnull((1)) static void onrequest(client_t *cli, unsigned count, const char *
                 nextlog = sec_lsm_manager_server_log;
                 if (count == 2) {
                     if (!ckarg(args[1], _on_, 0) && !ckarg(args[1], _off_, 0))
-                        goto invalid;
+                        goto invalid_protocol;
                     nextlog = ckarg(args[1], _on_, 0);
                 }
                 send_done(cli, nextlog ? _on_ : _off_);
@@ -501,8 +501,8 @@ __nonnull((1)) static void onrequest(client_t *cli, unsigned count, const char *
         default:
             break;
     }
-invalid:
-    send_error(cli, "invalid");
+invalid_protocol:
+    send_error(cli, "protocol");
     if (!cli->relax)
         cli->invalid = 1;
 }
