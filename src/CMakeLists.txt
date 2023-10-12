@@ -32,12 +32,10 @@ add_compile_definitions(VERSION="${PROJECT_VERSION}")
 message("\n[*] Create : libsec-lsm-manager")
 
 add_library(sec-lsm-manager STATIC
-    log.c
     prot.c
     sec-lsm-manager-client.c
     sec-lsm-manager-protocol.c
     socket.c
-    utils.c
 )
 install(TARGETS sec-lsm-manager LIBRARY
 		DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR})

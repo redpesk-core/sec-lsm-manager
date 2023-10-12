@@ -41,8 +41,6 @@
 #include <sys/un.h>
 #include <unistd.h>
 
-#include "utils.h"
-
 #if WITH_SYSTEMD
 #include <systemd/sd-daemon.h>
 #endif
@@ -108,7 +106,7 @@ static int open_unix(const char *spec, int server) {
 
     /* check the length */
     length = strlen(spec);
-    if (length >= 108) {
+    if (length >= sizeof addr.sun_path) {
         errno = ENAMETOOLONG;
         return -1;
     }
@@ -125,7 +123,7 @@ static int open_unix(const char *spec, int server) {
     /* prepare address  */
     memset(&addr, 0, sizeof addr);
     addr.sun_family = AF_UNIX;
-    secure_strncpy(addr.sun_path, spec, 108);
+    memcpy(addr.sun_path, spec, 1 + length);
     if (abstract)
         addr.sun_path[0] = 0; /* implement abstract sockets */
 

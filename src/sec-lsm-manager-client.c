@@ -35,20 +35,17 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "log.h"
 #include "prot.h"
 #include "sec-lsm-manager-protocol.h"
 #include "socket.h"
 
 #define CHECK_NO_NULL(param, param_name)   \
     if (!param) {                          \
-        ERROR("%s undefined", param_name); \
         return -EINVAL;                    \
     }
 
 #define CHECK_NO_NULL_NO_RETURN(param, param_name) \
     if (!param) {                                  \
-        ERROR("%s undefined", param_name);         \
         return;                                    \
     }
 
@@ -569,7 +566,6 @@ static int wait_display_replies(sec_lsm_manager_t *sec_lsm_manager)
         puts("################################################");
     }
     if (rc > 0 && !strcmp(sec_lsm_manager->reply.fields[0], _error_)) {
-        ERROR("%s", sec_lsm_manager->reply.fields[1]);
 	rc = -1;
     }
     return rc;
