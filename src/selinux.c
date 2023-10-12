@@ -59,21 +59,21 @@ __nonnull() __wur static int label_file(const char *path, const char *label) {
 }
 
 /**
- * @brief Apply selinux on a secure app
+ * @brief Apply selinux on a context
  *
- * @param[in] secure_app secure app handler
+ * @param[in] context context handler
  * @return 0 in case of success or a negative -errno value
  */
-__nonnull() __wur int selinux_process_paths(const secure_app_t *secure_app,
+__nonnull() __wur int selinux_process_paths(const context_t *context,
                                             path_type_definitions_t path_type_definitions[number_path_type]) {
     path_t *path = NULL;
     char label[SEC_LSM_MANAGER_MAX_SIZE_LABEL + 3];
-    for (size_t i = 0; i < secure_app->path_set.size; i++) {
-        path = secure_app->path_set.paths[i];
+    for (size_t i = 0; i < context->path_set.size; i++) {
+        path = context->path_set.paths[i];
         snprintf(label, SEC_LSM_MANAGER_MAX_SIZE_LABEL + 3, "%s:s0", path_type_definitions[path->path_type].label);
         int rc = label_file(path->path, label);
         if (rc < 0) {
-            ERROR("label_file((%s,%s),%s) : %d %s", path->path, get_path_type_string(path->path_type), secure_app->id,
+            ERROR("label_file((%s,%s),%s) : %d %s", path->path, get_path_type_string(path->path_type), context->id,
                   -rc, strerror(-rc));
             return rc;
         }
@@ -95,32 +95,32 @@ bool selinux_enabled(void) {
 }
 
 /* see selinux.h */
-int install_selinux(const secure_app_t *secure_app) {
-    /* TODO: treat the case where !secure_app->need_id */
-    if (secure_app->id[0] == '\0') {
+int install_selinux(const context_t *context) {
+    /* TODO: treat the case where !context->need_id */
+    if (context->id[0] == '\0') {
         ERROR("id undefined");
         return -EINVAL;
     }
 
     path_type_definitions_t path_type_definitions[number_path_type];
-    init_path_type_definitions(path_type_definitions, secure_app->id_underscore);
+    init_path_type_definitions(path_type_definitions, context->id_underscore);
 
     // ################## CREATE ##################
-    int rc = create_selinux_rules(secure_app, path_type_definitions);
+    int rc = create_selinux_rules(context, path_type_definitions);
     if (rc < 0) {
         ERROR("create_selinux_rules : %d %s", -rc, strerror(-rc));
         return rc;
     }
 
     // ############### CHECK AFTER ###############
-    if (!check_module_files_exist(secure_app)) {
+    if (!check_module_files_exist(context)) {
         ERROR("module files not exist");
         return -ENOENT;
     }
 
     DEBUG("success check files exist");
 
-    if (!check_module_in_policy(secure_app)) {
+    if (!check_module_in_policy(context)) {
         ERROR("module not in the policy");
         return -ENOENT;
     }
@@ -128,7 +128,7 @@ int install_selinux(const secure_app_t *secure_app) {
     DEBUG("success check module in policy");
 
     // force label
-    rc = selinux_process_paths(secure_app, path_type_definitions);
+    rc = selinux_process_paths(context, path_type_definitions);
     if (rc < 0) {
         ERROR("selinux_process_paths : %d %s", -rc, strerror(-rc));
         return rc;
@@ -140,26 +140,26 @@ int install_selinux(const secure_app_t *secure_app) {
 }
 
 /* see selinux.h */
-int uninstall_selinux(const secure_app_t *secure_app) {
-    /* TODO: treat the case where !secure_app->need_id */
-    if (secure_app->id[0] == '\0') {
+int uninstall_selinux(const context_t *context) {
+    /* TODO: treat the case where !context->need_id */
+    if (context->id[0] == '\0') {
         ERROR("id undefined");
         return -EINVAL;
     }
 
     // ############### CHECK BEFORE ###############
-    if (!check_module_files_exist(secure_app)) {
+    if (!check_module_files_exist(context)) {
         ERROR("module files not exist");
         return -ENOENT;
     }
 
-    if (!check_module_in_policy(secure_app)) {
+    if (!check_module_in_policy(context)) {
         ERROR("module not in the policy");
         return -ENOENT;
     }
 
     // ################## REMOVE ##################
-    int rc = remove_selinux_rules(secure_app);
+    int rc = remove_selinux_rules(context);
 
     if (rc < 0) {
         ERROR("remove_selinux_rules : %d %s", -rc, strerror(-rc));
@@ -169,14 +169,14 @@ int uninstall_selinux(const secure_app_t *secure_app) {
     DEBUG("success remove selinux module and files");
 
     // ############### CHECK AFTER ###############
-    if (check_module_files_exist(secure_app)) {
+    if (check_module_files_exist(context)) {
         ERROR("module files exist");
         return -1;
     }
 
     DEBUG("success check files removed");
 
-    if (check_module_in_policy(secure_app)) {
+    if (check_module_in_policy(context)) {
         ERROR("module in the policy");
         return -1;
     }

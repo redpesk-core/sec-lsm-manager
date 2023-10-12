@@ -61,7 +61,7 @@ extern int permission_set_add_permission(permission_set_t *permission_set, const
 /**
  * @brief check if the permission set has the permission
  *
- * @param[in] secure_app the application to be uninstalled
+ * @param[in] context the application to be uninstalled
  * @param[in] permission the permission to check
  * @return 1 when permission is granted or, otherwise, 0
  */

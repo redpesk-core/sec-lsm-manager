@@ -140,21 +140,21 @@ START_TEST(test_smack_install) {
     ck_assert_int_eq(create_file(id_file), 0);
     ck_assert_int_eq(create_file(public_file), 0);
 
-    // create secure app
-    secure_app_t *secure_app = NULL;
-    ck_assert_int_eq(create_secure_app(&secure_app), 0);
-    ck_assert_int_eq(secure_app_add_path(secure_app, data_dir, "data"), 0);
-    ck_assert_int_eq(secure_app_add_path(secure_app, data_file, "data"), 0);
-    ck_assert_int_eq(secure_app_add_path(secure_app, exec_dir, "exec"), 0);
-    ck_assert_int_eq(secure_app_add_path(secure_app, exec_file, "exec"), 0);
-    ck_assert_int_eq(secure_app_add_path(secure_app, id_dir, "id"), 0);
-    ck_assert_int_eq(secure_app_add_path(secure_app, id_file, "id"), 0);
-    ck_assert_int_eq(secure_app_add_path(secure_app, public_dir, "public"), 0);
-    ck_assert_int_eq(secure_app_add_path(secure_app, public_file, "public"), 0);
-    ck_assert_int_eq(secure_app_add_permission(secure_app, "perm1"), 0);
-    ck_assert_int_eq(secure_app_add_permission(secure_app, "perm2"), 0);
-    ck_assert_int_eq(secure_app_set_id(secure_app, "testid"), 0);
-    ck_assert_int_eq(install_smack(secure_app), 0);
+    // create context
+    context_t *context = NULL;
+    ck_assert_int_eq(create_context(&context), 0);
+    ck_assert_int_eq(context_add_path(context, data_dir, "data"), 0);
+    ck_assert_int_eq(context_add_path(context, data_file, "data"), 0);
+    ck_assert_int_eq(context_add_path(context, exec_dir, "exec"), 0);
+    ck_assert_int_eq(context_add_path(context, exec_file, "exec"), 0);
+    ck_assert_int_eq(context_add_path(context, id_dir, "id"), 0);
+    ck_assert_int_eq(context_add_path(context, id_file, "id"), 0);
+    ck_assert_int_eq(context_add_path(context, public_dir, "public"), 0);
+    ck_assert_int_eq(context_add_path(context, public_file, "public"), 0);
+    ck_assert_int_eq(context_add_permission(context, "perm1"), 0);
+    ck_assert_int_eq(context_add_permission(context, "perm2"), 0);
+    ck_assert_int_eq(context_set_id(context, "testid"), 0);
+    ck_assert_int_eq(install_smack(context), 0);
 
     // test settings
 
@@ -174,9 +174,9 @@ START_TEST(test_smack_install) {
     ck_assert_int_eq(compare_xattr(public_dir, XATTR_NAME_SMACKTRANSMUTE, "TRUE"), true);
     ck_assert_int_eq(compare_xattr(public_file, XATTR_NAME_SMACK, "System:Shared"), true);
 
-    ck_assert_int_eq(uninstall_smack(secure_app), 0);
+    ck_assert_int_eq(uninstall_smack(context), 0);
 
-    destroy_secure_app(secure_app);
+    destroy_context(context);
     remove(data_file);
     remove(exec_file);
     remove(id_file);
@@ -201,21 +201,21 @@ START_TEST(test_smack_uninstall) {
     ck_assert_int_eq(mkdir(data_dir, 0777), 0);
     ck_assert_int_eq(create_file(data_file), 0);
 
-    // create secure app
-    secure_app_t *secure_app = NULL;
-    ck_assert_int_eq(create_secure_app(&secure_app), 0);
-    ck_assert_int_eq(secure_app_add_path(secure_app, data_dir, "data"), 0);
-    ck_assert_int_eq(secure_app_add_path(secure_app, data_file, "data"), 0);
-    ck_assert_int_eq(secure_app_set_id(secure_app, "testid"), 0);
-    ck_assert_int_eq(install_smack(secure_app), 0);
+    // create context
+    context_t *context = NULL;
+    ck_assert_int_eq(create_context(&context), 0);
+    ck_assert_int_eq(context_add_path(context, data_dir, "data"), 0);
+    ck_assert_int_eq(context_add_path(context, data_file, "data"), 0);
+    ck_assert_int_eq(context_set_id(context, "testid"), 0);
+    ck_assert_int_eq(install_smack(context), 0);
 
-    ck_assert_int_eq(uninstall_smack(secure_app), 0);
+    ck_assert_int_eq(uninstall_smack(context), 0);
 
     bool exists;
     get_file_informations("/etc/smack/accesses.d/app-testid", &exists, NULL, NULL);
     ck_assert_int_eq(exists, false);
 
-    destroy_secure_app(secure_app);
+    destroy_context(context);
     remove(data_file);
     rmdir(data_dir);
     rmdir(tmp_dir);

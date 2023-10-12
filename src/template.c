@@ -38,7 +38,7 @@
 #include "utils.h"
 
 typedef struct {
-        const secure_app_t *secure_app;
+        const context_t *context;
         const plug_t *plug;
     }
         template_data_t;
@@ -51,13 +51,13 @@ static int put(void *closure, const char *name, int escape, FILE *file) {
     // DEBUG("name : %s", name);
 
     if (!strcmp(name, "id"))
-        txt = data->secure_app->id;
+        txt = data->context->id;
 
     else if (!strcmp(name, "id_underscore"))
-        txt = data->secure_app->id_underscore;
+        txt = data->context->id_underscore;
 
     else if (!strcmp(name, "_id_"))
-        txt = data->secure_app->id;
+        txt = data->context->id;
 
     else if (!strcmp(name, "impid") && data->plug != NULL)
         txt = data->plug->impid;
@@ -84,16 +84,16 @@ static int enter(void *closure, const char *name) {
         return 0;
 
     if (!strcmp(name, "has-plugs")) {
-        return data->secure_app->plugset != NULL;
+        return data->context->plugset != NULL;
     }
 
     if (!strcmp(name, "plugs")) {
-        data->plug = data->secure_app->plugset;
+        data->plug = data->context->plugset;
         return data->plug != NULL;
     }
 
     if (name[0] == 'p' && name[1] == '=') { /* permission checks are prefixed by p= */
-        return secure_app_has_permission(data->secure_app, &name[2]);
+        return context_has_permission(data->context, &name[2]);
     }
 
     return 0;
@@ -116,10 +116,10 @@ static int next(void *closure) {
 
 static struct mustach_itf itf = {.enter = enter, .put = put, .next = next, .leave = leave};
 
-int process_template(const char *template_path, const char *dest, const secure_app_t *secure_app) {
+int process_template(const char *template_path, const char *dest, const context_t *context) {
     int rc = 0;
     int rc2 = 0;
-    template_data_t data = { .secure_app = secure_app, .plug = NULL };
+    template_data_t data = { .context = context, .plug = NULL };
 
     char *template = read_file(template_path);
     if (template == NULL) {

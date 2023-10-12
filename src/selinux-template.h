@@ -75,36 +75,36 @@ extern void init_path_type_definitions(path_type_definitions_t path_type_definit
 /**
  * @brief Create selinux rules
  *
- * @param[in] secure_app secure app handler to install
+ * @param[in] context context handler to install
  * @return 0 in case of success or a negative -errno value
  */
-extern int create_selinux_rules(const secure_app_t *secure_app,
+extern int create_selinux_rules(const context_t *context,
                          path_type_definitions_t path_type_definitions[number_path_type]) __wur __nonnull();
 
 /**
  * @brief Check if the files of an application exists in the selinux rules directory
  *
- * @param[in] secure_app secure app handler
+ * @param[in] context context handler
  * @param[in] selinux_rules_dir some value or NULL for getting default
  * @return true if exists, false if not
  */
-extern bool check_module_files_exist(const secure_app_t *secure_app) __wur __nonnull((1));
+extern bool check_module_files_exist(const context_t *context) __wur __nonnull((1));
 
 /**
  * @brief Check if module is in the policy
  *
- * @param[in] secure_app secure app handler
+ * @param[in] context context handler
  * @return true if exists, false if not
  */
-extern bool check_module_in_policy(const secure_app_t *secure_app) __wur __nonnull();
+extern bool check_module_in_policy(const context_t *context) __wur __nonnull();
 
 /**
  * @brief Remove selinux rules (in the selinux rules directory and in the policy)
  *
- * @param[in] secure_app secure app handler
+ * @param[in] context context handler
  * @return 0 in case of success or a negative -errno value
  */
-extern int remove_selinux_rules(const secure_app_t *secure_app) __wur __nonnull();
+extern int remove_selinux_rules(const context_t *context) __wur __nonnull();
 
 /************************ FOR TESTING ************************/
 typedef struct selinux_module {
@@ -118,9 +118,9 @@ typedef struct selinux_module {
 } selinux_module_t;
 
 __nonnull() __wur
-extern int generate_app_module_fc(const char *selinux_fc_file, const secure_app_t *secure_app, path_type_definitions_t path_type_definitions[number_path_type]);
+extern int generate_app_module_fc(const char *selinux_fc_file, const context_t *context, path_type_definitions_t path_type_definitions[number_path_type]);
 
 __nonnull() __wur
-int generate_app_module_files(const selinux_module_t *selinux_module, const secure_app_t *secure_app, path_type_definitions_t path_type_definitions[number_path_type]);
+int generate_app_module_files(const selinux_module_t *selinux_module, const context_t *context, path_type_definitions_t path_type_definitions[number_path_type]);
 
 #endif

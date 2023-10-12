@@ -97,8 +97,8 @@ int main(int argc, char const *argv[]) {
     addtcase("permissions");
     test_permissions();
 
-    addtcase("secure_app");
-    test_secure_app();
+    addtcase("context");
+    test_context();
 
     addtcase("utils");
     test_utils();

@@ -182,21 +182,21 @@ void init_path_type_definitions(path_type_definitions_t path_type_definitions[nu
 }
 
 /* see smack-template.h */
-int create_smack_rules(const secure_app_t *secure_app) {
+int create_smack_rules(const context_t *context) {
     int rc = 0;
     int rc2 = 0;
     struct smack_accesses *smack_accesses = NULL;
     char smack_rules_file[SEC_LSM_MANAGER_MAX_SIZE_PATH + 1];
     const char *smack_template_file;
 
-    rc = get_smack_rule_path(smack_rules_file, secure_app->id);
+    rc = get_smack_rule_path(smack_rules_file, context->id);
     if (rc < 0) {
         ERROR("get_smack_rule_path: %d %s", -rc, strerror(-rc));
         goto end;
     }
 
     smack_template_file = get_smack_template_file(NULL);
-    rc = process_template(smack_template_file, smack_rules_file, secure_app);
+    rc = process_template(smack_template_file, smack_rules_file, context);
     if (rc < 0) {
         ERROR("process_template : %d %s", -rc, strerror(-rc));
         goto end;
@@ -244,11 +244,11 @@ end:
 }
 
 /* see smack-template.h */
-int remove_smack_rules(const secure_app_t *secure_app) {
+int remove_smack_rules(const context_t *context) {
     int rc = 0;
     char smack_rules_file[SEC_LSM_MANAGER_MAX_SIZE_PATH + 1];
 
-    rc = get_smack_rule_path(smack_rules_file, secure_app->id);
+    rc = get_smack_rule_path(smack_rules_file, context->id);
     if (rc < 0) {
         ERROR("get_smack_rule_path: %d %s", -rc, strerror(-rc));
         return rc;

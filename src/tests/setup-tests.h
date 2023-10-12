@@ -27,7 +27,7 @@ extern void test_prot(void);
 extern void test_paths(void);
 extern void test_plugs(void);
 extern void test_permissions(void);
-extern void test_secure_app(void);
+extern void test_context(void);
 extern void test_utils(void);
 
 #if !SIMULATE_CYNAGORA

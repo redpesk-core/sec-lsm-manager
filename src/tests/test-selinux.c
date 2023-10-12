@@ -43,17 +43,17 @@ START_TEST(test_selinux_process_paths) {
     path_type_definitions_t path_type_definitions[number_path_type];
     init_path_type_definitions(path_type_definitions, TESTID);
 
-    secure_app_t *secure_app = NULL;
-    ck_assert_int_eq(create_secure_app(&secure_app), 0);
-    ck_assert_int_eq(secure_app_add_path(secure_app, etc_tmp_file, "id"), 0);
+    context_t *context = NULL;
+    ck_assert_int_eq(create_context(&context), 0);
+    ck_assert_int_eq(context_add_path(context, etc_tmp_file, "id"), 0);
 
-    ck_assert_int_eq(selinux_process_paths(secure_app, path_type_definitions), 0);
+    ck_assert_int_eq(selinux_process_paths(context, path_type_definitions), 0);
 
     ck_assert_int_eq(compare_xattr(etc_tmp_file, XATTR_NAME_SELINUX, "system_u:object_r:testid-binding_t:s0"), true);
 
-    ck_assert_int_eq(secure_app_add_path(secure_app, "bad_path", "id"), 0);
+    ck_assert_int_eq(context_add_path(context, "bad_path", "id"), 0);
 
-    ck_assert_int_eq(selinux_process_paths(secure_app, path_type_definitions), -ENOENT);
+    ck_assert_int_eq(selinux_process_paths(context, path_type_definitions), -ENOENT);
 
     remove(etc_tmp_file);
 }
@@ -93,24 +93,24 @@ START_TEST(test_selinux_install) {
     ck_assert_int_eq(create_file(id_file), 0);
     ck_assert_int_eq(create_file(public_file), 0);
 
-    // create secure app
-    secure_app_t *secure_app = NULL;
-    ck_assert_int_eq(create_secure_app(&secure_app), 0);
+    // create context
+    context_t *context = NULL;
+    ck_assert_int_eq(create_context(&context), 0);
 
-    ck_assert_int_lt(install_selinux(secure_app), 0);
+    ck_assert_int_lt(install_selinux(context), 0);
 
-    ck_assert_int_eq(secure_app_add_path(secure_app, data_dir, "data"), 0);
-    ck_assert_int_eq(secure_app_add_path(secure_app, data_file, "data"), 0);
-    ck_assert_int_eq(secure_app_add_path(secure_app, exec_dir, "exec"), 0);
-    ck_assert_int_eq(secure_app_add_path(secure_app, exec_file, "exec"), 0);
-    ck_assert_int_eq(secure_app_add_path(secure_app, id_dir, "id"), 0);
-    ck_assert_int_eq(secure_app_add_path(secure_app, id_file, "id"), 0);
-    ck_assert_int_eq(secure_app_add_path(secure_app, public_dir, "public"), 0);
-    ck_assert_int_eq(secure_app_add_path(secure_app, public_file, "public"), 0);
-    ck_assert_int_eq(secure_app_add_permission(secure_app, "perm1"), 0);
-    ck_assert_int_eq(secure_app_add_permission(secure_app, "perm2"), 0);
-    ck_assert_int_eq(secure_app_set_id(secure_app, "testid-binding"), 0);
-    ck_assert_int_eq(install_selinux(secure_app), 0);
+    ck_assert_int_eq(context_add_path(context, data_dir, "data"), 0);
+    ck_assert_int_eq(context_add_path(context, data_file, "data"), 0);
+    ck_assert_int_eq(context_add_path(context, exec_dir, "exec"), 0);
+    ck_assert_int_eq(context_add_path(context, exec_file, "exec"), 0);
+    ck_assert_int_eq(context_add_path(context, id_dir, "id"), 0);
+    ck_assert_int_eq(context_add_path(context, id_file, "id"), 0);
+    ck_assert_int_eq(context_add_path(context, public_dir, "public"), 0);
+    ck_assert_int_eq(context_add_path(context, public_file, "public"), 0);
+    ck_assert_int_eq(context_add_permission(context, "perm1"), 0);
+    ck_assert_int_eq(context_add_permission(context, "perm2"), 0);
+    ck_assert_int_eq(context_set_id(context, "testid-binding"), 0);
+    ck_assert_int_eq(install_selinux(context), 0);
 
     // test settings
 
@@ -123,7 +123,7 @@ START_TEST(test_selinux_install) {
     ck_assert_int_eq(compare_xattr(public_dir, XATTR_NAME_SELINUX, "system_u:object_r:redpesk_public_t:s0"), true);
     ck_assert_int_eq(compare_xattr(public_file, XATTR_NAME_SELINUX, "system_u:object_r:redpesk_public_t:s0"), true);
 
-    ck_assert_int_eq(uninstall_selinux(secure_app), 0);
+    ck_assert_int_eq(uninstall_selinux(context), 0);
 
     remove(data_file);
     remove(exec_file);

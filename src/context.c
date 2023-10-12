@@ -53,17 +53,17 @@
 /**
  * @brief Initialize the fields 'id', 'id_underscore', 'permission_set', 'path_set' and error_flag
  *
- * @param[in] secure_app handler
+ * @param[in] context handler
  */
-__nonnull() void init_secure_app(secure_app_t *secure_app) {
-    memset(secure_app->id, '\0', SEC_LSM_MANAGER_MAX_SIZE_ID);
-    memset(secure_app->id_underscore, '\0', SEC_LSM_MANAGER_MAX_SIZE_ID);
-    memset(secure_app->label, '\0', SEC_LSM_MANAGER_MAX_SIZE_LABEL);
-    init_path_set(&(secure_app->path_set));
-    plugset_init(&(secure_app->plugset));
-    init_permission_set(&(secure_app->permission_set));
-    secure_app->need_id = false;
-    secure_app->error_flag = false;
+__nonnull() void init_context(context_t *context) {
+    memset(context->id, '\0', SEC_LSM_MANAGER_MAX_SIZE_ID);
+    memset(context->id_underscore, '\0', SEC_LSM_MANAGER_MAX_SIZE_ID);
+    memset(context->label, '\0', SEC_LSM_MANAGER_MAX_SIZE_LABEL);
+    init_path_set(&(context->path_set));
+    plugset_init(&(context->plugset));
+    init_permission_set(&(context->permission_set));
+    context->need_id = false;
+    context->error_flag = false;
 }
 
 /**
@@ -85,7 +85,7 @@ static int setids(
     char label[SEC_LSM_MANAGER_MAX_SIZE_LABEL + 1]
 ) {
     char car;
-    int rc = secure_app_is_valid_id(src);
+    int rc = context_is_valid_id(src);
     if (rc >= 0) {
         memcpy(id, src, (unsigned)rc);
         id_underscore[rc] = 0;
@@ -104,47 +104,47 @@ static int setids(
 /**********************/
 
 /* see context.h */
-int create_secure_app(secure_app_t **secure_app) {
-    *secure_app = (secure_app_t *)malloc(sizeof(secure_app_t));
-    if (*secure_app == NULL) {
+int create_context(context_t **context) {
+    *context = (context_t *)malloc(sizeof(context_t));
+    if (*context == NULL) {
         ERROR("malloc failed");
         return -ENOMEM;
     }
 
-    init_secure_app(*secure_app);
+    init_context(*context);
     return 0;
 }
 
 /* see context.h */
-void destroy_secure_app(secure_app_t *secure_app) {
-    clear_secure_app(secure_app);
-    free(secure_app);
+void destroy_context(context_t *context) {
+    clear_context(context);
+    free(context);
 }
 
 /* see context.h */
-void clear_secure_app(secure_app_t *secure_app) {
-    if (secure_app) {
-        secure_app->label[0] = secure_app->id_underscore[0] = secure_app->id[0] = '\0';
-        free_permission_set(&(secure_app->permission_set));
-        plugset_deinit(&(secure_app->plugset));
-        free_path_set(&(secure_app->path_set));
-        secure_app->need_id = false;
-        secure_app->error_flag = false;
+void clear_context(context_t *context) {
+    if (context) {
+        context->label[0] = context->id_underscore[0] = context->id[0] = '\0';
+        free_permission_set(&(context->permission_set));
+        plugset_deinit(&(context->plugset));
+        free_path_set(&(context->path_set));
+        context->need_id = false;
+        context->error_flag = false;
     }
 }
 
 /* see context.h */
-void secure_app_raise_error(secure_app_t *secure_app) {
-    secure_app->error_flag = true;
+void context_raise_error(context_t *context) {
+    context->error_flag = true;
 }
 
 /* see context.h */
-bool secure_app_has_error(secure_app_t *secure_app) {
-    return secure_app->error_flag;
+bool context_has_error(context_t *context) {
+    return context->error_flag;
 }
 
 /* see context.h */
-int secure_app_is_valid_id(const char *id)
+int context_is_valid_id(const char *id)
 {
     char car;
     int idx;
@@ -180,68 +180,68 @@ int secure_app_is_valid_id(const char *id)
 }
 
 /* see context.h */
-int secure_app_set_id(secure_app_t *secure_app, const char *id) {
+int context_set_id(context_t *context, const char *id) {
     int rc;
 
     /* check error state */
-    if (secure_app->error_flag) {
+    if (context->error_flag) {
         ERROR("error flag has been raised");
         return -ENOTRECOVERABLE;
     }
 
     /* check duplication */
-    if (secure_app->id[0] != '\0') {
+    if (context->id[0] != '\0') {
         ERROR("id already set");
         return -EEXIST;
     }
 
-    rc = setids(id, secure_app->id, secure_app->id_underscore, secure_app->label);
+    rc = setids(id, context->id, context->id_underscore, context->label);
     if (rc < 0)
-        secure_app->id[0] = secure_app->id_underscore[0] = secure_app->label[0] = '\0';
+        context->id[0] = context->id_underscore[0] = context->label[0] = '\0';
 
     return rc;
 }
 
 /* see context.h */
-int secure_app_add_permission(secure_app_t *secure_app, const char *permission)
+int context_add_permission(context_t *context, const char *permission)
 {
     size_t i;
     int rc;
 
     /* check error state */
-    if (secure_app->error_flag) {
+    if (context->error_flag) {
         ERROR("error flag has been raised");
         return -ENOTRECOVERABLE;
     }
 
     /* check duplication */
-    for (i = 0; i < secure_app->permission_set.size; i++) {
-        if (!strcmp(secure_app->permission_set.permissions[i], permission)) {
+    for (i = 0; i < context->permission_set.size; i++) {
+        if (!strcmp(context->permission_set.permissions[i], permission)) {
             ERROR("permission already defined");
             return -EEXIST;
         }
     }
 
-    rc = permission_set_add_permission(&(secure_app->permission_set), permission);
+    rc = permission_set_add_permission(&(context->permission_set), permission);
     if (rc < 0) {
         ERROR("permission_set_add_permission: %d %s", -rc, strerror(-rc));
         return rc;
     }
-    secure_app->need_id = true;
+    context->need_id = true;
 
     return 0;
 }
 
 /* see context.h */
 __wur __nonnull()
-int secure_app_add_path(secure_app_t *secure_app, const char *path, const char *type)
+int context_add_path(context_t *context, const char *path, const char *type)
 {
     enum path_type path_type;
     size_t i;
     int rc;
 
     /* check error state */
-    if (secure_app->error_flag) {
+    if (context->error_flag) {
         ERROR("error flag has been raised");
         return -ENOTRECOVERABLE;
     }
@@ -254,8 +254,8 @@ int secure_app_add_path(secure_app_t *secure_app, const char *path, const char *
     }
 
     /* check duplication */
-    for (i = 0; i < secure_app->path_set.size; i++) {
-        if (!strcmp(secure_app->path_set.paths[i]->path, path)) {
+    for (i = 0; i < context->path_set.size; i++) {
+        if (!strcmp(context->path_set.paths[i]->path, path)) {
             ERROR("path already added");
             return -EEXIST;
         }
@@ -269,7 +269,7 @@ int secure_app_add_path(secure_app_t *secure_app, const char *path, const char *
     }
 
     /* add the path to the set */
-    rc = path_set_add_path(&(secure_app->path_set), path, path_type);
+    rc = path_set_add_path(&(context->path_set), path, path_type);
     if (rc < 0) {
         ERROR("can't add path %s: %d %s", path, -rc, strerror(-rc));
         return rc;
@@ -277,26 +277,26 @@ int secure_app_add_path(secure_app_t *secure_app, const char *path, const char *
 
     /* compute the new need of id */
     if (path_type != type_default)
-        secure_app->need_id = true;
+        context->need_id = true;
 
     return 0;
 }
 
 /* see context.h */
 __wur __nonnull()
-int secure_app_add_plug(secure_app_t *secure_app, const char *expdir, const char *impid, const char *impdir)
+int context_add_plug(context_t *context, const char *expdir, const char *impid, const char *impdir)
 {
     int rc;
     plug_t *iter;
 
     /* check error state */
-    if (secure_app->error_flag) {
+    if (context->error_flag) {
         ERROR("error flag has been raised");
         return -ENOTRECOVERABLE;
     }
 
     /* check duplication */
-    for (iter = secure_app->plugset; iter != NULL ; iter = iter->next) {
+    for (iter = context->plugset; iter != NULL ; iter = iter->next) {
         if (!strcmp(iter->impdir, impdir)) {
             ERROR("import directory already added");
             return -EEXIST;
@@ -304,7 +304,7 @@ int secure_app_add_plug(secure_app_t *secure_app, const char *expdir, const char
     }
 
     /* check validity of id */
-    rc = secure_app_is_valid_id(impid);
+    rc = context_is_valid_id(impid);
     if (rc < 0) {
         ERROR("invalid plug id %s", impid);
         return rc;
@@ -323,43 +323,43 @@ int secure_app_add_plug(secure_app_t *secure_app, const char *expdir, const char
     }
 
     /* add the plug property */
-    rc = plugset_add(&(secure_app->plugset), expdir, impid, impdir);
+    rc = plugset_add(&(context->plugset), expdir, impid, impdir);
     if (rc < 0) {
         ERROR("can't add plug %d %s", -rc, strerror(-rc));
         return rc;
     }
-    secure_app->need_id = true;
+    context->need_id = true;
     return 0;
 }
 
 /* see context.h */
 __nonnull() __wur
-int secure_app_install(secure_app_t *secure_app, cynagora_t *cynagora)
+int context_install(context_t *context, cynagora_t *cynagora)
 {
     int rc, rc2;
     bool has_id;
 
     /* check error state */
-    if (secure_app->error_flag) {
-        ERROR("error flag has been raised, clear secure app");
+    if (context->error_flag) {
+        ERROR("error flag has been raised, clear context");
         return -ENOTRECOVERABLE;
     }
 
     /* check application id need */
-    has_id = secure_app->id[0] != '\0';
-    if (!has_id && secure_app->need_id) {
+    has_id = context->id[0] != '\0';
+    if (!has_id && context->need_id) {
         ERROR("an application identifier is needed");
         return -EINVAL;
     }
 
     /* check consistency */
-    rc = secure_app_check(secure_app, cynagora);
+    rc = context_check(context, cynagora);
     if (rc < 0)
         return rc;
 
     /* set cynagora policies */
     if (has_id) {
-        rc = cynagora_set_policies(cynagora, secure_app->label, &(secure_app->permission_set), 1);
+        rc = cynagora_set_policies(cynagora, context->label, &(context->permission_set), 1);
         if (rc < 0) {
             ERROR("cynagora_set_policies: %d %s", -rc, strerror(-rc));
             return rc;
@@ -368,11 +368,11 @@ int secure_app_install(secure_app_t *secure_app, cynagora_t *cynagora)
     }
 
     /* set LSM / MAC policies */
-    rc = install_mac(secure_app);
+    rc = install_mac(context);
     if (rc < 0) {
         ERROR("install_mac: %d %s", -rc, strerror(-rc));
         if (has_id) {
-            rc2 = cynagora_drop_policies(cynagora, secure_app->label);
+            rc2 = cynagora_drop_policies(cynagora, context->label);
             if (rc2 < 0) {
                 ERROR("cannot delete policy: %d %s", -rc2, strerror(-rc2));
             }
@@ -387,24 +387,24 @@ int secure_app_install(secure_app_t *secure_app, cynagora_t *cynagora)
 
 /* see context.h */
 __nonnull() __wur
-int secure_app_uninstall(secure_app_t *secure_app, cynagora_t *cynagora)
+int context_uninstall(context_t *context, cynagora_t *cynagora)
 {
     /* check error state */
-    if (secure_app->error_flag) {
-        ERROR("error flag has been raised, clear secure app");
+    if (context->error_flag) {
+        ERROR("error flag has been raised, clear context");
         return -ENOTRECOVERABLE;
     }
 
     /* check application id need */
-    bool has_id = secure_app->id[0] != '\0';
-    if (!has_id && secure_app->need_id) {
+    bool has_id = context->id[0] != '\0';
+    if (!has_id && context->need_id) {
         ERROR("an application identifier is needed");
         return -EINVAL;
     }
 
     /* drop cynagora policies */
     if (has_id) {
-        int rc = cynagora_drop_policies(cynagora, secure_app->label);
+        int rc = cynagora_drop_policies(cynagora, context->label);
         if (rc < 0) {
             ERROR("cynagora_drop_policies: %d %s", -rc, strerror(-rc));
             return rc;
@@ -412,7 +412,7 @@ int secure_app_uninstall(secure_app_t *secure_app, cynagora_t *cynagora)
     }
 
     /* drop LSM / MAC policies */
-    int rc = uninstall_mac(secure_app);
+    int rc = uninstall_mac(context);
     if (rc < 0) {
         ERROR("uninstall_mac: %d %s", -rc, strerror(-rc));
         return rc;
@@ -424,20 +424,20 @@ int secure_app_uninstall(secure_app_t *secure_app, cynagora_t *cynagora)
 
 /* see context.h */
 __nonnull() __wur
-int secure_app_has_permission(const secure_app_t *secure_app, const char *permission)
+int context_has_permission(const context_t *context, const char *permission)
 {
-    return permission_set_has_permission(&secure_app->permission_set, permission);
+    return permission_set_has_permission(&context->permission_set, permission);
 }
 
 /**
  * @brief Check if application plugs can be installed
  *
- * @param[in] secure_app the application to be checked
+ * @param[in] context the application to be checked
  * @param[in] cynagora handler to cynagora access
  * @return 0 in case of success or a negative -errno value
  */
 __nonnull() __wur
-static int check_plugs(secure_app_t *secure_app, cynagora_t *cynagora)
+static int check_plugs(context_t *context, cynagora_t *cynagora)
 {
     static const char perm_public_plug[] = "urn:redpesk:permission::public:plugs";
     static const char perm_export_template[] = "urn:redpesk:permission:%s:%s:export:plug";
@@ -454,7 +454,7 @@ static int check_plugs(secure_app_t *secure_app, cynagora_t *cynagora)
     int rc = 0;
 
     /* iterate over the plug requests */
-    for(plugit = secure_app->plugset ; plugit != NULL ; plugit = plugit->next) {
+    for(plugit = context->plugset ; plugit != NULL ; plugit = plugit->next) {
 
         /* compute the label of the application importing the plug */
         sts = setids(plugit->impid, id, _id_, label);
@@ -469,7 +469,7 @@ static int check_plugs(secure_app_t *secure_app, cynagora_t *cynagora)
                 /* compute the required permision */
                 snprintf(permission, sizeof permission, perm_export_template, id, scope);
                 /* check if the permision is granted for the app */
-                sts = secure_app_has_permission(secure_app, permission);
+                sts = context_has_permission(context, permission);
                 if (!sts) {
                     ERROR("no permission to install plugs for %s", id);
                     sts = -EPERM;
@@ -484,34 +484,34 @@ static int check_plugs(secure_app_t *secure_app, cynagora_t *cynagora)
 
 /* see context.h */
 __nonnull() __wur
-int secure_app_check(secure_app_t *secure_app, cynagora_t *cynagora)
+int context_check(context_t *context, cynagora_t *cynagora)
 {
-    return check_plugs(secure_app, cynagora);
+    return check_plugs(context, cynagora);
 }
 
 /* see context.h */
 __nonnull((1,2)) __wur
-int secure_app_visit(secure_app_t *secure_app, void *visitor, const secure_app_visitor_itf_t *itf)
+int context_visit(context_t *context, void *visitor, const context_visitor_itf_t *itf)
 {
     plug_t *plugit;
     size_t i;
     int rc = 0;
 
-    if (itf->id != NULL && secure_app->id[0] != '\0')
-        rc = itf->id(visitor, secure_app->id);
+    if (itf->id != NULL && context->id[0] != '\0')
+        rc = itf->id(visitor, context->id);
 
     if (itf->path != NULL)
-        for (i = 0; !rc && i < secure_app->path_set.size; i++)
+        for (i = 0; !rc && i < context->path_set.size; i++)
             rc = itf->path(visitor,
-                        secure_app->path_set.paths[i]->path,
-                        get_path_type_string(secure_app->path_set.paths[i]->path_type));
+                        context->path_set.paths[i]->path,
+                        get_path_type_string(context->path_set.paths[i]->path_type));
 
     if (itf->permission != NULL)
-        for (i = 0; !rc && i < secure_app->permission_set.size; i++)
-            rc = itf->permission(visitor, secure_app->permission_set.permissions[i]);
+        for (i = 0; !rc && i < context->permission_set.size; i++)
+            rc = itf->permission(visitor, context->permission_set.permissions[i]);
 
     if (itf->plug != NULL)
-        for (plugit = secure_app->plugset ; !rc && plugit != NULL ; plugit = plugit->next)
+        for (plugit = context->plugset ; !rc && plugit != NULL ; plugit = plugit->next)
             rc = itf->plug(visitor, plugit->expdir, plugit->impid, plugit->impdir);
 
     return rc;

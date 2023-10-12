@@ -27,20 +27,20 @@
 #include "context.h"
 
 /**
- * @brief Install a secure app for smack
+ * @brief Install a context for smack
  *
- * @param[in] secure_app secure app handler
+ * @param[in] context context handler
  * @return 0 in case of success or a negative -errno value
  */
-extern int install_smack(const secure_app_t *secure_app) __wur __nonnull();
+extern int install_smack(const context_t *context) __wur __nonnull();
 
 /**
- * @brief Uninstall a secure app for smack
+ * @brief Uninstall a context for smack
  *
- * @param[in] secure_app secure app handler
+ * @param[in] context context handler
  * @return 0 in case of success or a negative -errno value
  */
-extern int uninstall_smack(const secure_app_t *secure_app) __wur __nonnull();
+extern int uninstall_smack(const context_t *context) __wur __nonnull();
 
 /**
  * @brief get the security label of the application

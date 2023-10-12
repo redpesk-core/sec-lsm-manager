@@ -71,17 +71,17 @@ extern void init_path_type_definitions(path_type_definitions_t path_type_definit
 /**
  * @brief Create smack rules
  *
- * @param[in] secure_app secure app handler to install
+ * @param[in] context context handler to install
  * @return 0 in case of success or a negative -errno value
  */
-extern int create_smack_rules(const secure_app_t *secure_app) __wur __nonnull();
+extern int create_smack_rules(const context_t *context) __wur __nonnull();
 
 /**
  * @brief Remove smack rules
  *
- * @param[in] secure_app secure app handler
+ * @param[in] context context handler
  * @return 0 in case of success or a negative -errno value
  */
-extern int remove_smack_rules(const secure_app_t *secure_app) __wur __nonnull();
+extern int remove_smack_rules(const context_t *context) __wur __nonnull();
 
 #endif

@@ -45,15 +45,15 @@ START_TEST(test_generate_app_module_fc) {
     path_type_definitions_t path_type_definitions[number_path_type];
     init_path_type_definitions(path_type_definitions, TESTID);
 
-    secure_app_t *secure_app = NULL;
-    ck_assert_int_eq(create_secure_app(&secure_app), 0);
-    ck_assert_int_eq(secure_app_add_path(secure_app, "/tmp/data", "data"), 0);
-    ck_assert_int_eq(secure_app_add_path(secure_app, "/tmp/conf", "conf"), 0);
-    ck_assert_int_eq(secure_app_add_path(secure_app, "/tmp/lib", "lib"), 0);
-    ck_assert_int_lt(generate_app_module_fc(fs_file, secure_app, path_type_definitions), 0);
+    context_t *context = NULL;
+    ck_assert_int_eq(create_context(&context), 0);
+    ck_assert_int_eq(context_add_path(context, "/tmp/data", "data"), 0);
+    ck_assert_int_eq(context_add_path(context, "/tmp/conf", "conf"), 0);
+    ck_assert_int_eq(context_add_path(context, "/tmp/lib", "lib"), 0);
+    ck_assert_int_lt(generate_app_module_fc(fs_file, context, path_type_definitions), 0);
 
     create_tmp_file(tmp_file);
-    ck_assert_int_eq(generate_app_module_fc(tmp_file, secure_app, path_type_definitions), 0);
+    ck_assert_int_eq(generate_app_module_fc(tmp_file, context, path_type_definitions), 0);
     remove(tmp_file);
 }
 END_TEST
@@ -62,10 +62,10 @@ START_TEST(test_generate_app_module_files) {
     char tmp_dir[SEC_LSM_MANAGER_MAX_SIZE_DIR] = {'\0'};
     create_tmp_dir(tmp_dir);
 
-    secure_app_t *secure_app = NULL;
-    ck_assert_int_eq(create_secure_app(&secure_app), 0);
-    ck_assert_int_eq(secure_app_set_id(secure_app, TESTID), 0);
-    ck_assert_int_eq(secure_app_add_path(secure_app, "/tmp", "conf"), 0);
+    context_t *context = NULL;
+    ck_assert_int_eq(create_context(&context), 0);
+    ck_assert_int_eq(context_set_id(context, TESTID), 0);
+    ck_assert_int_eq(context_add_path(context, "/tmp", "conf"), 0);
 
     selinux_module_t selinux_module = {0};
     path_type_definitions_t path_type_definitions[number_path_type];
@@ -73,19 +73,19 @@ START_TEST(test_generate_app_module_files) {
 
     DEBUG("generate_app_module_files");
 
-    ck_assert_int_lt(generate_app_module_files(&selinux_module, secure_app, path_type_definitions), 0);
+    ck_assert_int_lt(generate_app_module_files(&selinux_module, context, path_type_definitions), 0);
 
     secure_strncpy(selinux_module.selinux_te_template_file, "/usr/share/sec-lsm-manager/app-template.te",
                    SEC_LSM_MANAGER_MAX_SIZE_PATH);
     snprintf(selinux_module.selinux_te_file, SEC_LSM_MANAGER_MAX_SIZE_PATH, "%s/%s", tmp_dir, "tefile");
 
-    ck_assert_int_lt(generate_app_module_files(&selinux_module, secure_app, path_type_definitions), 0);
+    ck_assert_int_lt(generate_app_module_files(&selinux_module, context, path_type_definitions), 0);
 
     secure_strncpy(selinux_module.selinux_if_template_file, "/usr/share/sec-lsm-manager/app-template.if",
                    SEC_LSM_MANAGER_MAX_SIZE_PATH);
     snprintf(selinux_module.selinux_if_file, SEC_LSM_MANAGER_MAX_SIZE_PATH, "%s/%s", tmp_dir, "iffile");
 
-    ck_assert_int_lt(generate_app_module_files(&selinux_module, secure_app, path_type_definitions), 0);
+    ck_assert_int_lt(generate_app_module_files(&selinux_module, context, path_type_definitions), 0);
 
     snprintf(selinux_module.selinux_fc_file, SEC_LSM_MANAGER_MAX_SIZE_PATH, "%s/%s", tmp_dir, "fcfile");
 

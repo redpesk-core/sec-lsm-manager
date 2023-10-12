@@ -64,8 +64,8 @@ struct client {
     /** a protocol structure */
     prot_t *prot;
 
-    /** secure_app used by the client */
-    secure_app_t *secure_app;
+    /** context used by the client */
+    context_t *context;
 
     /** the version of the protocol used */
     unsigned version: VERSION_BITS;
@@ -106,8 +106,8 @@ static int display_path(void *cli, const char *path, const char *type);
 static int display_permission(void *cli, const char *permission);
 static int display_plug(void *cli, const char *expdir, const char *impid, const char *impdir);
 
-/** visitor interface for displaying secure app */
-static const secure_app_visitor_itf_t display_visitor_itf = {
+/** visitor interface for displaying context */
+static const context_visitor_itf_t display_visitor_itf = {
     .id = display_id,
     .path = display_path,
     .permission = display_permission,
@@ -263,30 +263,30 @@ __nonnull((1)) static void send_done(client_t *cli, const char *arg) {
  * @param[in] errorstr string error to send
  */
 __nonnull((1)) static void send_error(client_t *cli, const char *errorstr) {
-    secure_app_raise_error(cli->secure_app);
+    context_raise_error(cli->context);
     putx(cli, _error_, errorstr, NULL);
     flushw(cli);
 }
 
-/* visitor's id callback for displaying secure app */
+/* visitor's id callback for displaying context */
 static int display_id(void *cli, const char *id)
 {
     return putx((client_t*)cli, _string_, _id_, id, NULL);
 }
 
-/* visitor's path callback for displaying secure app */
+/* visitor's path callback for displaying context */
 static int display_path(void *cli, const char *path, const char *type)
 {
     return putx((client_t*)cli, _string_, _path_, path, type, NULL);
 }
 
-/* visitor's permission callback for displaying secure app */
+/* visitor's permission callback for displaying context */
 static int display_permission(void *cli, const char *permission)
 {
     return putx((client_t*)cli, _string_, _permission_, permission, NULL);
 }
 
-/* visitor's plug callback for displaying secure app */
+/* visitor's plug callback for displaying context */
 static int display_plug(void *cli, const char *expdir, const char *impid, const char *impdir)
 {
     return putx((client_t*)cli, _string_, _plug_, expdir, impid, impdir, NULL);
@@ -302,11 +302,11 @@ static int send_display(client_t *cli) {
 
     int rc = 0;
     
-    if (secure_app_has_error(cli->secure_app))
+    if (context_has_error(cli->context))
         rc = putx(cli, _string_, _error_, _on_, NULL);
 
     if (rc == 0)
-        rc = secure_app_visit(cli->secure_app, cli, &display_visitor_itf);
+        rc = context_visit(cli->context, cli, &display_visitor_itf);
 
     return rc;
 }
@@ -373,7 +373,7 @@ __nonnull((1)) static void onrequest(client_t *cli, unsigned count, const char *
         case 'c':
             /* clear */
             if (ckarg(args[0], _clear_, 1) && count == 1) {
-                clear_secure_app(cli->secure_app);
+                clear_context(cli->context);
                 send_done(cli, NULL);
                 return;
             }
@@ -386,7 +386,7 @@ __nonnull((1)) static void onrequest(client_t *cli, unsigned count, const char *
                     send_done(cli, NULL);
                 } else {
                     send_error(cli, "internal");
-                    ERROR("send_display_secure_app: %d %s", -rc, strerror(-rc));
+                    ERROR("send_display_context: %d %s", -rc, strerror(-rc));
                 }
                 return;
             }
@@ -394,7 +394,7 @@ __nonnull((1)) static void onrequest(client_t *cli, unsigned count, const char *
         case 'i':
             /* id */
             if (ckarg(args[0], _id_, 1) && count == 2) {
-                rc = secure_app_set_id(cli->secure_app, args[1]);
+                rc = context_set_id(cli->context, args[1]);
                 if (rc >= 0) {
                     send_done(cli, NULL);
                 } else {
@@ -411,7 +411,7 @@ __nonnull((1)) static void onrequest(client_t *cli, unsigned count, const char *
             }
             /* install */
             if (ckarg(args[0], _install_, 1) && count == 1) {
-                rc = secure_app_install(cli->secure_app, cli->sec_lsm_manager_server->cynagora_admin_client);
+                rc = context_install(cli->context, cli->sec_lsm_manager_server->cynagora_admin_client);
                 if (rc >= 0) {
                     send_done(cli, NULL);
                 } else {
@@ -444,7 +444,7 @@ __nonnull((1)) static void onrequest(client_t *cli, unsigned count, const char *
         case 'p':
             /* path */
             if (ckarg(args[0], _path_, 1) && count == 3) {
-                rc = secure_app_add_path(cli->secure_app, args[1], args[2]);
+                rc = context_add_path(cli->context, args[1], args[2]);
                 if (rc >= 0) {
                     send_done(cli, NULL);
                 } else {
@@ -463,7 +463,7 @@ __nonnull((1)) static void onrequest(client_t *cli, unsigned count, const char *
             }
             /* permission */
             if (ckarg(args[0], _permission_, 1) && count == 2) {
-                rc = secure_app_add_permission(cli->secure_app, args[1]);
+                rc = context_add_permission(cli->context, args[1]);
                 if (rc >= 0) {
                     send_done(cli, NULL);
                 } else {
@@ -480,7 +480,7 @@ __nonnull((1)) static void onrequest(client_t *cli, unsigned count, const char *
             }
             /* plug */
             if (ckarg(args[0], _plug_, 1) && count == 4) {
-                rc = secure_app_add_plug(cli->secure_app, args[1], args[2], args[3]);
+                rc = context_add_plug(cli->context, args[1], args[2], args[3]);
                 if (rc >= 0) {
                     send_done(cli, NULL);
                 } else {
@@ -502,7 +502,7 @@ __nonnull((1)) static void onrequest(client_t *cli, unsigned count, const char *
         case 'u':
             /* uninstall */
             if (ckarg(args[0], _uninstall_, 1) && count == 1) {
-                rc = secure_app_uninstall(cli->secure_app, cli->sec_lsm_manager_server->cynagora_admin_client);
+                rc = context_uninstall(cli->context, cli->sec_lsm_manager_server->cynagora_admin_client);
                 if (rc >= 0) {
                     send_done(cli, NULL);
                 } else {
@@ -543,8 +543,8 @@ __nonnull((1)) static void destroy_client(client_t *cli, bool closefds) {
         close(cli->pollitem.fd);
 
     prot_destroy(cli->prot);
-    destroy_secure_app(cli->secure_app);
-    cli->secure_app = NULL;
+    destroy_context(cli->context);
+    cli->context = NULL;
     free(cli);
 }
 
@@ -614,10 +614,10 @@ __wur static int create_client(client_t **pcli, int fd, sec_lsm_manager_server_t
         goto error1;
     }
 
-    rc = create_secure_app(&((*pcli)->secure_app));
+    rc = create_context(&((*pcli)->context));
     if (rc < 0) {
-        ERROR("create_secure_app %d %s", -rc, strerror(-rc));
-        (*pcli)->secure_app = NULL;
+        ERROR("create_context %d %s", -rc, strerror(-rc));
+        (*pcli)->context = NULL;
         goto error2;
     }
 

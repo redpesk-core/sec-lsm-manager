@@ -27,138 +27,138 @@
 
 #include "context.h"
 
-START_TEST(test_init_secure_app) {
-    secure_app_t secure_app;
-    init_secure_app(&secure_app);
-    ck_assert_str_eq(secure_app.id, "");
-    ck_assert_str_eq(secure_app.id_underscore, "");
-    ck_assert_ptr_eq(secure_app.permission_set.permissions, NULL);
-    ck_assert_int_eq((int)secure_app.permission_set.size, 0);
-    ck_assert_ptr_eq(secure_app.path_set.paths, NULL);
-    ck_assert_int_eq((int)secure_app.path_set.size, 0);
+START_TEST(test_init_context) {
+    context_t context;
+    init_context(&context);
+    ck_assert_str_eq(context.id, "");
+    ck_assert_str_eq(context.id_underscore, "");
+    ck_assert_ptr_eq(context.permission_set.permissions, NULL);
+    ck_assert_int_eq((int)context.permission_set.size, 0);
+    ck_assert_ptr_eq(context.path_set.paths, NULL);
+    ck_assert_int_eq((int)context.path_set.size, 0);
 }
 END_TEST
 
-START_TEST(test_create_secure_app) {
-    secure_app_t *secure_app = NULL;
-    ck_assert_int_eq(create_secure_app(&secure_app), 0);
-    ck_assert_ptr_ne(secure_app, NULL);
-    ck_assert_str_eq(secure_app->id, "");
-    ck_assert_str_eq(secure_app->id_underscore, "");
-    ck_assert_ptr_eq(secure_app->permission_set.permissions, NULL);
-    ck_assert_int_eq((int)secure_app->permission_set.size, 0);
-    ck_assert_ptr_eq(secure_app->path_set.paths, NULL);
-    ck_assert_int_eq((int)secure_app->path_set.size, 0);
-    destroy_secure_app(secure_app);
+START_TEST(test_create_context) {
+    context_t *context = NULL;
+    ck_assert_int_eq(create_context(&context), 0);
+    ck_assert_ptr_ne(context, NULL);
+    ck_assert_str_eq(context->id, "");
+    ck_assert_str_eq(context->id_underscore, "");
+    ck_assert_ptr_eq(context->permission_set.permissions, NULL);
+    ck_assert_int_eq((int)context->permission_set.size, 0);
+    ck_assert_ptr_eq(context->path_set.paths, NULL);
+    ck_assert_int_eq((int)context->path_set.size, 0);
+    destroy_context(context);
 }
 END_TEST
 
-START_TEST(test_secure_app_set_id) {
-    secure_app_t *secure_app = NULL;
-    ck_assert_int_eq(create_secure_app(&secure_app), 0);
+START_TEST(test_context_set_id) {
+    context_t *context = NULL;
+    ck_assert_int_eq(create_context(&context), 0);
     // test set id
-    ck_assert_int_eq(secure_app_set_id(secure_app, "id"), 0);
-    ck_assert_str_eq(secure_app->id, "id");
+    ck_assert_int_eq(context_set_id(context, "id"), 0);
+    ck_assert_str_eq(context->id, "id");
     // test duplicate set id
-    ck_assert_int_eq(secure_app_set_id(secure_app, "id2"), -EINVAL);
-    destroy_secure_app(secure_app);
+    ck_assert_int_eq(context_set_id(context, "id2"), -EINVAL);
+    destroy_context(context);
 
-    ck_assert_int_eq(create_secure_app(&secure_app), 0);
-    ck_assert_int_lt(secure_app_set_id(secure_app, "i"), 0);
-    destroy_secure_app(secure_app);
+    ck_assert_int_eq(create_context(&context), 0);
+    ck_assert_int_lt(context_set_id(context, "i"), 0);
+    destroy_context(context);
 
-    ck_assert_int_eq(create_secure_app(&secure_app), 0);
-    ck_assert_int_lt(secure_app_set_id(secure_app, ""), 0);
-    destroy_secure_app(secure_app);
+    ck_assert_int_eq(create_context(&context), 0);
+    ck_assert_int_lt(context_set_id(context, ""), 0);
+    destroy_context(context);
 
-    ck_assert_int_eq(create_secure_app(&secure_app), 0);
-    ck_assert_int_lt(secure_app_set_id(secure_app, "id?bad/name"), 0);
-    destroy_secure_app(secure_app);
+    ck_assert_int_eq(create_context(&context), 0);
+    ck_assert_int_lt(context_set_id(context, "id?bad/name"), 0);
+    destroy_context(context);
 
-    ck_assert_int_eq(create_secure_app(&secure_app), 0);
+    ck_assert_int_eq(create_context(&context), 0);
     // test error flag raise
-    ck_assert_int_eq((int)secure_app_has_error(secure_app), 0);
-    secure_app_raise_error(secure_app);
-    ck_assert_int_eq((int)secure_app_has_error(secure_app), 1);
-    ck_assert_int_eq(secure_app_set_id(secure_app, "id3"), -EPERM);
-    destroy_secure_app(secure_app);
+    ck_assert_int_eq((int)context_has_error(context), 0);
+    context_raise_error(context);
+    ck_assert_int_eq((int)context_has_error(context), 1);
+    ck_assert_int_eq(context_set_id(context, "id3"), -EPERM);
+    destroy_context(context);
 }
 END_TEST
 
-START_TEST(test_secure_app_add_permission) {
-    secure_app_t *secure_app = NULL;
-    ck_assert_int_eq(create_secure_app(&secure_app), 0);
+START_TEST(test_context_add_permission) {
+    context_t *context = NULL;
+    ck_assert_int_eq(create_context(&context), 0);
     // test add perm
-    ck_assert_int_eq(secure_app_add_permission(secure_app, "perm"), 0);
-    ck_assert_int_eq((int)secure_app->permission_set.size, 1);
-    ck_assert_str_eq(secure_app->permission_set.permissions[0], "perm");
+    ck_assert_int_eq(context_add_permission(context, "perm"), 0);
+    ck_assert_int_eq((int)context->permission_set.size, 1);
+    ck_assert_str_eq(context->permission_set.permissions[0], "perm");
 
     // test duplicate perm
-    ck_assert_int_eq(secure_app_add_permission(secure_app, "perm"), -EINVAL);
+    ck_assert_int_eq(context_add_permission(context, "perm"), -EINVAL);
 
     // test error flag raise
-    ck_assert_int_eq((int)secure_app_has_error(secure_app), 0);
-    secure_app_raise_error(secure_app);
-    ck_assert_int_eq((int)secure_app_has_error(secure_app), 1);
-    ck_assert_int_eq(secure_app_add_permission(secure_app, "perm2"), -EPERM);
-    destroy_secure_app(secure_app);
+    ck_assert_int_eq((int)context_has_error(context), 0);
+    context_raise_error(context);
+    ck_assert_int_eq((int)context_has_error(context), 1);
+    ck_assert_int_eq(context_add_permission(context, "perm2"), -EPERM);
+    destroy_context(context);
 }
 END_TEST
 
-START_TEST(test_secure_app_add_path) {
-    secure_app_t *secure_app = NULL;
-    ck_assert_int_eq(create_secure_app(&secure_app), 0);
+START_TEST(test_context_add_path) {
+    context_t *context = NULL;
+    ck_assert_int_eq(create_context(&context), 0);
     // test add path
-    ck_assert_int_eq(secure_app_add_path(secure_app, "/tmp", "conf"), 0);
-    ck_assert_int_eq((int)secure_app->path_set.size, 1);
-    ck_assert_str_eq(secure_app->path_set.paths[0]->path, "/tmp");
-    ck_assert_int_eq((int)secure_app->path_set.paths[0]->path_type, (int)type_conf);
+    ck_assert_int_eq(context_add_path(context, "/tmp", "conf"), 0);
+    ck_assert_int_eq((int)context->path_set.size, 1);
+    ck_assert_str_eq(context->path_set.paths[0]->path, "/tmp");
+    ck_assert_int_eq((int)context->path_set.paths[0]->path_type, (int)type_conf);
 
     // test bad path type
-    ck_assert_int_eq(secure_app_add_path(secure_app, "/tmp3", "<unset>"), -EINVAL);
+    ck_assert_int_eq(context_add_path(context, "/tmp3", "<unset>"), -EINVAL);
 
     // test duplicate path
-    ck_assert_int_eq(secure_app_add_path(secure_app, "/tmp", "data"), -EINVAL);
-    ck_assert_int_eq(secure_app_add_path(secure_app, "/tmp", "conf"), -EINVAL);
+    ck_assert_int_eq(context_add_path(context, "/tmp", "data"), -EINVAL);
+    ck_assert_int_eq(context_add_path(context, "/tmp", "conf"), -EINVAL);
 
     // test error flag raise
-    ck_assert_int_eq((int)secure_app_has_error(secure_app), 0);
-    secure_app_raise_error(secure_app);
-    ck_assert_int_eq((int)secure_app_has_error(secure_app), 1);
-    ck_assert_int_eq(secure_app_add_path(secure_app, "/tmp2", "conf"), -EPERM);
-    destroy_secure_app(secure_app);
+    ck_assert_int_eq((int)context_has_error(context), 0);
+    context_raise_error(context);
+    ck_assert_int_eq((int)context_has_error(context), 1);
+    ck_assert_int_eq(context_add_path(context, "/tmp2", "conf"), -EPERM);
+    destroy_context(context);
 }
 END_TEST
 
-START_TEST(test_free_secure_app) {
-    secure_app_t *secure_app = NULL;
-    ck_assert_int_eq(create_secure_app(&secure_app), 0);
-    ck_assert_int_eq(secure_app_set_id(secure_app, "id"), 0);
-    ck_assert_int_eq(secure_app_add_path(secure_app, "/tmp", "conf"), 0);
-    ck_assert_int_eq(secure_app_add_permission(secure_app, "perm"), 0);
-    clear_secure_app(secure_app);
-    ck_assert_int_eq((int)secure_app->path_set.size, 0);
-    ck_assert_int_eq((int)secure_app->permission_set.size, 0);
-    destroy_secure_app(secure_app);
+START_TEST(test_free_context) {
+    context_t *context = NULL;
+    ck_assert_int_eq(create_context(&context), 0);
+    ck_assert_int_eq(context_set_id(context, "id"), 0);
+    ck_assert_int_eq(context_add_path(context, "/tmp", "conf"), 0);
+    ck_assert_int_eq(context_add_permission(context, "perm"), 0);
+    clear_context(context);
+    ck_assert_int_eq((int)context->path_set.size, 0);
+    ck_assert_int_eq((int)context->permission_set.size, 0);
+    destroy_context(context);
 }
 END_TEST
 
-START_TEST(test_destroy_secure_app) {
-    secure_app_t *secure_app = NULL;
-    ck_assert_int_eq(create_secure_app(&secure_app), 0);
-    ck_assert_int_eq(secure_app_set_id(secure_app, "id"), 0);
-    ck_assert_int_eq(secure_app_add_path(secure_app, "/tmp", "conf"), 0);
-    ck_assert_int_eq(secure_app_add_permission(secure_app, "perm"), 0);
-    destroy_secure_app(secure_app);
+START_TEST(test_destroy_context) {
+    context_t *context = NULL;
+    ck_assert_int_eq(create_context(&context), 0);
+    ck_assert_int_eq(context_set_id(context, "id"), 0);
+    ck_assert_int_eq(context_add_path(context, "/tmp", "conf"), 0);
+    ck_assert_int_eq(context_add_permission(context, "perm"), 0);
+    destroy_context(context);
 }
 END_TEST
 
-void test_secure_app(void) {
-    addtest(test_init_secure_app);
-    addtest(test_create_secure_app);
-    addtest(test_secure_app_set_id);
-    addtest(test_secure_app_add_permission);
-    addtest(test_secure_app_add_path);
-    addtest(test_free_secure_app);
-    addtest(test_destroy_secure_app);
+void test_context(void) {
+    addtest(test_init_context);
+    addtest(test_create_context);
+    addtest(test_context_set_id);
+    addtest(test_context_add_permission);
+    addtest(test_context_add_path);
+    addtest(test_free_context);
+    addtest(test_destroy_context);
 }

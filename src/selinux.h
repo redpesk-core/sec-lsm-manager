@@ -35,20 +35,20 @@
 extern bool selinux_enabled(void) __wur;
 
 /**
- * @brief Install a secure app for selinux
+ * @brief Install a context for selinux
  *
- * @param[in] secure_app The handle of secure app
+ * @param[in] context The handle of context
  * @return 0 in case of success or a negative -errno value
  */
-extern int install_selinux(const secure_app_t *secure_app) __wur __nonnull();
+extern int install_selinux(const context_t *context) __wur __nonnull();
 
 /**
- * @brief Uninstall a secure app for selinux
+ * @brief Uninstall a context for selinux
  *
- * @param[in] secure_app The handle of secure app
+ * @param[in] context The handle of context
  * @return 0 in case of success or a negative -errno value
  */
-extern int uninstall_selinux(const secure_app_t *secure_app) __wur __nonnull();
+extern int uninstall_selinux(const context_t *context) __wur __nonnull();
 
 /**
  * @brief get the security label of the application
@@ -63,6 +63,6 @@ extern void app_label_selinux(char label[SEC_LSM_MANAGER_MAX_SIZE_LABEL + 1], co
 /************************ FOR TESTING ************************/
 #include "selinux-template.h"
 __nonnull() __wur
-extern int selinux_process_paths(const secure_app_t *secure_app,
+extern int selinux_process_paths(const context_t *context,
                                             path_type_definitions_t path_type_definitions[number_path_type]);
 #endif

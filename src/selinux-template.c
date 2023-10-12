@@ -84,10 +84,10 @@ const char public_app[] = "redpesk_public_t";
  * @brief Init selinux module
  *
  * @param[in] selinux_module selinux module handler to init
- * @param[in] secure_app The secure_app of application
+ * @param[in] context The context of application
  * @return 0 in case of success or a negative -errno value
  */
-__nonnull() static void init_selinux_module(selinux_module_t *selinux_module, const secure_app_t *secure_app) {
+__nonnull() static void init_selinux_module(selinux_module_t *selinux_module, const context_t *context) {
     memset(selinux_module, 0, sizeof(*selinux_module));
 
     /* TODO: treat the case type_default or treat when label is "" */
@@ -101,27 +101,27 @@ __nonnull() static void init_selinux_module(selinux_module_t *selinux_module, co
                    SEC_LSM_MANAGER_MAX_SIZE_PATH);
 
     snprintf(selinux_module->selinux_te_file, SEC_LSM_MANAGER_MAX_SIZE_PATH, "%s/%s.%s",
-             selinux_module->selinux_rules_dir, secure_app->id, TE_EXTENSION);
+             selinux_module->selinux_rules_dir, context->id, TE_EXTENSION);
 
     snprintf(selinux_module->selinux_fc_file, SEC_LSM_MANAGER_MAX_SIZE_PATH, "%s/%s.%s",
-             selinux_module->selinux_rules_dir, secure_app->id, FC_EXTENSION);
+             selinux_module->selinux_rules_dir, context->id, FC_EXTENSION);
 
     snprintf(selinux_module->selinux_if_file, SEC_LSM_MANAGER_MAX_SIZE_PATH, "%s/%s.%s",
-             selinux_module->selinux_rules_dir, secure_app->id, IF_EXTENSION);
+             selinux_module->selinux_rules_dir, context->id, IF_EXTENSION);
 
     snprintf(selinux_module->selinux_pp_file, SEC_LSM_MANAGER_MAX_SIZE_PATH, "%s/%s.%s",
-             selinux_module->selinux_rules_dir, secure_app->id, PP_EXTENSION);
+             selinux_module->selinux_rules_dir, context->id, PP_EXTENSION);
 }
 
 /**
  * @brief Generate the fc file
  *
  * @param[in] selinux_fc_file The selinux destination fc file
- * @param[in] secure_app secure_app handler
+ * @param[in] context context handler
  * @return 0 in case of success or a negative -errno value
  */
 __nonnull() __wur
-int generate_app_module_fc(const char *selinux_fc_file, const secure_app_t *secure_app,
+int generate_app_module_fc(const char *selinux_fc_file, const context_t *context,
                                                     path_type_definitions_t path_type_definitions[number_path_type]) {
     int rc = 0;
     int rc2 = 0;
@@ -136,8 +136,8 @@ int generate_app_module_fc(const char *selinux_fc_file, const secure_app_t *secu
 
     path_t *path;
     char line[SEC_LSM_MANAGER_MAX_SIZE_LINE_MODULE];
-    for (size_t i = 0; i < secure_app->path_set.size; i++) {
-        path = secure_app->path_set.paths[i];
+    for (size_t i = 0; i < context->path_set.size; i++) {
+        path = context->path_set.paths[i];
         snprintf(line, SEC_LSM_MANAGER_MAX_SIZE_LINE_MODULE, "%s(/.*)? gen_context(%s,s0)\n", path->path,
                  path_type_definitions[path->path_type].label);
 
@@ -164,29 +164,29 @@ ret:
  * @brief Generate te, if, fc files
  *
  * @param[in] selinux_module selinux module handler
- * @param[in] secure_app secure app handler
+ * @param[in] context context handler
  * @return 0 in case of success or a negative -errno value
  */
 __nonnull() __wur
-int generate_app_module_files(const selinux_module_t *selinux_module, const secure_app_t *secure_app,
+int generate_app_module_files(const selinux_module_t *selinux_module, const context_t *context,
                                          path_type_definitions_t path_type_definitions[number_path_type]) {
     int rc = 0;
     int rc2 = 0;
-    rc = process_template(selinux_module->selinux_te_template_file, selinux_module->selinux_te_file, secure_app);
+    rc = process_template(selinux_module->selinux_te_template_file, selinux_module->selinux_te_file, context);
     if (rc < 0) {
         ERROR("process_template %s -> %s : %d %s", selinux_module->selinux_te_template_file,
               selinux_module->selinux_te_file, -rc, strerror(-rc));
         goto ret;
     }
 
-    rc = process_template(selinux_module->selinux_if_template_file, selinux_module->selinux_if_file, secure_app);
+    rc = process_template(selinux_module->selinux_if_template_file, selinux_module->selinux_if_file, context);
     if (rc < 0) {
         ERROR("process_template %s -> %s : %d %s", selinux_module->selinux_if_template_file,
               selinux_module->selinux_if_file, -rc, strerror(-rc));
         goto remove_te;
     }
 
-    rc = generate_app_module_fc(selinux_module->selinux_fc_file, secure_app, path_type_definitions);
+    rc = generate_app_module_fc(selinux_module->selinux_fc_file, context, path_type_definitions);
     if (rc < 0) {
         ERROR("generate_app_module_fc %s : %d %s", selinux_module->selinux_fc_file, -rc, strerror(-rc));
         goto remove_if;
@@ -520,12 +520,12 @@ void init_path_type_definitions(path_type_definitions_t path_type_definitions[nu
 }
 
 /* see selinux-template.h */
-int create_selinux_rules(const secure_app_t *secure_app,
+int create_selinux_rules(const context_t *context,
                          path_type_definitions_t path_type_definitions[number_path_type]) {
     int rc = 0;
     int rc2 = 0;
     selinux_module_t selinux_module;
-    init_selinux_module(&selinux_module, secure_app);
+    init_selinux_module(&selinux_module, context);
 
     semanage_handle_t *semanage_handle;
     rc = create_semanage_handle(&semanage_handle);
@@ -535,7 +535,7 @@ int create_selinux_rules(const secure_app_t *secure_app,
     }
 
     // Generate files
-    rc = generate_app_module_files(&selinux_module, secure_app, path_type_definitions);
+    rc = generate_app_module_files(&selinux_module, context, path_type_definitions);
     if (rc < 0) {
         ERROR("generate_app_module_files : %d %s", -rc, strerror(-rc));
         goto end2;
@@ -544,7 +544,7 @@ int create_selinux_rules(const secure_app_t *secure_app,
     DEBUG("success generate selinux files module");
 
     // fc, if, te generated
-    rc = launch_compile(secure_app->id);
+    rc = launch_compile(context->id);
     if (rc < 0) {
         ERROR("launch_compile : %d %s", -rc, strerror(-rc));
         goto error3;
@@ -584,14 +584,14 @@ ret:
 }
 
 /* see selinux-template.h */
-bool check_module_files_exist(const secure_app_t *secure_app) {
+bool check_module_files_exist(const context_t *context) {
     selinux_module_t selinux_module;
-    init_selinux_module(&selinux_module, secure_app);
+    init_selinux_module(&selinux_module, context);
     return check_app_module_files_exists(&selinux_module);
 }
 
 /* see selinux-template.h */
-bool check_module_in_policy(const secure_app_t *secure_app) {
+bool check_module_in_policy(const context_t *context) {
     bool ret = false;
     semanage_handle_t *semanage_handle;
     int rc = create_semanage_handle(&semanage_handle);
@@ -600,7 +600,7 @@ bool check_module_in_policy(const secure_app_t *secure_app) {
         goto end;
     }
 
-    ret = check_module(semanage_handle, secure_app->id);
+    ret = check_module(semanage_handle, context->id);
 
     rc = destroy_semanage_handle(semanage_handle);
     if (rc < 0) {
@@ -612,11 +612,11 @@ end:
 }
 
 /* see selinux-template.h */
-int remove_selinux_rules(const secure_app_t *secure_app) {
+int remove_selinux_rules(const context_t *context) {
     int rc = 0;
     int rc2 = 0;
     selinux_module_t selinux_module;
-    init_selinux_module(&selinux_module, secure_app);
+    init_selinux_module(&selinux_module, context);
 
     // remove files
     rc = remove_app_module_files(&selinux_module);
@@ -640,7 +640,7 @@ int remove_selinux_rules(const secure_app_t *secure_app) {
         ERROR("create_semanage_handle : %d %s", -rc, strerror(-rc));
         goto ret;
     }
-    rc = remove_module(semanage_handle, secure_app->id);
+    rc = remove_module(semanage_handle, context->id);
     if (rc < 0) {
         ERROR("remove_module : %d %s", -rc, strerror(-rc));
         goto end;

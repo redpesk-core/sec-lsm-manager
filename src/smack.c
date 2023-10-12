@@ -125,13 +125,13 @@ int set_path_labels(const char *path, const char *label, const char *execlabel, 
 }
 
 /**
- * @brief Set smack labels for secure app
+ * @brief Set smack labels for context
  *
- * @param[in] secure_app secure app handler
+ * @param[in] context context handler
  * @return 0 in case of success or a negative -errno value
  */
 __nonnull() __wur
-static int label_all_paths(const secure_app_t *secure_app, bool set)
+static int label_all_paths(const context_t *context, bool set)
 {
     size_t i;
     int pp, rc = 0;
@@ -140,11 +140,11 @@ static int label_all_paths(const secure_app_t *secure_app, bool set)
     path_type_definitions_t *def;
     const char *exec_label;
 
-    init_path_type_definitions(path_type_definitions, secure_app->id);
+    init_path_type_definitions(path_type_definitions, context->id);
     exec_label = path_type_definitions[type_id].label;
-    for (i = 0; i < secure_app->path_set.size; i++) {
+    for (i = 0; i < context->path_set.size; i++) {
 
-        path = secure_app->path_set.paths[i];
+        path = context->path_set.paths[i];
         def = &path_type_definitions[path->path_type];
 
         pp = get_path_property(path->path);
@@ -160,7 +160,7 @@ static int label_all_paths(const secure_app_t *secure_app, bool set)
                                  (pp == PATH_DIRECTORY) && def->is_transmute);
         if (rc < 0) {
             ERROR("%sset_path_labels(%s,%s,%s): %d %s", set ? "" : "un", path->path,
-                                    def->label, secure_app->id, -rc, strerror(-rc));
+                                    def->label, context->id, -rc, strerror(-rc));
             return rc;
         }
     }
@@ -169,21 +169,21 @@ static int label_all_paths(const secure_app_t *secure_app, bool set)
 }
 
 /**
- * @brief Removes smack labels for secure app
+ * @brief Removes smack labels for context
  *
- * @param[in] secure_app secure app handler
+ * @param[in] context context handler
  * @return 0 in case of success or a negative -errno value
  */
 __nonnull() __wur
-static int smack_drop_path_labels(const secure_app_t *secure_app) {
+static int smack_drop_path_labels(const context_t *context) {
     int rc = 0;
     path_t *path = NULL;
-    for (size_t i = 0; i < secure_app->path_set.size; i++) {
-        path = secure_app->path_set.paths[i];
+    for (size_t i = 0; i < context->path_set.size; i++) {
+        path = context->path_set.paths[i];
         rc = set_path_labels(path->path, DROP_LABEL, NULL, false);
         if (rc < 0) {
-            ERROR("set_path_labels((%s,%s),%s) : %d %s", secure_app->path_set.paths[i]->path,
-                  get_path_type_string(secure_app->path_set.paths[i]->path_type), secure_app->id, -rc, strerror(-rc));
+            ERROR("set_path_labels((%s,%s),%s) : %d %s", context->path_set.paths[i]->path,
+                  get_path_type_string(context->path_set.paths[i]->path_type), context->id, -rc, strerror(-rc));
             return rc;
         }
     }
@@ -194,19 +194,19 @@ static int smack_drop_path_labels(const secure_app_t *secure_app) {
 /**
 * @brief Installs the files for plugs
 *
-* @param[in] secure_app the application specification
+* @param[in] context the application specification
  * @return 0 in case of success or a negative -errno value
 */
 __nonnull() __wur
-static int install_smack_plugs(const secure_app_t *secure_app)
+static int install_smack_plugs(const context_t *context)
 {
     char label[SEC_LSM_MANAGER_MAX_SIZE_LABEL + 1];
     char buffer[PATH_MAX + 1];
     plug_t *plugit;
     int rc2, rc = 0;
 
-    for (plugit = secure_app->plugset ; plugit != NULL ; plugit = plugit->next) {
-        rc2 = snprintf(buffer, sizeof buffer, "%s/%s", plugit->impdir, secure_app->id);
+    for (plugit = context->plugset ; plugit != NULL ; plugit = plugit->next) {
+        rc2 = snprintf(buffer, sizeof buffer, "%s/%s", plugit->impdir, context->id);
         if (rc2 > PATH_MAX)
             rc2 = -ENAMETOOLONG;
         if (rc2 < 0)
@@ -218,7 +218,7 @@ static int install_smack_plugs(const secure_app_t *secure_app)
                 ERROR("install_smack_plugs: can't create link: %d, %s", -rc2, strerror(-rc2));
             }
             else {
-                app_label_smack(label, secure_app->id, secure_app->id_underscore);
+                app_label_smack(label, context->id, context->id_underscore);
                 rc2 = set_label(buffer, XATTR_NAME_SMACK, label);
             }
         }
@@ -231,18 +231,18 @@ static int install_smack_plugs(const secure_app_t *secure_app)
 /**
 * @brief Uninstalls the files for plugs
 *
-* @param[in] secure_app the application specification
+* @param[in] context the application specification
  * @return 0 in case of success or a negative -errno value
 */
 __nonnull() __wur
-static int uninstall_smack_plugs(const secure_app_t *secure_app)
+static int uninstall_smack_plugs(const context_t *context)
 {
     char buffer[PATH_MAX + 1];
     plug_t *plugit;
     int rc2, rc = 0;
 
-    for (plugit = secure_app->plugset ; plugit != NULL ; plugit = plugit->next) {
-        rc2 = snprintf(buffer, sizeof buffer, "%s/%s", plugit->impdir, secure_app->id);
+    for (plugit = context->plugset ; plugit != NULL ; plugit = plugit->next) {
+        rc2 = snprintf(buffer, sizeof buffer, "%s/%s", plugit->impdir, context->id);
         if (rc2 > PATH_MAX)
             rc2 = -ENAMETOOLONG;
         if (rc2 < 0)
@@ -265,26 +265,26 @@ static int uninstall_smack_plugs(const secure_app_t *secure_app)
 }
 
 /**
- * @brief Uninstall a secure app for smack without stopping on failure
+ * @brief Uninstall a context for smack without stopping on failure
  *
- * @param[in] secure_app secure app handler
+ * @param[in] context context handler
  * @return 0 in case of success or a negative -errno value
  */
-static int force_uninstall_smack(const secure_app_t *secure_app)
+static int force_uninstall_smack(const context_t *context)
 {
     int rc2, rc;
 
-    rc = smack_drop_path_labels(secure_app);
+    rc = smack_drop_path_labels(context);
     if (rc < 0)
         ERROR("smack_drop_path_labels: %d %s", -rc, strerror(-rc));
 
-    if (secure_app->id[0] != '\0') {
-        rc2 = uninstall_smack_plugs(secure_app);
+    if (context->id[0] != '\0') {
+        rc2 = uninstall_smack_plugs(context);
         if (rc2 < 0) {
             rc = rc2;
             ERROR("uninstall_smack_plugs: %d %s", -rc, strerror(-rc));
         }
-        rc2 = remove_smack_rules(secure_app);
+        rc2 = remove_smack_rules(context);
         if (rc2 < 0) {
             rc = rc2;
             ERROR("remove_smack_rules: %d %s", -rc, strerror(-rc));
@@ -297,18 +297,18 @@ static int force_uninstall_smack(const secure_app_t *secure_app)
 /**
  * @brief check the install status and cleanup if its bad
  *
- * @param[in] secure_app the secure app handler
+ * @param[in] context the context handler
  * @param[in] rc          the status of the installation
  * @return rc
  */
 __nonnull()
-static int install_status(const secure_app_t *secure_app, int rc)
+static int install_status(const context_t *context, int rc)
 {
     if (rc >= 0)
         DEBUG("smack install success");
     else {
         ERROR("smack install failed: %d %s", -rc, strerror(-rc));
-        force_uninstall_smack(secure_app);
+        force_uninstall_smack(context);
     }
     return rc;
 }
@@ -316,40 +316,40 @@ static int install_status(const secure_app_t *secure_app, int rc)
 /**
  * @brief install procedure when id is given
  *
- * @param[in] secure_app the secure app handler
+ * @param[in] context the context handler
  * @return the installation status
  */
 __nonnull()
-static int install_smack_with_id(const secure_app_t *secure_app) {
+static int install_smack_with_id(const context_t *context) {
     int rc;
 
-    rc = create_smack_rules(secure_app);
+    rc = create_smack_rules(context);
     if (rc >= 0)
-        rc = install_smack_plugs(secure_app);
+        rc = install_smack_plugs(context);
     if (rc >= 0)
-        rc = label_all_paths(secure_app, true);
+        rc = label_all_paths(context, true);
 
-    return install_status(secure_app, rc);
+    return install_status(context, rc);
 }
 
 /**
  * @brief install procedure when no id is given
  *
- * @param[in] secure_app the secure app handler
+ * @param[in] context the context handler
  * @return the installation status
  */
 __nonnull()
-static int install_smack_no_id(const secure_app_t *secure_app) {
+static int install_smack_no_id(const context_t *context) {
     int rc;
 
-    if (secure_app->need_id) {
+    if (context->need_id) {
         ERROR("id is needed");
         rc = -EINVAL;
     }
     else {
-        rc = label_all_paths(secure_app, false);
+        rc = label_all_paths(context, false);
     }
-    return install_status(secure_app, rc);
+    return install_status(context, rc);
 }
 
 /**********************/
@@ -357,21 +357,21 @@ static int install_smack_no_id(const secure_app_t *secure_app) {
 /**********************/
 
 /* see smack.h */
-int install_smack(const secure_app_t *secure_app) {
-    if (secure_app->id[0] != '\0')
-        return install_smack_with_id(secure_app);
+int install_smack(const context_t *context) {
+    if (context->id[0] != '\0')
+        return install_smack_with_id(context);
     else
-        return install_smack_no_id(secure_app);
+        return install_smack_no_id(context);
 }
 
 /* see smack.h */
-int uninstall_smack(const secure_app_t *secure_app) {
-    if (secure_app->id[0] == '\0' && secure_app->need_id) {
+int uninstall_smack(const context_t *context) {
+    if (context->id[0] == '\0' && context->need_id) {
         ERROR("id undefined");
         return -EINVAL;
     }
 
-    return force_uninstall_smack(secure_app);
+    return force_uninstall_smack(context);
 }
 
 /* see smack.h */

@@ -31,7 +31,7 @@
 #include "paths.h"
 #include "plugs.h"
 
-typedef struct secure_app {
+typedef struct context {
     char id[SEC_LSM_MANAGER_MAX_SIZE_ID + 1];
     char id_underscore[SEC_LSM_MANAGER_MAX_SIZE_ID + 1];
     char label[SEC_LSM_MANAGER_MAX_SIZE_LABEL + 1];
@@ -40,59 +40,59 @@ typedef struct secure_app {
     plugset_t plugset; /**< set of plug directives */
     bool need_id; /**< flags if id is needed */
     bool error_flag;
-} secure_app_t;
+} context_t;
 
 /**
  * @brief Initialize the fields 'id', 'id_underscore', 'permission_set', 'path_set' and error_flag
  *
- * @param[in] secure_app handler
+ * @param[in] context handler
  */
 __nonnull()
-extern void init_secure_app(secure_app_t *secure_app);
+extern void init_context(context_t *context);
 
 /**
- * @brief Create the secure app and init it
+ * @brief Create the context and init it
  *
- * This secure app need to be destroy at the end
+ * This context need to be destroy at the end
  * if the function succeeded
  *
- * @param[out] pointer to secure_app handler
+ * @param[out] pointer to context handler
  * @return 0 in case of success or a negative -errno value
  */
 __nonnull() __wur
-extern int create_secure_app(secure_app_t **pointer);
+extern int create_context(context_t **pointer);
 
 /**
- * @brief Destroy the secure app
- * Free secure app handler and content
+ * @brief Destroy the context
+ * Free context handler and content
  *
- * @param[in] secure_app handler
+ * @param[in] context handler
  */
 __nonnull()
-extern void destroy_secure_app(secure_app_t *secure_app);
+extern void destroy_context(context_t *context);
 
 /**
  * @brief Free id, paths and permissions
  * The pointer is not free
  *
- * @param[in] secure_app handler
+ * @param[in] context handler
  */
 __nonnull()
-extern void clear_secure_app(secure_app_t *secure_app);
+extern void clear_context(context_t *context);
 
 /**
  * @brief Set error_flag
- * The secure_app can't be installed after
+ * The context can't be installed after
  * You need to clear to return in create state
  */
 __nonnull()
-extern void secure_app_raise_error(secure_app_t *secure_app);
+extern void context_raise_error(context_t *context);
 
 /**
  * @brief Checks if an error was raise
  */
 __nonnull()
-extern bool secure_app_has_error(secure_app_t *secure_app);
+extern bool context_has_error(context_t *context);
 
 /**
  * @brief Validate the application id
@@ -103,12 +103,12 @@ extern bool secure_app_has_error(secure_app_t *secure_app);
  *    * -EINVAL        the id has bad characters
  */
 __nonnull() __wur
-extern int secure_app_is_valid_id(const char *id);
+extern int context_is_valid_id(const char *id);
 
 /**
- * @brief Alloc and copy id in secure app
+ * @brief Alloc and copy id in context
  *
- * @param[in] secure_app handler
+ * @param[in] context handler
  * @param[in] id The id to copy
  * @return
  *    * 0              success
@@ -117,12 +117,12 @@ extern int secure_app_is_valid_id(const char *id);
  *    * -ENOTRECOVERABLE state unrecoverable
  */
 __wur __nonnull()
-extern int secure_app_set_id(secure_app_t *secure_app, const char *id);
+extern int context_set_id(context_t *context, const char *id);
 
 /**
  * @brief Add a new policy in policies field
  *
- * @param[in] secure_app handler
+ * @param[in] context handler
  * @param[in] permission The permission to add
  * @return
  *    * 0              success
@@ -132,12 +132,12 @@ extern int secure_app_set_id(secure_app_t *secure_app, const char *id);
  *    * -ENOTRECOVERABLE state unrecoverable
  */
 __wur __nonnull()
-extern int secure_app_add_permission(secure_app_t *secure_app, const char *permission);
+extern int context_add_permission(context_t *context, const char *permission);
 
 /**
  * @brief Add a new path in paths field
  *
- * @param[in] secure_app handler
+ * @param[in] context handler
  * @param[in] path The path to add
  * @param[in] type The path type of the path to add
  * @return
@@ -150,12 +150,12 @@ extern int secure_app_add_permission(secure_app_t *secure_app, const char *permi
  *    * -ENOTRECOVERABLE state unrecoverable
  */
 __wur __nonnull()
-extern int secure_app_add_path(secure_app_t *secure_app, const char *path, const char *type);
+extern int context_add_path(context_t *context, const char *path, const char *type);
 
 /**
  * @brief Add a new plug definition
  *
- * @param[in] secure_app handler
+ * @param[in] context handler
  * @param[in] expdir   exported directory
  * @param[in] impid    import appid
  * @param[in] impdir   import directory
@@ -170,12 +170,12 @@ extern int secure_app_add_path(secure_app_t *secure_app, const char *path, const
  *    * -ENOTRECOVERABLE state unrecoverable
  */
 __wur __nonnull()
-extern int secure_app_add_plug(secure_app_t *secure_app, const char *expdir, const char *impid, const char *impdir);
+extern int context_add_plug(context_t *context, const char *expdir, const char *impid, const char *impdir);
 
 /**
  * @brief Install the application
  *
- * @param[in] secure_app the application to be installed
+ * @param[in] context the application to be installed
  * @param[in] cynagora handler to cynagora access
  * @return
  *    * 0        success
@@ -185,22 +185,22 @@ extern int secure_app_add_plug(secure_app_t *secure_app, const char *expdir, con
  *    * other negative values are possible
  */
 __nonnull() __wur
-extern int secure_app_install(secure_app_t *secure_app, cynagora_t *cynagora);
+extern int context_install(context_t *context, cynagora_t *cynagora);
 
 /**
  * @brief check if the application has the permission
  *
- * @param[in] secure_app the application to be uninstalled
+ * @param[in] context the application to be uninstalled
  * @param[in] permission the permission to check
  * @return 1 when permission is granted or, otherwise, 0
  */
 __nonnull() __wur
-extern int secure_app_has_permission(const secure_app_t *secure_app, const char *permission);
+extern int context_has_permission(const context_t *context, const char *permission);
 
 /**
  * @brief Uninstall the application
  *
- * @param[in] secure_app the application to be uninstalled
+ * @param[in] context the application to be uninstalled
  * @param[in] cynagora handler to cynagora access
  * @return
  *    * 0        success
@@ -209,20 +209,20 @@ extern int secure_app_has_permission(const secure_app_t *secure_app, const char 
  *    * other negative values are possible
  */
 __nonnull() __wur
-extern int secure_app_uninstall(secure_app_t *secure_app, cynagora_t *cynagora);
+extern int context_uninstall(context_t *context, cynagora_t *cynagora);
 
 /**
  * @brief Check if application can be installed
  *
- * @param[in] secure_app the application to be checked
+ * @param[in] context the application to be checked
  * @param[in] cynagora handler to cynagora access
  * @return 0 in case of success or a negative -errno value
  */
 __nonnull() __wur
-extern int secure_app_check(secure_app_t *secure_app, cynagora_t *cynagora);
+extern int context_check(context_t *context, cynagora_t *cynagora);
 
 /**
- * Structure of callback functions for visiting secure_app
+ * Structure of callback functions for visiting context
  */
 typedef
     struct {
@@ -231,21 +231,21 @@ typedef
         int (*permission)(void* /*visitor*/, const char* /*permission*/);
         int (*plug)(void* /*visitor*/, const char* /*id*/, const char* /*id*/, const char* /*id*/);
     }
-    secure_app_visitor_itf_t;
+    context_visitor_itf_t;
 
 /**
- * @brief Visit values of secure_app until non zero return
+ * @brief Visit values of context until non zero return
  *
- * @param[in] secure_app the application to be visited
+ * @param[in] context the application to be visited
  * @param[in] visitor a visitor pointer
  * @param[in] itf the visitor functions
  *
  */
 __nonnull((1,2)) __wur
-extern int secure_app_visit(
-    secure_app_t *secure_app,
+extern int context_visit(
+    context_t *context,
     void *visitor,
-    const secure_app_visitor_itf_t *itf);
+    const context_visitor_itf_t *itf);
 
 
 #endif
