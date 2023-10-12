@@ -26,8 +26,8 @@
 
 #include <sys/types.h>
 
-#include "cynagora-interface.h"
 #include "sizes.h"
+#include "permissions.h"
 #include "paths.h"
 #include "plugs.h"
 
@@ -173,21 +173,6 @@ __wur __nonnull()
 extern int context_add_plug(context_t *context, const char *expdir, const char *impid, const char *impdir);
 
 /**
- * @brief Install the application
- *
- * @param[in] context the application to be installed
- * @param[in] cynagora handler to cynagora access
- * @return
- *    * 0        success
- *    * -EINVAL  the application identifier is missing
- *    * -EPERM   no permission to install plugin
- *    * -ENOTRECOVERABLE state unrecoverable
- *    * other negative values are possible
- */
-__nonnull() __wur
-extern int context_install(context_t *context, cynagora_t *cynagora);
-
-/**
  * @brief check if the application has the permission
  *
  * @param[in] context the application to be uninstalled
@@ -196,30 +181,6 @@ extern int context_install(context_t *context, cynagora_t *cynagora);
  */
 __nonnull() __wur
 extern int context_has_permission(const context_t *context, const char *permission);
-
-/**
- * @brief Uninstall the application
- *
- * @param[in] context the application to be uninstalled
- * @param[in] cynagora handler to cynagora access
- * @return
- *    * 0        success
- *    * -EINVAL  the application identifier is missing
- *    * -ENOTRECOVERABLE state unrecoverable
- *    * other negative values are possible
- */
-__nonnull() __wur
-extern int context_uninstall(context_t *context, cynagora_t *cynagora);
-
-/**
- * @brief Check if application can be installed
- *
- * @param[in] context the application to be checked
- * @param[in] cynagora handler to cynagora access
- * @return 0 in case of success or a negative -errno value
- */
-__nonnull() __wur
-extern int context_check(context_t *context, cynagora_t *cynagora);
 
 /**
  * Structure of callback functions for visiting context

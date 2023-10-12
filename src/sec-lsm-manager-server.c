@@ -41,6 +41,8 @@
 #include "pollitem.h"
 #include "prot.h"
 #include "sec-lsm-manager-protocol.h"
+#include "cynagora-interface.h"
+#include "action.h"
 #include "context.h"
 #include "socket.h"
 #include "utils.h"
@@ -411,7 +413,7 @@ __nonnull((1)) static void onrequest(client_t *cli, unsigned count, const char *
             }
             /* install */
             if (ckarg(args[0], _install_, 1) && count == 1) {
-                rc = context_install(cli->context, cli->sec_lsm_manager_server->cynagora_admin_client);
+                rc = action_install(cli->context, cli->sec_lsm_manager_server->cynagora_admin_client);
                 if (rc >= 0) {
                     send_done(cli, NULL);
                 } else {
@@ -502,7 +504,7 @@ __nonnull((1)) static void onrequest(client_t *cli, unsigned count, const char *
         case 'u':
             /* uninstall */
             if (ckarg(args[0], _uninstall_, 1) && count == 1) {
-                rc = context_uninstall(cli->context, cli->sec_lsm_manager_server->cynagora_admin_client);
+                rc = action_uninstall(cli->context, cli->sec_lsm_manager_server->cynagora_admin_client);
                 if (rc >= 0) {
                     send_done(cli, NULL);
                 } else {

@@ -34,6 +34,20 @@
 #include "selinux-template.h"
 #include "utils.h"
 
+#if WITH_SELINUX
+__wur __nonnull()
+int install_mac(const context_t *context)
+         __attribute__ ((alias ("install_selinux")));
+
+__wur __nonnull()
+int uninstall_mac(const context_t *context)
+         __attribute__ ((alias ("uninstall_selinux")));
+
+__nonnull()
+void app_label_mac(char label[SEC_LSM_MANAGER_MAX_SIZE_LABEL + 1], const char *appid, const char *app_id)
+         __attribute__ ((alias ("app_label_selinux")));
+#endif
+
 /**
  * @brief Label file
  *

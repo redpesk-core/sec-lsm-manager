@@ -37,6 +37,20 @@
 
 #define DROP_LABEL "User:Home"
 
+#if WITH_SMACK
+__wur __nonnull()
+int install_mac(const context_t *context)
+         __attribute__ ((alias ("install_smack")));
+
+__wur __nonnull()
+int uninstall_mac(const context_t *context)
+         __attribute__ ((alias ("uninstall_smack")));
+
+__nonnull()
+void app_label_mac(char label[SEC_LSM_MANAGER_MAX_SIZE_LABEL + 1], const char *appid, const char *app_id)
+         __attribute__ ((alias ("app_label_smack")));
+#endif
+
 /***********************/
 /*** PRIVATE METHODS ***/
 /***********************/
