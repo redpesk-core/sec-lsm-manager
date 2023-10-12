@@ -32,8 +32,6 @@
 #include "log.h"
 #include "utils.h"
 
-__nonnull() extern void app_label_mac(char label[SEC_LSM_MANAGER_MAX_SIZE_LABEL + 1], const char *appid, const char *app_id);
-
 /***********************/
 /*** PRIVATE METHODS ***/
 /***********************/
@@ -45,8 +43,6 @@ __nonnull() extern void app_label_mac(char label[SEC_LSM_MANAGER_MAX_SIZE_LABEL 
  */
 __nonnull() void init_context(context_t *context) {
     memset(context->id, '\0', SEC_LSM_MANAGER_MAX_SIZE_ID);
-    memset(context->id_underscore, '\0', SEC_LSM_MANAGER_MAX_SIZE_ID);
-    memset(context->label, '\0', SEC_LSM_MANAGER_MAX_SIZE_LABEL);
     init_path_set(&(context->path_set));
     plugset_init(&(context->plugset));
     init_permission_set(&(context->permission_set));
@@ -68,21 +64,11 @@ __nonnull() void init_context(context_t *context) {
 __nonnull()
 static int setids(
     const char *src,
-    char id[SEC_LSM_MANAGER_MAX_SIZE_ID + 1],
-    char id_underscore[SEC_LSM_MANAGER_MAX_SIZE_ID + 1],
-    char label[SEC_LSM_MANAGER_MAX_SIZE_LABEL + 1]
+    char id[SEC_LSM_MANAGER_MAX_SIZE_ID + 1]
 ) {
-    char car;
     int rc = context_is_valid_id(src);
-    if (rc >= 0) {
+    if (rc >= 0)
         memcpy(id, src, (unsigned)rc);
-        id_underscore[rc] = 0;
-        while (rc) {
-            car = id[--rc];
-            id_underscore[rc] = car == '-' ? '_' : car;
-        }
-        app_label_mac(label, id, id_underscore);
-    }
     return rc;
 }
 
@@ -112,7 +98,7 @@ void destroy_context(context_t *context) {
 /* see context.h */
 void clear_context(context_t *context) {
     if (context) {
-        context->label[0] = context->id_underscore[0] = context->id[0] = '\0';
+        context->id[0] = '\0';
         free_permission_set(&(context->permission_set));
         plugset_deinit(&(context->plugset));
         free_path_set(&(context->path_set));
@@ -183,9 +169,9 @@ int context_set_id(context_t *context, const char *id) {
         return -EEXIST;
     }
 
-    rc = setids(id, context->id, context->id_underscore, context->label);
+    rc = setids(id, context->id);
     if (rc < 0)
-        context->id[0] = context->id_underscore[0] = context->label[0] = '\0';
+        context->id[0] = '\0';
 
     return rc;
 }

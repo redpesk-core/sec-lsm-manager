@@ -44,9 +44,24 @@ int uninstall_mac(const context_t *context)
          __attribute__ ((alias ("uninstall_selinux")));
 
 __nonnull()
-void app_label_mac(char label[SEC_LSM_MANAGER_MAX_SIZE_LABEL + 1], const char *appid, const char *app_id)
+void app_label_mac(char label[SEC_LSM_MANAGER_MAX_SIZE_LABEL + 1], const char *appid)
          __attribute__ ((alias ("app_label_selinux")));
 #endif
+
+/**
+ *
+ */
+__nonnull()
+static void trfid(const char *id, char _id_[SEC_LSM_MANAGER_MAX_SIZE_ID + 1])
+{
+    char c;
+    unsigned idx = 0;
+    do {
+        c = id[idx];
+        _id_[idx++] = c == '-' ? '_' : c;
+    } while(c && idx < sizeof idx);
+    _id_[SEC_LSM_MANAGER_MAX_SIZE_ID] = '\0';
+}
 
 /**
  * @brief Label file
@@ -110,6 +125,7 @@ bool selinux_enabled(void) {
 
 /* see selinux.h */
 int install_selinux(const context_t *context) {
+    char _id_[SEC_LSM_MANAGER_MAX_SIZE_ID + 1];
     /* TODO: treat the case where !context->need_id */
     if (context->id[0] == '\0') {
         ERROR("id undefined");
@@ -117,7 +133,8 @@ int install_selinux(const context_t *context) {
     }
 
     path_type_definitions_t path_type_definitions[number_path_type];
-    init_path_type_definitions(path_type_definitions, context->id_underscore);
+    trfid(context->id, _id_);
+    init_path_type_definitions(path_type_definitions, _id_);
 
     // ################## CREATE ##################
     int rc = create_selinux_rules(context, path_type_definitions);
@@ -202,8 +219,10 @@ int uninstall_selinux(const context_t *context) {
 
 /* see selinux.h */
 __nonnull()
-void app_label_selinux(char label[SEC_LSM_MANAGER_MAX_SIZE_LABEL + 1], const char *appid, const char *app_id)
+void app_label_selinux(char label[SEC_LSM_MANAGER_MAX_SIZE_LABEL + 1], const char *appid)
 {
-    (void)appid;
-    snprintf(label, SEC_LSM_MANAGER_MAX_SIZE_LABEL + 1, "system_u:system_r:%s_t:s0", app_id);
+    char _id_[SEC_LSM_MANAGER_MAX_SIZE_ID + 1];
+    trfid(appid, _id_);
+    snprintf(label, SEC_LSM_MANAGER_MAX_SIZE_LABEL, "system_u:system_r:%s_t:s0", _id_);
+    label[SEC_LSM_MANAGER_MAX_SIZE_ID] = '\0';
 }

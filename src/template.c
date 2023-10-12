@@ -23,6 +23,7 @@
 
 #include "template.h"
 
+#include <stdbool.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <stdio.h>
@@ -46,6 +47,7 @@ typedef struct {
 static int put(void *closure, const char *name, int escape, FILE *file) {
     (void)escape;
     template_data_t *data = closure;
+    bool underscore = name[0] == '_';
     const char *txt = NULL;
 
     // DEBUG("name : %s", name);
@@ -53,8 +55,10 @@ static int put(void *closure, const char *name, int escape, FILE *file) {
     if (!strcmp(name, "id"))
         txt = data->context->id;
 
-    else if (!strcmp(name, "id_underscore"))
-        txt = data->context->id_underscore;
+    else if (!strcmp(name, "id_underscore")) {
+        txt = data->context->id;
+        underscore = true;
+    }
 
     else if (!strcmp(name, "_id_"))
         txt = data->context->id;
@@ -66,7 +70,7 @@ static int put(void *closure, const char *name, int escape, FILE *file) {
         txt = data->plug->impid;
 
     if (txt != NULL) {
-        if (*name != '_')
+        if (!underscore)
             fputs(txt, file);
         else {
             for ( ; *txt ; txt++)

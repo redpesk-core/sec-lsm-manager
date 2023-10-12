@@ -100,16 +100,16 @@ __nonnull() static void init_selinux_module(selinux_module_t *selinux_module, co
     secure_strncpy(selinux_module->selinux_if_template_file, get_selinux_if_template_file(NULL),
                    SEC_LSM_MANAGER_MAX_SIZE_PATH);
 
-    snprintf(selinux_module->selinux_te_file, SEC_LSM_MANAGER_MAX_SIZE_PATH, "%s/%s.%s",
+    snprintf(selinux_module->selinux_te_file, SEMOD_MAX_SIZE_PATH, "%s/%s.%s",
              selinux_module->selinux_rules_dir, context->id, TE_EXTENSION);
 
-    snprintf(selinux_module->selinux_fc_file, SEC_LSM_MANAGER_MAX_SIZE_PATH, "%s/%s.%s",
+    snprintf(selinux_module->selinux_fc_file, SEMOD_MAX_SIZE_PATH, "%s/%s.%s",
              selinux_module->selinux_rules_dir, context->id, FC_EXTENSION);
 
-    snprintf(selinux_module->selinux_if_file, SEC_LSM_MANAGER_MAX_SIZE_PATH, "%s/%s.%s",
+    snprintf(selinux_module->selinux_if_file, SEMOD_MAX_SIZE_PATH, "%s/%s.%s",
              selinux_module->selinux_rules_dir, context->id, IF_EXTENSION);
 
-    snprintf(selinux_module->selinux_pp_file, SEC_LSM_MANAGER_MAX_SIZE_PATH, "%s/%s.%s",
+    snprintf(selinux_module->selinux_pp_file, SEMOD_MAX_SIZE_PATH, "%s/%s.%s",
              selinux_module->selinux_rules_dir, context->id, PP_EXTENSION);
 }
 

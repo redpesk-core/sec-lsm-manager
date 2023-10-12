@@ -47,7 +47,7 @@ int uninstall_mac(const context_t *context)
          __attribute__ ((alias ("uninstall_smack")));
 
 __nonnull()
-void app_label_mac(char label[SEC_LSM_MANAGER_MAX_SIZE_LABEL + 1], const char *appid, const char *app_id)
+void app_label_mac(char label[SEC_LSM_MANAGER_MAX_SIZE_LABEL + 1], const char *appid)
          __attribute__ ((alias ("app_label_smack")));
 #endif
 
@@ -232,7 +232,7 @@ static int install_smack_plugs(const context_t *context)
                 ERROR("install_smack_plugs: can't create link: %d, %s", -rc2, strerror(-rc2));
             }
             else {
-                app_label_smack(label, context->id, context->id_underscore);
+                app_label_smack(label, context->id);
                 rc2 = set_label(buffer, XATTR_NAME_SMACK, label);
             }
         }
@@ -390,8 +390,8 @@ int uninstall_smack(const context_t *context) {
 
 /* see smack.h */
 __nonnull()
-void app_label_smack(char label[SEC_LSM_MANAGER_MAX_SIZE_LABEL + 1], const char *appid, const char *app_id)
+void app_label_smack(char label[SEC_LSM_MANAGER_MAX_SIZE_LABEL + 1], const char *appid)
 {
-    (void)app_id;
-    snprintf(label, SEC_LSM_MANAGER_MAX_SIZE_LABEL + 1, "App:%s", appid);
+    snprintf(label, SEC_LSM_MANAGER_MAX_SIZE_LABEL, "App:%s", appid);
+    label[SEC_LSM_MANAGER_MAX_SIZE_ID] = '\0';    
 }

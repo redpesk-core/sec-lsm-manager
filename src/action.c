@@ -34,43 +34,11 @@
 
  __wur __nonnull() extern int install_mac(const context_t *context);
  __wur __nonnull() extern int uninstall_mac(const context_t *context);
-__nonnull() extern void app_label_mac(char label[SEC_LSM_MANAGER_MAX_SIZE_LABEL + 1], const char *appid, const char *app_id);
+__nonnull() extern void app_label_mac(char label[SEC_LSM_MANAGER_MAX_SIZE_LABEL + 1], const char *appid);
 
 /***********************/
 /*** PRIVATE METHODS ***/
 /***********************/
-
-/**
- * @brief Set and validate the ids from the source
- *
- * @param[in] src the source id
- * @param[out] id output of the id
- * @param[out] id_underscore output of the id with underscores for dashes
- * @param[out] label output of the LSM id for the application
- * @return
- *    * 0 in case of success
- *    * -EINVAL        the id has bad characters
- */
-__nonnull()
-static int setids(
-    const char *src,
-    char id[SEC_LSM_MANAGER_MAX_SIZE_ID + 1],
-    char id_underscore[SEC_LSM_MANAGER_MAX_SIZE_ID + 1],
-    char label[SEC_LSM_MANAGER_MAX_SIZE_LABEL + 1]
-) {
-    char car;
-    int rc = context_is_valid_id(src);
-    if (rc >= 0) {
-        memcpy(id, src, (unsigned)rc);
-        id_underscore[rc] = 0;
-        while (rc) {
-            car = id[--rc];
-            id_underscore[rc] = car == '-' ? '_' : car;
-        }
-        app_label_mac(label, id, id_underscore);
-    }
-    return rc;
-}
 
 /**
  * @brief Check if application plugs can be installed
@@ -88,8 +56,6 @@ static int check_plug_installable(context_t *context, cynagora_t *cynagora)
     static const char scope_partner[] = "partner";
 
     char permission[SEC_LSM_MANAGER_MAX_SIZE_ID + sizeof perm_export_template + sizeof scope_partner];
-    char id[SEC_LSM_MANAGER_MAX_SIZE_ID + 1];
-    char _id_[SEC_LSM_MANAGER_MAX_SIZE_ID + 1];
     char label[SEC_LSM_MANAGER_MAX_SIZE_LABEL + 1];
     plug_t *plugit;
     const char *scope;
@@ -100,7 +66,7 @@ static int check_plug_installable(context_t *context, cynagora_t *cynagora)
     for(plugit = context->plugset ; plugit != NULL ; plugit = plugit->next) {
 
         /* compute the label of the application importing the plug */
-        sts = setids(plugit->impid, id, _id_, label);
+        app_label_mac(label, plugit->impid);
         if (sts == 0) {
             sts = cynagora_check_permission(cynagora, label, perm_public_plug);
             if (sts < 0) {
@@ -110,11 +76,11 @@ static int check_plug_installable(context_t *context, cynagora_t *cynagora)
                 /* compute the scope of the required permision */
                 scope = sts ? scope_public : scope_partner;
                 /* compute the required permision */
-                snprintf(permission, sizeof permission, perm_export_template, id, scope);
+                snprintf(permission, sizeof permission, perm_export_template, plugit->impid, scope);
                 /* check if the permision is granted for the app */
                 sts = context_has_permission(context, permission);
                 if (!sts) {
-                    ERROR("no permission to install plugs for %s", id);
+                    ERROR("no permission to install plugs for %s", plugit->impid);
                     sts = -EPERM;
                 }
             }
@@ -132,7 +98,7 @@ static int check_plug_installable(context_t *context, cynagora_t *cynagora)
  * @return 0 in case of success or a negative -errno value
  */
 __nonnull() __wur
-static int check_context(context_t *context)
+static int check_context(context_t *context, char label[SEC_LSM_MANAGER_MAX_SIZE_LABEL + 1])
 {
     /* check error state */
     if (context->error_flag) {
@@ -146,7 +112,7 @@ static int check_context(context_t *context)
         ERROR("an application identifier is needed");
         return -EINVAL;
     }
-
+    app_label_mac(label, context->id);
     return 0;
 }
 
@@ -159,8 +125,9 @@ __nonnull() __wur
 int action_install(context_t *context, cynagora_t *cynagora)
 {
     /* check consistency */
+    char label[SEC_LSM_MANAGER_MAX_SIZE_LABEL + 1];
     bool has_id = context->id[0] != '\0';
-    int rc2, rc = check_context(context);
+    int rc2, rc = check_context(context, label);
     if (rc < 0)
         return rc;
     rc = check_plug_installable(context, cynagora);
@@ -169,7 +136,7 @@ int action_install(context_t *context, cynagora_t *cynagora)
 
     /* set cynagora policies */
     if (has_id) {
-        rc = cynagora_set_policies(cynagora, context->label, &(context->permission_set), 1);
+        rc = cynagora_set_policies(cynagora, label, &(context->permission_set), 1);
         if (rc < 0) {
             ERROR("cynagora_set_policies: %d %s", -rc, strerror(-rc));
             return rc;
@@ -182,7 +149,7 @@ int action_install(context_t *context, cynagora_t *cynagora)
     if (rc < 0) {
         ERROR("install_mac: %d %s", -rc, strerror(-rc));
         if (has_id) {
-            rc2 = cynagora_drop_policies(cynagora, context->label);
+            rc2 = cynagora_drop_policies(cynagora, label);
             if (rc2 < 0) {
                 ERROR("cannot delete policy: %d %s", -rc2, strerror(-rc2));
             }
@@ -200,14 +167,15 @@ __nonnull() __wur
 int action_uninstall(context_t *context, cynagora_t *cynagora)
 {
     /* check consistency */
+    char label[SEC_LSM_MANAGER_MAX_SIZE_LABEL + 1];
     bool has_id = context->id[0] != '\0';
-    int rc = check_context(context);
+    int rc = check_context(context, label);
     if (rc < 0)
         return rc;
 
     /* drop cynagora policies */
     if (has_id) {
-        rc = cynagora_drop_policies(cynagora, context->label);
+        rc = cynagora_drop_policies(cynagora, label);
         if (rc < 0) {
             ERROR("cynagora_drop_policies: %d %s", -rc, strerror(-rc));
             return rc;

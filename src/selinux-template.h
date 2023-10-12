@@ -107,11 +107,12 @@ extern bool check_module_in_policy(const context_t *context) __wur __nonnull();
 extern int remove_selinux_rules(const context_t *context) __wur __nonnull();
 
 /************************ FOR TESTING ************************/
+#define SEMOD_MAX_SIZE_PATH (SEC_LSM_MANAGER_MAX_SIZE_PATH + SEC_LSM_MANAGER_MAX_SIZE_ID + 6)
 typedef struct selinux_module {
-    char selinux_te_file[SEC_LSM_MANAGER_MAX_SIZE_PATH];           ///////////////////
-    char selinux_if_file[SEC_LSM_MANAGER_MAX_SIZE_PATH];           //   PATH MODULE //
-    char selinux_fc_file[SEC_LSM_MANAGER_MAX_SIZE_PATH];           //      FILE     //
-    char selinux_pp_file[SEC_LSM_MANAGER_MAX_SIZE_PATH];           ///////////////////
+    char selinux_te_file[SEMOD_MAX_SIZE_PATH];           ///////////////////
+    char selinux_if_file[SEMOD_MAX_SIZE_PATH];           //   PATH MODULE //
+    char selinux_fc_file[SEMOD_MAX_SIZE_PATH];           //      FILE     //
+    char selinux_pp_file[SEMOD_MAX_SIZE_PATH];           ///////////////////
     char selinux_rules_dir[SEC_LSM_MANAGER_MAX_SIZE_DIR];          // Store te, if, fc, pp files
     char selinux_te_template_file[SEC_LSM_MANAGER_MAX_SIZE_PATH];  // te base template
     char selinux_if_template_file[SEC_LSM_MANAGER_MAX_SIZE_PATH];  // if base template

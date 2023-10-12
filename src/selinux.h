@@ -58,7 +58,7 @@ extern int uninstall_selinux(const context_t *context) __wur __nonnull();
  * @param[in] app_id the application identifier with underscores
  */
 __nonnull()
-extern void app_label_selinux(char label[SEC_LSM_MANAGER_MAX_SIZE_LABEL + 1], const char *appid, const char *app_id);
+extern void app_label_selinux(char label[SEC_LSM_MANAGER_MAX_SIZE_LABEL + 1], const char *appid);
 
 /************************ FOR TESTING ************************/
 #include "selinux-template.h"

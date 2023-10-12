@@ -31,7 +31,6 @@ START_TEST(test_init_context) {
     context_t context;
     init_context(&context);
     ck_assert_str_eq(context.id, "");
-    ck_assert_str_eq(context.id_underscore, "");
     ck_assert_ptr_eq(context.permission_set.permissions, NULL);
     ck_assert_int_eq((int)context.permission_set.size, 0);
     ck_assert_ptr_eq(context.path_set.paths, NULL);
@@ -44,7 +43,6 @@ START_TEST(test_create_context) {
     ck_assert_int_eq(create_context(&context), 0);
     ck_assert_ptr_ne(context, NULL);
     ck_assert_str_eq(context->id, "");
-    ck_assert_str_eq(context->id_underscore, "");
     ck_assert_ptr_eq(context->permission_set.permissions, NULL);
     ck_assert_int_eq((int)context->permission_set.size, 0);
     ck_assert_ptr_eq(context->path_set.paths, NULL);
