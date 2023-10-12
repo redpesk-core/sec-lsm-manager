@@ -34,7 +34,7 @@
 
 #include "log.h"
 #include "mustach/mustach.h"
-#include "secure-app.h"
+#include "context.h"
 #include "utils.h"
 
 typedef struct {

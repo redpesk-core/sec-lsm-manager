@@ -30,7 +30,7 @@
 #endif
 
 #include "utils.h"
-#include "secure-app.h"
+#include "context.h"
 #include "smack.h"
 #include "smack-template.h"
 

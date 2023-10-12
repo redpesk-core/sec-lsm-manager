@@ -25,7 +25,7 @@
 
 #include <errno.h>
 
-#include "secure-app.h"
+#include "context.h"
 
 START_TEST(test_init_secure_app) {
     secure_app_t secure_app;

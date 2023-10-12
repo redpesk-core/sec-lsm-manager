@@ -92,7 +92,7 @@ endif()
 
 # smack part
 if(WITH_SMACK)
-    add_library(app-smack OBJECT secure-app.c smack-template.c smack.c)
+    add_library(app-smack OBJECT context.c smack-template.c smack.c)
     target_compile_definitions(app-smack PUBLIC WITH_SMACK=1)
 
     if(NOT SIMULATE_SMACK)
@@ -106,7 +106,7 @@ endif()
 
 # selinux part
 if(WITH_SELINUX)
-    add_library(app-selinux OBJECT secure-app.c selinux.c selinux-template.c)
+    add_library(app-selinux OBJECT context.c selinux.c selinux-template.c)
     target_compile_definitions(app-selinux PUBLIC WITH_SELINUX=1)
 
     if(NOT SIMULATE_SELINUX)

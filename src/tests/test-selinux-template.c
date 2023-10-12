@@ -31,7 +31,7 @@
 
 #include "log.h"
 #include "utils.h"
-#include "secure-app.h"
+#include "context.h"
 #include "selinux.h"
 #include "selinux-template.h"
 

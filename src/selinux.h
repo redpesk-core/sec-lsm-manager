@@ -24,7 +24,7 @@
 #ifndef SEC_LSM_MANAGER_SELINUX_H
 #define SEC_LSM_MANAGER_SELINUX_H
 
-#include "secure-app.h"
+#include "context.h"
 
 /**
  * @brief Check if selinux is enabled

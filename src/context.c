@@ -21,7 +21,7 @@
  * $RP_END_LICENSE$
  */
 
-#include "secure-app.h"
+#include "context.h"
 
 #include <errno.h>
 #include <stdio.h>
@@ -103,7 +103,7 @@ static int setids(
 /*** PUBLIC METHODS ***/
 /**********************/
 
-/* see secure-app.h */
+/* see context.h */
 int create_secure_app(secure_app_t **secure_app) {
     *secure_app = (secure_app_t *)malloc(sizeof(secure_app_t));
     if (*secure_app == NULL) {
@@ -115,13 +115,13 @@ int create_secure_app(secure_app_t **secure_app) {
     return 0;
 }
 
-/* see secure-app.h */
+/* see context.h */
 void destroy_secure_app(secure_app_t *secure_app) {
     clear_secure_app(secure_app);
     free(secure_app);
 }
 
-/* see secure-app.h */
+/* see context.h */
 void clear_secure_app(secure_app_t *secure_app) {
     if (secure_app) {
         secure_app->label[0] = secure_app->id_underscore[0] = secure_app->id[0] = '\0';
@@ -133,17 +133,17 @@ void clear_secure_app(secure_app_t *secure_app) {
     }
 }
 
-/* see secure-app.h */
+/* see context.h */
 void secure_app_raise_error(secure_app_t *secure_app) {
     secure_app->error_flag = true;
 }
 
-/* see secure-app.h */
+/* see context.h */
 bool secure_app_has_error(secure_app_t *secure_app) {
     return secure_app->error_flag;
 }
 
-/* see secure-app.h */
+/* see context.h */
 int secure_app_is_valid_id(const char *id)
 {
     char car;
@@ -179,7 +179,7 @@ int secure_app_is_valid_id(const char *id)
     }
 }
 
-/* see secure-app.h */
+/* see context.h */
 int secure_app_set_id(secure_app_t *secure_app, const char *id) {
     int rc;
 
@@ -202,7 +202,7 @@ int secure_app_set_id(secure_app_t *secure_app, const char *id) {
     return rc;
 }
 
-/* see secure-app.h */
+/* see context.h */
 int secure_app_add_permission(secure_app_t *secure_app, const char *permission)
 {
     size_t i;
@@ -232,7 +232,7 @@ int secure_app_add_permission(secure_app_t *secure_app, const char *permission)
     return 0;
 }
 
-/* see secure-app.h */
+/* see context.h */
 __wur __nonnull()
 int secure_app_add_path(secure_app_t *secure_app, const char *path, const char *type)
 {
@@ -282,7 +282,7 @@ int secure_app_add_path(secure_app_t *secure_app, const char *path, const char *
     return 0;
 }
 
-/* see secure-app.h */
+/* see context.h */
 __wur __nonnull()
 int secure_app_add_plug(secure_app_t *secure_app, const char *expdir, const char *impid, const char *impdir)
 {
@@ -332,7 +332,7 @@ int secure_app_add_plug(secure_app_t *secure_app, const char *expdir, const char
     return 0;
 }
 
-/* see secure-app.h */
+/* see context.h */
 __nonnull() __wur
 int secure_app_install(secure_app_t *secure_app, cynagora_t *cynagora)
 {
@@ -385,7 +385,7 @@ int secure_app_install(secure_app_t *secure_app, cynagora_t *cynagora)
     return 0;
 }
 
-/* see secure-app.h */
+/* see context.h */
 __nonnull() __wur
 int secure_app_uninstall(secure_app_t *secure_app, cynagora_t *cynagora)
 {
@@ -422,7 +422,7 @@ int secure_app_uninstall(secure_app_t *secure_app, cynagora_t *cynagora)
     return 0;
 }
 
-/* see secure-app.h */
+/* see context.h */
 __nonnull() __wur
 int secure_app_has_permission(const secure_app_t *secure_app, const char *permission)
 {
@@ -482,14 +482,14 @@ static int check_plugs(secure_app_t *secure_app, cynagora_t *cynagora)
     return rc;
 }
 
-/* see secure-app.h */
+/* see context.h */
 __nonnull() __wur
 int secure_app_check(secure_app_t *secure_app, cynagora_t *cynagora)
 {
     return check_plugs(secure_app, cynagora);
 }
 
-/* see secure-app.h */
+/* see context.h */
 __nonnull((1,2)) __wur
 int secure_app_visit(secure_app_t *secure_app, void *visitor, const secure_app_visitor_itf_t *itf)
 {

@@ -45,7 +45,7 @@ set(TEST_SOURCES
     test-paths.c
     test-plugs.c
     test-permissions.c
-    test-secure-app.c
+    test-context.c
     test-utils.c
 )
 

@@ -41,7 +41,7 @@
 #include "pollitem.h"
 #include "prot.h"
 #include "sec-lsm-manager-protocol.h"
-#include "secure-app.h"
+#include "context.h"
 #include "socket.h"
 #include "utils.h"
 

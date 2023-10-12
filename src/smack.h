@@ -24,7 +24,7 @@
 #ifndef SEC_LSM_MANAGER_SMACK_H
 #define SEC_LSM_MANAGER_SMACK_H
 
-#include "secure-app.h"
+#include "context.h"
 
 /**
  * @brief Install a secure app for smack
