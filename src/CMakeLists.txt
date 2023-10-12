@@ -34,13 +34,16 @@ message("\n[*] Create : libsec-lsm-manager")
 add_library(sec-lsm-manager STATIC
     log.c
     prot.c
-    sec-lsm-manager.c
+    sec-lsm-manager-client.c
     sec-lsm-manager-protocol.c
     socket.c
     utils.c
 )
-install(TARGETS sec-lsm-manager LIBRARY DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR})
-install(FILES sec-lsm-manager.h DESTINATION ${CMAKE_INSTALL_FULL_INCLUDEDIR})
+install(TARGETS sec-lsm-manager LIBRARY
+		DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR})
+install(FILES sec-lsm-manager-client.h
+		DESTINATION ${CMAKE_INSTALL_FULL_INCLUDEDIR}
+		RENAME sec-lsm-manager.h)
 
 message("[x] Done : libsec-lsm-manager\n")
 
@@ -58,7 +61,7 @@ add_library(common-lib OBJECT
     plugs.c
     pollitem.c
     prot.c
-    sec-lsm-manager.c
+    sec-lsm-manager-client.c
     sec-lsm-manager-protocol.c
     sec-lsm-manager-server.c
     template.c

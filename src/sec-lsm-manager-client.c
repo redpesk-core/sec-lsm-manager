@@ -24,7 +24,7 @@
  *
  */
 
-#include "sec-lsm-manager.h"
+#include "sec-lsm-manager-client.h"
 
 #include <errno.h>
 #include <poll.h>
@@ -421,7 +421,7 @@ static int sync_send_do(sec_lsm_manager_t *sec_lsm_manager, int (*aftersend)(sec
 /*** PUBLIC METHODS ***/
 /**********************/
 
-/* see sec-lsm-manager.h */
+/* see sec-lsm-manager-client.h */
 int sec_lsm_manager_create(sec_lsm_manager_t **sec_lsm_manager, const char *socketspec) {
     socketspec = sec_lsm_manager_get_socket(socketspec);
 
@@ -460,7 +460,7 @@ int sec_lsm_manager_create(sec_lsm_manager_t **sec_lsm_manager, const char *sock
     return 0;
 }
 
-/* see sec-lsm-manager.h */
+/* see sec-lsm-manager-client.h */
 void sec_lsm_manager_destroy(sec_lsm_manager_t *sec_lsm_manager) {
     CHECK_NO_NULL_NO_RETURN(sec_lsm_manager, "sec_lsm_manager");
 
@@ -473,21 +473,21 @@ void sec_lsm_manager_destroy(sec_lsm_manager_t *sec_lsm_manager) {
     sec_lsm_manager = NULL;
 }
 
-/* see sec-lsm-manager.h */
+/* see sec-lsm-manager-client.h */
 void sec_lsm_manager_disconnect(sec_lsm_manager_t *sec_lsm_manager) {
     CHECK_NO_NULL_NO_RETURN(sec_lsm_manager, "sec_lsm_manager");
 
     disconnection(sec_lsm_manager);
 }
 
-/* see sec-lsm-manager.h */
+/* see sec-lsm-manager-client.h */
 int sec_lsm_manager_set_id(sec_lsm_manager_t *sec_lsm_manager, const char *id) {
     CHECK_NO_NULL(id, "id");
 
     return sync_send_do(sec_lsm_manager, wait_done_or_error, _id_, id, NULL);
 }
 
-/* see sec-lsm-manager.h */
+/* see sec-lsm-manager-client.h */
 int sec_lsm_manager_add_path(sec_lsm_manager_t *sec_lsm_manager, const char *path, const char *path_type) {
     CHECK_NO_NULL(path, "path");
     CHECK_NO_NULL(path_type, "path_type");
@@ -495,7 +495,7 @@ int sec_lsm_manager_add_path(sec_lsm_manager_t *sec_lsm_manager, const char *pat
     return sync_send_do(sec_lsm_manager, wait_done_or_error, _path_, path, path_type, NULL);
 }
 
-/* see sec-lsm-manager.h */
+/* see sec-lsm-manager-client.h */
 __nonnull() __wur
 int sec_lsm_manager_add_plug(sec_lsm_manager_t *sec_lsm_manager, const char *expdir, const char *impid, const char *impdir)
 {
@@ -506,24 +506,24 @@ int sec_lsm_manager_add_plug(sec_lsm_manager_t *sec_lsm_manager, const char *exp
     return sync_send_do(sec_lsm_manager, wait_done_or_error, _plug_, expdir, impid, impdir, NULL);
 }
 
-/* see sec-lsm-manager.h */
+/* see sec-lsm-manager-client.h */
 int sec_lsm_manager_add_permission(sec_lsm_manager_t *sec_lsm_manager, const char *permission) {
     CHECK_NO_NULL(permission, "permission");
 
     return sync_send_do(sec_lsm_manager, wait_done_or_error, _permission_, permission, NULL);
 }
 
-/* see sec-lsm-manager.h */
+/* see sec-lsm-manager-client.h */
 int sec_lsm_manager_clear(sec_lsm_manager_t *sec_lsm_manager) {
     return sync_send_do(sec_lsm_manager, wait_done_or_error, _clear_, NULL);
 }
 
-/* see sec-lsm-manager.h */
+/* see sec-lsm-manager-client.h */
 int sec_lsm_manager_install(sec_lsm_manager_t *sec_lsm_manager) {
     return sync_send_do(sec_lsm_manager, wait_done_or_error, _install_, NULL);
 }
 
-/* see sec-lsm-manager.h */
+/* see sec-lsm-manager-client.h */
 int sec_lsm_manager_uninstall(sec_lsm_manager_t *sec_lsm_manager) {
     return sync_send_do(sec_lsm_manager, wait_done_or_error, _uninstall_, NULL);
 }
@@ -541,7 +541,7 @@ static int wait_log_reply(sec_lsm_manager_t *sec_lsm_manager)
     return rc;
 }
 
-/* see sec-lsm-manager.h */
+/* see sec-lsm-manager-client.h */
 int sec_lsm_manager_log(sec_lsm_manager_t *sec_lsm_manager, int on, int off) {
     return sync_send_do(sec_lsm_manager, wait_log_reply, _log_, off ? _off_ : on ? _on_ : NULL, NULL);
 }
@@ -575,12 +575,12 @@ static int wait_display_replies(sec_lsm_manager_t *sec_lsm_manager)
     return rc;
 }
 
-/* see sec-lsm-manager.h */
+/* see sec-lsm-manager-client.h */
 int sec_lsm_manager_display(sec_lsm_manager_t *sec_lsm_manager) {
     return sync_send_do(sec_lsm_manager, wait_display_replies, _display_, NULL);
 }
 
-/* see sec-lsm-manager.h */
+/* see sec-lsm-manager-client.h */
 int sec_lsm_manager_error_message(sec_lsm_manager_t *sec_lsm_manager, char **message)
 {
     int idx;

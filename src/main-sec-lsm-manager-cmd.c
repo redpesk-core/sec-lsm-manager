@@ -35,7 +35,7 @@
 #include <unistd.h>
 
 #include "log.h"
-#include "sec-lsm-manager.h"
+#include "sec-lsm-manager-client.h"
 #include "utils.h"
 
 #define ISSEP(x) (((x)[0] == ';') && ((x)[1] == '\0'))
