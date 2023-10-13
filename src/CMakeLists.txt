@@ -23,7 +23,10 @@
 # $RP_END_LICENSE$
 ###########################################################################
 
-add_compile_definitions(VERSION="${PROJECT_VERSION}")
+add_compile_definitions(
+	VERSION="${PROJECT_VERSION}"
+	PREFIX="${CMAKE_INSTALL_PREFIX}"
+)
 
 ##########################################################
 # build and install libsec-lsm-manager the client library

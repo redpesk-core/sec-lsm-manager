@@ -42,12 +42,24 @@
 
 #define SMACK_EXTENSION "smack"
 
+#if !defined(PREFIX)
+#define PREFIX "/usr"
+#endif
+
+#if !defined(DATADIR)
+#define DATADIR   PREFIX"/share"
+#endif
+
+#if !defined(SYSCONFDIR)
+#define SYSCONFDIR "/etc"
+#endif
+
 #if !defined(SEC_LSM_MANAGER_DATADIR)
-#define SEC_LSM_MANAGER_DATADIR "/usr/share/sec-lsm-manager"
+#define SEC_LSM_MANAGER_DATADIR  DATADIR"/sec-lsm-manager"
 #endif
 
 #if !defined(TEMPLATE_FILE)
-#define TEMPLATE_FILE "app-template.smack"
+#define TEMPLATE_FILE   "app-template.smack"
 #endif
 
 #if !defined(SMACK_TEMPLATE_FILE)
@@ -55,8 +67,10 @@
 #endif
 
 #if !defined(SMACK_POLICY_DIR)
-#define SMACK_POLICY_DIR "/etc/smack/accesses.d"
+#define SMACK_POLICY_DIR   SYSCONFDIR"/smack/accesses.d"
 #endif
+
+
 
 const char default_smack_template_file[] = SMACK_TEMPLATE_FILE;
 const char default_smack_policy_dir[] = SMACK_POLICY_DIR;
@@ -155,7 +169,7 @@ const char *get_smack_policy_dir(const char *value) {
     return value;
 }
 
-static int get_smack_rule_path(char rule_path[SEC_LSM_MANAGER_MAX_SIZE_PATH + 1], const char *id)
+int get_smack_rule_path(char rule_path[SEC_LSM_MANAGER_MAX_SIZE_PATH + 1], const char *id)
 {
     int len = snprintf(rule_path, SEC_LSM_MANAGER_MAX_SIZE_PATH + 1,
                    "%s/%s.%s", get_smack_policy_dir(NULL), id, SMACK_EXTENSION);

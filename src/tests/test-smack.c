@@ -118,6 +118,7 @@ START_TEST(test_smack_install) {
     char id_file[SEC_LSM_MANAGER_MAX_SIZE_PATH+20];
     char public_dir[SEC_LSM_MANAGER_MAX_SIZE_DIR+20];
     char public_file[SEC_LSM_MANAGER_MAX_SIZE_PATH+20];
+    char rule_path[SEC_LSM_MANAGER_MAX_SIZE_PATH + 1];
 
     snprintf(data_dir, sizeof data_dir, "%s/data/", tmp_dir);
     snprintf(data_file, sizeof data_file, "%s/data/data_file", tmp_dir);
@@ -159,7 +160,8 @@ START_TEST(test_smack_install) {
     // test settings
 
     bool exists;
-    get_file_informations("/etc/smack/accesses.d/testid.smack", &exists, NULL, NULL);
+    get_smack_rule_path(rule_path, context->id);
+    get_file_informations(rule_path, &exists, NULL, NULL);
     ck_assert_int_eq(exists, true);
     ck_assert_int_eq(compare_xattr(data_dir, XATTR_NAME_SMACK, "App:testid:Data"), true);
     ck_assert_int_eq(compare_xattr(data_dir, XATTR_NAME_SMACKTRANSMUTE, "TRUE"), true);

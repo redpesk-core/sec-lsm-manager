@@ -51,14 +51,14 @@ const char _uninstall_[] = "uninstall";
 #define SEC_LSM_MANAGER_SOCKET_DIR "/var/run"
 #endif
 
-#define PREFIX SEC_LSM_MANAGER_SOCKET_SCHEME ":" SEC_LSM_MANAGER_SOCKET_DIR "/"
+#define SOCKPREFIX SEC_LSM_MANAGER_SOCKET_SCHEME ":" SEC_LSM_MANAGER_SOCKET_DIR "/"
 
 #if !defined(SEC_LSM_MANAGER_SOCKET_NAME)
 #define SEC_LSM_MANAGER_SOCKET_NAME "sec-lsm-manager.socket"
 #endif
 
 #if !defined(SEC_LSM_MANAGER_SOCKET)
-#define SEC_LSM_MANAGER_SOCKET PREFIX SEC_LSM_MANAGER_SOCKET_NAME
+#define SEC_LSM_MANAGER_SOCKET SOCKPREFIX SEC_LSM_MANAGER_SOCKET_NAME
 #endif
 
 const char sec_lsm_manager_default_socket_scheme[] = SEC_LSM_MANAGER_SOCKET_SCHEME;

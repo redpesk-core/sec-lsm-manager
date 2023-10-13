@@ -51,6 +51,15 @@ extern const char *get_smack_template_file(const char *value) __wur;
 extern const char *get_smack_policy_dir(const char *value) __wur;
 
 /**
+ * @brief Get the smack policy path for the application of id
+ *
+ * @param[inout] path where to store the computed path
+ * @param[in] id id of the application
+ * @return the length stored or a negative error code
+ */
+extern int get_smack_rule_path(char rule_path[SEC_LSM_MANAGER_MAX_SIZE_PATH + 1], const char *id);
+
+/**
  * @brief Check if smack is enabled
  *
  * @return true if enabled
