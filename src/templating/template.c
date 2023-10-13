@@ -34,8 +34,7 @@
 #include <unistd.h>
 
 #include "log.h"
-#include "mustach/mustach.h"
-#include "context.h"
+#include "mustach.h"
 #include "utils.h"
 
 typedef struct {
@@ -84,6 +83,10 @@ static int enter(void *closure, const char *name) {
 
     template_data_t *data = closure;
 
+    if (name[0] == 'p' && name[1] == '=') { /* permission checks are prefixed by p= */
+        return context_has_permission(data->context, &name[2]);
+    }
+
     if (data->plug != NULL) /* avoid stacking in plugs ATM */
         return 0;
 
@@ -94,10 +97,6 @@ static int enter(void *closure, const char *name) {
     if (!strcmp(name, "plugs")) {
         data->plug = data->context->plugset;
         return data->plug != NULL;
-    }
-
-    if (name[0] == 'p' && name[1] == '=') { /* permission checks are prefixed by p= */
-        return context_has_permission(data->context, &name[2]);
     }
 
     return 0;
@@ -152,3 +151,4 @@ end:
     free(template);
     return rc;
 }
+

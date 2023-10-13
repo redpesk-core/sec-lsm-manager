@@ -30,9 +30,8 @@
 #endif
 
 #include "utils.h"
-#include "context.h"
-#include "smack.h"
-#include "smack-template.h"
+#include "lsm-smack/smack.h"
+#include "lsm-smack/smack-template.h"
 
 // START_TEST(test_label_file) {
 //     char label[SEC_LSM_MANAGER_MAX_SIZE_LABEL] = {'\0'};

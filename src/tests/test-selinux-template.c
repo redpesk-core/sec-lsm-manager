@@ -17,6 +17,7 @@
 
 #include "setup-tests.h"
 
+#include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <sys/stat.h>
@@ -31,9 +32,8 @@
 
 #include "log.h"
 #include "utils.h"
-#include "context.h"
-#include "selinux.h"
-#include "selinux-template.h"
+#include "lsm-selinux/selinux.h"
+#include "lsm-selinux/selinux-template.h"
 
 #define TESTID "testid-binding"
 #define TESTID_SELINUX "testid_binding"
@@ -44,7 +44,8 @@ START_TEST(test_generate_app_module_fc) {
 
     path_type_definitions_t path_type_definitions[number_path_type];
     init_path_type_definitions(path_type_definitions, TESTID);
-
+    int rc = system("touch /tmp/data /tmp/conf /tmp/lib");
+    ck_assert_int_eq(rc, 0);
     context_t *context = NULL;
     ck_assert_int_eq(create_context(&context), 0);
     ck_assert_int_eq(context_add_path(context, "/tmp/data", "data"), 0);

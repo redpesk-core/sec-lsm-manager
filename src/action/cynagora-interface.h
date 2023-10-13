@@ -24,7 +24,7 @@
 #ifndef SEC_LSM_MANAGER_CYNAGORA_INTERFACE_H
 #define SEC_LSM_MANAGER_CYNAGORA_INTERFACE_H
 
-#include "permissions.h"
+#include "context/permissions.h"
 
 #if SIMULATE_CYNAGORA
 #include "simulation/cynagora/cynagora.h"

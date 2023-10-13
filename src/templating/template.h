@@ -21,38 +21,11 @@
  * $RP_END_LICENSE$
  */
 
-#ifndef SEC_LSM_MANAGER_SMACK_H
-#define SEC_LSM_MANAGER_SMACK_H
+#ifndef SEC_LSM_MANAGER_TEMPLATE_H
+#define SEC_LSM_MANAGER_TEMPLATE_H
 
-#include "context.h"
+#include "context/context.h"
 
-/**
- * @brief Install a context for smack
- *
- * @param[in] context context handler
- * @return 0 in case of success or a negative -errno value
- */
-extern int install_smack(const context_t *context) __wur __nonnull();
+extern int process_template(const char *template, const char *dest, const context_t *context);
 
-/**
- * @brief Uninstall a context for smack
- *
- * @param[in] context context handler
- * @return 0 in case of success or a negative -errno value
- */
-extern int uninstall_smack(const context_t *context) __wur __nonnull();
-
-/**
- * @brief get the security label of the application
- *
- * @param[inout] label array receicing the label
- * @param[in] appid the application identifier
- * @param[in] app_id the application identifier with underscores
- */
-__nonnull()
-extern void app_label_smack(char label[SEC_LSM_MANAGER_MAX_SIZE_LABEL + 1], const char *appid);
-
-/************************ FOR TESTING ************************/
-__nonnull((1, 2)) __wur int set_path_labels(const char *path, const char *label, const char *execlabel, bool transmute);
-
-#endif
+#endif /* SEC_LSM_MANAGER_TEMPLATE_H */

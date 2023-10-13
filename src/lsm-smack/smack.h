@@ -21,34 +21,26 @@
  * $RP_END_LICENSE$
  */
 
-#ifndef SEC_LSM_MANAGER_SELINUX_H
-#define SEC_LSM_MANAGER_SELINUX_H
+#ifndef SEC_LSM_MANAGER_SMACK_H
+#define SEC_LSM_MANAGER_SMACK_H
 
-#include "context.h"
-
-/**
- * @brief Check if selinux is enabled
- *
- * @return true if enabled
- * @return false if not
- */
-extern bool selinux_enabled(void) __wur;
+#include "context/context.h"
 
 /**
- * @brief Install a context for selinux
+ * @brief Install a context for smack
  *
- * @param[in] context The handle of context
+ * @param[in] context context handler
  * @return 0 in case of success or a negative -errno value
  */
-extern int install_selinux(const context_t *context) __wur __nonnull();
+extern int install_smack(const context_t *context) __wur __nonnull();
 
 /**
- * @brief Uninstall a context for selinux
+ * @brief Uninstall a context for smack
  *
- * @param[in] context The handle of context
+ * @param[in] context context handler
  * @return 0 in case of success or a negative -errno value
  */
-extern int uninstall_selinux(const context_t *context) __wur __nonnull();
+extern int uninstall_smack(const context_t *context) __wur __nonnull();
 
 /**
  * @brief get the security label of the application
@@ -58,11 +50,9 @@ extern int uninstall_selinux(const context_t *context) __wur __nonnull();
  * @param[in] app_id the application identifier with underscores
  */
 __nonnull()
-extern void app_label_selinux(char label[SEC_LSM_MANAGER_MAX_SIZE_LABEL + 1], const char *appid);
+extern void app_label_smack(char label[SEC_LSM_MANAGER_MAX_SIZE_LABEL + 1], const char *appid);
 
 /************************ FOR TESTING ************************/
-#include "selinux-template.h"
-__nonnull() __wur
-extern int selinux_process_paths(const context_t *context,
-                                            path_type_definitions_t path_type_definitions[number_path_type]);
+__nonnull((1, 2)) __wur int set_path_labels(const char *path, const char *label, const char *execlabel, bool transmute);
+
 #endif

@@ -24,7 +24,7 @@
 #ifndef SEC_LSM_MANAGER_SELINUX_TEMPLATE_H
 #define SEC_LSM_MANAGER_SELINUX_TEMPLATE_H
 
-#include "context.h"
+#include "context/context.h"
 
 #if SIMULATE_SELINUX
 #include "simulation/selinux/selinux.h"

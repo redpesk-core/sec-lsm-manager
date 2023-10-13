@@ -1,8 +1,0 @@
-{
-global:
-    sec_lsm_manager_*;
-local:
-    *;
-};
-
-

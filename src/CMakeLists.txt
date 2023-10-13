@@ -27,6 +27,9 @@ add_compile_definitions(
 	VERSION="${PROJECT_VERSION}"
 	PREFIX="${CMAKE_INSTALL_PREFIX}"
 )
+include_directories(
+	${CMAKE_CURRENT_SOURCE_DIR}
+)
 
 ##########################################################
 # build and install libsec-lsm-manager the client library
@@ -35,14 +38,14 @@ add_compile_definitions(
 message("\n[*] Create : libsec-lsm-manager")
 
 add_library(sec-lsm-manager STATIC
-    prot.c
-    sec-lsm-manager-client.c
-    sec-lsm-manager-protocol.c
-    socket.c
+    protocol/prot.c
+    protocol/sec-lsm-manager-client.c
+    protocol/sec-lsm-manager-protocol.c
+    protocol/socket.c
 )
 install(TARGETS sec-lsm-manager LIBRARY
 		DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR})
-install(FILES sec-lsm-manager-client.h
+install(FILES protocol/sec-lsm-manager-client.h
 		DESTINATION ${CMAKE_INSTALL_FULL_INCLUDEDIR}
 		RENAME sec-lsm-manager.h)
 
@@ -54,19 +57,19 @@ message("[x] Done : libsec-lsm-manager\n")
 
 # common sources
 add_library(common-lib OBJECT
-    action.c
-    context.c
-    cynagora-interface.c
+    action/action.c
+    action/cynagora-interface.c
+    context/context.c
+    context/paths.c
+    context/permissions.c
+    context/plugs.c
     log.c
-    mustach/mustach.c
-    paths.c
-    permissions.c
-    plugs.c
-    pollitem.c
-    prot.c
-    sec-lsm-manager-protocol.c
-    sec-lsm-manager-server.c
-    template.c
+    protocol/pollitem.c
+    protocol/prot.c
+    protocol/sec-lsm-manager-protocol.c
+    protocol/sec-lsm-manager-server.c
+    templating/mustach.c
+    templating/template.c
     utils.c
 )
 if(SIMULATE_CYNAGORA)
@@ -85,8 +88,8 @@ if(SIMULATE_SELINUX)
 endif()
 
 # socket (without or with systemd)
-add_library(socket-std  OBJECT socket.c)
-add_library(socket-srv  OBJECT socket.c)
+add_library(socket-std  OBJECT protocol/socket.c)
+add_library(socket-srv  OBJECT protocol/socket.c)
 if(WITH_SYSTEMD)
     target_compile_definitions(socket-srv PUBLIC WITH_SYSTEMD=1)
     target_link_libraries(socket-srv PUBLIC ${libsystemd_LDFLAGS} ${libsystemd_LINK_LIBRARIES})
@@ -97,8 +100,9 @@ endif()
 
 # smack part
 if(WITH_SMACK)
-    add_library(app-smack OBJECT smack-template.c smack.c)
+    add_library(app-smack OBJECT lsm-smack/smack-template.c lsm-smack/smack.c)
     target_compile_definitions(app-smack PUBLIC WITH_SMACK=1)
+    include_directories(${CMAKE_CURRENT_SOURCE_DIR}/lsm-smack)
 
     if(NOT SIMULATE_SMACK)
         target_link_libraries(app-smack PUBLIC ${libsmack_LDFLAGS} ${libsmack_LINK_LIBRARIES})
@@ -111,11 +115,12 @@ endif()
 
 # selinux part
 if(WITH_SELINUX)
-    add_library(app-selinux OBJECT selinux.c selinux-template.c)
+    add_library(app-selinux OBJECT lsm-selinux/selinux.c lsm-selinux/selinux-template.c)
     target_compile_definitions(app-selinux PUBLIC WITH_SELINUX=1)
+    include_directories(${CMAKE_CURRENT_SOURCE_DIR}/lsm-selinux)
 
     if(NOT SIMULATE_SELINUX)
-        target_sources(app-selinux PRIVATE selinux-compile.c)
+        target_sources(app-selinux PRIVATE lsm-selinux/selinux-compile.c)
         target_link_libraries(app-selinux PUBLIC ${libselinux_LDFLAGS} ${libselinux_LINK_LIBRARIES})
         target_link_libraries(app-selinux PUBLIC ${libsemanage_LDFLAGS} ${libsemanage_LINK_LIBRARIES})
         target_include_directories(app-selinux PUBLIC ${libselinux_INCLUDE_DIRS})

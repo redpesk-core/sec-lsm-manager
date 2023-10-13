@@ -42,8 +42,8 @@
 #include <systemd/sd-daemon.h>
 #endif
 
-#include "sec-lsm-manager-protocol.h"
-#include "sec-lsm-manager-server.h"
+#include "protocol/sec-lsm-manager-protocol.h"
+#include "protocol/sec-lsm-manager-server.h"
 
 #if !defined(SYSTEMD_NAME)
 #define SYSTEMD_NAME "sec-lsm-manager"

@@ -1,3 +1,7 @@
+The files **mustach.c** and **mustach.h** are copied from
+`mustach` on [gitlab](https://gitlab.com/jobol/mustach), version 0.99.
+
+It comes with the below license:
 
 Copyright (c) 2017-2020 by José Bollo
 
@@ -12,3 +16,4 @@ OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE,
 DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS
 ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
+

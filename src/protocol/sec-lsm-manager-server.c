@@ -41,9 +41,8 @@
 #include "pollitem.h"
 #include "prot.h"
 #include "sec-lsm-manager-protocol.h"
-#include "cynagora-interface.h"
-#include "action.h"
-#include "context.h"
+#include "action/action.h"
+#include "context/context.h"
 #include "socket.h"
 #include "utils.h"
 

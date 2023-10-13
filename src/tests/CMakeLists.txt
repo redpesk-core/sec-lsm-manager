@@ -41,17 +41,14 @@ endif()
 
 set(TEST_SOURCES
     setup-tests.c
-    test-prot.c
-    test-paths.c
-    test-plugs.c
-    test-permissions.c
     test-context.c
+    test-cynagora.c
+    test-paths.c
+    test-permissions.c
+    test-plugs.c
+    test-prot.c
     test-utils.c
 )
-
-if(NOT SIMULATE_CYNAGORA)
-    set(TEST_SOURCES ${TEST_SOURCES} test-cynagora.c)
-endif()
 
 if(WITH_SMACK)
     set(TEST_SOURCES_smack ${TEST_SOURCES} test-smack.c test-smack-label.c)

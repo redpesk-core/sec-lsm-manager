@@ -23,7 +23,7 @@
 
 #include "setup-tests.h"
 
-#include "plugs.h"
+#include "context/plugs.h"
 
 START_TEST(test_plugset_init)
 {

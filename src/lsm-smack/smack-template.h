@@ -26,7 +26,7 @@
 
 #include <sys/cdefs.h>
 
-#include "context.h"
+#include "context/context.h"
 
 typedef struct path_type_definitions {
     char label[SEC_LSM_MANAGER_MAX_SIZE_LABEL];

@@ -21,11 +21,39 @@
  * $RP_END_LICENSE$
  */
 
-#ifndef SEC_LSM_MANAGER_TEMPLATE_H
-#define SEC_LSM_MANAGER_TEMPLATE_H
+#ifndef SEC_LSM_MANAGER_ACTION_H
+#define SEC_LSM_MANAGER_ACTION_H
 
-#include "context.h"
+#include "cynagora-interface.h"
+#include "context/context.h"
 
-extern int process_template(const char *template, const char *dest, const context_t *context);
+/**
+ * @brief Install the application
+ *
+ * @param[in] context the application to be installed
+ * @param[in] cynagora handler to cynagora access
+ * @return
+ *    * 0        success
+ *    * -EINVAL  the application identifier is missing
+ *    * -EPERM   no permission to install plugin
+ *    * -ENOTRECOVERABLE state unrecoverable
+ *    * other negative values are possible
+ */
+__nonnull() __wur
+extern int action_install(context_t *context, cynagora_t *cynagora);
 
-#endif /* SEC_LSM_MANAGER_TEMPLATE_H */
+/**
+ * @brief Uninstall the application
+ *
+ * @param[in] context the application to be uninstalled
+ * @param[in] cynagora handler to cynagora access
+ * @return
+ *    * 0        success
+ *    * -EINVAL  the application identifier is missing
+ *    * -ENOTRECOVERABLE state unrecoverable
+ *    * other negative values are possible
+ */
+__nonnull() __wur
+extern int action_uninstall(context_t *context, cynagora_t *cynagora);
+
+#endif

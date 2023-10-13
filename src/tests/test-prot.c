@@ -27,7 +27,7 @@
 #include <errno.h>
 #include <unistd.h>
 
-#include "prot.h"
+#include "protocol/prot.h"
 
 /* the format is STREAM [ FIELDS...] NULL until a NULL line */
 const char *data[] = {

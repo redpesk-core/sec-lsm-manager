@@ -30,30 +30,28 @@
 #endif
 
 #include "utils.h"
-#include "context.h"
-#include "selinux.h"
-#include "selinux-template.h"
+#include "lsm-selinux/selinux.h"
+#include "lsm-selinux/selinux-template.h"
 
 #define TESTID "testid-binding"
 
 START_TEST(test_selinux_process_paths) {
     char etc_tmp_file[SEC_LSM_MANAGER_MAX_SIZE_PATH] = {'\0'};
-    create_etc_tmp_file(etc_tmp_file);
+    create_tmp_file(etc_tmp_file);
 
     path_type_definitions_t path_type_definitions[number_path_type];
     init_path_type_definitions(path_type_definitions, TESTID);
 
     context_t *context = NULL;
     ck_assert_int_eq(create_context(&context), 0);
+    ck_assert_int_eq(context_set_id(context, "testid-binding"), 0);
     ck_assert_int_eq(context_add_path(context, etc_tmp_file, "id"), 0);
 
     ck_assert_int_eq(selinux_process_paths(context, path_type_definitions), 0);
 
-    ck_assert_int_eq(compare_xattr(etc_tmp_file, XATTR_NAME_SELINUX, "system_u:object_r:testid-binding_t:s0"), true);
+    ck_assert_int_eq(compare_xattr(etc_tmp_file, XATTR_NAME_SELINUX, "system_u:object_r:testid_binding_t:s0"), true);
 
-    ck_assert_int_eq(context_add_path(context, "bad_path", "id"), 0);
-
-    ck_assert_int_eq(selinux_process_paths(context, path_type_definitions), -ENOENT);
+    ck_assert_int_eq(context_add_path(context, "bad_path", "id"), -ENOENT);
 
     remove(etc_tmp_file);
 }

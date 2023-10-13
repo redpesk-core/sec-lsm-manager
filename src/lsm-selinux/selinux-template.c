@@ -31,7 +31,7 @@
 #include "sizes.h"
 #include "log.h"
 #include "selinux-compile.h"
-#include "template.h"
+#include "templating/template.h"
 #include "utils.h"
 
 #if !defined(SEC_LSM_MANAGER_DATADIR)

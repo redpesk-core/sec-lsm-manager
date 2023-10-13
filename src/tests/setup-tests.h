@@ -30,16 +30,10 @@ extern void test_permissions(void);
 extern void test_context(void);
 extern void test_utils(void);
 
-#if !SIMULATE_CYNAGORA
 extern void test_cynagora(void);
-#endif
 
-#if WITH_SMACK
 extern void test_smack(void);
 extern void test_smack_label(void);
-#endif
 
-#if WITH_SELINUX
 extern void test_selinux_template(void);
 extern void test_selinux(void);
-#endif

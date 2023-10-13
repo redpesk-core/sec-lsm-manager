@@ -25,7 +25,7 @@
 
 #include <errno.h>
 
-#include "context.h"
+#include "context/context.h"
 
 START_TEST(test_init_context) {
     context_t context;
