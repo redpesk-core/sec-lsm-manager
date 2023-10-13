@@ -64,7 +64,6 @@ add_library(common-lib OBJECT
     plugs.c
     pollitem.c
     prot.c
-    sec-lsm-manager-client.c
     sec-lsm-manager-protocol.c
     sec-lsm-manager-server.c
     template.c
