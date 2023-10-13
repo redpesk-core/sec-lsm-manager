@@ -67,8 +67,10 @@ static int setids(
     char id[SEC_LSM_MANAGER_MAX_SIZE_ID + 1]
 ) {
     int rc = context_is_valid_id(src);
-    if (rc >= 0)
+    if (rc >= 0) {
         memcpy(id, src, (unsigned)rc);
+        rc = 0;
+    }
     return rc;
 }
 

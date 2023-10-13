@@ -58,19 +58,19 @@ START_TEST(test_context_set_id) {
     ck_assert_int_eq(context_set_id(context, "id"), 0);
     ck_assert_str_eq(context->id, "id");
     // test duplicate set id
-    ck_assert_int_eq(context_set_id(context, "id2"), -EINVAL);
+    ck_assert_int_eq(context_set_id(context, "id2"), -EEXIST);
     destroy_context(context);
 
     ck_assert_int_eq(create_context(&context), 0);
-    ck_assert_int_lt(context_set_id(context, "i"), 0);
+    ck_assert_int_eq(context_set_id(context, "i"), -EINVAL);
     destroy_context(context);
 
     ck_assert_int_eq(create_context(&context), 0);
-    ck_assert_int_lt(context_set_id(context, ""), 0);
+    ck_assert_int_eq(context_set_id(context, ""), -EINVAL);
     destroy_context(context);
 
     ck_assert_int_eq(create_context(&context), 0);
-    ck_assert_int_lt(context_set_id(context, "id?bad/name"), 0);
+    ck_assert_int_eq(context_set_id(context, "id?bad/name"), -EINVAL);
     destroy_context(context);
 
     ck_assert_int_eq(create_context(&context), 0);
@@ -78,7 +78,7 @@ START_TEST(test_context_set_id) {
     ck_assert_int_eq((int)context_has_error(context), 0);
     context_raise_error(context);
     ck_assert_int_eq((int)context_has_error(context), 1);
-    ck_assert_int_eq(context_set_id(context, "id3"), -EPERM);
+    ck_assert_int_eq(context_set_id(context, "id3"), -ENOTRECOVERABLE);
     destroy_context(context);
 }
 END_TEST
@@ -92,13 +92,13 @@ START_TEST(test_context_add_permission) {
     ck_assert_str_eq(context->permission_set.permissions[0], "perm");
 
     // test duplicate perm
-    ck_assert_int_eq(context_add_permission(context, "perm"), -EINVAL);
+    ck_assert_int_eq(context_add_permission(context, "perm"), -EEXIST);
 
     // test error flag raise
     ck_assert_int_eq((int)context_has_error(context), 0);
     context_raise_error(context);
     ck_assert_int_eq((int)context_has_error(context), 1);
-    ck_assert_int_eq(context_add_permission(context, "perm2"), -EPERM);
+    ck_assert_int_eq(context_add_permission(context, "perm2"), -ENOTRECOVERABLE);
     destroy_context(context);
 }
 END_TEST
@@ -116,14 +116,14 @@ START_TEST(test_context_add_path) {
     ck_assert_int_eq(context_add_path(context, "/tmp3", "<unset>"), -EINVAL);
 
     // test duplicate path
-    ck_assert_int_eq(context_add_path(context, "/tmp", "data"), -EINVAL);
-    ck_assert_int_eq(context_add_path(context, "/tmp", "conf"), -EINVAL);
+    ck_assert_int_eq(context_add_path(context, "/tmp", "data"), -EEXIST);
+    ck_assert_int_eq(context_add_path(context, "/tmp", "conf"), -EEXIST);
 
     // test error flag raise
     ck_assert_int_eq((int)context_has_error(context), 0);
     context_raise_error(context);
     ck_assert_int_eq((int)context_has_error(context), 1);
-    ck_assert_int_eq(context_add_path(context, "/tmp2", "conf"), -EPERM);
+    ck_assert_int_eq(context_add_path(context, "/tmp2", "conf"), -ENOTRECOVERABLE);
     destroy_context(context);
 }
 END_TEST
