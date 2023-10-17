@@ -1,32 +1,46 @@
 @startuml
 
-class "sec-lsm-manager-server" as slms {
-  - fd
-  - synclock
-  - prot
-  - reply
+class "sec_lsm_manager_server" as slms {
+  + {static} log: bool
+  + pollfd
+  + count: int
+  + stopped: bool
   + {static} create(socketspec)
   + destroy()
-  + disconnect()
-  + clear()
-  + set_id(id)
-  + add_path(path,type)
-  + add_permission(permission)
-  + add_plug(path,id,topath)
-  + install()
-  + uninstall()
-  + log(on,off)
-  + display()
+  + serve(shutofftime)
+  + stop(status)
 }
-
-class prot
-
-slm *-right- prot
 
 class socket {
   + open(spec)
 }
 
-slm -left- socket
+class pollitem {
+  + closure
+  + fd: int
+  + {field} handler: lambda(pollitem, events, pollfd)
+  + add(events, pollfd)
+  + mod(events, pollfd)
+  + del(events, pollfd)
+  + {static} wait_dispatch(pollfd, timeout)
+}
+
+class client {
+  + version
+  + invalid: bool
+}
+
+class prot
+class context
+
+
+pollitem <|-- slms
+pollitem <|-- client
+
+slms -left- socket
+slms  *- "*" client : clients
+
+client *-- prot
+client *-- context
 
 @enduml

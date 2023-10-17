@@ -1,32 +1,37 @@
 @startuml
 
-class "sec-lsm-manager" as slm {
+class "sec_lsm_manager_client" as slmc {
   - fd
   - synclock
   - prot
   - reply
+  .. life cycle ..
   + {static} create(socketspec)
   + destroy()
   + disconnect()
-  + clear()
+  .. meta ..
+  + log(on,off)
+  + error_message(out message)
+  .. context ..
   + set_id(id)
   + add_path(path,type)
   + add_permission(permission)
   + add_plug(path,id,topath)
+  + display()
+  .. action ..
+  + clear()
   + install()
   + uninstall()
-  + log(on,off)
-  + display()
 }
 
 class prot
 
-slm *-right- prot
+slmc *-right- prot
 
 class socket {
   + open(spec)
 }
 
-slm -left- socket
+slmc -left- socket
 
 @enduml

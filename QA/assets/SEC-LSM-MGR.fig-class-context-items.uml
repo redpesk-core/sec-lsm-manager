@@ -1,0 +1,66 @@
+@startuml
+
+
+class plug {
+  # next: plug
+  + expdir: string
+  + impid: string
+  + impdir: string
+}
+
+class plugset {
+  + init()
+  + clear()
+  + add(expdir, impid, impdir: string): int
+  + has(expdir, impid, impdir: string): bool
+}
+
+plug <|-- plugset
+plug *-- "0 .. 1" plug : next
+
+
+enum path_type {
+   type_unset
+   type_default
+   type_conf
+   type_data
+   type_exec
+   type_http
+   type_icon
+   type_id
+   type_lib
+   type_plug
+   type_public
+   + {static} get(name: string): path_type
+   + name(): string
+   + is_valid(): bool
+}
+
+class path {
+   + type: path_type
+   + path: string
+}
+
+class path_set {
+   # paths: path[]
+   # size: size_t
+
+   + init()
+   + clear()
+   + add(path: string, path_type: path_type)
+}
+
+path_set "1" *-- "0 .. size-1" path : paths
+path o-- path_type : type
+
+class permission_set {
+   # permissions: string[]
+   # size: size_t
+
+   + init()
+   + clear()
+   + add(permission: string)
+   + has(permission: string): bool
+}
+
+@enduml

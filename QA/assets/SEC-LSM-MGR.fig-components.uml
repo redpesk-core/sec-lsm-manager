@@ -1,25 +1,26 @@
 @startuml
 
 component SEC-LSM-MGR {
-  () API
-  [server]
-  [protocol]
-  [configuration]
+  component protocol {
+      [server]
+  }
   [permission]
-  [template]
-  [system]
+  [templating]
+  [MAC-LSM]
+  [context]
+  [action]
   [tool]
-  [library]
-  tool -> API
-  API - library
-  library -- protocol
-  protocol -- server
-  server -- permission
-  server - system
-  system - template
+
+  client -- tool
+  server -- context
+  server -- action
+  action -- "MAC-LSM"
+  action -- permission
+  action -- context
+  "MAC-LSM" - templating
 }
-system --- [linux kernel]
-system --- [file system]
+"MAC-LSM" --- [linux kernel]
+"MAC-LSM" --- [file system]
 permission --- [CYNAGORA]
 
 @enduml

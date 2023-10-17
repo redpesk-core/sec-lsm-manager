@@ -1,0 +1,26 @@
+@startuml
+
+class buf {
+  # pos
+  # count
+  # content[PROT_MAX_BUFFER_LENGTH]
+  # put_car(car)
+  # put_string(string)
+  # write_length(fdout, length)
+  # get_fields(inout fields)
+  # scan_end_record()
+  # crop()
+  # read(fdin)
+}
+
+class fields {
+  # count
+  # fields[PROT_MAX_FIELDS]
+}
+
+class prot
+prot o-left- buf : inbuf, outbuf
+prot o-right- fields : fields
+
+@enduml
+

@@ -1,0 +1,25 @@
+@startuml
+
+class action {
+  + install(context)
+  + uninstall(context)
+}
+
+class cynagora_interface {
+  + set_policies(label, permission_set): int
+  + drop_policies(label): int
+  + check_permission(label, permission): int
+}
+
+abstract class MAC {
+
+  + install(context): int
+  + uninstall(context): int
+  + get_label(out label, in id: string)
+
+}
+
+action -- cynagora_interface
+action -- MAC
+
+@enduml
