@@ -28,21 +28,55 @@
 
 #include "log.h"
 
+#if SIMULATE_CYNAGORA
+#include "simulation/cynagora/cynagora.h"
+#else
+#include <cynagora.h>
+#endif
+
 #define CYNAGORA_SELECT_ALL "#"
 #define CYNAGORA_INSERT_ALL "*"
 #define CYNAGORA_AUTHORIZED "yes"
+
+
+/** cynagora client used by all client */
+cynagora_t *cynagora_handler = NULL;
+
+/***********************/
+/*** PRIVATE METHODS ***/
+/***********************/
+
+static int get(cynagora_t **handler)
+{
+    if (cynagora_handler == NULL) {
+        int rc = cynagora_create(&cynagora_handler, cynagora_Admin, 1, 0);
+        if (rc < 0) {
+            ERROR("cynagora_create: %d %s", -rc, strerror(-rc));
+            cynagora_handler = NULL;
+            return rc;
+        }
+    }
+    *handler = cynagora_handler;
+    return 0;
+}
 
 /**********************/
 /*** PUBLIC METHODS ***/
 /**********************/
 
 /* see cynagora-interface.h */
-__wur __nonnull((1,2))
-int cynagora_set_policies(cynagora_t *cynagora, const char *label, const permission_set_t *permission_set, int drop_before) {
+__wur __nonnull((1))
+int cynagora_set_policies(const char *label, const permission_set_t *permission_set, int drop_before) {
     size_t i;
     int rc2, rc;
     cynagora_key_t key;
     cynagora_value_t val;
+    cynagora_t *cynagora;
+
+    /* get cynagora common handler */
+    rc = get(&cynagora);
+    if (rc < 0)
+        return rc;
 
     /* enter to modify policies cynagora */
     rc = cynagora_enter(cynagora);
@@ -93,13 +127,13 @@ int cynagora_set_policies(cynagora_t *cynagora, const char *label, const permiss
 }
 
 /* see cynagora-interface.h */
-int cynagora_drop_policies(cynagora_t *cynagora, const char *label) {
-    return cynagora_set_policies(cynagora, label, NULL, 1);
+int cynagora_drop_policies(const char *label) {
+    return cynagora_set_policies(label, NULL, 1);
 }
 
 /* see cynagora-interface.h */
 __nonnull() __wur
-int cynagora_check_permission(cynagora_t *cynagora, const char *label, const char *permission)
+int cynagora_check_permission(const char *label, const char *permission)
 {
     cynagora_key_t key = {
         .client = label,
@@ -107,5 +141,45 @@ int cynagora_check_permission(cynagora_t *cynagora, const char *label, const cha
         .user = "-",
         .permission = permission
     };
+    cynagora_t *cynagora;
+
+    /* get cynagora common handler */
+    int rc = get(&cynagora);
+    if (rc < 0)
+        return rc;
+
     return cynagora_check(cynagora, &key, 0);
 }
+
+static void list(void *closure, const cynagora_key_t *key, const cynagora_value_t *value) {
+    (void)value;
+    int rc = permission_set_add_permission(closure, key->permission);
+    (void)rc;
+}
+
+__nonnull() __wur
+int cynagora_get_policies(const char *label, permission_set_t *permission_set) {
+    cynagora_key_t k = {
+        .client = label,
+        .session = CYNAGORA_SELECT_ALL,
+        .user = CYNAGORA_SELECT_ALL,
+        .permission = CYNAGORA_SELECT_ALL
+    };
+    int rc;
+    cynagora_t *cynagora;
+
+    /* init */
+    init_permission_set(permission_set);
+
+    /* get cynagora common handler */
+    rc = get(&cynagora);
+    if (rc < 0)
+        return rc;
+
+    rc = cynagora_get(cynagora, &k, list, permission_set);
+    if (rc < 0)
+        return rc;
+
+    return 0;
+}
+

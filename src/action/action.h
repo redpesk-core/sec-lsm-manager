@@ -24,14 +24,12 @@
 #ifndef SEC_LSM_MANAGER_ACTION_H
 #define SEC_LSM_MANAGER_ACTION_H
 
-#include "cynagora-interface.h"
 #include "context/context.h"
 
 /**
  * @brief Install the application
  *
  * @param[in] context the application to be installed
- * @param[in] cynagora handler to cynagora access
  * @return
  *    * 0        success
  *    * -EINVAL  the application identifier is missing
@@ -40,13 +38,12 @@
  *    * other negative values are possible
  */
 __nonnull() __wur
-extern int action_install(context_t *context, cynagora_t *cynagora);
+extern int action_install(context_t *context);
 
 /**
  * @brief Uninstall the application
  *
  * @param[in] context the application to be uninstalled
- * @param[in] cynagora handler to cynagora access
  * @return
  *    * 0        success
  *    * -EINVAL  the application identifier is missing
@@ -54,6 +51,6 @@ extern int action_install(context_t *context, cynagora_t *cynagora);
  *    * other negative values are possible
  */
 __nonnull() __wur
-extern int action_uninstall(context_t *context, cynagora_t *cynagora);
+extern int action_uninstall(context_t *context);
 
 #endif

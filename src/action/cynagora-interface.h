@@ -26,43 +26,38 @@
 
 #include "context/permissions.h"
 
-#if SIMULATE_CYNAGORA
-#include "simulation/cynagora/cynagora.h"
-#else
-#include <cynagora.h>
-#endif
-
 /**
  * @brief Define new permissions in cynagora
  *
- * @param[in] cynagora cynagora admin client
  * @param[in] label label of the application
  * @param[in] permission_set array of permission_set_t (can be NULL)
  * @param[in] drop_before if not zero, a drop is done before
  * @return 0 in case of success or a negative -errno value
  */
-__wur __nonnull((1,2))
-extern int cynagora_set_policies(cynagora_t *cynagora, const char *label, const permission_set_t *permission_set, int drop_before);
+__wur __nonnull((1))
+extern int cynagora_set_policies(const char *label, const permission_set_t *permission_set, int drop_before);
 
 /**
  * @brief Drop old policies of cynagora for a label (client)
  *
- * @param[in] cynagora cynagora admin client
  * @param[in] label the label of the application for which to remove permissions
  * @return 0 in case of success or a negative -errno value
  */
-extern int cynagora_drop_policies(cynagora_t *cynagora, const char *label) __wur __nonnull();
+extern int cynagora_drop_policies(const char *label) __wur __nonnull();
 
 /**
  * @brief Check if application of label has the permission
  *
- * @param[in] cynagora handler to cynagora access
  * @param[in] label label of the application
  * @param[in] permission permission to check
  * @return 0 when permission is not granted, 1 when it is granted
  *         or a negative -errno value in case of failure
  */
 __nonnull() __wur
-extern int cynagora_check_permission(cynagora_t *cynagora, const char *label, const char *permission);
+extern int cynagora_check_permission(const char *label, const char *permission);
+
+/** for test **/
+__nonnull() __wur
+extern int cynagora_get_policies(const char *label, permission_set_t *permission_set);
 
 #endif

@@ -31,6 +31,7 @@
 
 #include "log.h"
 #include "utils.h"
+#include "cynagora-interface.h"
 
  __wur __nonnull() extern int install_mac(const context_t *context);
  __wur __nonnull() extern int uninstall_mac(const context_t *context);
@@ -48,7 +49,7 @@ __nonnull() extern void app_label_mac(char label[SEC_LSM_MANAGER_MAX_SIZE_LABEL 
  * @return 0 in case of success or a negative -errno value
  */
 __nonnull() __wur
-static int check_plug_installable(context_t *context, cynagora_t *cynagora)
+static int check_plug_installable(context_t *context)
 {
     static const char perm_public_plug[] = "urn:redpesk:permission::public:plugs";
     static const char perm_export_template[] = "urn:redpesk:permission:%s:%s:export:plug";
@@ -68,7 +69,7 @@ static int check_plug_installable(context_t *context, cynagora_t *cynagora)
         /* compute the label of the application importing the plug */
         app_label_mac(label, plugit->impid);
         if (sts == 0) {
-            sts = cynagora_check_permission(cynagora, label, perm_public_plug);
+            sts = cynagora_check_permission(label, perm_public_plug);
             if (sts < 0) {
                 ERROR("can't query cynagora");
             }
@@ -122,7 +123,7 @@ static int check_context(context_t *context, char label[SEC_LSM_MANAGER_MAX_SIZE
 
 /* see action.h */
 __nonnull() __wur
-int action_install(context_t *context, cynagora_t *cynagora)
+int action_install(context_t *context)
 {
     /* check consistency */
     char label[SEC_LSM_MANAGER_MAX_SIZE_LABEL + 1];
@@ -130,13 +131,13 @@ int action_install(context_t *context, cynagora_t *cynagora)
     int rc2, rc = check_context(context, label);
     if (rc < 0)
         return rc;
-    rc = check_plug_installable(context, cynagora);
+    rc = check_plug_installable(context);
     if (rc < 0)
         return rc;
 
     /* set cynagora policies */
     if (has_id) {
-        rc = cynagora_set_policies(cynagora, label, &(context->permission_set), 1);
+        rc = cynagora_set_policies(label, &(context->permission_set), 1);
         if (rc < 0) {
             ERROR("cynagora_set_policies: %d %s", -rc, strerror(-rc));
             return rc;
@@ -149,7 +150,7 @@ int action_install(context_t *context, cynagora_t *cynagora)
     if (rc < 0) {
         ERROR("install_mac: %d %s", -rc, strerror(-rc));
         if (has_id) {
-            rc2 = cynagora_drop_policies(cynagora, label);
+            rc2 = cynagora_drop_policies(label);
             if (rc2 < 0) {
                 ERROR("cannot delete policy: %d %s", -rc2, strerror(-rc2));
             }
@@ -164,7 +165,7 @@ int action_install(context_t *context, cynagora_t *cynagora)
 
 /* see action.h */
 __nonnull() __wur
-int action_uninstall(context_t *context, cynagora_t *cynagora)
+int action_uninstall(context_t *context)
 {
     /* check consistency */
     char label[SEC_LSM_MANAGER_MAX_SIZE_LABEL + 1];
@@ -175,7 +176,7 @@ int action_uninstall(context_t *context, cynagora_t *cynagora)
 
     /* drop cynagora policies */
     if (has_id) {
-        rc = cynagora_drop_policies(cynagora, label);
+        rc = cynagora_drop_policies(label);
         if (rc < 0) {
             ERROR("cynagora_drop_policies: %d %s", -rc, strerror(-rc));
             return rc;

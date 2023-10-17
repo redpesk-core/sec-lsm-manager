@@ -95,9 +95,6 @@ struct sec_lsm_manager_server {
     /** is stopped ? */
     int stopped;
 
-    /** cynagora client used by all client */
-    cynagora_t *cynagora_admin_client;
-
     /** the server socket */
     pollitem_t socket;
 };
@@ -412,7 +409,7 @@ __nonnull((1)) static void onrequest(client_t *cli, unsigned count, const char *
             }
             /* install */
             if (ckarg(args[0], _install_, 1) && count == 1) {
-                rc = action_install(cli->context, cli->sec_lsm_manager_server->cynagora_admin_client);
+                rc = action_install(cli->context);
                 if (rc >= 0) {
                     send_done(cli, NULL);
                 } else {
@@ -503,7 +500,7 @@ __nonnull((1)) static void onrequest(client_t *cli, unsigned count, const char *
         case 'u':
             /* uninstall */
             if (ckarg(args[0], _uninstall_, 1) && count == 1) {
-                rc = action_uninstall(cli->context, cli->sec_lsm_manager_server->cynagora_admin_client);
+                rc = action_uninstall(cli->context);
                 if (rc >= 0) {
                     send_done(cli, NULL);
                 } else {
@@ -535,9 +532,6 @@ invalid_protocol:
  */
 __nonnull((1)) static void destroy_client(client_t *cli, bool closefds) {
     cli->sec_lsm_manager_server->count--;
-    if (!cli->sec_lsm_manager_server->count) {
-        cynagora_disconnect(cli->sec_lsm_manager_server->cynagora_admin_client);
-    }
 
     /* close protocol */
     if (closefds)
@@ -708,8 +702,6 @@ void sec_lsm_manager_server_destroy(sec_lsm_manager_server_t *server) {
         close(server->socket.fd);
     free(server);
     server = NULL;
-    cynagora_destroy(server->cynagora_admin_client);
-    server->cynagora_admin_client = NULL;
 }
 
 /* see sec-lsm-manager-server.h */
@@ -759,13 +751,6 @@ __wur int sec_lsm_manager_server_create(sec_lsm_manager_server_t **server, const
         goto error;
     }
 
-    rc = cynagora_create(&((*server)->cynagora_admin_client), cynagora_Admin, 1, 0);
-    if (rc < 0) {
-        ERROR("cynagora_create: %d %s", -rc, strerror(-rc));
-        (*server)->cynagora_admin_client = NULL;
-        goto error;
-    }
-
     goto ret;
 
 error:
@@ -777,7 +762,6 @@ ret:
 /* see sec-lsm-manager-server.h */
 void sec_lsm_manager_server_stop(sec_lsm_manager_server_t *server, int status) {
     server->stopped = status != 0 ? status : INT_MIN;
-    cynagora_disconnect(server->cynagora_admin_client);
 }
 
 /* see sec-lsm-manager-server.h */
