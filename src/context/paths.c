@@ -93,7 +93,7 @@ int path_set_add_path(path_set_t *path_set, const char *path, enum path_type pat
         return -ENOMEM;
     }
     
-    secure_strncpy(path_item->path, path, path_len + 1);
+    memcpy(path_item->path, path, path_len + 1);
     while (path_len > 1 && path_item->path[path_len - 1] == '/') {
         path_item->path[--path_len] = '\0';
     }

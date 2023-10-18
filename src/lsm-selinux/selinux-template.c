@@ -92,13 +92,11 @@ __nonnull() static void init_selinux_module(selinux_module_t *selinux_module, co
 
     /* TODO: treat the case type_default or treat when label is "" */
 
-    secure_strncpy(selinux_module->selinux_rules_dir, get_selinux_rules_dir(NULL), SEC_LSM_MANAGER_MAX_SIZE_DIR);
-
-    secure_strncpy(selinux_module->selinux_te_template_file, get_selinux_te_template_file(NULL),
-                   SEC_LSM_MANAGER_MAX_SIZE_PATH);
-
-    secure_strncpy(selinux_module->selinux_if_template_file, get_selinux_if_template_file(NULL),
-                   SEC_LSM_MANAGER_MAX_SIZE_PATH);
+#define COPY(to, from) do { strncpy((to), (from), sizeof(to)); (to)[sizeof(to) - 1] = '\0'; } while(0)
+    COPY(selinux_module->selinux_rules_dir, get_selinux_rules_dir(NULL));
+    COPY(selinux_module->selinux_te_template_file, get_selinux_te_template_file(NULL));
+    COPY(selinux_module->selinux_if_template_file, get_selinux_if_template_file(NULL));
+#undef COPY
 
     snprintf(selinux_module->selinux_te_file, SEMOD_MAX_SIZE_PATH, "%s/%s.%s",
              selinux_module->selinux_rules_dir, context->id, TE_EXTENSION);
@@ -459,42 +457,34 @@ end:
     return ret;
 }
 
+/* see selinux-template.h */
+__nonnull((2,3))
+static const char *get_opt_env_def(const char *value, const char *envname, const char *defvalue) {
+    if (value == NULL) {
+        value = secure_getenv(envname);
+        if (value == NULL)
+            value = defvalue;
+    }
+    return value;
+}
+
 /**********************/
 /*** PUBLIC METHODS ***/
 /**********************/
 
 /* see selinux-template.h */
 const char *get_selinux_te_template_file(const char *value) {
-    if (value == NULL) {
-        value = secure_getenv("SELINUX_TE_TEMPLATE_FILE");
-        if (value == NULL)
-            value = default_selinux_te_template_file;
-    }
-    return value;
+    return get_opt_env_def(value, "SELINUX_TE_TEMPLATE_FILE", default_selinux_te_template_file);
 }
 
 /* see selinux-template.h */
 const char *get_selinux_if_template_file(const char *value) {
-    if (value == NULL) {
-        value = secure_getenv("SELINUX_IF_TEMPLATE_FILE");
-        if (value == NULL)
-            value = default_selinux_if_template_file;
-    }
-    return value;
+    return get_opt_env_def(value, "SELINUX_IF_TEMPLATE_FILE", default_selinux_if_template_file);
 }
 
 /* see selinux-template.h */
 const char *get_selinux_rules_dir(const char *value) {
-    if (value == NULL) {
-        value = secure_getenv("SELINUX_RULES_DIR");
-        if (value == NULL)
-            value = default_selinux_rules_dir;
-    }
-    if (strlen(value) >= SEC_LSM_MANAGER_MAX_SIZE_DIR) {
-        value = NULL;
-        ERROR("selinux_rules_dir too long");
-    }
-    return value;
+    return get_opt_env_def(value, "SELINUX_RULES_DIR", default_selinux_rules_dir);
 }
 
 /* see selinux-label.h */

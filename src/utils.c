@@ -42,16 +42,6 @@ static const size_t BLOCKSIZE = 8192;
 /*** PUBLIC METHODS ***/
 /**********************/
 
-char *secure_strncpy(char *dest, const char *src, size_t n) {
-    char *ret = NULL;
-    if (dest != NULL && src != NULL) {
-        ret = strncpy(dest, src, n - 1);
-        if (n > 0)
-            dest[n - 1] = '\0';
-    }
-    return ret;
-}
-
 /* see utils.h */
 int set_label(const char *path, const char *xattr, const char *value) {
     int rc = lsetxattr(path, xattr, value, strlen(value), 0);

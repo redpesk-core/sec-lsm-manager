@@ -28,8 +28,6 @@
 #include <stdbool.h>
 #include <sys/types.h>
 
-extern char *secure_strncpy(char *dest, const char *src, size_t n) __nonnull((1, 2));
-
 /**
  * @brief Set label attr on file
  *

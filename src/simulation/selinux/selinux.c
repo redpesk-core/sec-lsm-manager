@@ -48,8 +48,9 @@ static int ptr = 0;
 #include "../../sizes.h"
 #include "../../utils.h"
 
+#define SEMIFO_NAMELEN 256
 struct semanage_module_info {
-    char name[256];
+    char name[SEMIFO_NAMELEN + 1];
 };
 
 ////////////////////////////////////////////
@@ -144,8 +145,10 @@ int semanage_module_list(semanage_handle_t *sh, semanage_module_info_t **semanag
     dir = opendir(SELINUX_POLICY_DIR);
     if (dir != NULL) {
         while (i < *num_modules) {
+            char *name = (*semanage_module_info)[i].name;
             file = readdir(dir);
-            secure_strncpy((*semanage_module_info)[i].name, file->d_name, 256);
+            strncpy(name, file->d_name, SEMIFO_NAMELEN);
+	    name[SEMIFO_NAMELEN] = 0;
             i++;
         }
         closedir(dir);

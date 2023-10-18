@@ -60,7 +60,7 @@ START_TEST(test_generate_app_module_fc) {
 END_TEST
 
 START_TEST(test_generate_app_module_files) {
-    char tmp_dir[SEC_LSM_MANAGER_MAX_SIZE_DIR] = {'\0'};
+    char tmp_dir[SEC_LSM_MANAGER_MAX_SIZE_DIR + 1] = {'\0'};
     create_tmp_dir(tmp_dir);
 
     context_t *context = NULL;
@@ -76,14 +76,16 @@ START_TEST(test_generate_app_module_files) {
 
     ck_assert_int_lt(generate_app_module_files(&selinux_module, context, path_type_definitions), 0);
 
-    secure_strncpy(selinux_module.selinux_te_template_file, "/usr/share/sec-lsm-manager/app-template.te",
+    strncpy(selinux_module.selinux_te_template_file, "/usr/share/sec-lsm-manager/app-template.te",
                    SEC_LSM_MANAGER_MAX_SIZE_PATH);
+    tmp_dir[SEC_LSM_MANAGER_MAX_SIZE_DIR] = '\0';
     snprintf(selinux_module.selinux_te_file, SEC_LSM_MANAGER_MAX_SIZE_PATH, "%s/%s", tmp_dir, "tefile");
 
     ck_assert_int_lt(generate_app_module_files(&selinux_module, context, path_type_definitions), 0);
 
-    secure_strncpy(selinux_module.selinux_if_template_file, "/usr/share/sec-lsm-manager/app-template.if",
+    strncpy(selinux_module.selinux_if_template_file, "/usr/share/sec-lsm-manager/app-template.if",
                    SEC_LSM_MANAGER_MAX_SIZE_PATH);
+    tmp_dir[SEC_LSM_MANAGER_MAX_SIZE_DIR] = '\0';
     snprintf(selinux_module.selinux_if_file, SEC_LSM_MANAGER_MAX_SIZE_PATH, "%s/%s", tmp_dir, "iffile");
 
     ck_assert_int_lt(generate_app_module_files(&selinux_module, context, path_type_definitions), 0);

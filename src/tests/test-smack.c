@@ -39,13 +39,13 @@
 //     // path and label not set + file not created
 //     ck_assert_int_lt(label_file(tmp_file, label), 0);
 //     // set label
-//     secure_strncpy(label, "label", SEC_LSM_MANAGER_MAX_SIZE_LABEL);
+//     strncpy(label, "label", SEC_LSM_MANAGER_MAX_SIZE_LABEL);
 //     ck_assert_int_lt(label_file(tmp_file, label), 0);
 //     // create file
 //     create_tmp_file(tmp_file);
 //     ck_assert_int_eq(label_file(tmp_file, label), 0);
 //     // set label = ""
-//     secure_strncpy(label, "", SEC_LSM_MANAGER_MAX_SIZE_LABEL);
+//     strncpy(label, "", SEC_LSM_MANAGER_MAX_SIZE_LABEL);
 //     ck_assert_int_lt(label_file(tmp_file, label), 0);
 //     remove(tmp_file);
 // }
@@ -77,7 +77,7 @@ START_TEST(test_label_path) {
     char tmp_dir[SEC_LSM_MANAGER_MAX_SIZE_DIR] = {'\0'};
 
     // path not set + file and dir not created
-    secure_strncpy(label, "label", SEC_LSM_MANAGER_MAX_SIZE_LABEL);
+    strcpy(label, "label");
     ck_assert_int_lt(set_path_labels(tmp_dir, label, 0, 1), 0);
     ck_assert_int_lt(set_path_labels(path, label, label, 1), 0);
 
