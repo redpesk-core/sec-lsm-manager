@@ -44,7 +44,7 @@
 #include "action/action.h"
 #include "context/context.h"
 #include "socket.h"
-#include "utils.h"
+#include "utf8-utils.h"
 
 typedef struct client client_t;
 

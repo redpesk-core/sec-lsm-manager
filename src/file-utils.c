@@ -22,17 +22,15 @@
  * $RP_END_LICENSE$
  */
 
-#include "utils.h"
+#include "file-utils.h"
 
-#include <errno.h>
-#include <fcntl.h>
-#include <stddef.h>
-#include <stdio.h>
 #include <stdlib.h>
+#include <stdio.h>
+#include <errno.h>
+#include <unistd.h>
 #include <string.h>
 #include <sys/stat.h>
-#include <sys/xattr.h>
-#include <unistd.h>
+#include <fcntl.h>
 
 #include "log.h"
 
@@ -42,35 +40,7 @@ static const size_t BLOCKSIZE = 8192;
 /*** PUBLIC METHODS ***/
 /**********************/
 
-/* see utils.h */
-int set_label(const char *path, const char *xattr, const char *value) {
-    int rc = lsetxattr(path, xattr, value, strlen(value), 0);
-    if (rc < 0) {
-        rc = -errno;
-        ERROR("lsetxattr('%s','%s','%s',%ld,%d) : %d %s", path, xattr, value, strlen(value), 0, -rc, strerror(-rc));
-        return rc;
-    }
-
-    DEBUG("set %s=%s on %s", xattr, value, path);
-
-    return 0;
-}
-
-/* see utils.h */
-int unset_label(const char *path, const char *xattr) {
-    int rc = lremovexattr(path, xattr);
-    if (rc < 0 && errno != ENODATA) {
-        rc = -errno;
-        ERROR("lremovexattr('%s','%s') : %d %s", path, xattr, -rc, strerror(-rc));
-        return rc;
-    }
-
-    DEBUG("drop %s from %s", xattr, path);
-
-    return 0;
-}
-
-/* see utils.h */
+/* see file-utils.h */
 void get_file_informations(const char *path, bool *exists, bool *is_exec, bool *is_dir) {
     int rc = get_path_property(path);
 
@@ -84,7 +54,7 @@ void get_file_informations(const char *path, bool *exists, bool *is_exec, bool *
         *is_dir = rc == PATH_DIRECTORY;
 }
 
-/* see utils.h */
+/* see file-utils.h */
 int create_file(const char *path) {
     int rc;
     int fd = creat(path, S_IRWXU | S_IRWXG);
@@ -97,7 +67,7 @@ int create_file(const char *path) {
     return 0;
 }
 
-/* see utils.h */
+/* see file-utils.h */
 int remove_file(const char *path) {
     int rc = remove(path);
     if (rc < 0) {
@@ -108,7 +78,7 @@ int remove_file(const char *path) {
     return 0;
 }
 
-/* see utils.h */
+/* see file-utils.h */
 char *read_file(const char *filename) {
     int f;
     struct stat s;
@@ -171,7 +141,7 @@ end:
     return result;
 }
 
-/* see utils.h */
+/* see file-utils.h */
 __nonnull()
 int get_path_property(const char path[])
 {
@@ -194,42 +164,17 @@ int get_path_property(const char path[])
     return rc;
 }
 
-/* see utils.h */
+/* see file-utils.h */
 int check_path_exists(const char path[])
 {
     int rc = get_path_property(path);
     return rc < 0 ? rc : 0;
 }
 
-/* see utils.h */
+/* see file-utils.h */
 int check_directory_exists(const char path[])
 {
     int rc = get_path_property(path);
     return rc < 0 ? rc : rc == PATH_DIRECTORY ? 0 : -ENOTDIR;
-}
-
-/* see utils.h */
-bool is_utf8(const char *text)
-{
-    unsigned len;
-    const unsigned char *iter = (const unsigned char *)text;
-    while (*iter) {
-        if (*iter <= 0x7f)
-            len = 0;
-        else if (*iter <= 0xbf)
-            return false;
-        else if (*iter <= 0xdf)
-            len = 1;
-        else if (*iter <= 0xef)
-            len = 2;
-        else if (*iter <= 0xf7)
-            len = 3;
-        else
-            return false;
-        for (iter++; len ; len--, iter++)
-            if (*iter < 0x80 || *iter > 0xbf)
-                return false;
-    }
-    return true;
 }
 

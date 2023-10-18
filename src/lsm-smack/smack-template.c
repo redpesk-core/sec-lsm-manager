@@ -38,7 +38,7 @@
 
 #include "log.h"
 #include "templating/template.h"
-#include "utils.h"
+#include "file-utils.h"
 
 #define SMACK_EXTENSION "smack"
 

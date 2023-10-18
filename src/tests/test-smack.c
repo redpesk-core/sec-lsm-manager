@@ -29,7 +29,7 @@
 #include <sys/smack.h>
 #endif
 
-#include "utils.h"
+#include "file-utils.h"
 #include "lsm-smack/smack.h"
 #include "lsm-smack/smack-template.h"
 

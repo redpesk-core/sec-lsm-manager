@@ -46,7 +46,7 @@ static int ptr = 0;
 #include <sys/types.h>
 
 #include "../../sizes.h"
-#include "../../utils.h"
+#include "../../file-utils.h"
 
 #define SEMIFO_NAMELEN 256
 struct semanage_module_info {

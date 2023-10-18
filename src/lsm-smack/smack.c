@@ -33,7 +33,8 @@
 
 #include "log.h"
 #include "smack-template.h"
-#include "utils.h"
+#include "file-utils.h"
+#include "xattr-utils.h"
 
 #define DROP_LABEL "User:Home"
 
@@ -71,7 +72,7 @@ static int unset_path_labels(const char *path) {
         return pp;
 
     // file
-    rc = unset_label(path, XATTR_NAME_SMACK);
+    rc = unset_xattr(path, XATTR_NAME_SMACK);
     if (rc < 0) {
         ERROR("unlabel(%s): %d %s", path, -rc, strerror(-rc));
         return rc;
@@ -79,7 +80,7 @@ static int unset_path_labels(const char *path) {
 
     // exec
     if (pp == PATH_FILE_EXEC) {
-        rc = unset_label(path, XATTR_NAME_SMACKEXEC);
+        rc = unset_xattr(path, XATTR_NAME_SMACKEXEC);
         if (rc < 0) {
             ERROR("unlabel exec(%s): %d %s", path, -rc, strerror(-rc));
             return rc;
@@ -88,7 +89,7 @@ static int unset_path_labels(const char *path) {
 
     // dir
     if (pp == PATH_DIRECTORY) {
-        rc = unset_label(path, XATTR_NAME_SMACKTRANSMUTE);
+        rc = unset_xattr(path, XATTR_NAME_SMACKTRANSMUTE);
         if (rc < 0) {
             ERROR("unlabel transmute(%s): %d %s", path, -rc, strerror(-rc));
             return rc;
@@ -111,15 +112,15 @@ __nonnull((1, 2)) __wur
 int set_path_labels(const char *path, const char *label, const char *execlabel, bool transmute)
 {
     // access
-    int rc = set_label(path, XATTR_NAME_SMACK, label);
+    int rc = set_xattr(path, XATTR_NAME_SMACK, label);
     if (rc < 0) {
-        ERROR("set_label(%s,%s,%s) : %d %s", path, XATTR_NAME_SMACK, label, -rc, strerror(-rc));
+        ERROR("set_xattr(%s,%s,%s) : %d %s", path, XATTR_NAME_SMACK, label, -rc, strerror(-rc));
         return rc;
     }
 
     // exec
     if (execlabel) {
-        rc = set_label(path, XATTR_NAME_SMACKEXEC, execlabel);
+        rc = set_xattr(path, XATTR_NAME_SMACKEXEC, execlabel);
         if (rc < 0) {
             ERROR("set_smack(%s,%s,%s) : %d %s", path, XATTR_NAME_SMACKEXEC, execlabel, -rc, strerror(-rc));
             return rc;
@@ -128,9 +129,9 @@ int set_path_labels(const char *path, const char *label, const char *execlabel, 
 
     // transmute
     if (transmute) {
-        rc = set_label(path, XATTR_NAME_SMACKTRANSMUTE, "TRUE");
+        rc = set_xattr(path, XATTR_NAME_SMACKTRANSMUTE, "TRUE");
         if (rc < 0) {
-            ERROR("set_label(%s,%s,%s) : %d %s", path, XATTR_NAME_SMACKTRANSMUTE, "TRUE", -rc, strerror(-rc));
+            ERROR("set_xattr(%s,%s,%s) : %d %s", path, XATTR_NAME_SMACKTRANSMUTE, "TRUE", -rc, strerror(-rc));
             return rc;
         }
     }
@@ -233,7 +234,7 @@ static int install_smack_plugs(const context_t *context)
             }
             else {
                 app_label_smack(label, context->id);
-                rc2 = set_label(buffer, XATTR_NAME_SMACK, label);
+                rc2 = set_xattr(buffer, XATTR_NAME_SMACK, label);
             }
         }
         if (rc2 < 0 && rc == 0)

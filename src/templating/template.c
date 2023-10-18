@@ -35,7 +35,7 @@
 
 #include "log.h"
 #include "mustach.h"
-#include "utils.h"
+#include "file-utils.h"
 
 typedef struct {
         const context_t *context;

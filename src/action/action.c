@@ -30,7 +30,7 @@
 #include <unistd.h>
 
 #include "log.h"
-#include "utils.h"
+#include "file-utils.h"
 #include "cynagora-interface.h"
 
  __wur __nonnull() extern int install_mac(const context_t *context);

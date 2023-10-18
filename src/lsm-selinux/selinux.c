@@ -32,7 +32,8 @@
 
 #include "log.h"
 #include "selinux-template.h"
-#include "utils.h"
+#include "file-utils.h"
+#include "xattr-utils.h"
 
 #if WITH_SELINUX
 __wur __nonnull()
@@ -78,9 +79,9 @@ __nonnull() __wur static int label_file(const char *path, const char *label) {
         return -ENOENT;
     }
 
-    int rc = set_label(path, XATTR_NAME_SELINUX, label);
+    int rc = set_xattr(path, XATTR_NAME_SELINUX, label);
     if (rc < 0) {
-        ERROR("set_label(%s,%s,%s) : %d %s", path, XATTR_NAME_SELINUX, label, -rc, strerror(-rc));
+        ERROR("set_xattr(%s,%s,%s) : %d %s", path, XATTR_NAME_SELINUX, label, -rc, strerror(-rc));
         return rc;
     }
 

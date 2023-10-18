@@ -21,31 +21,12 @@
  * $RP_END_LICENSE$
  */
 
-#ifndef SEC_LSM_MANAGER_UTILS_H
-#define SEC_LSM_MANAGER_UTILS_H
+#ifndef SEC_LSM_MANAGER_FILE_UTILS_H
+#define SEC_LSM_MANAGER_FILE_UTILS_H
 
 #include <ctype.h>
 #include <stdbool.h>
 #include <sys/types.h>
-
-/**
- * @brief Set label attr on file
- *
- * @param[in] path the path of the file
- * @param[in] xattr name of the extended attribute
- * @param[in] value value of the extended attribute
- * @return 0 in case of success or a negative -errno value
- */
-extern int set_label(const char *path, const char *xattr, const char *value) __wur __nonnull();
-
-/**
- * @brief Unset label attr on file
- *
- * @param[in] path the path of the file
- * @param[in] xattr name of the extended attribute
- * @return 0 in case of success or a negative -errno value
- */
-extern int unset_label(const char *path, const char *xattr) __wur __nonnull();
 
 /**
  * @brief Check if file exists
@@ -123,13 +104,5 @@ extern int check_path_exists(const char path[]);
  */
 __nonnull() __wur
 extern int check_directory_exists(const char path[]);
-
-/**
- * Check if text is a valid UTF8 encoded text
- * @param[in] text the text to check
- * @return true when valid, false otherwise
- */
-__nonnull() __wur
-extern bool is_utf8(const char *text);
 
 #endif

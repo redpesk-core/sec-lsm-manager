@@ -36,7 +36,7 @@
 
 #include "log.h"
 #include "protocol/sec-lsm-manager-client.h"
-#include "utils.h"
+#include "file-utils.h"
 
 #define ISSEP(x) (((x)[0] == ';') && ((x)[1] == '\0'))
 

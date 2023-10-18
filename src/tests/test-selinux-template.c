@@ -31,7 +31,7 @@
 #endif
 
 #include "log.h"
-#include "utils.h"
+#include "file-utils.h"
 #include "lsm-selinux/selinux.h"
 #include "lsm-selinux/selinux-template.h"
 

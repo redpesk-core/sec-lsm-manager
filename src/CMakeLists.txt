@@ -63,6 +63,7 @@ add_library(common-lib OBJECT
     context/paths.c
     context/permissions.c
     context/plugs.c
+    file-utils.c
     log.c
     protocol/pollitem.c
     protocol/prot.c
@@ -70,7 +71,8 @@ add_library(common-lib OBJECT
     protocol/sec-lsm-manager-server.c
     templating/mustach.c
     templating/template.c
-    utils.c
+    utf8-utils.c
+    xattr-utils.c
 )
 if(SIMULATE_CYNAGORA)
     target_sources(common-lib PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/simulation/cynagora/cynagora.c)
@@ -179,7 +181,7 @@ message("[x] Done : sec-lsm-managerd\n")
 
 message("[*] Create : sec-lsm-manager-cmd")
 
-add_executable(sec-lsm-manager-cmd main-sec-lsm-manager-cmd.c log.c utils.c)
+add_executable(sec-lsm-manager-cmd main-sec-lsm-manager-cmd.c log.c)
 
 target_link_libraries(sec-lsm-manager-cmd sec-lsm-manager)
 

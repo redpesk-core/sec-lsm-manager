@@ -29,7 +29,7 @@
 #include <selinux/selinux.h>
 #endif
 
-#include "utils.h"
+#include "file-utils.h"
 #include "lsm-selinux/selinux.h"
 #include "lsm-selinux/selinux-template.h"
 

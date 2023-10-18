@@ -32,7 +32,7 @@
 #include "log.h"
 #include "selinux-compile.h"
 #include "templating/template.h"
-#include "utils.h"
+#include "file-utils.h"
 
 #if !defined(SEC_LSM_MANAGER_DATADIR)
 #define SEC_LSM_MANAGER_DATADIR "/usr/share/sec-lsm-manager"

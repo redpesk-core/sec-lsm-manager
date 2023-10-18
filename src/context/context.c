@@ -30,7 +30,7 @@
 #include <unistd.h>
 
 #include "log.h"
-#include "utils.h"
+#include "file-utils.h"
 
 /***********************/
 /*** PRIVATE METHODS ***/

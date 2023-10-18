@@ -22,7 +22,7 @@
 #include <sys/xattr.h>
 #include <unistd.h>
 
-#include "utils.h"
+#include "file-utils.h"
 #include "sizes.h"
 
 Suite *suite;
