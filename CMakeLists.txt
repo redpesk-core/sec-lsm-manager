@@ -190,15 +190,27 @@ endif()
 
 message("CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}")
 
-link_libraries(-Wl,--as-needed -Wl,--gc-sections -Wl,--no-undefined)
+add_link_options(-Wl,--as-needed -Wl,--gc-sections -Wl,--no-undefined)
 
-add_compile_options(-Wall -Wextra -Wconversion -Wshadow)
-add_compile_options(-Werror=maybe-uninitialized)
-add_compile_options(-Werror=implicit-function-declaration)
-add_compile_options(-ffunction-sections -fdata-sections)
-add_compile_options(-Wno-nonnull-compare)
+add_compile_options(
+	-fdata-sections
+	-ffunction-sections
 
-add_compile_options(-Wpedantic -Wshadow -Wpointer-arith -Wcast-qual -Wcast-align -Wstrict-prototypes -Wmissing-prototypes -Wconversion)
+	-Wall
+	-Wcast-align
+	-Wcast-qual
+	-Wconversion
+	-Wextra
+	-Wmissing-prototypes
+	-Wno-nonnull-compare
+	-Wpedantic
+	-Wpointer-arith
+	-Wshadow
+	-Wstrict-prototypes
+
+	-Werror=maybe-uninitialized
+	-Werror=implicit-function-declaration
+)
 
 #add_compile_options(-ffile-prefix-map=${CMAKE_SOURCE_DIR}=.)
 
