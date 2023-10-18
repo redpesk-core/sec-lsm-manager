@@ -32,10 +32,8 @@
 #include "log.h"
 #include "file-utils.h"
 #include "cynagora-interface.h"
+#include "mac-interface.h"
 
- __wur __nonnull() extern int install_mac(const context_t *context);
- __wur __nonnull() extern int uninstall_mac(const context_t *context);
-__nonnull() extern void app_label_mac(char label[SEC_LSM_MANAGER_MAX_SIZE_LABEL + 1], const char *appid);
 
 /***********************/
 /*** PRIVATE METHODS ***/

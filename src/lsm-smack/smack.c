@@ -39,6 +39,7 @@
 #define DROP_LABEL "User:Home"
 
 #if WITH_SMACK
+#include "action/mac-interface.h"
 __wur __nonnull()
 int install_mac(const context_t *context)
          __attribute__ ((alias ("install_smack")));

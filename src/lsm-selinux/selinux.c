@@ -36,6 +36,7 @@
 #include "xattr-utils.h"
 
 #if WITH_SELINUX
+#include "action/mac-interface.h"
 __wur __nonnull()
 int install_mac(const context_t *context)
          __attribute__ ((alias ("install_selinux")));
