@@ -65,7 +65,7 @@ static int check_plug_installable(context_t *context)
     for(plugit = context->plugset ; plugit != NULL ; plugit = plugit->next) {
 
         /* compute the label of the application importing the plug */
-        app_label_mac(label, plugit->impid);
+        mac_get_label(label, plugit->impid);
         if (sts == 0) {
             sts = cynagora_check_permission(label, perm_public_plug);
             if (sts < 0) {
@@ -111,7 +111,7 @@ static int check_context(context_t *context, char label[SEC_LSM_MANAGER_MAX_SIZE
         ERROR("an application identifier is needed");
         return -EINVAL;
     }
-    app_label_mac(label, context->id);
+    mac_get_label(label, context->id);
     return 0;
 }
 
@@ -144,9 +144,9 @@ int action_install(context_t *context)
     }
 
     /* set LSM / MAC policies */
-    rc = install_mac(context);
+    rc = mac_install(context);
     if (rc < 0) {
-        ERROR("install_mac: %d %s", -rc, strerror(-rc));
+        ERROR("mac_install: %d %s", -rc, strerror(-rc));
         if (has_id) {
             rc2 = cynagora_drop_policies(label);
             if (rc2 < 0) {
@@ -182,9 +182,9 @@ int action_uninstall(context_t *context)
     }
 
     /* drop LSM / MAC policies */
-    rc = uninstall_mac(context);
+    rc = mac_uninstall(context);
     if (rc < 0) {
-        ERROR("uninstall_mac: %d %s", -rc, strerror(-rc));
+        ERROR("mac_uninstall: %d %s", -rc, strerror(-rc));
         return rc;
     }
 

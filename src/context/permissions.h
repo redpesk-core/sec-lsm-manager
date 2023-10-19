@@ -37,14 +37,14 @@ typedef struct permission_set {
  *
  * @param[in] permission_set The permission_set handler
  */
-extern void init_permission_set(permission_set_t *permission_set) __nonnull();
+extern void permission_set_init(permission_set_t *permission_set) __nonnull();
 
 /**
  * @brief[in] Free permission_set that have been added
  * The pointer is not free
  * @param policies The permission_set handler
  */
-extern void free_permission_set(permission_set_t *permission_set) __nonnull();
+extern void permission_set_clear(permission_set_t *permission_set) __nonnull();
 
 /**
  * @brief Add a permission to permission_set struct
@@ -56,7 +56,7 @@ extern void free_permission_set(permission_set_t *permission_set) __nonnull();
  *    * -EINVAL        bad type or bad path
  *    * -ENOMEM        out of memory
  */
-extern int permission_set_add_permission(permission_set_t *permission_set, const char *permission) __wur __nonnull();
+extern int permission_set_add(permission_set_t *permission_set, const char *permission) __wur __nonnull();
 
 /**
  * @brief check if the permission set has the permission
@@ -66,6 +66,6 @@ extern int permission_set_add_permission(permission_set_t *permission_set, const
  * @return 1 when permission is granted or, otherwise, 0
  */
 __nonnull() __wur
-extern int permission_set_has_permission(const permission_set_t *permission_set, const char *permission);
+extern int permission_set_has(const permission_set_t *permission_set, const char *permission);
 
 #endif

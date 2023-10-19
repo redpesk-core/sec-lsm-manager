@@ -41,11 +41,11 @@
  *
  * @param[in] context handler
  */
-__nonnull() void init_context(context_t *context) {
+__nonnull() void context_init(context_t *context) {
     memset(context->id, '\0', SEC_LSM_MANAGER_MAX_SIZE_ID);
-    init_path_set(&(context->path_set));
+    path_set_init(&(context->path_set));
     plugset_init(&(context->plugset));
-    init_permission_set(&(context->permission_set));
+    permission_set_init(&(context->permission_set));
     context->need_id = false;
     context->error_flag = false;
 }
@@ -80,30 +80,30 @@ static int setids(
 /**********************/
 
 /* see context.h */
-int create_context(context_t **context) {
+int context_create(context_t **context) {
     *context = (context_t *)malloc(sizeof(context_t));
     if (*context == NULL) {
         ERROR("malloc failed");
         return -ENOMEM;
     }
 
-    init_context(*context);
+    context_init(*context);
     return 0;
 }
 
 /* see context.h */
-void destroy_context(context_t *context) {
-    clear_context(context);
+void context_destroy(context_t *context) {
+    context_clear(context);
     free(context);
 }
 
 /* see context.h */
-void clear_context(context_t *context) {
+void context_clear(context_t *context) {
     if (context) {
         context->id[0] = '\0';
-        free_permission_set(&(context->permission_set));
-        plugset_deinit(&(context->plugset));
-        free_path_set(&(context->path_set));
+        permission_set_clear(&(context->permission_set));
+        plugset_clear(&(context->plugset));
+        path_set_clear(&(context->path_set));
         context->need_id = false;
         context->error_flag = false;
     }
@@ -198,9 +198,9 @@ int context_add_permission(context_t *context, const char *permission)
         }
     }
 
-    rc = permission_set_add_permission(&(context->permission_set), permission);
+    rc = permission_set_add(&(context->permission_set), permission);
     if (rc < 0) {
-        ERROR("permission_set_add_permission: %d %s", -rc, strerror(-rc));
+        ERROR("permission_set_add: %d %s", -rc, strerror(-rc));
         return rc;
     }
     context->need_id = true;
@@ -223,8 +223,8 @@ int context_add_path(context_t *context, const char *path, const char *type)
     }
 
     /* check type validity */
-    path_type = get_path_type(type);
-    if (!valid_path_type(path_type)) {
+    path_type = path_type_get(type);
+    if (!path_type_is_valid(path_type)) {
         ERROR("type invalid: %d", path_type);
         return -EINVAL;
     }
@@ -245,7 +245,7 @@ int context_add_path(context_t *context, const char *path, const char *type)
     }
 
     /* add the path to the set */
-    rc = path_set_add_path(&(context->path_set), path, path_type);
+    rc = path_set_add(&(context->path_set), path, path_type);
     if (rc < 0) {
         ERROR("can't add path %s: %d %s", path, -rc, strerror(-rc));
         return rc;
@@ -309,7 +309,7 @@ int context_add_plug(context_t *context, const char *expdir, const char *impid, 
 __nonnull() __wur
 int context_has_permission(const context_t *context, const char *permission)
 {
-    return permission_set_has_permission(&context->permission_set, permission);
+    return permission_set_has(&context->permission_set, permission);
 }
 
 /* see context.h */
@@ -327,7 +327,7 @@ int context_visit(context_t *context, void *visitor, const context_visitor_itf_t
         for (i = 0; !rc && i < context->path_set.size; i++)
             rc = itf->path(visitor,
                         context->path_set.paths[i]->path,
-                        get_path_type_string(context->path_set.paths[i]->path_type));
+                        path_type_name(context->path_set.paths[i]->path_type));
 
     if (itf->permission != NULL)
         for (i = 0; !rc && i < context->permission_set.size; i++)

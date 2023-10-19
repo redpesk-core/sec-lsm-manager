@@ -46,7 +46,7 @@ typedef struct context {
  * @param[in] context handler
  */
 __nonnull()
-extern void init_context(context_t *context);
+extern void context_init(context_t *context);
 
 /**
  * @brief Create the context and init it
@@ -58,7 +58,7 @@ extern void init_context(context_t *context);
  * @return 0 in case of success or a negative -errno value
  */
 __nonnull() __wur
-extern int create_context(context_t **pointer);
+extern int context_create(context_t **pointer);
 
 /**
  * @brief Destroy the context
@@ -67,7 +67,7 @@ extern int create_context(context_t **pointer);
  * @param[in] context handler
  */
 __nonnull()
-extern void destroy_context(context_t *context);
+extern void context_destroy(context_t *context);
 
 /**
  * @brief Free id, paths and permissions
@@ -76,7 +76,7 @@ extern void destroy_context(context_t *context);
  * @param[in] context handler
  */
 __nonnull()
-extern void clear_context(context_t *context);
+extern void context_clear(context_t *context);
 
 /**
  * @brief Set error_flag

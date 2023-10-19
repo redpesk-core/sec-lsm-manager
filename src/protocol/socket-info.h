@@ -31,6 +31,6 @@ typedef struct socket_info {
     char *label;
 } socket_info_t;
 
-extern int get_socket_info(int fd, socket_info_t *socket_info);
+extern int socket_info_get(int fd, socket_info_t *socket_info);
 
 #endif

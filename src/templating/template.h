@@ -26,6 +26,6 @@
 
 #include "context/context.h"
 
-extern int process_template(const char *template, const char *dest, const context_t *context);
+extern int template_process(const char *template, const char *dest, const context_t *context);
 
 #endif /* SEC_LSM_MANAGER_TEMPLATE_H */

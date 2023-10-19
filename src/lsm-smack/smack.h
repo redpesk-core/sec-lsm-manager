@@ -32,7 +32,7 @@
  * @param[in] context context handler
  * @return 0 in case of success or a negative -errno value
  */
-extern int install_smack(const context_t *context) __wur __nonnull();
+extern int smack_install(const context_t *context) __wur __nonnull();
 
 /**
  * @brief Uninstall a context for smack
@@ -40,7 +40,7 @@ extern int install_smack(const context_t *context) __wur __nonnull();
  * @param[in] context context handler
  * @return 0 in case of success or a negative -errno value
  */
-extern int uninstall_smack(const context_t *context) __wur __nonnull();
+extern int smack_uninstall(const context_t *context) __wur __nonnull();
 
 /**
  * @brief get the security label of the application
@@ -50,9 +50,9 @@ extern int uninstall_smack(const context_t *context) __wur __nonnull();
  * @param[in] app_id the application identifier with underscores
  */
 __nonnull()
-extern void app_label_smack(char label[SEC_LSM_MANAGER_MAX_SIZE_LABEL + 1], const char *appid);
+extern void smack_get_label(char label[SEC_LSM_MANAGER_MAX_SIZE_LABEL + 1], const char *appid);
 
 /************************ FOR TESTING ************************/
-__nonnull((1, 2)) __wur int set_path_labels(const char *path, const char *label, const char *execlabel, bool transmute);
+__nonnull((1, 2)) __wur int smack_set_path_labels(const char *path, const char *label, const char *execlabel, bool transmute);
 
 #endif

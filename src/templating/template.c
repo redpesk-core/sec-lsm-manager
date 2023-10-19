@@ -119,7 +119,7 @@ static int next(void *closure) {
 
 static struct mustach_itf itf = {.enter = enter, .put = put, .next = next, .leave = leave};
 
-int process_template(const char *template_path, const char *dest, const context_t *context) {
+int template_process(const char *template_path, const char *dest, const context_t *context) {
     int rc = 0;
     int rc2 = 0;
     template_data_t data = { .context = context, .plug = NULL };

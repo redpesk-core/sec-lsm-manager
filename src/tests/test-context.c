@@ -29,7 +29,7 @@
 
 START_TEST(test_init_context) {
     context_t context;
-    init_context(&context);
+    context_init(&context);
     ck_assert_str_eq(context.id, "");
     ck_assert_ptr_eq(context.permission_set.permissions, NULL);
     ck_assert_int_eq((int)context.permission_set.size, 0);
@@ -40,52 +40,52 @@ END_TEST
 
 START_TEST(test_create_context) {
     context_t *context = NULL;
-    ck_assert_int_eq(create_context(&context), 0);
+    ck_assert_int_eq(context_create(&context), 0);
     ck_assert_ptr_ne(context, NULL);
     ck_assert_str_eq(context->id, "");
     ck_assert_ptr_eq(context->permission_set.permissions, NULL);
     ck_assert_int_eq((int)context->permission_set.size, 0);
     ck_assert_ptr_eq(context->path_set.paths, NULL);
     ck_assert_int_eq((int)context->path_set.size, 0);
-    destroy_context(context);
+    context_destroy(context);
 }
 END_TEST
 
 START_TEST(test_context_set_id) {
     context_t *context = NULL;
-    ck_assert_int_eq(create_context(&context), 0);
+    ck_assert_int_eq(context_create(&context), 0);
     // test set id
     ck_assert_int_eq(context_set_id(context, "id"), 0);
     ck_assert_str_eq(context->id, "id");
     // test duplicate set id
     ck_assert_int_eq(context_set_id(context, "id2"), -EEXIST);
-    destroy_context(context);
+    context_destroy(context);
 
-    ck_assert_int_eq(create_context(&context), 0);
+    ck_assert_int_eq(context_create(&context), 0);
     ck_assert_int_eq(context_set_id(context, "i"), -EINVAL);
-    destroy_context(context);
+    context_destroy(context);
 
-    ck_assert_int_eq(create_context(&context), 0);
+    ck_assert_int_eq(context_create(&context), 0);
     ck_assert_int_eq(context_set_id(context, ""), -EINVAL);
-    destroy_context(context);
+    context_destroy(context);
 
-    ck_assert_int_eq(create_context(&context), 0);
+    ck_assert_int_eq(context_create(&context), 0);
     ck_assert_int_eq(context_set_id(context, "id?bad/name"), -EINVAL);
-    destroy_context(context);
+    context_destroy(context);
 
-    ck_assert_int_eq(create_context(&context), 0);
+    ck_assert_int_eq(context_create(&context), 0);
     // test error flag raise
     ck_assert_int_eq((int)context_has_error(context), 0);
     context_raise_error(context);
     ck_assert_int_eq((int)context_has_error(context), 1);
     ck_assert_int_eq(context_set_id(context, "id3"), -ENOTRECOVERABLE);
-    destroy_context(context);
+    context_destroy(context);
 }
 END_TEST
 
 START_TEST(test_context_add_permission) {
     context_t *context = NULL;
-    ck_assert_int_eq(create_context(&context), 0);
+    ck_assert_int_eq(context_create(&context), 0);
     // test add perm
     ck_assert_int_eq(context_add_permission(context, "perm"), 0);
     ck_assert_int_eq((int)context->permission_set.size, 1);
@@ -99,13 +99,13 @@ START_TEST(test_context_add_permission) {
     context_raise_error(context);
     ck_assert_int_eq((int)context_has_error(context), 1);
     ck_assert_int_eq(context_add_permission(context, "perm2"), -ENOTRECOVERABLE);
-    destroy_context(context);
+    context_destroy(context);
 }
 END_TEST
 
 START_TEST(test_context_add_path) {
     context_t *context = NULL;
-    ck_assert_int_eq(create_context(&context), 0);
+    ck_assert_int_eq(context_create(&context), 0);
     // test add path
     ck_assert_int_eq(context_add_path(context, "/tmp", "conf"), 0);
     ck_assert_int_eq((int)context->path_set.size, 1);
@@ -124,30 +124,30 @@ START_TEST(test_context_add_path) {
     context_raise_error(context);
     ck_assert_int_eq((int)context_has_error(context), 1);
     ck_assert_int_eq(context_add_path(context, "/tmp2", "conf"), -ENOTRECOVERABLE);
-    destroy_context(context);
+    context_destroy(context);
 }
 END_TEST
 
 START_TEST(test_free_context) {
     context_t *context = NULL;
-    ck_assert_int_eq(create_context(&context), 0);
+    ck_assert_int_eq(context_create(&context), 0);
     ck_assert_int_eq(context_set_id(context, "id"), 0);
     ck_assert_int_eq(context_add_path(context, "/tmp", "conf"), 0);
     ck_assert_int_eq(context_add_permission(context, "perm"), 0);
-    clear_context(context);
+    context_clear(context);
     ck_assert_int_eq((int)context->path_set.size, 0);
     ck_assert_int_eq((int)context->permission_set.size, 0);
-    destroy_context(context);
+    context_destroy(context);
 }
 END_TEST
 
 START_TEST(test_destroy_context) {
     context_t *context = NULL;
-    ck_assert_int_eq(create_context(&context), 0);
+    ck_assert_int_eq(context_create(&context), 0);
     ck_assert_int_eq(context_set_id(context, "id"), 0);
     ck_assert_int_eq(context_add_path(context, "/tmp", "conf"), 0);
     ck_assert_int_eq(context_add_permission(context, "perm"), 0);
-    destroy_context(context);
+    context_destroy(context);
 }
 END_TEST
 

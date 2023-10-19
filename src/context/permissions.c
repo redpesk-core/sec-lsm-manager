@@ -36,13 +36,13 @@
 /**********************/
 
 /* see permissions.h */
-void init_permission_set(permission_set_t *permission_set) {
+void permission_set_init(permission_set_t *permission_set) {
     permission_set->size = 0;
     permission_set->permissions = NULL;
 }
 
 /* see permissions.h */
-void free_permission_set(permission_set_t *permission_set) {
+void permission_set_clear(permission_set_t *permission_set) {
     if (permission_set) {
         while (permission_set->size)
             free(permission_set->permissions[--permission_set->size]);
@@ -53,7 +53,7 @@ void free_permission_set(permission_set_t *permission_set) {
 
 /* see permissions.h */
 __nonnull() __wur
-int permission_set_has_permission(const permission_set_t *permission_set, const char *permission)
+int permission_set_has(const permission_set_t *permission_set, const char *permission)
 {
     char **parray = permission_set->permissions;
     size_t nrp = permission_set->size;
@@ -67,13 +67,13 @@ int permission_set_has_permission(const permission_set_t *permission_set, const 
 }
 
 /* see permissions.h */
-int permission_set_add_permission(permission_set_t *permission_set, const char *permission) {
+int permission_set_add(permission_set_t *permission_set, const char *permission) {
 
     size_t size;
     void *ptr, *perm;
 
     /* avoid duplication of permisssion */
-    if (permission_set_has_permission(permission_set, permission))
+    if (permission_set_has(permission_set, permission))
         return 0;
 
     /* check length */

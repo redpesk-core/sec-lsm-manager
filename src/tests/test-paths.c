@@ -30,18 +30,18 @@
 
 START_TEST(test_init_path_set) {
     path_set_t path_set;
-    init_path_set(&path_set);
+    path_set_init(&path_set);
     ck_assert_ptr_eq(path_set.paths, NULL);
     ck_assert_int_eq((int)path_set.size, 0);
-    free_path_set(&path_set);
+    path_set_clear(&path_set);
 }
 END_TEST
 
 START_TEST(test_free_path_set) {
     path_set_t path_set;
-    init_path_set(&path_set);
-    ck_assert_int_eq(path_set_add_path(&path_set, "/test", type_data), 0);
-    free_path_set(&path_set);
+    path_set_init(&path_set);
+    ck_assert_int_eq(path_set_add(&path_set, "/test", type_data), 0);
+    path_set_clear(&path_set);
     ck_assert_ptr_eq(path_set.paths, NULL);
     ck_assert_int_eq((int)path_set.size, 0);
 }
@@ -49,13 +49,13 @@ END_TEST
 
 START_TEST(test_path_set_add_path) {
     path_set_t paths;
-    init_path_set(&paths);
+    path_set_init(&paths);
 
-    ck_assert_int_eq(path_set_add_path(&paths, "/test", 10000), -EINVAL);
+    ck_assert_int_eq(path_set_add(&paths, "/test", 10000), -EINVAL);
 
-    ck_assert_int_eq(path_set_add_path(&paths, "", type_data), -EINVAL);
+    ck_assert_int_eq(path_set_add(&paths, "", type_data), -EINVAL);
 
-    ck_assert_int_eq(path_set_add_path(&paths, "/test", type_data), 0);
+    ck_assert_int_eq(path_set_add(&paths, "/test", type_data), 0);
 
     ck_assert_int_eq((int)paths.size, 1);
     ck_assert_str_eq(paths.paths[0]->path, "/test");
@@ -64,77 +64,77 @@ START_TEST(test_path_set_add_path) {
     while (i < 50) {
         char buf[50];
         snprintf(buf, 50, "/test/n%d", i);
-        ck_assert_int_eq(path_set_add_path(&paths, buf, type_conf), 0);
+        ck_assert_int_eq(path_set_add(&paths, buf, type_conf), 0);
         i++;
     }
     ck_assert_str_eq(paths.paths[0]->path, "/test");
     ck_assert_int_eq((int)paths.paths[0]->path_type, type_data);
     ck_assert_str_eq(paths.paths[41]->path, "/test/n40");
     ck_assert_int_eq((int)paths.paths[41]->path_type, type_conf);
-    ck_assert_int_eq(path_set_add_path(&paths, "/test_slash/", type_lib), 0);
+    ck_assert_int_eq(path_set_add(&paths, "/test_slash/", type_lib), 0);
     ck_assert_str_eq(paths.paths[51]->path, "/test_slash");
     ck_assert_int_eq((int)paths.paths[51]->path_type, type_lib);
 
-    ck_assert_int_eq(path_set_add_path(&paths, "//", type_data), 0);
+    ck_assert_int_eq(path_set_add(&paths, "//", type_data), 0);
     ck_assert_str_eq(paths.paths[52]->path, "/");
     ck_assert_int_eq((int)paths.paths[52]->path_type, type_data);
 
-    free_path_set(&paths);
+    path_set_clear(&paths);
 }
 END_TEST
 
 START_TEST(test_valid_path_type) {
-    ck_assert_int_eq(valid_path_type(type_unset), false);
-    ck_assert_int_eq(valid_path_type(0), false);
-    ck_assert_int_eq(valid_path_type(type_default), true);
-    ck_assert_int_eq(valid_path_type(type_conf), true);
-    ck_assert_int_eq(valid_path_type(type_data), true);
-    ck_assert_int_eq(valid_path_type(type_exec), true);
-    ck_assert_int_eq(valid_path_type(type_http), true);
-    ck_assert_int_eq(valid_path_type(type_icon), true);
-    ck_assert_int_eq(valid_path_type(type_id), true);
-    ck_assert_int_eq(valid_path_type(type_lib), true);
-    ck_assert_int_eq(valid_path_type(type_public), true);
-    ck_assert_int_eq(valid_path_type(number_path_type), false);
+    ck_assert_int_eq(path_type_is_valid(type_unset), false);
+    ck_assert_int_eq(path_type_is_valid(0), false);
+    ck_assert_int_eq(path_type_is_valid(type_default), true);
+    ck_assert_int_eq(path_type_is_valid(type_conf), true);
+    ck_assert_int_eq(path_type_is_valid(type_data), true);
+    ck_assert_int_eq(path_type_is_valid(type_exec), true);
+    ck_assert_int_eq(path_type_is_valid(type_http), true);
+    ck_assert_int_eq(path_type_is_valid(type_icon), true);
+    ck_assert_int_eq(path_type_is_valid(type_id), true);
+    ck_assert_int_eq(path_type_is_valid(type_lib), true);
+    ck_assert_int_eq(path_type_is_valid(type_public), true);
+    ck_assert_int_eq(path_type_is_valid(number_path_type), false);
 }
 END_TEST
 
 START_TEST(test_get_path_type) {
-    ck_assert_int_eq(get_path_type("default"), type_default);
-    ck_assert_int_eq(get_path_type("conf"), type_conf);
-    ck_assert_int_eq(get_path_type("data"), type_data);
-    ck_assert_int_eq(get_path_type("exec"), type_exec);
-    ck_assert_int_eq(get_path_type("http"), type_http);
-    ck_assert_int_eq(get_path_type("icon"), type_icon);
-    ck_assert_int_eq(get_path_type("id"), type_id);
-    ck_assert_int_eq(get_path_type("lib"), type_lib);
-    ck_assert_int_eq(get_path_type("public"), type_public);
+    ck_assert_int_eq(path_type_get("default"), type_default);
+    ck_assert_int_eq(path_type_get("conf"), type_conf);
+    ck_assert_int_eq(path_type_get("data"), type_data);
+    ck_assert_int_eq(path_type_get("exec"), type_exec);
+    ck_assert_int_eq(path_type_get("http"), type_http);
+    ck_assert_int_eq(path_type_get("icon"), type_icon);
+    ck_assert_int_eq(path_type_get("id"), type_id);
+    ck_assert_int_eq(path_type_get("lib"), type_lib);
+    ck_assert_int_eq(path_type_get("public"), type_public);
 
-    ck_assert_int_eq(get_path_type("no"), type_unset);
-    ck_assert_int_eq(get_path_type("co"), type_unset);
-    ck_assert_int_eq(get_path_type("dat"), type_unset);
-    ck_assert_int_eq(get_path_type("exe"), type_unset);
-    ck_assert_int_eq(get_path_type("htt"), type_unset);
-    ck_assert_int_eq(get_path_type("ico"), type_unset);
-    ck_assert_int_eq(get_path_type("ip"), type_unset);
-    ck_assert_int_eq(get_path_type("li"), type_unset);
-    ck_assert_int_eq(get_path_type("pub"), type_unset);
-    ck_assert_int_eq(get_path_type("zzzz"), type_unset);
+    ck_assert_int_eq(path_type_get("no"), type_unset);
+    ck_assert_int_eq(path_type_get("co"), type_unset);
+    ck_assert_int_eq(path_type_get("dat"), type_unset);
+    ck_assert_int_eq(path_type_get("exe"), type_unset);
+    ck_assert_int_eq(path_type_get("htt"), type_unset);
+    ck_assert_int_eq(path_type_get("ico"), type_unset);
+    ck_assert_int_eq(path_type_get("ip"), type_unset);
+    ck_assert_int_eq(path_type_get("li"), type_unset);
+    ck_assert_int_eq(path_type_get("pub"), type_unset);
+    ck_assert_int_eq(path_type_get("zzzz"), type_unset);
 }
 END_TEST
 
 START_TEST(test_get_path_type_string) {
-    ck_assert_str_eq(get_path_type_string(type_unset), "<unset>");
-    ck_assert_str_eq(get_path_type_string(type_default), "default");
-    ck_assert_str_eq(get_path_type_string(type_conf), "conf");
-    ck_assert_str_eq(get_path_type_string(type_data), "data");
-    ck_assert_str_eq(get_path_type_string(type_exec), "exec");
-    ck_assert_str_eq(get_path_type_string(type_http), "http");
-    ck_assert_str_eq(get_path_type_string(type_icon), "icon");
-    ck_assert_str_eq(get_path_type_string(type_id), "id");
-    ck_assert_str_eq(get_path_type_string(type_lib), "lib");
-    ck_assert_str_eq(get_path_type_string(type_public), "public");
-    ck_assert_str_eq(get_path_type_string(number_path_type), "invalid");
+    ck_assert_str_eq(path_type_name(type_unset), "<unset>");
+    ck_assert_str_eq(path_type_name(type_default), "default");
+    ck_assert_str_eq(path_type_name(type_conf), "conf");
+    ck_assert_str_eq(path_type_name(type_data), "data");
+    ck_assert_str_eq(path_type_name(type_exec), "exec");
+    ck_assert_str_eq(path_type_name(type_http), "http");
+    ck_assert_str_eq(path_type_name(type_icon), "icon");
+    ck_assert_str_eq(path_type_name(type_id), "id");
+    ck_assert_str_eq(path_type_name(type_lib), "lib");
+    ck_assert_str_eq(path_type_name(type_public), "public");
+    ck_assert_str_eq(path_type_name(number_path_type), "invalid");
 }
 END_TEST
 

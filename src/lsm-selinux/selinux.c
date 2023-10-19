@@ -38,16 +38,16 @@
 #if WITH_SELINUX
 #include "action/mac-interface.h"
 __wur __nonnull()
-int install_mac(const context_t *context)
-         __attribute__ ((alias ("install_selinux")));
+int mac_install(const context_t *context)
+         __attribute__ ((alias ("selinux_install")));
 
 __wur __nonnull()
-int uninstall_mac(const context_t *context)
-         __attribute__ ((alias ("uninstall_selinux")));
+int mac_uninstall(const context_t *context)
+         __attribute__ ((alias ("selinux_uninstall")));
 
 __nonnull()
-void app_label_mac(char label[SEC_LSM_MANAGER_MAX_SIZE_LABEL + 1], const char *appid)
-         __attribute__ ((alias ("app_label_selinux")));
+void mac_get_label(char label[SEC_LSM_MANAGER_MAX_SIZE_LABEL + 1], const char *appid)
+         __attribute__ ((alias ("selinux_get_label")));
 #endif
 
 /**
@@ -104,7 +104,7 @@ __nonnull() __wur int selinux_process_paths(const context_t *context,
         snprintf(label, SEC_LSM_MANAGER_MAX_SIZE_LABEL + 3, "%s:s0", path_type_definitions[path->path_type].label);
         int rc = label_file(path->path, label);
         if (rc < 0) {
-            ERROR("label_file((%s,%s),%s) : %d %s", path->path, get_path_type_string(path->path_type), context->id,
+            ERROR("label_file((%s,%s),%s) : %d %s", path->path, path_type_name(path->path_type), context->id,
                   -rc, strerror(-rc));
             return rc;
         }
@@ -126,7 +126,7 @@ bool selinux_enabled(void) {
 }
 
 /* see selinux.h */
-int install_selinux(const context_t *context) {
+int selinux_install(const context_t *context) {
     char _id_[SEC_LSM_MANAGER_MAX_SIZE_ID + 1];
     /* TODO: treat the case where !context->need_id */
     if (context->id[0] == '\0') {
@@ -173,7 +173,7 @@ int install_selinux(const context_t *context) {
 }
 
 /* see selinux.h */
-int uninstall_selinux(const context_t *context) {
+int selinux_uninstall(const context_t *context) {
     /* TODO: treat the case where !context->need_id */
     if (context->id[0] == '\0') {
         ERROR("id undefined");
@@ -221,7 +221,7 @@ int uninstall_selinux(const context_t *context) {
 
 /* see selinux.h */
 __nonnull()
-void app_label_selinux(char label[SEC_LSM_MANAGER_MAX_SIZE_LABEL + 1], const char *appid)
+void selinux_get_label(char label[SEC_LSM_MANAGER_MAX_SIZE_LABEL + 1], const char *appid)
 {
     char _id_[SEC_LSM_MANAGER_MAX_SIZE_ID + 1];
     trfid(appid, _id_);

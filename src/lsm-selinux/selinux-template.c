@@ -170,16 +170,16 @@ int generate_app_module_files(const selinux_module_t *selinux_module, const cont
                                          path_type_definitions_t path_type_definitions[number_path_type]) {
     int rc = 0;
     int rc2 = 0;
-    rc = process_template(selinux_module->selinux_te_template_file, selinux_module->selinux_te_file, context);
+    rc = template_process(selinux_module->selinux_te_template_file, selinux_module->selinux_te_file, context);
     if (rc < 0) {
-        ERROR("process_template %s -> %s : %d %s", selinux_module->selinux_te_template_file,
+        ERROR("template_process %s -> %s : %d %s", selinux_module->selinux_te_template_file,
               selinux_module->selinux_te_file, -rc, strerror(-rc));
         goto ret;
     }
 
-    rc = process_template(selinux_module->selinux_if_template_file, selinux_module->selinux_if_file, context);
+    rc = template_process(selinux_module->selinux_if_template_file, selinux_module->selinux_if_file, context);
     if (rc < 0) {
-        ERROR("process_template %s -> %s : %d %s", selinux_module->selinux_if_template_file,
+        ERROR("template_process %s -> %s : %d %s", selinux_module->selinux_if_template_file,
               selinux_module->selinux_if_file, -rc, strerror(-rc));
         goto remove_te;
     }

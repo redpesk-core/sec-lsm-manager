@@ -371,7 +371,7 @@ __nonnull((1)) static void onrequest(client_t *cli, unsigned count, const char *
         case 'c':
             /* clear */
             if (ckarg(args[0], _clear_, 1) && count == 1) {
-                clear_context(cli->context);
+                context_clear(cli->context);
                 send_done(cli, NULL);
                 return;
             }
@@ -538,7 +538,7 @@ __nonnull((1)) static void destroy_client(client_t *cli, bool closefds) {
         close(cli->pollitem.fd);
 
     prot_destroy(cli->prot);
-    destroy_context(cli->context);
+    context_destroy(cli->context);
     cli->context = NULL;
     free(cli);
 }
@@ -609,9 +609,9 @@ __wur static int create_client(client_t **pcli, int fd, sec_lsm_manager_server_t
         goto error1;
     }
 
-    rc = create_context(&((*pcli)->context));
+    rc = context_create(&((*pcli)->context));
     if (rc < 0) {
-        ERROR("create_context %d %s", -rc, strerror(-rc));
+        ERROR("context_create %d %s", -rc, strerror(-rc));
         (*pcli)->context = NULL;
         goto error2;
     }

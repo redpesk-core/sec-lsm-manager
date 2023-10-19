@@ -40,7 +40,7 @@ extern bool selinux_enabled(void) __wur;
  * @param[in] context The handle of context
  * @return 0 in case of success or a negative -errno value
  */
-extern int install_selinux(const context_t *context) __wur __nonnull();
+extern int selinux_install(const context_t *context) __wur __nonnull();
 
 /**
  * @brief Uninstall a context for selinux
@@ -48,7 +48,7 @@ extern int install_selinux(const context_t *context) __wur __nonnull();
  * @param[in] context The handle of context
  * @return 0 in case of success or a negative -errno value
  */
-extern int uninstall_selinux(const context_t *context) __wur __nonnull();
+extern int selinux_uninstall(const context_t *context) __wur __nonnull();
 
 /**
  * @brief get the security label of the application
@@ -58,7 +58,7 @@ extern int uninstall_selinux(const context_t *context) __wur __nonnull();
  * @param[in] app_id the application identifier with underscores
  */
 __nonnull()
-extern void app_label_selinux(char label[SEC_LSM_MANAGER_MAX_SIZE_LABEL + 1], const char *appid);
+extern void selinux_get_label(char label[SEC_LSM_MANAGER_MAX_SIZE_LABEL + 1], const char *appid);
 
 /************************ FOR TESTING ************************/
 #include "selinux-template.h"

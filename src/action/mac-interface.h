@@ -25,8 +25,8 @@
 
 #include "context/context.h"
 
- __wur __nonnull() extern int install_mac(const context_t *context);
- __wur __nonnull() extern int uninstall_mac(const context_t *context);
-__nonnull() extern void app_label_mac(char label[SEC_LSM_MANAGER_MAX_SIZE_LABEL + 1], const char *appid);
+ __wur __nonnull() extern int mac_install(const context_t *context);
+ __wur __nonnull() extern int mac_uninstall(const context_t *context);
+__nonnull() extern void mac_get_label(char label[SEC_LSM_MANAGER_MAX_SIZE_LABEL + 1], const char *appid);
 
 #endif

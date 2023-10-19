@@ -33,7 +33,7 @@ START_TEST(test_plugset_init)
     plugset_init(&plugset);
     ck_assert_ptr_null(plugset);
 
-    plugset_deinit(&plugset);
+    plugset_clear(&plugset);
     ck_assert_ptr_null(plugset);
 }
 END_TEST
@@ -52,7 +52,7 @@ START_TEST(test_plugset_deinit)
     ck_assert_int_eq(plugset_add(&plugset, "u", "v", "w"), 0);
     ck_assert_ptr_nonnull(plugset);
 
-    plugset_deinit(&plugset);
+    plugset_clear(&plugset);
     ck_assert_ptr_null(plugset);
 }
 END_TEST
@@ -79,7 +79,7 @@ START_TEST(test_plugset_add) {
     ck_assert_str_eq("b", plugset->next->impid);
     ck_assert_str_eq("c", plugset->next->impdir);
 
-    plugset_deinit(&plugset);
+    plugset_clear(&plugset);
     ck_assert_ptr_null(plugset);
 }
 END_TEST

@@ -23,7 +23,7 @@
 
 #include "socket-info.h"
 
-int get_socket_info(int fd, socket_info_t *socket_info) {
+int socket_info_get(int fd, socket_info_t *socket_info) {
     int rc = 0;
     struct ucred uc;
     socklen_t len = sizeof(uc);

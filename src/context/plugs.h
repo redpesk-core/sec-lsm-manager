@@ -58,7 +58,7 @@ extern void plugset_init(plugset_t *plugset);
  * @param[in] plugset plugset handler
  */
 __nonnull()
-extern void plugset_deinit(plugset_t *plugset);
+extern void plugset_clear(plugset_t *plugset);
 
 /**
  * @brief Add a plug to plugs

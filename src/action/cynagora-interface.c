@@ -153,7 +153,7 @@ int cynagora_check_permission(const char *label, const char *permission)
 
 static void list(void *closure, const cynagora_key_t *key, const cynagora_value_t *value) {
     (void)value;
-    int rc = permission_set_add_permission(closure, key->permission);
+    int rc = permission_set_add(closure, key->permission);
     (void)rc;
 }
 
@@ -169,7 +169,7 @@ int cynagora_get_policies(const char *label, permission_set_t *permission_set) {
     cynagora_t *cynagora;
 
     /* init */
-    init_permission_set(permission_set);
+    permission_set_init(permission_set);
 
     /* get cynagora common handler */
     rc = get(&cynagora);

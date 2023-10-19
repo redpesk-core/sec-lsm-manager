@@ -41,16 +41,16 @@
 #if WITH_SMACK
 #include "action/mac-interface.h"
 __wur __nonnull()
-int install_mac(const context_t *context)
-         __attribute__ ((alias ("install_smack")));
+int mac_install(const context_t *context)
+         __attribute__ ((alias ("smack_install")));
 
 __wur __nonnull()
-int uninstall_mac(const context_t *context)
-         __attribute__ ((alias ("uninstall_smack")));
+int mac_uninstall(const context_t *context)
+         __attribute__ ((alias ("smack_uninstall")));
 
 __nonnull()
-void app_label_mac(char label[SEC_LSM_MANAGER_MAX_SIZE_LABEL + 1], const char *appid)
-         __attribute__ ((alias ("app_label_smack")));
+void mac_get_label(char label[SEC_LSM_MANAGER_MAX_SIZE_LABEL + 1], const char *appid)
+         __attribute__ ((alias ("smack_get_label")));
 #endif
 
 /***********************/
@@ -110,7 +110,7 @@ static int unset_path_labels(const char *path) {
  * @return 0 in case of success or a negative -errno value
  */
 __nonnull((1, 2)) __wur
-int set_path_labels(const char *path, const char *label, const char *execlabel, bool transmute)
+int smack_set_path_labels(const char *path, const char *label, const char *execlabel, bool transmute)
 {
     // access
     int rc = set_xattr(path, XATTR_NAME_SMACK, label);
@@ -170,7 +170,7 @@ static int label_all_paths(const context_t *context, bool set)
         else if (!set)
             rc = unset_path_labels(path->path);
         else
-            rc = set_path_labels(path->path,
+            rc = smack_set_path_labels(path->path,
                                  def->label,
                                  (pp == PATH_FILE_EXEC) && def->is_executable ? exec_label : NULL,
                                  (pp == PATH_DIRECTORY) && def->is_transmute);
@@ -196,10 +196,10 @@ static int smack_drop_path_labels(const context_t *context) {
     path_t *path = NULL;
     for (size_t i = 0; i < context->path_set.size; i++) {
         path = context->path_set.paths[i];
-        rc = set_path_labels(path->path, DROP_LABEL, NULL, false);
+        rc = smack_set_path_labels(path->path, DROP_LABEL, NULL, false);
         if (rc < 0) {
-            ERROR("set_path_labels((%s,%s),%s) : %d %s", context->path_set.paths[i]->path,
-                  get_path_type_string(context->path_set.paths[i]->path_type), context->id, -rc, strerror(-rc));
+            ERROR("smack_set_path_labels((%s,%s),%s) : %d %s", context->path_set.paths[i]->path,
+                  path_type_name(context->path_set.paths[i]->path_type), context->id, -rc, strerror(-rc));
             return rc;
         }
     }
@@ -234,7 +234,7 @@ static int install_smack_plugs(const context_t *context)
                 ERROR("install_smack_plugs: can't create link: %d, %s", -rc2, strerror(-rc2));
             }
             else {
-                app_label_smack(label, context->id);
+                smack_get_label(label, context->id);
                 rc2 = set_xattr(buffer, XATTR_NAME_SMACK, label);
             }
         }
@@ -373,7 +373,7 @@ static int install_smack_no_id(const context_t *context) {
 /**********************/
 
 /* see smack.h */
-int install_smack(const context_t *context) {
+int smack_install(const context_t *context) {
     if (context->id[0] != '\0')
         return install_smack_with_id(context);
     else
@@ -381,7 +381,7 @@ int install_smack(const context_t *context) {
 }
 
 /* see smack.h */
-int uninstall_smack(const context_t *context) {
+int smack_uninstall(const context_t *context) {
     if (context->id[0] == '\0' && context->need_id) {
         ERROR("id undefined");
         return -EINVAL;
@@ -392,7 +392,7 @@ int uninstall_smack(const context_t *context) {
 
 /* see smack.h */
 __nonnull()
-void app_label_smack(char label[SEC_LSM_MANAGER_MAX_SIZE_LABEL + 1], const char *appid)
+void smack_get_label(char label[SEC_LSM_MANAGER_MAX_SIZE_LABEL + 1], const char *appid)
 {
     snprintf(label, SEC_LSM_MANAGER_MAX_SIZE_LABEL, "App:%s", appid);
     label[SEC_LSM_MANAGER_MAX_SIZE_ID] = '\0';    

@@ -78,8 +78,8 @@ START_TEST(test_label_path) {
 
     // path not set + file and dir not created
     strcpy(label, "label");
-    ck_assert_int_lt(set_path_labels(tmp_dir, label, 0, 1), 0);
-    ck_assert_int_lt(set_path_labels(path, label, label, 1), 0);
+    ck_assert_int_lt(smack_set_path_labels(tmp_dir, label, 0, 1), 0);
+    ck_assert_int_lt(smack_set_path_labels(path, label, label, 1), 0);
 
     // create dir
     create_tmp_dir(tmp_dir);
@@ -88,16 +88,16 @@ START_TEST(test_label_path) {
     ck_assert_int_eq(create_file(path), 0);
 
     // label dir with label and transmute
-    ck_assert_int_eq(set_path_labels(tmp_dir, label, 0, 1), 0);
+    ck_assert_int_eq(smack_set_path_labels(tmp_dir, label, 0, 1), 0);
     // label file with label
-    ck_assert_int_eq(set_path_labels(path, label, 0, 0), 0);
+    ck_assert_int_eq(smack_set_path_labels(path, label, 0, 0), 0);
 
     snprintf(path2, SEC_LSM_MANAGER_MAX_SIZE_PATH, "%s/test.bin", tmp_dir);
     // create file 2
     ck_assert_int_eq(create_file(path2), 0);
 
     // label file 2 with label+suffix and executable
-    ck_assert_int_eq(set_path_labels(path2, label, label, 0), 0);
+    ck_assert_int_eq(smack_set_path_labels(path2, label, label, 0), 0);
 
     remove(path);
     remove(path2);
@@ -142,7 +142,7 @@ START_TEST(test_smack_install) {
 
     // create context
     context_t *context = NULL;
-    ck_assert_int_eq(create_context(&context), 0);
+    ck_assert_int_eq(context_create(&context), 0);
     ck_assert_int_eq(context_add_path(context, data_dir, "data"), 0);
     ck_assert_int_eq(context_add_path(context, data_file, "data"), 0);
     ck_assert_int_eq(context_add_path(context, exec_dir, "exec"), 0);
@@ -154,7 +154,7 @@ START_TEST(test_smack_install) {
     ck_assert_int_eq(context_add_permission(context, "perm1"), 0);
     ck_assert_int_eq(context_add_permission(context, "perm2"), 0);
     ck_assert_int_eq(context_set_id(context, "testid"), 0);
-    ck_assert_int_eq(install_smack(context), 0);
+    ck_assert_int_eq(smack_install(context), 0);
 
     // test settings
 
@@ -175,9 +175,9 @@ START_TEST(test_smack_install) {
     ck_assert_int_eq(compare_xattr(public_dir, XATTR_NAME_SMACKTRANSMUTE, "TRUE"), true);
     ck_assert_int_eq(compare_xattr(public_file, XATTR_NAME_SMACK, "System:Shared"), true);
 
-    ck_assert_int_eq(uninstall_smack(context), 0);
+    ck_assert_int_eq(smack_uninstall(context), 0);
 
-    destroy_context(context);
+    context_destroy(context);
     remove(data_file);
     remove(exec_file);
     remove(id_file);
@@ -204,19 +204,19 @@ START_TEST(test_smack_uninstall) {
 
     // create context
     context_t *context = NULL;
-    ck_assert_int_eq(create_context(&context), 0);
+    ck_assert_int_eq(context_create(&context), 0);
     ck_assert_int_eq(context_add_path(context, data_dir, "data"), 0);
     ck_assert_int_eq(context_add_path(context, data_file, "data"), 0);
     ck_assert_int_eq(context_set_id(context, "testid"), 0);
-    ck_assert_int_eq(install_smack(context), 0);
+    ck_assert_int_eq(smack_install(context), 0);
 
-    ck_assert_int_eq(uninstall_smack(context), 0);
+    ck_assert_int_eq(smack_uninstall(context), 0);
 
     bool exists;
     get_file_informations("/etc/smack/accesses.d/app-testid", &exists, NULL, NULL);
     ck_assert_int_eq(exists, false);
 
-    destroy_context(context);
+    context_destroy(context);
     remove(data_file);
     rmdir(data_dir);
     rmdir(tmp_dir);

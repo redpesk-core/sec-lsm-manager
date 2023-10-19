@@ -43,7 +43,7 @@ START_TEST(test_selinux_process_paths) {
     init_path_type_definitions(path_type_definitions, TESTID);
 
     context_t *context = NULL;
-    ck_assert_int_eq(create_context(&context), 0);
+    ck_assert_int_eq(context_create(&context), 0);
     ck_assert_int_eq(context_set_id(context, "testid-binding"), 0);
     ck_assert_int_eq(context_add_path(context, etc_tmp_file, "id"), 0);
 
@@ -93,9 +93,9 @@ START_TEST(test_selinux_install) {
 
     // create context
     context_t *context = NULL;
-    ck_assert_int_eq(create_context(&context), 0);
+    ck_assert_int_eq(context_create(&context), 0);
 
-    ck_assert_int_lt(install_selinux(context), 0);
+    ck_assert_int_lt(selinux_install(context), 0);
 
     ck_assert_int_eq(context_add_path(context, data_dir, "data"), 0);
     ck_assert_int_eq(context_add_path(context, data_file, "data"), 0);
@@ -108,7 +108,7 @@ START_TEST(test_selinux_install) {
     ck_assert_int_eq(context_add_permission(context, "perm1"), 0);
     ck_assert_int_eq(context_add_permission(context, "perm2"), 0);
     ck_assert_int_eq(context_set_id(context, "testid-binding"), 0);
-    ck_assert_int_eq(install_selinux(context), 0);
+    ck_assert_int_eq(selinux_install(context), 0);
 
     // test settings
 
@@ -121,7 +121,7 @@ START_TEST(test_selinux_install) {
     ck_assert_int_eq(compare_xattr(public_dir, XATTR_NAME_SELINUX, "system_u:object_r:redpesk_public_t:s0"), true);
     ck_assert_int_eq(compare_xattr(public_file, XATTR_NAME_SELINUX, "system_u:object_r:redpesk_public_t:s0"), true);
 
-    ck_assert_int_eq(uninstall_selinux(context), 0);
+    ck_assert_int_eq(selinux_uninstall(context), 0);
 
     remove(data_file);
     remove(exec_file);

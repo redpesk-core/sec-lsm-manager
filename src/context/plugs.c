@@ -38,7 +38,7 @@ void plugset_init(plugset_t *plugset)
 }
 
 __nonnull()
-void plugset_deinit(plugset_t *plugset)
+void plugset_clear(plugset_t *plugset)
 {
     for (;;) {
         plug_t *plug = *plugset;

@@ -47,7 +47,7 @@ START_TEST(test_generate_app_module_fc) {
     int rc = system("touch /tmp/data /tmp/conf /tmp/lib");
     ck_assert_int_eq(rc, 0);
     context_t *context = NULL;
-    ck_assert_int_eq(create_context(&context), 0);
+    ck_assert_int_eq(context_create(&context), 0);
     ck_assert_int_eq(context_add_path(context, "/tmp/data", "data"), 0);
     ck_assert_int_eq(context_add_path(context, "/tmp/conf", "conf"), 0);
     ck_assert_int_eq(context_add_path(context, "/tmp/lib", "lib"), 0);
@@ -64,7 +64,7 @@ START_TEST(test_generate_app_module_files) {
     create_tmp_dir(tmp_dir);
 
     context_t *context = NULL;
-    ck_assert_int_eq(create_context(&context), 0);
+    ck_assert_int_eq(context_create(&context), 0);
     ck_assert_int_eq(context_set_id(context, TESTID), 0);
     ck_assert_int_eq(context_add_path(context, "/tmp", "conf"), 0);
 

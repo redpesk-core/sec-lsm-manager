@@ -51,13 +51,13 @@ static const char *type_strings[number_path_type] =
 /**********************/
 
 /* see paths.h */
-void init_path_set(path_set_t *path_set) {
+void path_set_init(path_set_t *path_set) {
     path_set->size = 0;
     path_set->paths = NULL;
 }
 
 /* see paths.h */
-void free_path_set(path_set_t *path_set) {
+void path_set_clear(path_set_t *path_set) {
     if (path_set) {
         while(path_set->size)
             free(path_set->paths[--path_set->size]);
@@ -67,8 +67,8 @@ void free_path_set(path_set_t *path_set) {
 }
 
 /* see paths.h */
-int path_set_add_path(path_set_t *path_set, const char *path, enum path_type path_type) {
-    if (!valid_path_type(path_type)) {
+int path_set_add(path_set_t *path_set, const char *path, enum path_type path_type) {
+    if (!path_type_is_valid(path_type)) {
         ERROR("invalid path type %d", path_type);
         return -EINVAL;
     }
@@ -105,12 +105,12 @@ int path_set_add_path(path_set_t *path_set, const char *path, enum path_type pat
 }
 
 /* see paths.h */
-bool valid_path_type(enum path_type path_type) {
+bool path_type_is_valid(enum path_type path_type) {
     return path_type > type_unset && path_type < number_path_type;
 }
 
 /* see paths.h */
-enum path_type get_path_type(const char *path_type_string) {
+enum path_type path_type_get(const char *path_type_string) {
     enum path_type type = number_path_type;
     while (--type != type_unset && strcmp(path_type_string, type_strings[type]) != 0);
     if (type == type_unset)
@@ -119,7 +119,7 @@ enum path_type get_path_type(const char *path_type_string) {
 }
 
 /* see paths.h */
-const char *get_path_type_string(enum path_type path_type) {
+const char *path_type_name(enum path_type path_type) {
     if (path_type >= type_unset && path_type < number_path_type)
         return type_strings[path_type];
     ERROR("Path type invalid");

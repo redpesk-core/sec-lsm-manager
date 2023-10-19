@@ -210,9 +210,9 @@ int create_smack_rules(const context_t *context) {
     }
 
     smack_template_file = get_smack_template_file(NULL);
-    rc = process_template(smack_template_file, smack_rules_file, context);
+    rc = template_process(smack_template_file, smack_rules_file, context);
     if (rc < 0) {
-        ERROR("process_template : %d %s", -rc, strerror(-rc));
+        ERROR("template_process : %d %s", -rc, strerror(-rc));
         goto end;
     }
 
