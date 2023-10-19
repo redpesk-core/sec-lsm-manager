@@ -93,8 +93,8 @@ struct prot {
     /** count of pending output fields */
     unsigned outfields;
 
-    /** cancel index when putting values */
-    unsigned cancelidx;
+    /** count of writable bytes */
+    unsigned wrokcnt;
 
     /** allow empty records */
     int allow_empty;
@@ -175,16 +175,19 @@ cancel:
 }
 
 /**
- * write the content of 'buf' to 'fd'
+ * write part of the content of 'buf' to 'fd'
  */
-static int buf_write(buf_t *buf, int fd) {
+static int buf_write_length(buf_t *buf, int fd, unsigned count)
+{
     int n;
-    unsigned count;
     ssize_t rc;
     struct iovec vec[2];
 
     /* get the count of byte to write (avoid int overflow) */
-    count = buf->count > INT_MAX ? INT_MAX : buf->count;
+    if (count > buf->count)
+        count = buf->count;
+    if (count > INT_MAX)
+        count = INT_MAX;
 
     /* calling it with nothing to write is an error */
     if (count == 0)
@@ -337,7 +340,7 @@ void prot_reset(prot_t *prot) {
     /* initialisation of the structure */
     prot->inbuf.pos = prot->inbuf.count = 0;
     prot->outbuf.pos = prot->outbuf.count = 0;
-    prot->outfields = 0;
+    prot->outfields = prot->wrokcnt = 0;
     prot->fields.count = -1;
     prot->allow_empty = 0;
 }
@@ -356,11 +359,8 @@ void prot_set_allow_empty(prot_t *prot, int value)
 
 /* see prot.h */
 void prot_put_cancel(prot_t *prot) {
-    unsigned count;
-
     if (prot->outfields) {
-        count = prot->cancelidx - prot->outbuf.pos;
-        prot->outbuf.count = count > MAX_BUFFER_LENGTH ? count - MAX_BUFFER_LENGTH : count;
+        prot->outbuf.count = prot->wrokcnt;
         prot->outfields = 0;
     }
 }
@@ -371,22 +371,20 @@ int prot_put_end(prot_t *prot) {
 
     if (prot->outfields || prot->allow_empty) {
         rc = buf_put_car(&prot->outbuf, RECORD_SEPARATOR);
-        if (rc == 0)
+        if (rc == 0) {
+            prot->wrokcnt = prot->outbuf.count;
             prot->outfields = 0;
+        }
     }
     return rc;
 }
 
 /* see prot.h */
 int prot_put_field(prot_t *prot, const char *field) {
-    int rc;
+    int rc = 0;
 
     if (prot->outfields++)
         rc = buf_put_car(&prot->outbuf, FIELD_SEPARATOR);
-    else {
-        prot->cancelidx = prot->outbuf.pos + prot->outbuf.count;
-        rc = 0;
-    }
     if (rc >= 0 && field)
         rc = buf_put_string(&prot->outbuf, field);
 
@@ -400,7 +398,8 @@ int prot_put_fields(prot_t *prot, unsigned count, const char **fields) {
         rc = 0;
     else {
         rc = prot_put_field(prot, *fields);
-        while (rc >= 0 && --count) rc = prot_put_field(prot, *++fields);
+        while (rc >= 0 && --count)
+            rc = prot_put_field(prot, *++fields);
     }
     return rc;
 }
@@ -444,10 +443,19 @@ int prot_putx(prot_t *prot, ...) {
 }
 
 /* see prot.h */
-int prot_should_write(prot_t *prot) { return prot->outbuf.count > 0; }
+int prot_should_write(prot_t *prot)
+{
+    return prot->wrokcnt > 0;
+}
 
 /* see prot.h */
-int prot_write(prot_t *prot, int fdout) { return buf_write(&prot->outbuf, fdout); }
+int prot_write(prot_t *prot, int fdout)
+{
+    int result = buf_write_length(&prot->outbuf, fdout, prot->wrokcnt);
+    if (result > 0)
+        prot->wrokcnt -= (unsigned)result;
+    return result;
+}
 
 /* see prot.h */
 int prot_can_read(prot_t *prot) { return prot->inbuf.count < MAX_BUFFER_LENGTH; }
