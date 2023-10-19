@@ -53,8 +53,6 @@ struct buf {
     /** a count */
     unsigned count;
 
-    /* TODO: add a 3rd unsigned for improving management of read and write */
-
     /** a fixed size content */
     char content[MAX_BUFFER_LENGTH];
 };
@@ -74,10 +72,22 @@ typedef struct fields fields_t;
  * structure for handling the protocol
  */
 struct prot {
-    /** input buf, pos is the scanning position */
+    /**
+    * input buf, pos is the scanning position, count is the count of bytes read
+    *  +-------------------------------------+
+    *  |<--decoded-->|<--pending-->|         |
+    *  +-------------------------------------+
+    *                ^pos          ^count
+    */
     buf_t inbuf;
 
-    /** output buf, pos is to be written position */
+    /**
+    * output buf, pos is the start position, count is the count of byte to be written
+    *  +-------------------------------------+
+    *  |       |<---count--->|               |
+    *  +-------------------------------------+
+    *          ^pos
+    */
     buf_t outbuf;
 
     /** count of pending output fields */
@@ -335,13 +345,13 @@ void prot_reset(prot_t *prot) {
 /* see prot.h */
 int prot_is_empty_allowed(prot_t *prot)
 {
-	return prot->allow_empty;
+    return prot->allow_empty;
 }
 
 /* see prot.h */
 void prot_set_allow_empty(prot_t *prot, int value)
 {
-	prot->allow_empty = !!value;
+    prot->allow_empty = !!value;
 }
 
 /* see prot.h */
