@@ -75,4 +75,18 @@ extern void plugset_deinit(plugset_t *plugset);
 __wur __nonnull()
 extern int plugset_add(plugset_t *plugset, const char *expdir, const char *impid, const char *impdir);
 
+/**
+ * @brief Checks if the plugset has a given value
+ *
+ * @param[in] plugset  plugset handler
+ * @param[in] expdir   exported directory or NULL
+ * @param[in] impid    import appid or NULL
+ * @param[in] impdir   import directory or NULL
+ * @return
+ *    * true if found
+ *    * false if not found
+ */
+__wur __nonnull((1))
+extern bool plugset_has(plugset_t *plugset, const char *expdir, const char *impid, const char *impdir);
+
 #endif

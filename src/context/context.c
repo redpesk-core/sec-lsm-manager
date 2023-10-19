@@ -263,7 +263,6 @@ __wur __nonnull()
 int context_add_plug(context_t *context, const char *expdir, const char *impid, const char *impdir)
 {
     int rc;
-    plug_t *iter;
 
     /* check error state */
     if (context->error_flag) {
@@ -272,11 +271,9 @@ int context_add_plug(context_t *context, const char *expdir, const char *impid, 
     }
 
     /* check duplication */
-    for (iter = context->plugset; iter != NULL ; iter = iter->next) {
-        if (!strcmp(iter->impdir, impdir)) {
-            ERROR("import directory already added");
-            return -EEXIST;
-        }
+    if (plugset_has(&context->plugset, NULL, NULL, impdir)) {
+        ERROR("import directory already added");
+        return -EEXIST;
     }
 
     /* check validity of id */

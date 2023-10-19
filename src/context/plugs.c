@@ -85,3 +85,22 @@ int plugset_add(plugset_t *plugset, const char *expdir, const char *impid, const
     *plugset = plug;
     return 0;
 }
+
+__wur __nonnull()
+static plug_t *search(plugset_t *plugset, const char *expdir, const char *impid, const char *impdir)
+{
+    plug_t *plug = *plugset;
+    while (plug != NULL
+        && (expdir == NULL || 0 == strcmp(plug->expdir, expdir))
+        && (impid == NULL  || 0 == strcmp(plug->impid, impid))
+        && (impdir == NULL || 0 == strcmp(plug->impdir, impdir)))
+        plug = plug->next;
+    return plug;
+}
+
+__wur __nonnull((1))
+bool plugset_has(plugset_t *plugset, const char *expdir, const char *impid, const char *impdir)
+{
+    return search(plugset, expdir, impid, impdir);
+}
+
