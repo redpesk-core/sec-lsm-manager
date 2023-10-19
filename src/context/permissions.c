@@ -53,17 +53,17 @@ void permission_set_clear(permission_set_t *permission_set) {
 
 /* see permissions.h */
 __nonnull() __wur
-int permission_set_has(const permission_set_t *permission_set, const char *permission)
+bool permission_set_has(const permission_set_t *permission_set, const char *permission)
 {
     char **parray = permission_set->permissions;
     size_t nrp = permission_set->size;
     size_t idxp = 0;
     while (idxp < nrp)
         if (compare_permission(permission, parray[idxp]) == 0)
-            return 1;
+            return true;
         else
             idxp++;
-    return 0;
+    return false;
 }
 
 /* see permissions.h */

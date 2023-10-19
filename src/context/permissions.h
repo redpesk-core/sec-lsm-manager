@@ -18,9 +18,9 @@
 #ifndef SEC_LSM_MANAGER_POLICIES_H
 #define SEC_LSM_MANAGER_POLICIES_H
 
+#include <sys/cdefs.h>
 #include <stddef.h>
-#include <stdint.h>
-#include <time.h>
+#include <stdbool.h>
 
 /**
  * @brief Structure of permission_set
@@ -66,6 +66,6 @@ extern int permission_set_add(permission_set_t *permission_set, const char *perm
  * @return 1 when permission is granted or, otherwise, 0
  */
 __nonnull() __wur
-extern int permission_set_has(const permission_set_t *permission_set, const char *permission);
+extern bool permission_set_has(const permission_set_t *permission_set, const char *permission);
 
 #endif
