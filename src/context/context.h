@@ -186,9 +186,9 @@ extern int context_has_permission(const context_t *context, const char *permissi
 typedef
     struct {
         int (*id)(void* /*visitor*/, const char* /*id*/);
-        int (*path)(void* /*visitor*/, const char* /*id*/, const char* /*id*/);
+        int (*path)(void* /*visitor*/, const char* /*path*/, const char* /*type*/);
         int (*permission)(void* /*visitor*/, const char* /*permission*/);
-        int (*plug)(void* /*visitor*/, const char* /*id*/, const char* /*id*/, const char* /*id*/);
+        int (*plug)(void* /*visitor*/, const char* /*expdir*/, const char* /*impid*/, const char* /*impdir*/);
     }
     context_visitor_itf_t;
 
