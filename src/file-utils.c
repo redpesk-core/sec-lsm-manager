@@ -82,7 +82,7 @@ int remove_file(const char *path) {
 char *read_file(const char *filename) {
     int f;
     struct stat s;
-    char *result;
+    char *result, *temp;
     size_t size, pos;
     ssize_t rc;
 
@@ -109,13 +109,11 @@ char *read_file(const char *filename) {
 
     pos = 0;
     result = malloc(size + 1);
+    if (result == NULL)
+        goto oom;
     do {
-        if (result == NULL) {
-            fprintf(stderr, "Out of memory\n");
-            goto end2;
-        }
         rc = read(f, &result[pos], (size - pos) + 1);
-        if (rc < 0) {
+        if (rc < 0 && errno != EINTR) {
             fprintf(stderr, "Error while reading %s\n", filename);
             goto error;
         }
@@ -123,7 +121,10 @@ char *read_file(const char *filename) {
             pos += (size_t)rc;
             if (pos > size) {
                 size = pos + BLOCKSIZE;
-                result = realloc(result, size + 1);
+                temp = realloc(result, size + 1);
+                if (temp == NULL)
+                    goto oom;
+                result = temp;
             }
         }
     } while (rc > 0);
@@ -132,6 +133,8 @@ char *read_file(const char *filename) {
 
     goto end2;
 
+oom:
+    fprintf(stderr, "Out of memory\n");
 error:
     free(result);
     result = NULL;

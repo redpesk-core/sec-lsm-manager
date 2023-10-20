@@ -23,6 +23,13 @@
 
 #include "socket-info.h"
 
+#include <stddef.h>
+#include <errno.h>
+#include <string.h>
+#include <sys/socket.h>
+
+#include "log.h"
+
 int socket_info_get(int fd, socket_info_t *socket_info) {
     int rc = 0;
     struct ucred uc;
@@ -33,7 +40,7 @@ int socket_info_get(int fd, socket_info_t *socket_info) {
         goto ret;
     }
 
-#if WITH_SMACK
+#if WITH_SMACK && 0
     rc = (int)smack_new_label_from_socket(fd, &(socket_info->label));
     if (rc < 0) {
         rc = -errno;
@@ -48,7 +55,7 @@ int socket_info_get(int fd, socket_info_t *socket_info) {
     socket_info->uid = uc.uid;
     socket_info->pid = uc.pid;
 
-    socket_info->uid_str = get_uid_str(socket_info->uid);
+    socket_info->uid_str = strdup(""); //get_uid_str(socket_info->uid);
     if (socket_info->uid_str == NULL) {
         ERROR("get_uid_str %d", socket_info->uid);
         rc = -EINVAL;

@@ -384,13 +384,22 @@ __nonnull() __wur static int ensure_opened(sec_lsm_manager_t *sec_lsm_manager) {
  * @brief lock, open and send
  *
  */
-static int sync_send_do(sec_lsm_manager_t *sec_lsm_manager, int (*aftersend)(sec_lsm_manager_t *), ...)
+static int sync_send_do(sec_lsm_manager_t *sec_lsm_manager, int (*aftersend)(sec_lsm_manager_t *), const char *first, ...)
 {
     va_list va;
     int nf, rc;
-    const char *fields[8];
+    const char *fields[8], *ptr;
 
     CHECK_NO_NULL(sec_lsm_manager, "sec_lsm_manager");
+
+    /* get args */
+    va_start(va, first);
+    ptr = first;
+    for (nf = 0 ; ptr != NULL && nf < (int)(sizeof fields / sizeof *fields) ; nf++) {
+        fields[nf] = ptr;
+        ptr = va_arg(va, const char *);
+    }
+    va_end(va);
 
     /* check lock */
     if (sec_lsm_manager->synclock)
@@ -400,15 +409,6 @@ static int sync_send_do(sec_lsm_manager_t *sec_lsm_manager, int (*aftersend)(sec
     sec_lsm_manager->synclock = true;
     rc = ensure_opened(sec_lsm_manager);
     if (rc >= 0) {
-
-        /* fill the arguments */
-        va_start(va, aftersend);
-        for (nf = 0 ; nf < (int)(sizeof fields / sizeof *fields) ; nf++) {
-            fields[nf] = va_arg(va, const char *);
-            if (fields[nf] == NULL)
-                break;
-        }
-        va_end(va);
 
         /* send the reply */
         rc = send_reply(sec_lsm_manager, fields, nf);

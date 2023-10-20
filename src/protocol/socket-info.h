@@ -24,6 +24,8 @@
 #ifndef SEC_LSM_SOCKET_INFO_H
 #define SEC_LSM_SOCKET_INFO_H
 
+#include <unistd.h>
+
 typedef struct socket_info {
     uid_t uid;
     char *uid_str;

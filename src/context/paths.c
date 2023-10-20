@@ -74,6 +74,8 @@ int path_set_add(path_set_t *path_set, const char *path, enum path_type path_typ
     }
 
     size_t path_len = strlen(path);
+    while (path_len > 1 && path[path_len - 1] == '/')
+        path_len--;
 
     if (path_len < 1 || path_len >= SEC_LSM_MANAGER_MAX_SIZE_PATH) {
         ERROR("invalid path size : %ld", path_len);
@@ -93,10 +95,8 @@ int path_set_add(path_set_t *path_set, const char *path, enum path_type path_typ
         return -ENOMEM;
     }
     
-    memcpy(path_item->path, path, path_len + 1);
-    while (path_len > 1 && path_item->path[path_len - 1] == '/') {
-        path_item->path[--path_len] = '\0';
-    }
+    memcpy(path_item->path, path, path_len);
+    path_item->path[path_len] = '\0';
 
     path_item->path_type = path_type;
     path_set->paths[path_set->size++] = path_item;

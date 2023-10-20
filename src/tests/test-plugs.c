@@ -29,7 +29,7 @@ START_TEST(test_plugset_init)
 {
     plugset_t plugset;
 
-    plugset = (plug_t*)&plugset;
+    plugset = (plug_t*)(intptr_t)8;
     plugset_init(&plugset);
     ck_assert_ptr_null(plugset);
 
@@ -42,7 +42,7 @@ START_TEST(test_plugset_deinit)
 {
     plugset_t plugset;
 
-    plugset = (plug_t*)&plugset;
+    plugset = (plug_t*)(intptr_t)8;
     plugset_init(&plugset);
     ck_assert_ptr_null(plugset);
 
@@ -60,7 +60,7 @@ END_TEST
 START_TEST(test_plugset_add) {
     plugset_t plugset;
 
-    plugset = (plug_t*)&plugset;
+    plugset = (plug_t*)(intptr_t)8;
     plugset_init(&plugset);
     ck_assert_ptr_null(plugset);
 

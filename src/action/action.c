@@ -66,22 +66,20 @@ static int check_plug_installable(context_t *context)
 
         /* compute the label of the application importing the plug */
         mac_get_label(label, plugit->impid);
-        if (sts == 0) {
-            sts = cynagora_check_permission(label, perm_public_plug);
-            if (sts < 0) {
-                ERROR("can't query cynagora");
-            }
-            else {
-                /* compute the scope of the required permision */
-                scope = sts ? scope_public : scope_partner;
-                /* compute the required permision */
-                snprintf(permission, sizeof permission, perm_export_template, plugit->impid, scope);
-                /* check if the permision is granted for the app */
-                sts = context_has_permission(context, permission);
-                if (!sts) {
-                    ERROR("no permission to install plugs for %s", plugit->impid);
-                    sts = -EPERM;
-                }
+        sts = cynagora_check_permission(label, perm_public_plug);
+        if (sts < 0) {
+            ERROR("can't query cynagora");
+        }
+        else {
+            /* compute the scope of the required permision */
+            scope = sts ? scope_public : scope_partner;
+            /* compute the required permision */
+            snprintf(permission, sizeof permission, perm_export_template, plugit->impid, scope);
+            /* check if the permision is granted for the app */
+            sts = context_has_permission(context, permission);
+            if (!sts) {
+                ERROR("no permission to install plugs for %s", plugit->impid);
+                sts = -EPERM;
             }
         }
         if (sts < 0 && rc == 0)

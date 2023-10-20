@@ -226,26 +226,28 @@ int create_smack_rules(const context_t *context) {
     rc = smack_accesses_new(&smack_accesses);
     if (rc < 0) {
         ERROR("smack_accesses_new");
-        goto error;
+        goto error2;
     }
 
     rc = smack_accesses_add_from_file(smack_accesses, fd);
     if (rc < 0) {
         ERROR("smack_accesses_add_from_file");
-        goto error;
+        goto error2;
     }
 
     if (smack_enabled()) {
         rc = smack_accesses_apply(smack_accesses);
         if (rc < 0) {
             ERROR("smack_accesses_apply");
-            goto error;
+            goto error2;
         }
     }
 
     DEBUG("create_smack_rules success");
     goto end;
 
+error2:
+    close(fd);
 error:
     rc2 = remove(smack_rules_file);
     if (rc2 < 0) {

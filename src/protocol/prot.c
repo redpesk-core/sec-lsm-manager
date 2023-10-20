@@ -445,6 +445,7 @@ int prot_putx(prot_t *prot, ...) {
         rc = prot_put_field(prot, p);
         p = va_arg(l, const char *);
     }
+    va_end(l);
     if (rc)
         prot_put_cancel(prot);
     else

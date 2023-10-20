@@ -304,9 +304,10 @@ __nonnull() __wur static int destroy_semanage_handle(semanage_handle_t *semanage
 __wur static int create_semanage_handle(semanage_handle_t **semanage_handle) {
     int rc = 0;
     int rc2 = 0;
+
     *semanage_handle = semanage_handle_create();
 
-    if (semanage_handle == NULL) {
+    if (*semanage_handle == NULL) {
         rc = -errno;
         ERROR("semanage_handle_create : %d %s", -rc, strerror(-rc));
         goto ret;
@@ -328,15 +329,16 @@ __wur static int create_semanage_handle(semanage_handle_t **semanage_handle) {
         goto error;
     }
 
-    goto ret;
+    return 0;
 
 error:
     if (destroy_semanage_handle(*semanage_handle) < 0) {
         rc2 = -errno;
         ERROR("destroy_semanage_handle : %d %s", -rc2, strerror(-rc2));
     }
+    *semanage_handle = NULL;
 ret:
-    return rc;
+    return rc >= 0 ? -EINVAL : rc;
 }
 
 /**
@@ -459,7 +461,7 @@ end:
 
 /* see selinux-template.h */
 __nonnull((2,3))
-static const char *get_opt_env_def(const char *value, const char *envname, const char *defvalue) {
+static const char *get_opt_env_def(const char *value, const char *envname, const char defvalue[]) {
     if (value == NULL) {
         value = secure_getenv(envname);
         if (value == NULL)
@@ -517,7 +519,7 @@ int create_selinux_rules(const context_t *context,
     selinux_module_t selinux_module;
     init_selinux_module(&selinux_module, context);
 
-    semanage_handle_t *semanage_handle;
+    semanage_handle_t *semanage_handle = NULL;
     rc = create_semanage_handle(&semanage_handle);
     if (rc < 0) {
         ERROR("create_semanage_handle : %d %s", -rc, strerror(-rc));

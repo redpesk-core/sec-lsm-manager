@@ -25,6 +25,8 @@
 
 #include <errno.h>
 #include <string.h>
+#include <stdint.h>
+#include <time.h>
 
 #include "log.h"
 
