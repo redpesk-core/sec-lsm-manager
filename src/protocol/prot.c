@@ -37,11 +37,21 @@
 #include <unistd.h>
 #include <limits.h>
 
-#define MAX_FIELDS 20
-#define MAX_BUFFER_LENGTH 2000
-#define FIELD_SEPARATOR ' '
-#define RECORD_SEPARATOR '\n'
-#define ESCAPE '\\'
+#ifndef PROT_MAX_FIELDS
+#define PROT_MAX_FIELDS 20
+#endif
+#ifndef PROT_MAX_BUFFER_LENGTH
+#define PROT_MAX_BUFFER_LENGTH 2000
+#endif
+#ifndef PROT_FIELD_SEPARATOR
+#define PROT_FIELD_SEPARATOR ' '
+#endif
+#ifndef PROT_RECORD_SEPARATOR
+#define PROT_RECORD_SEPARATOR '\n'
+#endif
+#ifndef PROT_ESCAPE
+#define PROT_ESCAPE '\\'
+#endif
 
 /**
  * the structure buf is generic the meaning of pos/count is not fixed
@@ -54,7 +64,7 @@ struct buf {
     unsigned count;
 
     /** a fixed size content */
-    char content[MAX_BUFFER_LENGTH];
+    char content[PROT_MAX_BUFFER_LENGTH];
 };
 typedef struct buf buf_t;
 
@@ -64,7 +74,7 @@ struct fields {
     int count;
 
     /** the fields as strings */
-    const char *fields[MAX_FIELDS];
+    const char *fields[PROT_MAX_FIELDS];
 };
 typedef struct fields fields_t;
 
@@ -113,13 +123,13 @@ static int buf_put_car(buf_t *buf, char car) {
     unsigned pos;
 
     pos = buf->count;
-    if (pos >= MAX_BUFFER_LENGTH)
+    if (pos >= PROT_MAX_BUFFER_LENGTH)
         return -ECANCELED;
 
     buf->count = pos + 1;
     pos += buf->pos;
-    if (pos >= MAX_BUFFER_LENGTH)
-        pos -= MAX_BUFFER_LENGTH;
+    if (pos >= PROT_MAX_BUFFER_LENGTH)
+        pos -= PROT_MAX_BUFFER_LENGTH;
     buf->content[pos] = car;
     return 0;
 }
@@ -136,25 +146,25 @@ static int buf_put_string(buf_t *buf, const char *string) {
 
     remain = buf->count;
     pos = buf->pos + remain;
-    if (pos >= MAX_BUFFER_LENGTH)
-        pos -= MAX_BUFFER_LENGTH;
-    remain = MAX_BUFFER_LENGTH - remain;
+    if (pos >= PROT_MAX_BUFFER_LENGTH)
+        pos -= PROT_MAX_BUFFER_LENGTH;
+    remain = PROT_MAX_BUFFER_LENGTH - remain;
 
     /* put all chars of the string */
     while ((c = *string++)) {
         /* escape special characters */
-        if (c == FIELD_SEPARATOR || c == RECORD_SEPARATOR)
+        if (c == PROT_FIELD_SEPARATOR || c == PROT_RECORD_SEPARATOR)
             escape = 1;
-        else if (c == ESCAPE)
+        else if (c == PROT_ESCAPE)
             escape = *string == 0
-                  || *string == FIELD_SEPARATOR
-                  || *string == RECORD_SEPARATOR
-                  || *string == ESCAPE;
+                  || *string == PROT_FIELD_SEPARATOR
+                  || *string == PROT_RECORD_SEPARATOR
+                  || *string == PROT_ESCAPE;
         if (escape) {
             if (!remain--)
                 goto cancel;
-            buf->content[pos++] = ESCAPE;
-            if (pos == MAX_BUFFER_LENGTH)
+            buf->content[pos++] = PROT_ESCAPE;
+            if (pos == PROT_MAX_BUFFER_LENGTH)
                 pos = 0;
             escape = 0;
         }
@@ -162,12 +172,12 @@ static int buf_put_string(buf_t *buf, const char *string) {
         if (!remain--)
             goto cancel;
         buf->content[pos++] = c;
-        if (pos == MAX_BUFFER_LENGTH)
+        if (pos == PROT_MAX_BUFFER_LENGTH)
             pos = 0;
     }
 
     /* record the new values */
-    buf->count = MAX_BUFFER_LENGTH - remain;
+    buf->count = PROT_MAX_BUFFER_LENGTH - remain;
     return 0;
 
 cancel:
@@ -195,11 +205,11 @@ static int buf_write_length(buf_t *buf, int fd, unsigned count)
 
     /* prepare the iovec */
     vec[0].iov_base = buf->content + buf->pos;
-    if (buf->pos + count <= MAX_BUFFER_LENGTH) {
+    if (buf->pos + count <= PROT_MAX_BUFFER_LENGTH) {
         vec[0].iov_len = count;
         n = 1;
     } else {
-        vec[0].iov_len = MAX_BUFFER_LENGTH - buf->pos;
+        vec[0].iov_len = PROT_MAX_BUFFER_LENGTH - buf->pos;
         vec[1].iov_base = buf->content;
         vec[1].iov_len = count - vec[0].iov_len;
         n = 2;
@@ -217,8 +227,8 @@ static int buf_write_length(buf_t *buf, int fd, unsigned count)
         /* update the state */
         buf->count -= (unsigned)rc;
         buf->pos += (unsigned)rc;
-        if (buf->pos >= MAX_BUFFER_LENGTH)
-            buf->pos -= MAX_BUFFER_LENGTH;
+        if (buf->pos >= PROT_MAX_BUFFER_LENGTH)
+            buf->pos -= PROT_MAX_BUFFER_LENGTH;
     }
 
     return (int)rc;
@@ -232,7 +242,7 @@ static void buf_get_fields(buf_t *buf, fields_t *fields) {
     unsigned read, write;
 
     /* advance the pos after the end */
-    assert(buf->content[buf->pos] == RECORD_SEPARATOR);
+    assert(buf->content[buf->pos] == PROT_RECORD_SEPARATOR);
     buf->pos++;
 
     /* init first field */
@@ -241,20 +251,20 @@ static void buf_get_fields(buf_t *buf, fields_t *fields) {
     for (;;) {
         c = buf->content[read++];
         switch (c) {
-            case FIELD_SEPARATOR: /* field separator */
+            case PROT_FIELD_SEPARATOR: /* field separator */
                 buf->content[write++] = 0;
-                if (fields->count >= MAX_FIELDS)
+                if (fields->count >= PROT_MAX_FIELDS)
                     return;
                 fields->fields[++fields->count] = &buf->content[write];
                 break;
-            case RECORD_SEPARATOR: /* end of line (record separator) */
+            case PROT_RECORD_SEPARATOR: /* end of line (record separator) */
                 buf->content[write] = 0;
                 fields->count += (write > 0);
                 return;
-            case ESCAPE: /* escaping */
+            case PROT_ESCAPE: /* escaping */
                 c = buf->content[read++];
-                if (c != FIELD_SEPARATOR && c != RECORD_SEPARATOR && c != ESCAPE)
-                    buf->content[write++] = ESCAPE;
+                if (c != PROT_FIELD_SEPARATOR && c != PROT_RECORD_SEPARATOR && c != PROT_ESCAPE)
+                    buf->content[write++] = PROT_ESCAPE;
                 buf->content[write++] = c;
                 break;
             default: /* other characters */
@@ -273,10 +283,10 @@ static int buf_scan_end_record(buf_t *buf) {
 
     /* search the next RS */
     while (buf->pos < buf->count) {
-        if (buf->content[buf->pos] == RECORD_SEPARATOR) {
+        if (buf->content[buf->pos] == PROT_RECORD_SEPARATOR) {
             /* check whether RS is escaped */
             nesc = 0;
-            while (buf->pos > nesc && buf->content[buf->pos - (nesc + 1)] == ESCAPE) nesc++;
+            while (buf->pos > nesc && buf->content[buf->pos - (nesc + 1)] == PROT_ESCAPE) nesc++;
             if ((nesc & 1) == 0)
                 return 1; /* not escaped */
         }
@@ -302,11 +312,11 @@ static int inbuf_read(buf_t *buf, int fd) {
     ssize_t szr;
     int rc;
 
-    if (buf->count == MAX_BUFFER_LENGTH)
+    if (buf->count == PROT_MAX_BUFFER_LENGTH)
         return -ENOBUFS;
 
     do {
-        szr = read(fd, buf->content + buf->count, MAX_BUFFER_LENGTH - buf->count);
+        szr = read(fd, buf->content + buf->count, PROT_MAX_BUFFER_LENGTH - buf->count);
     } while (szr < 0 && errno == EINTR);
     if (szr >= 0)
         buf->count += (unsigned)(rc = (int)szr);
@@ -370,7 +380,7 @@ int prot_put_end(prot_t *prot) {
     int rc = 0;
 
     if (prot->outfields || prot->allow_empty) {
-        rc = buf_put_car(&prot->outbuf, RECORD_SEPARATOR);
+        rc = buf_put_car(&prot->outbuf, PROT_RECORD_SEPARATOR);
         if (rc == 0) {
             prot->wrokcnt = prot->outbuf.count;
             prot->outfields = 0;
@@ -384,7 +394,7 @@ int prot_put_field(prot_t *prot, const char *field) {
     int rc = 0;
 
     if (prot->outfields++)
-        rc = buf_put_car(&prot->outbuf, FIELD_SEPARATOR);
+        rc = buf_put_car(&prot->outbuf, PROT_FIELD_SEPARATOR);
     if (rc >= 0 && field)
         rc = buf_put_string(&prot->outbuf, field);
 
@@ -458,7 +468,7 @@ int prot_write(prot_t *prot, int fdout)
 }
 
 /* see prot.h */
-int prot_can_read(prot_t *prot) { return prot->inbuf.count < MAX_BUFFER_LENGTH; }
+int prot_can_read(prot_t *prot) { return prot->inbuf.count < PROT_MAX_BUFFER_LENGTH; }
 
 /* see prot.h */
 int prot_read(prot_t *prot, int fdin) { return inbuf_read(&prot->inbuf, fdin); }
