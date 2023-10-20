@@ -148,6 +148,7 @@ extern int prot_should_write(prot_t *prot);
  * @param prot the protocol handler
  * @param fdout the file to write
  * @return the count of bytes written or a negative -errno error code
+ *         returns -ENODATA when nothing to be writen (see above comment)
  */
 extern int prot_write(prot_t *prot, int fdout);
 
@@ -174,6 +175,7 @@ extern int prot_read(prot_t *prot, int fdin);
  * @param prot the protocol handler
  * @param fields where to store the array of received fields (can be NULL)
  * @return the count of fields or -EAGAIN if no field is available
+ *         or -EMSGSIZE when buffer is full but record didn't end
  */
 extern int prot_get(prot_t *prot, const char ***fields);
 

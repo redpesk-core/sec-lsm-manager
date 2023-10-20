@@ -80,6 +80,18 @@ struct sec_lsm_manager {
 /***********************/
 
 /**
+ * @brief Disconnect the client
+ *
+ * @param[in] sec_lsm_manager  the handler of the client
+ */
+__nonnull() static void disconnection(sec_lsm_manager_t *sec_lsm_manager) {
+    if (sec_lsm_manager->fd >= 0) {
+        close(sec_lsm_manager->fd);
+        sec_lsm_manager->fd = -1;
+    }
+}
+
+/**
  * @brief Flush the write buffer of the client
  *
  * @param[in] sec_lsm_manager  the handler of the client
@@ -245,12 +257,20 @@ __nonnull() __wur static int wait_reply(sec_lsm_manager_t *sec_lsm_manager, bool
         if (rc > 0)
             return rc;
 
+        if (rc == -EMSGSIZE) {
+            /* the input is too big */
+disconnect:
+            disconnection(sec_lsm_manager);
+            errno = EPIPE;
+            return -EPIPE;
+        }
+
         if (rc < 0) {
             /* wait for an answer */
             rc = prot_read(sec_lsm_manager->prot, sec_lsm_manager->fd);
             while (rc <= 0) {
                 if (rc == 0)
-                    return -(errno = EPIPE);
+                    goto disconnect;
                 if (rc == -EAGAIN && block)
                     rc = wait_input(sec_lsm_manager);
                 if (rc < 0)
@@ -259,7 +279,6 @@ __nonnull() __wur static int wait_reply(sec_lsm_manager_t *sec_lsm_manager, bool
             }
         }
     }
-    return -1;
 }
 
 /**
@@ -313,18 +332,6 @@ __nonnull() __wur static int raw_wait_done_or_error(sec_lsm_manager_t *sec_lsm_m
 __nonnull() __wur static int wait_done_or_error(sec_lsm_manager_t *sec_lsm_manager) {
     int rc = raw_wait_done_or_error(sec_lsm_manager);
     return rc < 0 ? rc : 0;
-}
-
-/**
- * @brief Disconnect the client
- *
- * @param[in] sec_lsm_manager  the handler of the client
- */
-__nonnull() static void disconnection(sec_lsm_manager_t *sec_lsm_manager) {
-    if (sec_lsm_manager->fd >= 0) {
-        close(sec_lsm_manager->fd);
-        sec_lsm_manager->fd = -1;
-    }
 }
 
 /**
@@ -566,7 +573,7 @@ static int wait_display_replies(sec_lsm_manager_t *sec_lsm_manager)
         puts("################################################");
     }
     if (rc > 0 && !strcmp(sec_lsm_manager->reply.fields[0], _error_)) {
-	rc = -1;
+        rc = -1;
     }
     return rc;
 }

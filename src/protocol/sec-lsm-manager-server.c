@@ -576,6 +576,9 @@ static void on_client_event(pollitem_t *pollitem, uint32_t events, int pollfd) {
             prot_next(cli->prot);
             nargs = prot_get(cli->prot, &args);
         }
+        if (nargs == -EMSGSIZE) {
+            goto terminate;
+        }
     }
     return;
 

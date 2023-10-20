@@ -478,7 +478,7 @@ int prot_get(prot_t *prot, const char ***fields) {
     for (;;) {
         if (prot->fields.count < 0) {
             if (!buf_scan_end_record(&prot->inbuf))
-                return -EAGAIN;
+                return prot_can_read(prot) ? -EAGAIN : -EMSGSIZE;
             buf_get_fields(&prot->inbuf, &prot->fields);
         }
         if (prot->fields.count == 0 && !prot->allow_empty)
