@@ -395,5 +395,5 @@ __nonnull()
 void smack_get_label(char label[SEC_LSM_MANAGER_MAX_SIZE_LABEL + 1], const char *appid)
 {
     snprintf(label, SEC_LSM_MANAGER_MAX_SIZE_LABEL, "App:%s", appid);
-    label[SEC_LSM_MANAGER_MAX_SIZE_ID] = '\0';    
+    label[SEC_LSM_MANAGER_MAX_SIZE_ID] = '\0';
 }

@@ -94,7 +94,7 @@ int path_set_add(path_set_t *path_set, const char *path, enum path_type path_typ
         ERROR("malloc path_item");
         return -ENOMEM;
     }
-    
+
     memcpy(path_item->path, path, path_len);
     path_item->path[path_len] = '\0';
 

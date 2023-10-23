@@ -64,6 +64,7 @@ add_library(common-lib OBJECT
     context/plugs.c
     file-utils.c
     log.c
+    protocol/client.c
     protocol/pollitem.c
     protocol/prot.c
     protocol/sec-lsm-manager-protocol.c

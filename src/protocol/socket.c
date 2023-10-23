@@ -305,7 +305,7 @@ int socket_open(const char *uri, int server) {
             setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &rc, sizeof rc);
         }
         if (!e->nolisten)
-            listen(fd, BACKLOG);
+            listen(fd, server);
     }
     return fd;
 }

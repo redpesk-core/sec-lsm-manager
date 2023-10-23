@@ -25,14 +25,15 @@
 #ifndef SEC_LSM_MANAGER_SERVER_H
 #define SEC_LSM_MANAGER_SERVER_H
 
-#include <sys/cdefs.h>
+#include <features.h>
+#include <stdbool.h>
 
 typedef struct sec_lsm_manager_server sec_lsm_manager_server_t;
 
 /**
  * @brief Boolean flag telling whether the server logs or not its received commands
  */
-extern int sec_lsm_manager_server_log;
+extern bool sec_lsm_manager_server_log;
 
 /**
  * @brief Create a security manager server
@@ -44,8 +45,9 @@ extern int sec_lsm_manager_server_log;
  *
  * @see sec_lsm_manager_server_destroy
  */
+__wur __nonnull((1))
 extern int sec_lsm_manager_server_create(sec_lsm_manager_server_t **server,
-                                         const char *sec_lsm_manager_socket_spec) __wur;
+                                         const char *sec_lsm_manager_socket_spec);
 
 /**
  * @brief Destroy a created server and release its resources
@@ -54,7 +56,8 @@ extern int sec_lsm_manager_server_create(sec_lsm_manager_server_t **server,
  *
  * @see sec_lsm_manager_server_create
  */
-extern void sec_lsm_manager_server_destroy(sec_lsm_manager_server_t *server) __nonnull();
+__nonnull()
+extern void sec_lsm_manager_server_destroy(sec_lsm_manager_server_t *server);
 
 /**
  * @brief Start the sec_lsm_manager server and returns only when stopped
@@ -67,7 +70,8 @@ extern void sec_lsm_manager_server_destroy(sec_lsm_manager_server_t *server) __n
  *
  * @see sec_lsm_manager_server_stop
  */
-extern int sec_lsm_manager_server_serve(sec_lsm_manager_server_t *server, int shutofftime) __nonnull() __wur;
+__wur __nonnull()
+extern int sec_lsm_manager_server_serve(sec_lsm_manager_server_t *server, int shutofftime);
 
 /**
  * @brief Stop the sec_lsm_manager server
@@ -77,6 +81,7 @@ extern int sec_lsm_manager_server_serve(sec_lsm_manager_server_t *server, int sh
  *
  * @see sec_lsm_manager_server_serve
  */
-extern void sec_lsm_manager_server_stop(sec_lsm_manager_server_t *server, int status) __nonnull();
+__nonnull()
+extern void sec_lsm_manager_server_stop(sec_lsm_manager_server_t *server, int status);
 
 #endif
