@@ -42,7 +42,8 @@
 /**
  * structure recording a client
  */
-struct sec_lsm_manager {
+struct sec_lsm_manager
+{
     /** file descriptor of the socket */
     int fd;
 
@@ -63,6 +64,17 @@ struct sec_lsm_manager {
 
     /** spec of the socket */
     char *socketspec;
+};
+
+/**
+ * private structure for display implementation
+ */
+struct display_data
+{
+    /** the callback function */
+    void (*callback)(void *, int count, const char *[]);
+    /** its closure */
+    void *closure;
 };
 
 /***********************/
@@ -319,7 +331,8 @@ __nonnull() __wur static int raw_wait_done_or_error(sec_lsm_manager_t *sec_lsm_m
  * @return  0 in case of success or a negative -errno value
  *          -ECANCELED when received an error status
  */
-__nonnull() __wur static int wait_done_or_error(sec_lsm_manager_t *sec_lsm_manager) {
+__nonnull() __wur static int wait_done_or_error(sec_lsm_manager_t *sec_lsm_manager, void *closure) {
+    (void)closure;
     int rc = raw_wait_done_or_error(sec_lsm_manager);
     return rc < 0 ? rc : 0;
 }
@@ -372,22 +385,15 @@ __nonnull() __wur static int ensure_opened(sec_lsm_manager_t *sec_lsm_manager) {
 
 /**
  * @brief lock, open and send
- *
  */
-static int sync_send_do(sec_lsm_manager_t *sec_lsm_manager, int (*aftersend)(sec_lsm_manager_t *), const char *first, ...)
-{
-    va_list va;
-    int nf, rc;
-    const char *fields[8], *ptr;
-
-    /* get args */
-    va_start(va, first);
-    ptr = first;
-    for (nf = 0 ; ptr != NULL && nf < (int)(sizeof fields / sizeof *fields) ; nf++) {
-        fields[nf] = ptr;
-        ptr = va_arg(va, const char *);
-    }
-    va_end(va);
+static int sync_process(
+    sec_lsm_manager_t *sec_lsm_manager,
+    int nfields,
+    const char *fields[],
+    int (*aftersend)(sec_lsm_manager_t *, void *),
+    void *closure
+) {
+    int rc;
 
     /* check lock */
     if (sec_lsm_manager->synclock)
@@ -399,9 +405,9 @@ static int sync_send_do(sec_lsm_manager_t *sec_lsm_manager, int (*aftersend)(sec
     if (rc >= 0) {
 
         /* send the reply */
-        rc = send_reply(sec_lsm_manager, fields, nf);
+        rc = send_reply(sec_lsm_manager, fields, nfields);
         if (rc >= 0) {
-            rc = aftersend(sec_lsm_manager);
+            rc = aftersend(sec_lsm_manager, closure);
         }
     }
     sec_lsm_manager->synclock = false;
@@ -482,7 +488,8 @@ int sec_lsm_manager_set_id(sec_lsm_manager_t *sec_lsm_manager, const char *id) {
     if (sec_lsm_manager == NULL || id == NULL)
         return -EINVAL;
 
-    return sync_send_do(sec_lsm_manager, wait_done_or_error, _id_, id, NULL);
+    return sync_process(sec_lsm_manager, 2, (const char*[]){ _id_, id },
+                        wait_done_or_error, NULL);
 }
 
 /* see sec-lsm-manager-client.h */
@@ -491,7 +498,8 @@ int sec_lsm_manager_add_path(sec_lsm_manager_t *sec_lsm_manager, const char *pat
     if (sec_lsm_manager == NULL || path == NULL || path_type == NULL)
         return -EINVAL;
 
-    return sync_send_do(sec_lsm_manager, wait_done_or_error, _path_, path, path_type, NULL);
+    return sync_process(sec_lsm_manager, 3, (const char*[]){ _path_, path, path_type },
+                        wait_done_or_error, NULL);
 }
 
 /* see sec-lsm-manager-client.h */
@@ -502,7 +510,8 @@ int sec_lsm_manager_add_plug(sec_lsm_manager_t *sec_lsm_manager, const char *exp
     if (sec_lsm_manager == NULL || expdir == NULL || impid == NULL || impdir == NULL)
         return -EINVAL;
 
-    return sync_send_do(sec_lsm_manager, wait_done_or_error, _plug_, expdir, impid, impdir, NULL);
+    return sync_process(sec_lsm_manager, 4, (const char*[]){ _plug_, expdir, impid, impdir },
+                        wait_done_or_error, NULL);
 }
 
 /* see sec-lsm-manager-client.h */
@@ -511,7 +520,8 @@ int sec_lsm_manager_add_permission(sec_lsm_manager_t *sec_lsm_manager, const cha
     if (sec_lsm_manager == NULL || permission == NULL)
         return -EINVAL;
 
-    return sync_send_do(sec_lsm_manager, wait_done_or_error, _permission_, permission, NULL);
+    return sync_process(sec_lsm_manager, 2, (const char*[]){ _permission_, permission },
+                        wait_done_or_error, NULL);
 }
 
 /* see sec-lsm-manager-client.h */
@@ -519,7 +529,8 @@ int sec_lsm_manager_clear(sec_lsm_manager_t *sec_lsm_manager) {
     /* check parameters not NULL */
     if (sec_lsm_manager == NULL)
         return -EINVAL;
-    return sync_send_do(sec_lsm_manager, wait_done_or_error, _clear_, NULL);
+    return sync_process(sec_lsm_manager, 1, (const char*[]){ _clear_ },
+                        wait_done_or_error, NULL);
 }
 
 /* see sec-lsm-manager-client.h */
@@ -527,7 +538,8 @@ int sec_lsm_manager_install(sec_lsm_manager_t *sec_lsm_manager) {
     /* check parameters not NULL */
     if (sec_lsm_manager == NULL)
         return -EINVAL;
-    return sync_send_do(sec_lsm_manager, wait_done_or_error, _install_, NULL);
+    return sync_process(sec_lsm_manager, 1, (const char*[]){ _install_ },
+                        wait_done_or_error, NULL);
 }
 
 /* see sec-lsm-manager-client.h */
@@ -535,7 +547,8 @@ int sec_lsm_manager_uninstall(sec_lsm_manager_t *sec_lsm_manager) {
     /* check parameters not NULL */
     if (sec_lsm_manager == NULL)
         return -EINVAL;
-    return sync_send_do(sec_lsm_manager, wait_done_or_error, _uninstall_, NULL);
+    return sync_process(sec_lsm_manager, 1, (const char*[]){ _uninstall_ },
+                        wait_done_or_error, NULL);
 }
 
 /**
@@ -543,8 +556,9 @@ int sec_lsm_manager_uninstall(sec_lsm_manager_t *sec_lsm_manager) {
  * @param sec_lsm_manager sec_lsm_manager client handler
  * @return 0 if replied "done off", 1 if replied "done on" or a negative -errno value
  */
-static int wait_log_reply(sec_lsm_manager_t *sec_lsm_manager)
+static int wait_log_reply(sec_lsm_manager_t *sec_lsm_manager, void *closure)
 {
+    (void)closure;
     /* check parameters not NULL */
     if (sec_lsm_manager == NULL)
         return -EINVAL;
@@ -559,7 +573,8 @@ int sec_lsm_manager_log(sec_lsm_manager_t *sec_lsm_manager, int on, int off) {
     /* check parameters not NULL */
     if (sec_lsm_manager == NULL)
         return -EINVAL;
-    return sync_send_do(sec_lsm_manager, wait_log_reply, _log_, off ? _off_ : on ? _on_ : NULL, NULL);
+    return sync_process(sec_lsm_manager, (on || off ? 2 : 1), (const char*[]){ _log_, (off ? _off_ : _on_) },
+                        wait_log_reply, NULL);
 }
 
 /**
@@ -567,22 +582,16 @@ int sec_lsm_manager_log(sec_lsm_manager_t *sec_lsm_manager, int on, int off) {
  * @param sec_lsm_manager sec_lsm_manager client handler
  * @return 0 on success or a negative -errno value
  */
-static int wait_display_replies(sec_lsm_manager_t *sec_lsm_manager)
+static int wait_display_replies(sec_lsm_manager_t *sec_lsm_manager, void *closure)
 {
     int rc = wait_reply(sec_lsm_manager, true);
     if (rc > 2 && !strcmp(sec_lsm_manager->reply.fields[0], _string_)) {
-        puts("################## SECURE APP ##################");
+        struct display_data *data = closure;
         do {
-            printf(&"%s %s %s %s\n"[15 - 3 * (rc > 5 ? 5 : rc)],
-              sec_lsm_manager->reply.fields[1],
-              sec_lsm_manager->reply.fields[2],
-              rc > 3 ? sec_lsm_manager->reply.fields[3] : NULL,
-              rc > 4 ? sec_lsm_manager->reply.fields[4] : NULL);
+            data->callback(data->closure, rc - 1, &sec_lsm_manager->reply.fields[1]);
             rc = wait_reply(sec_lsm_manager, true);
         }
         while (rc > 2 && !strcmp(sec_lsm_manager->reply.fields[0], _string_));
-
-        puts("################################################");
     }
     if (rc > 0 && !strcmp(sec_lsm_manager->reply.fields[0], _error_)) {
         rc = -1;
@@ -591,11 +600,20 @@ static int wait_display_replies(sec_lsm_manager_t *sec_lsm_manager)
 }
 
 /* see sec-lsm-manager-client.h */
-int sec_lsm_manager_display(sec_lsm_manager_t *sec_lsm_manager) {
+int sec_lsm_manager_display(
+        sec_lsm_manager_t *sec_lsm_manager,
+        void (*callback)(void *, int count, const char *[]),
+        void *closure
+) {
+    struct display_data data;
+
     /* check parameters not NULL */
     if (sec_lsm_manager == NULL)
         return -EINVAL;
-    return sync_send_do(sec_lsm_manager, wait_display_replies, _display_, NULL);
+    data.callback = callback;
+    data.closure = closure;
+    return sync_process(sec_lsm_manager, 1, (const char*[]){ _display_ },
+                        wait_display_replies, &data);
 }
 
 /* see sec-lsm-manager-client.h */

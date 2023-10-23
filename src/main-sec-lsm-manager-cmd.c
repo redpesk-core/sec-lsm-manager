@@ -245,8 +245,23 @@ static int do_clear(int ac, char **av) {
     return show_status(used_count, "clear", rc, NULL);
 }
 
+static void display_callback(void *closure, int count, const char *fields[])
+{
+    int *emitted = closure;
+
+    if (!*emitted) {
+        puts("################## SECURE APP ##################");
+        *emitted = 1;
+    }
+    printf(&"%s %s %s %s\n"[12 - 3 * (count > 4 ? 4 : count)],
+              fields[0],
+              fields[1],
+              count > 2 ? fields[2] : NULL,
+              count > 3 ? fields[3] : NULL);
+}
+
 static int do_display(int ac, char **av) {
-    int used_count, rc;
+    int used_count, rc, emitted = 0;
     int n = plink(ac, av, &used_count, 1);
 
     if (n < 1) {
@@ -255,7 +270,9 @@ static int do_display(int ac, char **av) {
         return used_count;
     }
 
-    rc = sec_lsm_manager_display(sec_lsm_manager);
+    rc = sec_lsm_manager_display(sec_lsm_manager, display_callback, &emitted);
+    if (emitted)
+        puts("################################################");
     return show_status(used_count, "display", rc, NULL);
 }
 

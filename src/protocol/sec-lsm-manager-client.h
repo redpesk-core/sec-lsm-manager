@@ -143,9 +143,14 @@ extern int sec_lsm_manager_log(sec_lsm_manager_t *sec_lsm_manager, int on, int o
  * @brief Display the actual state security manager handle
  *
  * @param[in] sec_lsm_manager sec_lsm_manager client handler
+ * @param[in] callback callback receiving data
+ * @param[in] closure closure for the callback
  * @return 0 in case of success or a negative -errno value
  */
-extern int sec_lsm_manager_display(sec_lsm_manager_t *sec_lsm_manager) __nonnull() __wur;
+extern int sec_lsm_manager_display(
+		sec_lsm_manager_t *sec_lsm_manager,
+		void (*callback)(void *, int count, const char *[]),
+		void *closure) __nonnull((1,2)) __wur;
 
 /**
  * @brief Get copy of the lastest error message. The returned message
