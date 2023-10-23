@@ -26,6 +26,10 @@
 
 #include <features.h>
 
+/** declare the version of the client API */
+#define SEC_LSM_MANAGER_CLIENT_API_VERSION 2
+
+/** the opaque structure for handling sec-lsm-manager */
 typedef struct sec_lsm_manager sec_lsm_manager_t;
 
 /**
@@ -41,7 +45,8 @@ typedef struct sec_lsm_manager sec_lsm_manager_t;
  *
  * @see sec_lsm_manager_destroy
  */
-extern int sec_lsm_manager_create(sec_lsm_manager_t **sec_lsm_manager, const char *socketspec) __wur;
+__nonnull((1)) __wur
+extern int sec_lsm_manager_create(sec_lsm_manager_t **sec_lsm_manager, const char *socketspec);
 
 /**
  * @brief Destroy sec_lsm_manager client handler and release its memory
@@ -50,7 +55,8 @@ extern int sec_lsm_manager_create(sec_lsm_manager_t **sec_lsm_manager, const cha
  *
  * @see sec_lsm_manager_create
  */
-extern void sec_lsm_manager_destroy(sec_lsm_manager_t *sec_lsm_manager) __nonnull();
+__nonnull()
+extern void sec_lsm_manager_destroy(sec_lsm_manager_t *sec_lsm_manager);
 
 /**
  * Ask the sec_lsm_manager client handler to disconnect from the server.
@@ -58,7 +64,8 @@ extern void sec_lsm_manager_destroy(sec_lsm_manager_t *sec_lsm_manager) __nonnul
  *
  * @param[in] sec_lsm_manager sec_lsm_manager client handler
  */
-extern void sec_lsm_manager_disconnect(sec_lsm_manager_t *sec_lsm_manager) __nonnull();
+__nonnull()
+extern void sec_lsm_manager_disconnect(sec_lsm_manager_t *sec_lsm_manager);
 
 /**
  * @brief Set id of sec_lsm_manager client handler
@@ -67,7 +74,8 @@ extern void sec_lsm_manager_disconnect(sec_lsm_manager_t *sec_lsm_manager) __non
  * @param[in] id The id to define
  * @return 0 in case of success or a negative -errno value
  */
-extern int sec_lsm_manager_set_id(sec_lsm_manager_t *sec_lsm_manager, const char *id) __nonnull() __wur;
+__nonnull() __wur
+extern int sec_lsm_manager_set_id(sec_lsm_manager_t *sec_lsm_manager, const char *id);
 
 /**
  * @brief Add a path to sec_lsm_manager client handler
@@ -77,8 +85,8 @@ extern int sec_lsm_manager_set_id(sec_lsm_manager_t *sec_lsm_manager, const char
  * @param path_type The path_type to add
  * @return 0 in case of success or a negative -errno value
  */
-extern int sec_lsm_manager_add_path(sec_lsm_manager_t *sec_lsm_manager, const char *path, const char *path_type)
-    __nonnull() __wur;
+__nonnull() __wur
+extern int sec_lsm_manager_add_path(sec_lsm_manager_t *sec_lsm_manager, const char *path, const char *path_type);
 
 /**
  * @brief Add a plug to sec_lsm_manager client handler
@@ -99,7 +107,8 @@ extern int sec_lsm_manager_add_plug(sec_lsm_manager_t *sec_lsm_manager, const ch
  * @param[in] permission The permission to add
  * @return 0 in case of success or a negative -errno value
  */
-extern int sec_lsm_manager_add_permission(sec_lsm_manager_t *sec_lsm_manager, const char *permission) __nonnull() __wur;
+__nonnull() __wur
+extern int sec_lsm_manager_add_permission(sec_lsm_manager_t *sec_lsm_manager, const char *permission);
 
 /**
  * @brief Clear the sec_lsm_manager client handler
@@ -108,7 +117,8 @@ extern int sec_lsm_manager_add_permission(sec_lsm_manager_t *sec_lsm_manager, co
  * @param sec_lsm_manager sec_lsm_manager client handler
  * @return 0 in case of success or a negative -errno value
  */
-extern int sec_lsm_manager_clear(sec_lsm_manager_t *sec_lsm_manager) __nonnull() __wur;
+__nonnull() __wur
+extern int sec_lsm_manager_clear(sec_lsm_manager_t *sec_lsm_manager);
 
 /**
  * @brief Install an application with all defined paramters in the security manager handle
@@ -117,7 +127,8 @@ extern int sec_lsm_manager_clear(sec_lsm_manager_t *sec_lsm_manager) __nonnull()
  * @param[in] sec_lsm_manager sec_lsm_manager client handler
  * @return 0 in case of success or a negative -errno value
  */
-extern int sec_lsm_manager_install(sec_lsm_manager_t *sec_lsm_manager) __nonnull() __wur;
+__nonnull() __wur
+extern int sec_lsm_manager_install(sec_lsm_manager_t *sec_lsm_manager);
 
 /**
  * @brief Uninstall an application (cynagora permissions, paths)
@@ -126,7 +137,8 @@ extern int sec_lsm_manager_install(sec_lsm_manager_t *sec_lsm_manager) __nonnull
  * @param[in] sec_lsm_manager sec_lsm_manager client handler
  * @return 0 in case of success or a negative -errno value
  */
-extern int sec_lsm_manager_uninstall(sec_lsm_manager_t *sec_lsm_manager) __nonnull() __wur;
+__nonnull() __wur
+extern int sec_lsm_manager_uninstall(sec_lsm_manager_t *sec_lsm_manager);
 
 /**
  * @brief Query or set the logging of requests
@@ -137,7 +149,8 @@ extern int sec_lsm_manager_uninstall(sec_lsm_manager_t *sec_lsm_manager) __nonnu
  *
  * @return 0 if not logging, 1 if logging or a negative -errno value
  */
-extern int sec_lsm_manager_log(sec_lsm_manager_t *sec_lsm_manager, int on, int off) __nonnull() __wur;
+__nonnull() __wur
+extern int sec_lsm_manager_log(sec_lsm_manager_t *sec_lsm_manager, int on, int off);
 
 /**
  * @brief Display the actual state security manager handle
@@ -147,10 +160,11 @@ extern int sec_lsm_manager_log(sec_lsm_manager_t *sec_lsm_manager, int on, int o
  * @param[in] closure closure for the callback
  * @return 0 in case of success or a negative -errno value
  */
+__nonnull((1,2)) __wur
 extern int sec_lsm_manager_display(
 		sec_lsm_manager_t *sec_lsm_manager,
 		void (*callback)(void *, int count, const char *[]),
-		void *closure) __nonnull((1,2)) __wur;
+		void *closure);
 
 /**
  * @brief Get copy of the lastest error message. The returned message
@@ -162,7 +176,7 @@ extern int sec_lsm_manager_display(
  * @return 0 in case of success or a negative -errno value: -ENOMEM in case
  * of memory depletion or -EINVAL if latest result was not an error.
  */
-__nonnull()
+__nonnull() __wur
 extern int sec_lsm_manager_error_message(sec_lsm_manager_t *sec_lsm_manager, char **message);
 
 #endif

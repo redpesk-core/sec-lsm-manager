@@ -35,7 +35,7 @@
 #include <unistd.h>
 
 #include "log.h"
-#include "protocol/sec-lsm-manager-client.h"
+#include "protocol/sec-lsm-manager.h"
 #include "file-utils.h"
 
 #define ISSEP(x) (((x)[0] == ';') && ((x)[1] == '\0'))
@@ -221,8 +221,8 @@ static int show_status(int used_count, const char *oper, int rc, const char *ext
     }
     else if (rc == -EPROTO) {
         char *message;
-        sec_lsm_manager_error_message(sec_lsm_manager, &message);
-        LOG("%s, error: %s", oper, message);
+        rc = sec_lsm_manager_error_message(sec_lsm_manager, &message);
+        LOG("%s, error: %s", oper, rc >= 0 ? message : "***unrecoverable error***");
         free(message);
     }
     else {

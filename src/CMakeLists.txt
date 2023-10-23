@@ -39,15 +39,14 @@ message("\n[*] Create : libsec-lsm-manager")
 
 add_library(sec-lsm-manager STATIC
     protocol/prot.c
-    protocol/sec-lsm-manager-client.c
+    protocol/sec-lsm-manager.c
     protocol/sec-lsm-manager-protocol.c
     protocol/socket.c
 )
 install(TARGETS sec-lsm-manager LIBRARY
 		DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR})
-install(FILES protocol/sec-lsm-manager-client.h
-		DESTINATION ${CMAKE_INSTALL_FULL_INCLUDEDIR}
-		RENAME sec-lsm-manager.h)
+install(FILES protocol/sec-lsm-manager.h
+		DESTINATION ${CMAKE_INSTALL_FULL_INCLUDEDIR})
 
 message("[x] Done : libsec-lsm-manager\n")
 
