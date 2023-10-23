@@ -39,16 +39,6 @@
 #include "sec-lsm-manager-protocol.h"
 #include "socket.h"
 
-#define CHECK_NO_NULL(param, param_name)   \
-    if (!param) {                          \
-        return -EINVAL;                    \
-    }
-
-#define CHECK_NO_NULL_NO_RETURN(param, param_name) \
-    if (!param) {                                  \
-        return;                                    \
-    }
-
 /**
  * structure recording a client
  */
@@ -390,8 +380,6 @@ static int sync_send_do(sec_lsm_manager_t *sec_lsm_manager, int (*aftersend)(sec
     int nf, rc;
     const char *fields[8], *ptr;
 
-    CHECK_NO_NULL(sec_lsm_manager, "sec_lsm_manager");
-
     /* get args */
     va_start(va, first);
     ptr = first;
@@ -427,6 +415,11 @@ static int sync_send_do(sec_lsm_manager_t *sec_lsm_manager, int (*aftersend)(sec
 
 /* see sec-lsm-manager-client.h */
 int sec_lsm_manager_create(sec_lsm_manager_t **sec_lsm_manager, const char *socketspec) {
+
+    /* check parameters not NULL */
+    if (sec_lsm_manager == NULL)
+        return -EINVAL;
+
     socketspec = sec_lsm_manager_get_socket(socketspec);
 
     /* allocate the structure */
@@ -466,35 +459,37 @@ int sec_lsm_manager_create(sec_lsm_manager_t **sec_lsm_manager, const char *sock
 
 /* see sec-lsm-manager-client.h */
 void sec_lsm_manager_destroy(sec_lsm_manager_t *sec_lsm_manager) {
-    CHECK_NO_NULL_NO_RETURN(sec_lsm_manager, "sec_lsm_manager");
-
-    disconnection(sec_lsm_manager);
-    if (sec_lsm_manager->prot)
-        prot_destroy(sec_lsm_manager->prot);
-    free(sec_lsm_manager->socketspec);
-    sec_lsm_manager->socketspec = NULL;
-    free(sec_lsm_manager);
-    sec_lsm_manager = NULL;
+    /* check parameters not NULL */
+    if (sec_lsm_manager != NULL) {
+        disconnection(sec_lsm_manager);
+        if (sec_lsm_manager->prot)
+            prot_destroy(sec_lsm_manager->prot);
+        free(sec_lsm_manager->socketspec);
+        free(sec_lsm_manager);
+    }
 }
 
 /* see sec-lsm-manager-client.h */
 void sec_lsm_manager_disconnect(sec_lsm_manager_t *sec_lsm_manager) {
-    CHECK_NO_NULL_NO_RETURN(sec_lsm_manager, "sec_lsm_manager");
-
-    disconnection(sec_lsm_manager);
+    /* check parameters not NULL */
+    if (sec_lsm_manager != NULL)
+        disconnection(sec_lsm_manager);
 }
 
 /* see sec-lsm-manager-client.h */
 int sec_lsm_manager_set_id(sec_lsm_manager_t *sec_lsm_manager, const char *id) {
-    CHECK_NO_NULL(id, "id");
+    /* check parameters not NULL */
+    if (sec_lsm_manager == NULL || id == NULL)
+        return -EINVAL;
 
     return sync_send_do(sec_lsm_manager, wait_done_or_error, _id_, id, NULL);
 }
 
 /* see sec-lsm-manager-client.h */
 int sec_lsm_manager_add_path(sec_lsm_manager_t *sec_lsm_manager, const char *path, const char *path_type) {
-    CHECK_NO_NULL(path, "path");
-    CHECK_NO_NULL(path_type, "path_type");
+    /* check parameters not NULL */
+    if (sec_lsm_manager == NULL || path == NULL || path_type == NULL)
+        return -EINVAL;
 
     return sync_send_do(sec_lsm_manager, wait_done_or_error, _path_, path, path_type, NULL);
 }
@@ -503,32 +498,43 @@ int sec_lsm_manager_add_path(sec_lsm_manager_t *sec_lsm_manager, const char *pat
 __nonnull() __wur
 int sec_lsm_manager_add_plug(sec_lsm_manager_t *sec_lsm_manager, const char *expdir, const char *impid, const char *impdir)
 {
-    CHECK_NO_NULL(expdir, "expdir");
-    CHECK_NO_NULL(impid, "impid");
-    CHECK_NO_NULL(impdir, "impdir");
+    /* check parameters not NULL */
+    if (sec_lsm_manager == NULL || expdir == NULL || impid == NULL || impdir == NULL)
+        return -EINVAL;
 
     return sync_send_do(sec_lsm_manager, wait_done_or_error, _plug_, expdir, impid, impdir, NULL);
 }
 
 /* see sec-lsm-manager-client.h */
 int sec_lsm_manager_add_permission(sec_lsm_manager_t *sec_lsm_manager, const char *permission) {
-    CHECK_NO_NULL(permission, "permission");
+    /* check parameters not NULL */
+    if (sec_lsm_manager == NULL || permission == NULL)
+        return -EINVAL;
 
     return sync_send_do(sec_lsm_manager, wait_done_or_error, _permission_, permission, NULL);
 }
 
 /* see sec-lsm-manager-client.h */
 int sec_lsm_manager_clear(sec_lsm_manager_t *sec_lsm_manager) {
+    /* check parameters not NULL */
+    if (sec_lsm_manager == NULL)
+        return -EINVAL;
     return sync_send_do(sec_lsm_manager, wait_done_or_error, _clear_, NULL);
 }
 
 /* see sec-lsm-manager-client.h */
 int sec_lsm_manager_install(sec_lsm_manager_t *sec_lsm_manager) {
+    /* check parameters not NULL */
+    if (sec_lsm_manager == NULL)
+        return -EINVAL;
     return sync_send_do(sec_lsm_manager, wait_done_or_error, _install_, NULL);
 }
 
 /* see sec-lsm-manager-client.h */
 int sec_lsm_manager_uninstall(sec_lsm_manager_t *sec_lsm_manager) {
+    /* check parameters not NULL */
+    if (sec_lsm_manager == NULL)
+        return -EINVAL;
     return sync_send_do(sec_lsm_manager, wait_done_or_error, _uninstall_, NULL);
 }
 
@@ -539,6 +545,9 @@ int sec_lsm_manager_uninstall(sec_lsm_manager_t *sec_lsm_manager) {
  */
 static int wait_log_reply(sec_lsm_manager_t *sec_lsm_manager)
 {
+    /* check parameters not NULL */
+    if (sec_lsm_manager == NULL)
+        return -EINVAL;
     int rc = raw_wait_done_or_error(sec_lsm_manager);
     if (rc > 0)
         rc = sec_lsm_manager->reply.count >= 2 && !strcmp(sec_lsm_manager->reply.fields[1], _on_);
@@ -547,6 +556,9 @@ static int wait_log_reply(sec_lsm_manager_t *sec_lsm_manager)
 
 /* see sec-lsm-manager-client.h */
 int sec_lsm_manager_log(sec_lsm_manager_t *sec_lsm_manager, int on, int off) {
+    /* check parameters not NULL */
+    if (sec_lsm_manager == NULL)
+        return -EINVAL;
     return sync_send_do(sec_lsm_manager, wait_log_reply, _log_, off ? _off_ : on ? _on_ : NULL, NULL);
 }
 
@@ -580,6 +592,9 @@ static int wait_display_replies(sec_lsm_manager_t *sec_lsm_manager)
 
 /* see sec-lsm-manager-client.h */
 int sec_lsm_manager_display(sec_lsm_manager_t *sec_lsm_manager) {
+    /* check parameters not NULL */
+    if (sec_lsm_manager == NULL)
+        return -EINVAL;
     return sync_send_do(sec_lsm_manager, wait_display_replies, _display_, NULL);
 }
 
@@ -589,6 +604,10 @@ int sec_lsm_manager_error_message(sec_lsm_manager_t *sec_lsm_manager, char **mes
     int idx;
     size_t size;
     char *text;
+
+    /* check parameters not NULL */
+    if (sec_lsm_manager == NULL || message == NULL)
+        return -EINVAL;
 
     /* check state */
     if (sec_lsm_manager->reply.count < 1
