@@ -31,14 +31,11 @@
 #include <string.h>
 #include <errno.h>
 #include <unistd.h>
-#include <time.h>
 #include <poll.h>
-#include <sys/epoll.h>
 
 #include "action/action.h"
 #include "context/context.h"
 #include "log.h"
-#include "pollitem.h"
 #include "prot.h"
 #include "sec-lsm-manager-protocol.h"
 #include "utf8-utils.h"
@@ -69,14 +66,11 @@ struct client
     /** is the actual link invalid or valid */
     unsigned invalid: 1;
 
-    /** pollfd */
-    int pollfd;
+    /** fdin */
+    int fdin;
 
-    /** polling callback */
-    pollitem_t pollitem;
-
-    /** last query time */
-    time_t lasttime;
+    /** fdout */
+    int fdout;
 };
 
 static int display_id(void *client, const char *id);
@@ -157,7 +151,7 @@ static int flushw(client_t *client)
         if (rc < 0)
             ERROR("flushw: should write returned error %s", strerror(-rc));
         else if (rc > 0) {
-            rc = prot_write(client->prot, client->pollitem.fd);
+            rc = prot_write(client->prot, client->fdout);
             if (rc >= 0)
                 continue;
             if (rc == -ENODATA)
@@ -165,7 +159,7 @@ static int flushw(client_t *client)
             else if (rc != -EAGAIN)
                 ERROR("flushw: write returned error %s", strerror(-rc));
             else {
-                pfd.fd = client->pollitem.fd;
+                pfd.fd = client->fdout;
                 pfd.events = POLLOUT;
                 do {
                     rc = poll(&pfd, 1, 0);
@@ -514,51 +508,12 @@ invalid_protocol:
 __nonnull()
 static void disconnect(client_t *client)
 {
-    pollitem_del(&client->pollitem, client->pollfd);
-    close(client->pollitem.fd);
-    client->pollfd = client->pollitem.fd = -1;
+    if (client->fdin != client->fdout)
+        close(client->fdout);
+    close(client->fdin);
+    client->fdin = client->fdout = -1;
 }
 
-
-/**
- * @brief handle client requests
- *
- * @param[in] pollitem pollitem of requests
- * @param[in] events events receive
- * @param[in] pollfd pollfd of the client
- */
-static void on_client_event(pollitem_t *pollitem, uint32_t events, int pollfd)
-{
-    (void) pollfd; /* make compiler happy even when -Wunused-parameter */
-
-    int nargs, nr;
-    const char **args;
-    client_t *client = pollitem->closure;
-
-    /* is it incoming data ? */
-    if ((events & EPOLLHUP) == 0 && (events & EPOLLIN) != 0) {
-
-        /* read the incoming data */
-        nr = prot_read(client->prot, client->pollitem.fd);
-        if (nr > 0) {
-            /* yes, something to process */
-            client->lasttime = time(NULL);
-            for (;;) {
-                nargs = prot_get(client->prot, &args);
-                if (nargs <= 0) {
-                    if (nargs != -EMSGSIZE)
-                        return;
-                    break;
-                }
-                onrequest(client, (unsigned)nargs, args);
-                if (client->invalid)
-                    break;
-                prot_next(client->prot);
-            }
-        }
-    }
-    disconnect(client);
-}
 
 /**********************/
 /*** PUBLIC METHODS ***/
@@ -566,13 +521,13 @@ static void on_client_event(pollitem_t *pollitem, uint32_t events, int pollfd)
 
 /* see client.h */
 __wur __nonnull()
-int client_create(client_t **pclient, int fd, int pollfd)
+int client_create(client_t **pclient, int fdin, int fdout)
 {
     client_t *client;
     int rc;
 
     /* check parameters */
-    if (fd < 0 || pollfd < 0) {
+    if (fdin < 0 || fdout < 0) {
         rc = -EINVAL;
         goto error;
     }
@@ -601,25 +556,13 @@ int client_create(client_t **pclient, int fd, int pollfd)
     /* init other fields */
     client->version = 0; /* version not set */
     client->invalid = 0; /* not invalid */
-    client->pollfd = pollfd;
-    client->pollitem.handler = on_client_event;
-    client->pollitem.closure = client;
-    client->pollitem.fd = fd;
-    client->lasttime = time(NULL);
-
-    /* connect the client to polling */
-    rc = pollitem_add(&client->pollitem, EPOLLIN, pollfd);
-    if (rc < 0) {
-        ERROR("can't poll client connection: %d %s", -rc, strerror(-rc));
-        goto error3;
-    }
+    client->fdin = fdin;
+    client->fdout = fdout;
 
     /* link the ready client */
     *pclient = client;
     return 0;
 
-error3:
-    context_destroy(client->context);
 error2:
     prot_destroy(client->prot);
 error1:
@@ -633,7 +576,7 @@ error:
 __wur __nonnull()
 bool client_is_connected(client_t *client)
 {
-    return client->pollitem.fd >= 0;
+    return client->fdin >= 0;
 }
 
 /* see client.h */
@@ -646,19 +589,47 @@ void client_disconnect(client_t *client)
 
 /* see client.h */
 __nonnull()
-void client_disconnect_older(client_t *client, time_t trigger)
-{
-    if (client_is_connected(client) && client->lasttime <= trigger)
-        disconnect(client);
-}
-
-/* see client.h */
-__nonnull()
 void client_destroy(client_t *client)
 {
     client_disconnect(client);
     prot_destroy(client->prot);
     context_destroy(client->context);
     free(client);
+}
+
+/* see client.h */
+__nonnull()
+int client_process_input(client_t *client)
+{
+    int rc;
+    const char **args;
+
+    for (;;) {
+        /* process the pending available requests */
+        while (!client->invalid) {
+            rc = prot_get(client->prot, &args);
+            if (rc > 0)
+                onrequest(client, (unsigned)rc, args);
+            else if (rc < 0) {
+                if (rc == -EMSGSIZE)
+                    return rc; /* message is toooo big */
+                break;
+            }
+            prot_next(client->prot);
+        }
+
+        /* must be connected */
+        if (!client_is_connected(client))
+            return -EINVAL;
+
+        /* must be valid */
+        if (client->invalid)
+            return -EPROTO;
+
+        /* read the incoming data */
+        rc = prot_read(client->prot, client->fdin);
+        if (rc <= 0)
+            return rc;
+    }
 }
 

@@ -307,6 +307,7 @@ static void buf_crop(buf_t *buf) {
 
 /**
  * read input 'buf' from 'fd'
+ * 
  */
 static int inbuf_read(buf_t *buf, int fd) {
     ssize_t szr;
@@ -318,10 +319,12 @@ static int inbuf_read(buf_t *buf, int fd) {
     do {
         szr = read(fd, buf->content + buf->count, PROT_MAX_BUFFER_LENGTH - buf->count);
     } while (szr < 0 && errno == EINTR);
-    if (szr >= 0)
-        buf->count += (unsigned)(rc = (int)szr);
-    else if (szr < 0)
+    if (szr < 0)
         rc = -(errno == EWOULDBLOCK ? EAGAIN : errno);
+    else {
+        rc = (int)szr;
+        buf->count += (unsigned)rc;
+    }
 
     return rc;
 }

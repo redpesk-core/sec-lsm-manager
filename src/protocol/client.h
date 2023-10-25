@@ -31,25 +31,57 @@
 /** abstract client type */
 typedef struct client client_t;
 
-/* see client.h */
+/**
+ * @brief Create a new client instance that use the given file descriptors.
+ *        fdin can equal fdout.
+ *
+ * @param[in] pclient   pointer receiving the pointer to the created instance
+ * @param[in] fdin      file descriptor of the input stream
+ * @param[in] fdout     file descriptor of the output stream
+ * @return 0 incase of success or a negative error code
+ */
 __wur __nonnull()
-extern int client_create(client_t **pclient, int fd, int pollfd);
+extern int client_create(client_t **pclient, int fdin, int fdout);
 
-/* see client.h */
+/**
+ * @brief Check if the client is still connected
+ *
+ * @param[in] client pointer to the client instance
+ * @return true is still connected, false if disconnected
+ */
 __wur __nonnull()
 extern bool client_is_connected(client_t *client);
 
-/* see client.h */
+/**
+ * @brief Disconnect the client of its pair
+ *
+ * @param[in] client pointer to the client instance
+ */
 __nonnull()
 extern void client_disconnect(client_t *client);
 
-/* see client.h */
-__nonnull()
-extern void client_disconnect_older(client_t *client, time_t trigger);
-
-/* see client.h */
+/**
+ * @brief Destroy the client instance, disconnecting it if connected
+ *
+ * @param[in] client pointer to the client instance
+ */
 __nonnull()
 extern void client_destroy(client_t *client);
 
+/**
+ * @brief
+ *
+ * @param[in] client pointer to the client instance
+ * @return a strict positive number on success,
+ *         0 if all input consumed but input terminated
+ *         -EAGAIN if all input consumed
+ *         -INVAL if disconnected
+ *         -EPROTO on protocol violation and disconnection
+ *         -EMSGSIZE on too big message and disconnection
+ *         other negative values are error
+ */
+__nonnull()
+extern int client_process_input(client_t *client);
 
 #endif /* PROTOCOL_CLIENT_H */
+

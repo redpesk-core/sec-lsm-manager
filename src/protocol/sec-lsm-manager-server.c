@@ -49,13 +49,25 @@
 /** log of the protocol */
 bool sec_lsm_manager_server_log = false;
 
+struct client
+{
+    /** the client */
+    client_t *client;
+
+    /** pollfd */
+    int pollfd;
+
+    /** polling callback */
+    pollitem_t pollitem;
+
+    /** last query time */
+    time_t lasttime;
+};
+
 /** structure for servers */
 struct sec_lsm_manager_server {
     /** the pollfd to use */
     int pollfd;
-
-    /** count of clients */
-    int client_count;
 
     /** stop status */
     int stoprc;
@@ -70,8 +82,35 @@ struct sec_lsm_manager_server {
     pollitem_t pollitem;
 
     /** the clients */
-    client_t *clients[MAX_CLIENT_COUNT];
+    struct client clients[MAX_CLIENT_COUNT];
 };
+
+/**
+ * @brief handle client requests
+ *
+ * @param[in] pollitem pollitem of requests
+ * @param[in] events events receive
+ * @param[in] pollfd pollfd of the client
+ */
+static void on_client_event(pollitem_t *pollitem, uint32_t events, int pollfd)
+{
+    bool keep;
+    struct client *client = pollitem->closure;
+
+    if ((events & EPOLLHUP) != 0)
+        keep = false;
+    else {
+        int rc = client_process_input(client->client);
+        keep = rc > 0 || rc == -EAGAIN;
+    }
+    if (keep)
+        client->lasttime = time(NULL);
+    else {
+        pollitem_del(&client->pollitem, pollfd);
+        client_destroy(client->client);
+        client->client = NULL;
+    }
+}
 
 /**
  * @brief handle server events
@@ -83,7 +122,7 @@ struct sec_lsm_manager_server {
 static void on_server_event(pollitem_t *pollitem, uint32_t events, int pollfd)
 {
     int servfd = pollitem->fd;
-    int fd, rc;
+    int fd, rc, idx;
     struct sockaddr saddr;
     socklen_t slen;
     sec_lsm_manager_server_t *server = (sec_lsm_manager_server_t *)pollitem->closure;
@@ -99,37 +138,60 @@ static void on_server_event(pollitem_t *pollitem, uint32_t events, int pollfd)
     if (!(events & EPOLLIN))
         return;
 
-    /* accept the connection */
-    slen = (socklen_t)sizeof(saddr);
-    fd = accept(servfd, &saddr, &slen);
-    if (fd < 0) {
-        ERROR("can't accept connection: %s", strerror(errno));
-        return;
-    }
-    fcntl(fd, F_SETFD, FD_CLOEXEC);
-    fcntl(fd, F_SETFL, O_NONBLOCK);
+    /* search a slot */
+    for(idx = 0 ; idx < MAX_CLIENT_COUNT ; idx++)
+        if (server->clients[idx].client == NULL)
+            break;
 
-    /* create a client for the connection */
-    rc = client_create(&server->clients[server->client_count], fd, pollfd);
-    if (rc < 0) {
-        ERROR("can't create client connection: %d %s", -rc, strerror(-rc));
-        close(fd);
-        return;
-    }
-    server->client_count++;
+    if (idx < MAX_CLIENT_COUNT) {
+        struct client *client = &server->clients[idx];
 
-    /* check if full of clients */
-    if (server->client_count == MAX_CLIENT_COUNT) {
-        /* if full avoid accepting new clients */
-        rc = pollitem_mod(&server->pollitem, 0, server->pollfd);
-        if (rc < 0) {
-            ERROR("unexpected server socket error");
-            sec_lsm_manager_server_stop(server, rc);
+        /* accept the connection */
+        slen = (socklen_t)sizeof(saddr);
+        fd = accept(servfd, &saddr, &slen);
+        if (fd < 0) {
+            ERROR("can't accept connection: %s", strerror(errno));
+            return;
         }
-        server->deaf = true;
+        fcntl(fd, F_SETFD, FD_CLOEXEC);
+        fcntl(fd, F_SETFL, O_NONBLOCK);
+
+        /* create a client for the connection */
+        rc = client_create(&client->client, fd, fd);
+        if (rc < 0) {
+            ERROR("can't create client connection: %d %s", -rc, strerror(-rc));
+            close(fd);
+            return;
+        }
+
+        /* set pollitem */
+        client->lasttime = time(NULL);
+        client->pollitem.handler = on_client_event;
+        client->pollitem.closure = client;
+        client->pollitem.fd = fd;
+
+        /* connect the client to polling */
+        rc = pollitem_add(&client->pollitem, EPOLLIN, pollfd);
+        if (rc < 0) {
+            ERROR("can't poll client connection: %d %s", -rc, strerror(-rc));
+            client_destroy(client->client);
+            client->client = NULL;
+            return;
+        }
+        DEBUG("starting new client connection");
+
+        while(++idx < MAX_CLIENT_COUNT)
+            if (server->clients[idx].client == NULL)
+                return;
     }
 
-    DEBUG("starting new client connection");
+    /* if full avoid accepting new clients */
+    rc = pollitem_mod(&server->pollitem, 0, server->pollfd);
+    if (rc < 0) {
+        ERROR("unexpected server socket error");
+        sec_lsm_manager_server_stop(server, rc);
+    }
+    server->deaf = true;
 }
 
 /**********************/
@@ -139,9 +201,14 @@ static void on_server_event(pollitem_t *pollitem, uint32_t events, int pollfd)
 /* see sec-lsm-manager-server.h */
 void sec_lsm_manager_server_destroy(sec_lsm_manager_server_t *server)
 {
+    int idx;
     pollitem_del(&server->pollitem, server->pollfd);
-    while (server->client_count > 0)
-        client_destroy(server->clients[--server->client_count]);
+    for (idx = 0 ; idx < MAX_CLIENT_COUNT ; idx++) {
+        if (server->clients[idx].client) {
+            pollitem_del(&server->clients[idx].pollitem, server->pollfd);
+            client_destroy(server->clients[idx].client);
+        }
+    }
     close(server->pollitem.fd);
     close(server->pollfd);
     free(server);
@@ -228,21 +295,24 @@ __wur int sec_lsm_manager_server_serve(sec_lsm_manager_server_t *server, int shu
         }
         else {
             time_t trig = shutofftime < 0 ? 0 : time(NULL) - shutofftime;
-            int idxcli = 0;
-            while (idxcli < server->client_count) {
-                client_t *client = server->clients[idxcli];
-                client_disconnect_older(client, trig);
-                if (client_is_connected(client))
-                    idxcli++;
-                else {
-                    server->client_count--;
-                    server->clients[idxcli] = server->clients[server->client_count];
-                    client_destroy(client);
+            int idx, ncli;
+            for (idx = ncli = 0 ; idx < MAX_CLIENT_COUNT ; idx ++) {
+                struct client *client = &server->clients[idx];
+                if (client->client != NULL) {
+                    if (client->lasttime <= trig)
+                        client_disconnect(client->client);
+                    if (client_is_connected(client->client))
+                        ncli++;
+                    else {
+                        pollitem_del(&client->pollitem, server->pollfd);
+                        client_destroy(client->client);
+                        client->client = NULL;
+                    }
                 }
             }
-            if (rc == 0 && server->client_count == 0 && shutofftime >= 0)
+            if (rc == 0 && ncli == 0 && shutofftime >= 0)
                 sec_lsm_manager_server_stop(server, 0);
-            else if (server->deaf && server->client_count < MAX_CLIENT_COUNT) {
+            else if (server->deaf && ncli < MAX_CLIENT_COUNT) {
                 rc = pollitem_mod(&server->pollitem, EPOLLIN, server->pollfd);
                 if (rc < 0) {
                     ERROR("unexpected server socket error");
