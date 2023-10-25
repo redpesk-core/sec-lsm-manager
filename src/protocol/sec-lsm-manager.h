@@ -61,6 +61,8 @@ extern void sec_lsm_manager_destroy(sec_lsm_manager_t *sec_lsm_manager);
 /**
  * Ask the sec_lsm_manager client handler to disconnect from the server.
  * The client will reconnect if needed.
+ * This function must be called if the connection was broken and persistently
+ * returns -EPIPE error because it will then allow reconnection.
  *
  * @param[in] sec_lsm_manager sec_lsm_manager client handler
  */

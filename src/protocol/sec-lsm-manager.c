@@ -40,6 +40,21 @@
 #include "socket.h"
 
 /**
+ * connection state
+ */
+enum connection_state
+{
+    /** not currently connected */
+    state_Disconnected,
+
+    /** currently connected */
+    state_Connected,
+
+    /** broken state is waiting for a reset */
+    state_Broken
+};
+
+/**
  * structure recording a client
  */
 struct sec_lsm_manager
@@ -49,6 +64,9 @@ struct sec_lsm_manager
 
     /** synchronous lock */
     bool synclock;
+
+    /** state of the connection */
+    enum connection_state state;
 
     /** protocol manager object */
     prot_t *prot;
@@ -86,11 +104,11 @@ struct display_data
  *
  * @param[in] sec_lsm_manager  the handler of the client
  */
-__nonnull() static void disconnection(sec_lsm_manager_t *sec_lsm_manager) {
-    if (sec_lsm_manager->fd >= 0) {
+__nonnull()
+static void disconnection(sec_lsm_manager_t *sec_lsm_manager, enum connection_state state) {
+    if (sec_lsm_manager->state == state_Connected)
         close(sec_lsm_manager->fd);
-        sec_lsm_manager->fd = -1;
-    }
+    sec_lsm_manager->state = state;
 }
 
 /**
@@ -100,7 +118,8 @@ __nonnull() static void disconnection(sec_lsm_manager_t *sec_lsm_manager) {
  *
  * @return  0 in case of success or a negative -errno value
  */
-__nonnull() __wur static int flushw(sec_lsm_manager_t *sec_lsm_manager) {
+__nonnull() __wur
+static int flushw(sec_lsm_manager_t *sec_lsm_manager) {
     int rc;
     struct pollfd pfd;
 
@@ -126,14 +145,15 @@ __nonnull() __wur static int flushw(sec_lsm_manager_t *sec_lsm_manager) {
 }
 
 /**
- * @brief Send a reply
+ * @brief Send fields
  *
  * @param[in] sec_lsm_manager the client
  * @param[in] fields the fields to send
  * @param[in] count the count of fields
  * @return 0 on success or a negative error code
  */
-__nonnull() __wur static int send_reply(sec_lsm_manager_t *sec_lsm_manager, const char **fields, int count) {
+__nonnull() __wur
+static int send_fields(sec_lsm_manager_t *sec_lsm_manager, const char **fields, int count) {
     int rc, trial, i;
     prot_t *prot;
 
@@ -203,7 +223,7 @@ static int putxkv(sec_lsm_manager_t *sec_lsm_manager, const char *command, const
     va_end(va);
 
     /* send now */
-    rc = send_reply(sec_lsm_manager, fields, nf - 1);
+    rc = send_fields(sec_lsm_manager, fields, nf - 1);
     return rc;
 }
 
@@ -214,7 +234,8 @@ static int putxkv(sec_lsm_manager_t *sec_lsm_manager, const char *command, const
  *
  * @return  0 in case of success or a negative -errno value
  */
-__nonnull() __wur static int wait_input(sec_lsm_manager_t *sec_lsm_manager) {
+__nonnull() __wur
+static int wait_input(sec_lsm_manager_t *sec_lsm_manager) {
     int rc;
     struct pollfd pfd;
 
@@ -227,22 +248,6 @@ __nonnull() __wur static int wait_input(sec_lsm_manager_t *sec_lsm_manager) {
 }
 
 /**
- * @brief Get the next reply if any
- *
- * @param[in] sec_lsm_manager  the handler of the client
- *
- * @return  the count of field of the reply (can be 0)
- *          or -EAGAIN if there is no reply
- */
-__nonnull() __wur static int get_reply(sec_lsm_manager_t *sec_lsm_manager) {
-    prot_next(sec_lsm_manager->prot);
-    int rc = prot_get(sec_lsm_manager->prot, &sec_lsm_manager->reply.fields);
-
-    sec_lsm_manager->reply.count = rc;
-    return rc;
-}
-
-/**
  * @brief Wait for a reply
  *
  * @param[in] sec_lsm_manager  the handler of the client
@@ -252,17 +257,22 @@ __nonnull() __wur static int get_reply(sec_lsm_manager_t *sec_lsm_manager) {
  *          or -EAGAIN if nothing and block == false
  *          or -EPIPE if broken link
  */
-__nonnull() __wur static int wait_reply(sec_lsm_manager_t *sec_lsm_manager, bool block) {
+__nonnull() __wur
+static int wait_reply(sec_lsm_manager_t *sec_lsm_manager, bool block) {
+    int rc;
     for (;;) {
         /* get the next reply if any */
-        int rc = get_reply(sec_lsm_manager);
-        if (rc > 0)
+        prot_next(sec_lsm_manager->prot);
+        rc = prot_get(sec_lsm_manager->prot, &sec_lsm_manager->reply.fields);
+        if (rc > 0) {
+            sec_lsm_manager->reply.count = rc;
             return rc;
+        }
 
         if (rc == -EMSGSIZE) {
             /* the input is too big */
 disconnect:
-            disconnection(sec_lsm_manager);
+            disconnection(sec_lsm_manager, state_Broken);
             errno = EPIPE;
             return -EPIPE;
         }
@@ -290,7 +300,8 @@ disconnect:
  *
  * @return  0 in case of success or a negative -errno value
  */
-__nonnull() __wur static int wait_any_reply(sec_lsm_manager_t *sec_lsm_manager) {
+__nonnull() __wur
+static int wait_any_reply(sec_lsm_manager_t *sec_lsm_manager) {
     for (;;) {
         int rc = wait_reply(sec_lsm_manager, true);
         if (rc < 0)
@@ -308,7 +319,8 @@ __nonnull() __wur static int wait_any_reply(sec_lsm_manager_t *sec_lsm_manager) 
  * @return  the count of fields in case of success or a negative -errno value
  *          -ECANCELED when received an error status
  */
-__nonnull() __wur static int raw_wait_done_or_error(sec_lsm_manager_t *sec_lsm_manager) {
+__nonnull() __wur
+static int raw_wait_done_or_error(sec_lsm_manager_t *sec_lsm_manager) {
     int rc = wait_any_reply(sec_lsm_manager);
 
     if (rc > 0) {
@@ -331,7 +343,8 @@ __nonnull() __wur static int raw_wait_done_or_error(sec_lsm_manager_t *sec_lsm_m
  * @return  0 in case of success or a negative -errno value
  *          -ECANCELED when received an error status
  */
-__nonnull() __wur static int wait_done_or_error(sec_lsm_manager_t *sec_lsm_manager, void *closure) {
+__nonnull() __wur
+static int wait_done_or_error(sec_lsm_manager_t *sec_lsm_manager, void *closure) {
     (void)closure;
     int rc = raw_wait_done_or_error(sec_lsm_manager);
     return rc < 0 ? rc : 0;
@@ -344,7 +357,8 @@ __nonnull() __wur static int wait_done_or_error(sec_lsm_manager_t *sec_lsm_manag
  *
  * @return  0 in case of success or a negative -errno value
  */
-__nonnull() __wur static int connection(sec_lsm_manager_t *sec_lsm_manager) {
+__nonnull() __wur
+static int connection(sec_lsm_manager_t *sec_lsm_manager) {
     int rc;
 
     /* init the client */
@@ -359,14 +373,16 @@ __nonnull() __wur static int connection(sec_lsm_manager_t *sec_lsm_manager) {
     if (rc >= 0) {
         rc = wait_any_reply(sec_lsm_manager);
         if (rc >= 0) {
-            rc = -EPROTO;
-            if (sec_lsm_manager->reply.count >= 2 && 0 == strcmp(sec_lsm_manager->reply.fields[0], _done_) &&
-                0 == strcmp(sec_lsm_manager->reply.fields[1], "1")) {
+            if (sec_lsm_manager->reply.count >= 2
+             && 0 == strcmp(sec_lsm_manager->reply.fields[0], _done_)
+             && 0 == strcmp(sec_lsm_manager->reply.fields[1], "1")) {
+                sec_lsm_manager->state = state_Connected;
                 return 0;
             }
+            rc = -EPROTO;
         }
     }
-    disconnection(sec_lsm_manager);
+    disconnection(sec_lsm_manager, state_Broken);
     return rc;
 }
 
@@ -377,15 +393,26 @@ __nonnull() __wur static int connection(sec_lsm_manager_t *sec_lsm_manager) {
  *
  * @return  0 in case of success or a negative -errno value
  */
-__nonnull() __wur static int ensure_opened(sec_lsm_manager_t *sec_lsm_manager) {
-    if (sec_lsm_manager->fd >= 0 && write(sec_lsm_manager->fd, NULL, 0) < 0)
-        disconnection(sec_lsm_manager);
-    return sec_lsm_manager->fd < 0 ? connection(sec_lsm_manager) : 0;
+__nonnull() __wur
+static int ensure_opened(sec_lsm_manager_t *sec_lsm_manager) {
+    switch (sec_lsm_manager->state) {
+    case state_Disconnected:
+        return connection(sec_lsm_manager);
+    case state_Connected:
+        if (write(sec_lsm_manager->fd, NULL, 0) == 0)
+            return 0;
+        disconnection(sec_lsm_manager, state_Broken);
+        /*@fallthrough@*/
+    case state_Broken:
+    default:
+        return -EPIPE;
+    }
 }
 
 /**
  * @brief lock, open and send
  */
+__nonnull((1,3,4))
 static int sync_process(
     sec_lsm_manager_t *sec_lsm_manager,
     int nfields,
@@ -405,7 +432,7 @@ static int sync_process(
     if (rc >= 0) {
 
         /* send the reply */
-        rc = send_reply(sec_lsm_manager, fields, nfields);
+        rc = send_fields(sec_lsm_manager, fields, nfields);
         if (rc >= 0) {
             rc = aftersend(sec_lsm_manager, closure);
         }
@@ -420,54 +447,57 @@ static int sync_process(
 /**********************/
 
 /* see sec-lsm-manager.h */
-int sec_lsm_manager_create(sec_lsm_manager_t **sec_lsm_manager, const char *socketspec) {
+int sec_lsm_manager_create(sec_lsm_manager_t **psec_lsm_manager, const char *socketspec)
+{
+    int rc;
+    sec_lsm_manager_t *sec_lsm_manager;
 
     /* check parameters not NULL */
-    if (sec_lsm_manager == NULL)
+    if (psec_lsm_manager == NULL)
         return -EINVAL;
 
+    /* ensure a sockectspec by providing defaults */
     socketspec = sec_lsm_manager_get_socket(socketspec);
 
     /* allocate the structure */
-    *sec_lsm_manager = (sec_lsm_manager_t *)malloc(sizeof(sec_lsm_manager_t));
-    if (*sec_lsm_manager == NULL) {
-        return -ENOMEM;
+    sec_lsm_manager = calloc(1, sizeof *sec_lsm_manager);
+    if (sec_lsm_manager == NULL) {
+        rc = -ENOMEM;
+        goto error;
     }
-    memset(*sec_lsm_manager, 0, sizeof(sec_lsm_manager_t));
 
     /* socket spec */
-    (*sec_lsm_manager)->socketspec = strdup(socketspec);
-    if ((*sec_lsm_manager)->socketspec == NULL) {
-        free(*sec_lsm_manager);
-        *sec_lsm_manager = NULL;
-        return -ENOMEM;
+    sec_lsm_manager->socketspec = strdup(socketspec);
+    if (sec_lsm_manager->socketspec == NULL) {
+        rc = -ENOMEM;
+        goto error2;
     }
 
     /* create a protocol object */
-    int rc = prot_create(&(*sec_lsm_manager)->prot);
-    if (rc < 0) {
-        free(*sec_lsm_manager);
-        *sec_lsm_manager = NULL;
-        free((*sec_lsm_manager)->socketspec);
-        (*sec_lsm_manager)->socketspec = NULL;
-        return rc;
-    }
-
-    /* record type and weakly create cache */
-    (*sec_lsm_manager)->synclock = false;
-
-    /* lazy connection */
-    (*sec_lsm_manager)->fd = -1;
+    rc = prot_create(&sec_lsm_manager->prot);
+    if (rc < 0)
+        goto error3;
 
     /* done */
+    sec_lsm_manager->synclock = false;
+    sec_lsm_manager->state = state_Disconnected; /* lazy connection */
+    *psec_lsm_manager = sec_lsm_manager;
     return 0;
+
+error3:
+    free(sec_lsm_manager->socketspec);
+error2:
+    free(sec_lsm_manager);
+error:
+    *psec_lsm_manager = NULL;
+    return rc;
 }
 
 /* see sec-lsm-manager.h */
 void sec_lsm_manager_destroy(sec_lsm_manager_t *sec_lsm_manager) {
     /* check parameters not NULL */
     if (sec_lsm_manager != NULL) {
-        disconnection(sec_lsm_manager);
+        disconnection(sec_lsm_manager, state_Broken);
         if (sec_lsm_manager->prot)
             prot_destroy(sec_lsm_manager->prot);
         free(sec_lsm_manager->socketspec);
@@ -479,7 +509,7 @@ void sec_lsm_manager_destroy(sec_lsm_manager_t *sec_lsm_manager) {
 void sec_lsm_manager_disconnect(sec_lsm_manager_t *sec_lsm_manager) {
     /* check parameters not NULL */
     if (sec_lsm_manager != NULL)
-        disconnection(sec_lsm_manager);
+        disconnection(sec_lsm_manager, state_Disconnected);
 }
 
 /* see sec-lsm-manager.h */

@@ -164,11 +164,19 @@ static const char help_uninstall_text[] =
 
 static const char help__text[] =
     "\n"
-    "Commands are: log, clear, display, id, path, plug, permission,\n"
-    "              install, uninstall, quit, help\n"
     "Type 'help command' to get help on the command\n"
-    "\n"
     "Example 'help log' to get help on log\n"
+    "\n"
+    "Commands are: log, clear, display, id, path, plug, permission,\n"
+    "              install, uninstall, quit, reset, help\n"
+    "\n";
+
+static const char help_reset_text[] =
+    "\n"
+    "Command: reset\n"
+    "\n"
+    "Reset the connection with the server\n"
+    "It automatically clear any context\n"
     "\n";
 
 static const char help_quit_text[] =
@@ -184,7 +192,8 @@ static const char help_help_text[] =
     "\n"
     "Gives help on the command.\n"
     "\n"
-    "Available commands: log, clear, display, id, path, permission, install, uninstall, quit, help\n"
+    "Available commands: log, clear, display, id, path, permission,\n"
+    "                    install, uninstall, quit, reset, help\n"
     "\n";
 
 static sec_lsm_manager_t *sec_lsm_manager = NULL;
@@ -401,6 +410,20 @@ static int do_uninstall(int ac, char **av) {
     return show_status(used_count, "uninstall", rc, NULL);
 }
 
+static int do_reset(int ac, char **av) {
+    int used_count;
+    int n = plink(ac, av, &used_count, 1);
+
+    if (n < 1) {
+        ERROR("not enough arguments");
+        last_status = -EINVAL;
+        return used_count;
+    }
+
+    sec_lsm_manager_disconnect(sec_lsm_manager);
+    return show_status(used_count, "reset", 0, NULL);
+}
+
 static int do_log(int ac, char **av) {
     int used_count, rc;
     int on = 0, off = 0;
@@ -444,6 +467,8 @@ static int do_help(int ac, char **av) {
         help = help_install_text;
     else if (ac > 1 && !strcmp(av[1], "uninstall"))
         help = help_uninstall_text;
+    else if (ac > 1 && !strcmp(av[1], "reset"))
+        help = help_reset_text;
     else
         rc = 1;
     _echo_(rc, av);
@@ -484,6 +509,9 @@ static int do_any(int ac, char **av) {
 
     if (!strcmp(av[0], "uninstall"))
         return do_uninstall(ac, av);
+
+    if (!strcmp(av[0], "reset"))
+        return do_reset(ac, av);
 
     if (!strcmp(av[0], "quit")) {
         _echo_(1, av);
