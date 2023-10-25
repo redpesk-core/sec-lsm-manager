@@ -94,3 +94,36 @@ add_custom_target(coverage
                     COMMAND ${GVOVR} --exclude ${CMAKE_SOURCE_DIR}/src/mustach -r ${CMAKE_SOURCE_DIR}/src --object-directory=${CMAKE_BINARY_DIR} --html --html-details -o ${CMAKE_BINARY_DIR}/coverage/index.html
                     COMMAND ${GVOVR} --exclude ${CMAKE_SOURCE_DIR}/src/mustach -r ${CMAKE_SOURCE_DIR}/src --object-directory=${CMAKE_BINARY_DIR}
                     WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
+
+if(SIMULATE_CYNAGORA)
+    set(CYNTAG simcyn)
+else()
+    set(CYNTAG cyn)
+endif()
+if(SIMULATE_SMACK)
+    set(SMATAG simsma)
+else()
+    set(SMATAG sma)
+endif()
+if(SIMULATE_SELINUX)
+    set(SELTAG simsel)
+else()
+    set(SELTAG sel)
+endif()
+if(WITH_SMACK)
+    set(TSMA slmc-test-${CYNTAG}-${SMATAG})
+    message("[*] Create : ${TSMA}")
+    add_executable(${TSMA} slmc-test.c)
+    target_include_directories(${TSMA} PRIVATE ..)
+    target_link_libraries(${TSMA} PRIVATE cap common-lib app-smack)
+endif()
+if(WITH_SELINUX)
+    set(TSEL slmc-test-${CYNTAG}-${SELTAG})
+    message("[*] Create : ${TSEL}")
+    add_executable(${TSEL} slmc-test.c)
+    target_include_directories(${TSEL} PRIVATE ..)
+    target_link_libraries(${TSEL} PRIVATE cap common-lib app-selinux)
+endif()
+
+
+
