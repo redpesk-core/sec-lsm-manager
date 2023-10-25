@@ -31,7 +31,7 @@
 
 #include "log.h"
 #include "file-utils.h"
-#include "cynagora-interface.h"
+#include "permission/cynagora-interface.h"
 #include "mac-interface.h"
 
 

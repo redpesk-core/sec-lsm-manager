@@ -34,6 +34,10 @@
 #include "templating/template.h"
 #include "file-utils.h"
 
+#if SIMULATE_SELINUX
+#include "simulation/selinux/selinux.c"
+#endif
+
 #if !defined(SEC_LSM_MANAGER_DATADIR)
 #define SEC_LSM_MANAGER_DATADIR "/usr/share/sec-lsm-manager"
 #endif

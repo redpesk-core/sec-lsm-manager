@@ -34,7 +34,7 @@
 #include "log.h"
 #include "smack-template.h"
 #include "file-utils.h"
-#include "xattr-utils.h"
+#include "xattr-smack.h"
 
 #define DROP_LABEL "User:Home"
 
@@ -101,6 +101,18 @@ static int unset_path_labels(const char *path) {
 }
 
 /**
+ * @brief Wrap writing default value of xattr as unsetting it
+ * @param[in] path the path of the file
+ * @param[in] xattr name of the extended attribute
+ * @param[in] value value of the extended attribute
+ * @return 0 in case of success or a negative -errno value
+ */
+static int put_xattr(const char *path, const char *xattr, const char *value)
+{
+    return value && *value ? set_xattr(path, xattr, value) : unset_xattr(path, xattr);
+}
+
+/**
  * @brief Sets labels of a path entry
  *
  * @param[in] path The path of the file
@@ -113,17 +125,17 @@ __nonnull((1, 2)) __wur
 int smack_set_path_labels(const char *path, const char *label, const char *execlabel, bool transmute)
 {
     // access
-    int rc = set_xattr(path, XATTR_NAME_SMACK, label);
+    int rc = put_xattr(path, XATTR_NAME_SMACK, label);
     if (rc < 0) {
-        ERROR("set_xattr(%s,%s,%s) : %d %s", path, XATTR_NAME_SMACK, label, -rc, strerror(-rc));
+        ERROR("put_xattr(%s,%s,%s) : %d %s", path, XATTR_NAME_SMACK, label, -rc, strerror(-rc));
         return rc;
     }
 
     // exec
     if (execlabel) {
-        rc = set_xattr(path, XATTR_NAME_SMACKEXEC, execlabel);
+        rc = put_xattr(path, XATTR_NAME_SMACKEXEC, execlabel);
         if (rc < 0) {
-            ERROR("set_smack(%s,%s,%s) : %d %s", path, XATTR_NAME_SMACKEXEC, execlabel, -rc, strerror(-rc));
+            ERROR("put_smack(%s,%s,%s) : %d %s", path, XATTR_NAME_SMACKEXEC, execlabel, -rc, strerror(-rc));
             return rc;
         }
     }

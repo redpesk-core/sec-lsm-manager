@@ -53,7 +53,7 @@ typedef struct cynagora cynagora_t;
 
 /* see cynagora.h */
 int cynagora_create(cynagora_t **prcyn, cynagora_type_t type, uint32_t cache_size, const char *socketspec) {
-    printf("cynagora_create(%d, %d, %s)\n", type, cache_size, socketspec);
+    printf("cynagora_create(%d, %d, %s)\n", type, cache_size, socketspec?socketspec:"NULL");
     *prcyn = (cynagora_t *)malloc(sizeof(int));
     if (*prcyn == NULL) {
         ERROR("malloc cynagora_t failed");

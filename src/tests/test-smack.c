@@ -23,12 +23,6 @@
 #include <errno.h>
 #include <linux/xattr.h>
 
-#if SIMULATE_SMACK
-#include "simulation/smack/smack.h"
-#else
-#include <sys/smack.h>
-#endif
-
 #include "file-utils.h"
 #include "lsm-smack/smack.h"
 #include "lsm-smack/smack-template.h"

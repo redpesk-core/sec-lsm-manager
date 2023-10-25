@@ -15,8 +15,8 @@
  * limitations under the License.
  */
 
-#ifndef SEC_LSM_MANAGER_POLICIES_H
-#define SEC_LSM_MANAGER_POLICIES_H
+#ifndef SEC_LSM_MANAGER_PERMISSIONS_H
+#define SEC_LSM_MANAGER_PERMISSIONS_H
 
 #include <sys/cdefs.h>
 #include <stddef.h>

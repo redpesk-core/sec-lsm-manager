@@ -24,11 +24,11 @@
 ###########################################################################
 
 add_compile_definitions(
-	VERSION="${PROJECT_VERSION}"
-	PREFIX="${CMAKE_INSTALL_PREFIX}"
+    VERSION="${PROJECT_VERSION}"
+    PREFIX="${CMAKE_INSTALL_PREFIX}"
 )
 include_directories(
-	${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
 ##########################################################
@@ -44,9 +44,9 @@ add_library(sec-lsm-manager STATIC
     protocol/socket.c
 )
 install(TARGETS sec-lsm-manager LIBRARY
-		DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR})
+        DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR})
 install(FILES protocol/sec-lsm-manager.h
-		DESTINATION ${CMAKE_INSTALL_FULL_INCLUDEDIR})
+        DESTINATION ${CMAKE_INSTALL_FULL_INCLUDEDIR})
 
 message("[x] Done : libsec-lsm-manager\n")
 
@@ -57,13 +57,13 @@ message("[x] Done : libsec-lsm-manager\n")
 # common sources
 add_library(common-lib OBJECT
     action/action.c
-    action/cynagora-interface.c
     context/context.c
     context/paths.c
     context/permissions.c
     context/plugs.c
     file-utils.c
     log.c
+    permission/cynagora-interface.c
     protocol/client.c
     protocol/pollitem.c
     protocol/prot.c
@@ -75,18 +75,12 @@ add_library(common-lib OBJECT
     xattr-utils.c
 )
 if(SIMULATE_CYNAGORA)
-    target_sources(common-lib PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/simulation/cynagora/cynagora.c)
+    message("[-] Simul : cynagora")
 else()
     target_link_libraries(common-lib PUBLIC ${cynagora_LDFLAGS} ${cynagora_LINK_LIBRARIES})
     target_include_directories(common-lib PUBLIC ${cynagora_INCLUDE_DIRS})
     target_compile_options(common-lib PUBLIC ${cynagora_CFLAGS})
     message("[-] Link : cynagora")
-endif()
-if(SIMULATE_SMACK)
-    target_sources(common-lib PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/simulation/smack/smack.c)
-endif()
-if(SIMULATE_SELINUX)
-    target_sources(common-lib PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/simulation/selinux/selinux.c)
 endif()
 
 # socket (without or with systemd)
@@ -106,7 +100,9 @@ if(WITH_SMACK)
     target_compile_definitions(app-smack PUBLIC WITH_SMACK=1)
     include_directories(${CMAKE_CURRENT_SOURCE_DIR}/lsm-smack)
 
-    if(NOT SIMULATE_SMACK)
+    if(SIMULATE_SMACK)
+        message("[-] Simul : smack")
+    else()
         target_link_libraries(app-smack PUBLIC ${libsmack_LDFLAGS} ${libsmack_LINK_LIBRARIES})
         target_include_directories(app-smack PUBLIC ${libsmack_INCLUDE_DIRS})
         target_include_directories(app-smack PUBLIC $<TARGET_PROPERTY:common-lib,INTERFACE_INCLUDE_DIRECTORIES>)
@@ -121,7 +117,9 @@ if(WITH_SELINUX)
     target_compile_definitions(app-selinux PUBLIC WITH_SELINUX=1)
     include_directories(${CMAKE_CURRENT_SOURCE_DIR}/lsm-selinux)
 
-    if(NOT SIMULATE_SELINUX)
+    if(SIMULATE_SELINUX)
+        message("[-] Simul : selinux")
+    else()
         target_sources(app-selinux PRIVATE lsm-selinux/selinux-compile.c)
         target_link_libraries(app-selinux PUBLIC ${libselinux_LDFLAGS} ${libselinux_LINK_LIBRARIES})
         target_link_libraries(app-selinux PUBLIC ${libsemanage_LDFLAGS} ${libsemanage_LINK_LIBRARIES})

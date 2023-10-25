@@ -32,6 +32,7 @@
 
 #if SIMULATE_CYNAGORA
 #include "simulation/cynagora/cynagora.h"
+#include "simulation/cynagora/cynagora.c"
 #else
 #include <cynagora.h>
 #endif

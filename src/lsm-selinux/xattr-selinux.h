@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2018-2023 IoT.bzh Company
- * Author: José Bollo <jose.bollo@iot.bzh>
+ * Copyright (C) 2020-2023 IoT.bzh Company
+ * Author: Arthur Guyader <arthur.guyader@iot.bzh>
  *
  * $RP_BEGIN_LICENSE$
  * Commercial License Usage
@@ -21,35 +21,31 @@
  * $RP_END_LICENSE$
  */
 
-#ifndef SEC_LSM_MANAGER_CLIENT_H
-#define SEC_LSM_MANAGER_CLIENT_H
+#ifndef SEC_LSM_MANAGER_XATTR_SELINUX_H
+#define SEC_LSM_MANAGER_XATTR_SELINUX_H
 
-#include <features.h>
-#include <stdbool.h>
-#include <time.h>
+#if !SIMULATE_SELINUX
+#include "xattr-utils.h"
+#else
 
-/** abstract client type */
-typedef struct client client_t;
+#include <stdio.h>
 
-/* see client.h */
 __wur __nonnull()
-extern int client_create(client_t **pclient, int fd, int pollfd);
+static int set_xattr(const char *path, const char *xattr, const char *value)
+{
+    printf("set_xattr(%s, %s, %s)\n", path, xattr, value);
+    return 0;
+}
 
-/* see client.h */
+#if 0
 __wur __nonnull()
-extern bool client_is_connected(client_t *client);
+static int unset_xattr(const char *path, const char *xattr)
+{
+    printf("unset_xattr(%s, %s)\n", path, xattr);
+    return 0;
+}
+#endif
 
-/* see client.h */
-__nonnull()
-extern void client_disconnect(client_t *client);
+#endif
 
-/* see client.h */
-__nonnull()
-extern void client_disconnect_older(client_t *client, time_t trigger);
-
-/* see client.h */
-__nonnull()
-extern void client_destroy(client_t *client);
-
-
-#endif /* PROTOCOL_CLIENT_H */
+#endif

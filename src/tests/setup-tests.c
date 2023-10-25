@@ -108,13 +108,13 @@ int main(int argc, char const *argv[]) {
     test_cynagora();
 #endif
 
-#if WITH_SMACK
+#if WITH_SMACK && !SIMULATE_SMACK
     addtcase("smack");
     test_smack();
     test_smack_label();
 #endif
 
-#if WITH_SELINUX
+#if WITH_SELINUX && !SIMULATE_SELINUX
     addtcase("selinux");
     test_selinux_template();
     test_selinux();

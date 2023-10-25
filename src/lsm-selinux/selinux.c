@@ -33,7 +33,7 @@
 #include "log.h"
 #include "selinux-template.h"
 #include "file-utils.h"
-#include "xattr-utils.h"
+#include "xattr-selinux.h"
 
 #if WITH_SELINUX
 #include "action/mac-interface.h"

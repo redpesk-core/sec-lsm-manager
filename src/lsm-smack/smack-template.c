@@ -32,6 +32,7 @@
 
 #if SIMULATE_SMACK
 #include "simulation/smack/smack.h"
+#include "simulation/smack/smack.c"
 #else
 #include <sys/smack.h>
 #endif

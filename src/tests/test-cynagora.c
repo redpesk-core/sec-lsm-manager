@@ -17,14 +17,7 @@
 
 #include "setup-tests.h"
 
-#include "action/cynagora-interface.h"
-#if SIMULATE_CYNAGORA
-#include "simulation/cynagora/cynagora.h"
-#else
-#include <cynagora.h>
-#endif
-
-#define CYNAGORA_SELECT_ALL "#"
+#include "permission/cynagora-interface.h"
 
 START_TEST(test_cynagora_set_policies) {
     char *id = "testid";
@@ -37,11 +30,11 @@ START_TEST(test_cynagora_set_policies) {
 
     ck_assert_int_eq(cynagora_set_policies(id, &permission_set, 0), 0);
 
-    int found = 0;
     permission_set_t permission_set2;
     ck_assert_int_eq(cynagora_get_policies(id, &permission_set2), 0);
 
     for (size_t i = 0; i < permission_set.size; i++) {
+        int found = 0;
         for (size_t j = 0; j < permission_set2.size; j++) {
             if (!strcmp(permission_set.permissions[i], permission_set2.permissions[j])) {
                 found = 1;
@@ -49,7 +42,6 @@ START_TEST(test_cynagora_set_policies) {
             }
         }
         ck_assert_int_eq(found, 1);
-        found = 0;
     }
 
     ck_assert_int_eq(cynagora_drop_policies(id), 0);
@@ -72,11 +64,11 @@ START_TEST(test_cynagora_drop_policies) {
 
     ck_assert_int_eq(cynagora_drop_policies(id), 0);
 
-    int found = 0;
     permission_set_t permission_set2;
     ck_assert_int_eq(cynagora_get_policies(id, &permission_set2), 0);
 
     for (size_t i = 0; i < permission_set.size; i++) {
+        int found = 0;
         for (size_t j = 0; j < permission_set2.size; j++) {
             if (!strcmp(permission_set.permissions[i], permission_set2.permissions[j])) {
                 found = 1;
@@ -84,7 +76,6 @@ START_TEST(test_cynagora_drop_policies) {
             }
         }
         ck_assert_int_eq(found, 0);
-        found = 0;
     }
 
     permission_set_clear(&permission_set);
