@@ -1,0 +1,8 @@
+#simple test
+id jojo
+path DATA/file0 default
+permission perm
+install
+uninstall
+display
+clear

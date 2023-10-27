@@ -1,0 +1,18 @@
+id j
+id jojo
+clear
+id jojo
+path DATA/file0 default
+path DATA/file1 conf
+path DATA/file2 data
+path DATA/file3 exec
+path DATA/file4 http
+path DATA/file5 icon
+path DATA/file6 id
+path DATA/file7 lib
+path DATA/file8 public
+path DATA/dir1 plug
+install
+uninstall
+display
+clear
