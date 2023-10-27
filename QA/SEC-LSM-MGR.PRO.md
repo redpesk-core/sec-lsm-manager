@@ -8,6 +8,8 @@
 
 .DIFFUSION: CONFIDENTIAL
 
+.REVIEW: IREV1
+
 .git-id($Id$)
 
 The component redpesk-core/sec-lsm-manager is here denoted as
