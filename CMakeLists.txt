@@ -182,10 +182,7 @@ add_compile_definitions(SYSTEMD_NAME="${CMAKE_PROJECT_NAME}")
 message("\n######################## COMPILE OPTIONS ########################\n")
 
 if(DEBUG)
-    set(CMAKE_BUILD_TYPE "DEBUG")
     add_compile_definitions(DEBUG_MODE=1)
-else()
-    set(CMAKE_BUILD_TYPE "RELEASE")
 endif()
 
 message("CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}")
