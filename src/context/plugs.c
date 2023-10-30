@@ -86,7 +86,7 @@ int plugset_add(plugset_t *plugset, const char *expdir, const char *impid, const
     return 0;
 }
 
-__wur __nonnull()
+__wur __nonnull((1))
 static plug_t *search(plugset_t *plugset, const char *expdir, const char *impid, const char *impdir)
 {
     plug_t *plug = *plugset;
