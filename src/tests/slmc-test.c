@@ -25,31 +25,88 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <string.h>
+#include <stdio.h>
 #include <errno.h>
+#include <signal.h>
 
 #include "protocol/client.h"
 #include "protocol/pollitem.h"
 
 int main(int ac, const char **av)
 {
-    const char *prog = *av++;
+    const char *prog = *av;
+    const char * def[] = { prog, "-", NULL };
 
-    if (ac == 1 || (ac == 2 && 0 == strcmp(av[0], "-"))) {
-        static const char * def[2] = { "/dev/stdin", NULL };
+    if (ac == 1) {
         av = (const char **)def;
-        ac = 2;
     }
-
-    while(*av) {
+    signal(SIGPIPE, SIG_IGN); /* avoid SIGPIPE! */
+    while(*++av) {
+        char byte;
         client_t *client;
-        int fd = open(*av, O_RDONLY);
-        int rc = client_create(&client, fd, dup(1));
-        rc = rc == 0 ? 1 : rc;
-        while ((rc > 0 || rc == -EAGAIN) && client_is_connected(client))
+        int rc, pfds[2], df1, st;
+        const char *name = strcmp(*av, "-") ? *av : "/dev/stdin";
+        int fd = open(name, O_RDONLY);
+        if (fd < 0) {
+            fprintf(stderr, "error %s: %s\n", *av, strerror(errno));
+            continue;
+        }
+        df1 = dup(1);
+        if (df1 < 0) {
+            fprintf(stderr, "error can't dup: %s\n", strerror(errno));
+            close(fd);
+            continue;
+        }
+        rc = pipe(pfds);
+        if (rc < 0) {
+            fprintf(stderr, "error can't pipe: %s\n", strerror(errno));
+            close(fd);
+            close(df1);
+            continue;
+        }
+        fcntl(pfds[0], F_SETFL, O_RDONLY|O_NONBLOCK);
+        fcntl(pfds[1], F_SETFL, O_WRONLY|O_NONBLOCK);
+        rc = client_create(&client, pfds[0], df1);
+        if (rc < 0) {
+            fprintf(stderr, "error can't create client: %s\n", strerror(-rc));
+            close(fd);
+            close(df1);
+            close(pfds[0]);
+            close(pfds[1]);
+            continue;
+        }
+        for(rc = st = 1 ; (rc > 0 || rc == -EAGAIN) && client_is_connected(client) ; ) {
+            /* get the input */
+            while (st != 0) {
+                rc = (int)read(fd, &byte, 1);
+                if (rc <= 0) {
+                    st = 0;
+                    close(pfds[1]);
+                    pfds[1] = -1;
+                    break;
+                }
+                write(df1, &byte, 1);
+                if (st == 1)
+                    st = byte == '#' ? 2 : 3;
+                if (st == 3) {
+                    rc = (int)write(pfds[1], &byte, 1);
+                    if (rc <= 0) {
+                        st = 0;
+                        close(pfds[1]);
+                        pfds[1] = -1;
+                        break;
+                    }
+                }
+                if (byte == '\n') {
+                    st = 1;
+                    break;
+                }
+            }
             rc = client_process_input(client);
-        if (client)
-            client_destroy(client);
-        av++;
+        }
+        client_destroy(client);
+        close(fd);
+        close(pfds[1]);
     }
 
     (void)prog;
