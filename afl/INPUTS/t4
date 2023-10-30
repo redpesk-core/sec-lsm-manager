@@ -13,7 +13,9 @@ permission urn:redpesk:permission-1
 permission urn:redpesk:permission-2
 permission urn:redpesk:permission-3
 permission urn:redpesk:permission-4
+permission urn:redpesk:permission:toto:partner:export:plug
 plug DATA/dir1 toto DATA/dir2
+display
 install
 uninstall
 display
