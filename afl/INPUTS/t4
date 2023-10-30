@@ -1,0 +1,21 @@
+id jojo
+path DATA/file0 default
+path DATA/file1 conf
+path DATA/file2 data
+path DATA/file3 exec
+path DATA/file4 http
+path DATA/file5 icon
+path DATA/file6 id
+path DATA/file7 lib
+path DATA/file8 public
+path DATA/dir1 plug
+permission urn:redpesk:permission-1
+permission urn:redpesk:permission-2
+permission urn:redpesk:permission-3
+permission urn:redpesk:permission-4
+plug DATA/dir1 toto DATA/dir2
+install
+uninstall
+display
+clear
+
