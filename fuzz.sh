@@ -4,12 +4,12 @@ rootdir=$(realpath $(dirname $0))
 builddir=$rootdir/afl-build
 afldir=$rootdir/afl
 
-export AFL_USE_ASAN=1
+#export AFL_USE_ASAN=1
 #export AFL_USE_MSAN=1
-export AFL_USE_UBSAN=1
-export AFL_USE_CFISAN=1
+#export AFL_USE_UBSAN=1
+#export AFL_USE_CFISAN=1
 #export AFL_USE_TSAN=1
-export AFL_USE_LSAN=1
+#export AFL_USE_LSAN=1
 
 mkdir -p $builddir
 cd $builddir || exit 1
@@ -26,7 +26,7 @@ cmake .. \
 	-DCOMPILE_TEST=ON \
 	-DDEBUG=ON
 
-make
+make -j
 
 cd $afldir
 
