@@ -93,25 +93,30 @@ int cynagora_cache_resize(cynagora_t *cynagora, uint32_t size) {
 /* see cynagora.h */
 void cynagora_cache_clear(cynagora_t *cynagora) { printf("cynagora_cache_clear(%p)\n", (void*)cynagora); }
 
+static int check(const cynagora_key_t *key)
+{
+    return key->client[0] != '-';
+}
+
 /* see cynagora.h */
 int cynagora_cache_check(cynagora_t *cynagora, const cynagora_key_t *key) {
     printf("cynagora_cache_check(%p ,(%s,%s,%s,%s))\n", (void*)cynagora, key->client, key->session, key->user,
            key->permission);
-    return 0;
+    return check(key);
 }
 
 /* see cynagora.h */
 int cynagora_check(cynagora_t *cynagora, const cynagora_key_t *key, int force) {
     printf("cynagora_check(%p ,(%s,%s,%s,%s), %d)\n", (void*)cynagora, key->client, key->session, key->user, key->permission,
            force);
-    return 0;
+    return check(key);
 }
 
 /* see cynagora.h */
 int cynagora_test(cynagora_t *cynagora, const cynagora_key_t *key, int force) {
     printf("cynagora_test(%p ,(%s,%s,%s,%s), %d)\n", (void*)cynagora, key->client, key->session, key->user, key->permission,
            force);
-    return 0;
+    return check(key);
 }
 
 /* see cynagora.h */
@@ -120,7 +125,7 @@ int cynagora_async_check(cynagora_t *cynagora, const cynagora_key_t *key, int fo
     (void)callback;
     printf("cynagora_async_check(%p ,(%s,%s,%s,%s), %d, %d, %p)\n", (void*)cynagora, key->client, key->session, key->user,
            key->permission, force, simple, (void*)closure);
-    return 0;
+    return check(key);
 }
 
 /******************************************************************************/
