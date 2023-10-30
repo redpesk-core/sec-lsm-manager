@@ -126,14 +126,6 @@ int context_is_valid_id(const char *id)
     int idx;
 
     for (idx = 0;; idx++) {
-
-        /* validate length isn't too big */
-        if (idx >= SEC_LSM_MANAGER_MAX_SIZE_ID) {
-            ERROR("invalid id size, bigger than %d for %.*s...",
-                SEC_LSM_MANAGER_MAX_SIZE_ID, SEC_LSM_MANAGER_MAX_SIZE_ID, id);
-            return -EINVAL;
-        }
-
         /* get the character */
         car = id[idx];
         if (car == '\0') {
@@ -143,8 +135,15 @@ int context_is_valid_id(const char *id)
                     SEC_LSM_MANAGER_MIN_SIZE_ID, id);
                 return -EINVAL;
             }
-            /* return the legth */
+            /* return the length */
             return idx;
+        }
+
+        /* validate length isn't too big */
+        if (idx >= SEC_LSM_MANAGER_MAX_SIZE_ID) {
+            ERROR("invalid id size, bigger than %d for %.*s...",
+                SEC_LSM_MANAGER_MAX_SIZE_ID, SEC_LSM_MANAGER_MAX_SIZE_ID, id);
+            return -EINVAL;
         }
 
         /* validate character is valid */
