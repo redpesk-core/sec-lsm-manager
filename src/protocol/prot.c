@@ -246,8 +246,9 @@ static void buf_get_fields(buf_t *buf, fields_t *fields) {
     buf->pos++;
 
     /* init first field */
-    fields->fields[fields->count = 0] = buf->content;
+    fields->count = 0;
     read = write = 0;
+    fields->fields[0] = buf->content;
     for (;;) {
         c = buf->content[read++];
         switch (c) {
@@ -255,11 +256,12 @@ static void buf_get_fields(buf_t *buf, fields_t *fields) {
                 buf->content[write++] = 0;
                 if (fields->count >= PROT_MAX_FIELDS)
                     return;
-                fields->fields[++fields->count] = &buf->content[write];
+                if (++fields->count < PROT_MAX_FIELDS)
+                        fields->fields[fields->count] = &buf->content[write];
                 break;
             case PROT_RECORD_SEPARATOR: /* end of line (record separator) */
                 buf->content[write] = 0;
-                fields->count += (write > 0);
+                fields->count += (write > 0 && fields->count < PROT_MAX_FIELDS);
                 return;
             case PROT_ESCAPE: /* escaping */
                 c = buf->content[read++];
