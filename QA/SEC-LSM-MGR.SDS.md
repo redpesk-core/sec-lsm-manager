@@ -12,14 +12,11 @@ Internally, SEC-LSM-MANAGER is made of the below components:
 
 ![Figure: components](assets/SEC-LSM-MGR.fig-components.svg)
 
-- **tool**: program for administration and test, based on using the library
 - **protocol**: translation of messages to and from bytestreams
-- **client**: provides a library client C API for connecting to server
-- **server**: receives client queries and translates it to actions
 - **context**: holds a client context
 - **action**: performs install and uninstall
-- **MAC-LSM**: applies policy rules to the system
 - **permission**: checks permissions or manages it, linked with cynagora
+- **MAC-LSM**: applies policy rules to the system
 - **templating**: translates logical policy to system policy using templating
 
 ## The protocol
@@ -27,11 +24,9 @@ Internally, SEC-LSM-MANAGER is made of the below components:
 The protocol normalize the exchanges between the SEC-LSM-MANAGER,
 the server, and its clients.
 
-It is made of 3 components:
+It is made of 2 components:
 
 - the component **prot**: implementation of the presentation layer
-- the component **sec-lsm-manager-client**: implementation of the application
-  layer for the client side
 - the component **sec-lsm-manager-server**: implementation
   of the application layer for the server side
 
@@ -132,57 +127,35 @@ The class fields is used when decoding for recording position
 of fields in the decoding buffer.
 
 
-### Component sec-lsm-manager-client
-
-That component exposes a user interface for communicating with
-service SEC-LSM-MANAGER.
-
-This is a single class as shown on the **figure class sec-lsm-manager**
-
-![Figure: class sec_lsm_manager_client](assets/SEC-LSM-MGR.fig-class-sec-lsm-manager-client.svg)
-
-That single class embbeds an instance of *prot* and uses *open* feature
-of *socket* to open the socket given its designation.
-
-#### Life cycle and meta
-
-Instances of `sec_lsm_manager_client` are created using function `create` that
-connects the instance to the specified socket designated by a name. The
-function `destroy` deletes it and clean the memory. The function `disconnect`
-disconnects from the server but doesn't destroys the instance.
-
-The function `log`allows tuning the logging of the server (see log of
-@SEC-LSM-MGR.PRO).
-
-The function `error_message` returns a copy of the error indication of
-the latest record received from the server.
-
-#### Context and action
-
-The other functions are directly linked to the management of the context
-by the server, each of them sends a record corresponding to required
-intention as described by the protocol.
-
-
 ### Component sec-lsm-manager-server
 
-That component holds client connection and the dispatching of decoded
-imputs.
+That component holds client connections and the dispatching of pending
+inputs. Nominally the server only serves one client. However it
+can serve more than one client but one by one under the same main thread.
 
 The figure below shows its organization:
 
 ![Figure: class sec_lsm_manager_server](assets/SEC-LSM-MGR.fig-class-sec-lsm-manager-server.svg)
 
 The class `sec_lsm_manager_server` has a listening socket for accepting
-incoming clients. The incoming clients are then attached to an instance
+incoming clients. The incoming clients are then attached to an fresh instance
 of the private class `client`.
 
-The instance of `sec_lsm_manager_server` and instances of its `client`
-are inheriting the class `pollitem` for inserting it in an event loop
-based on the system call `epoll_wait`. It means that 
+The instance of `sec_lsm_manager_server` inherits the class `pollitem`
+for managing an event loop based on the system call `epoll_wait`.
+
+The events occuring on inputs of the server are:
+
+- a new pair connects: the server creates a fresh instance of client
+  to handle that new connection
+- a pair sent data: the server asks the client instance to process
+  its input
+- a pair diconnects: the server destroys the client instance
 
 Each instance of the class `client` is composed with one instance
-of the class `prot` and one instance of the class `context`.
+of the class `prot` that manges the presentation of the protocol
+and one instance of the class `context` that manages the current
+context of the client.
 
 The class server interprets for each of its client the received
 messages.
@@ -190,11 +163,42 @@ messages.
 
 ## The context
 
+The class context records the current context state of a client
+connection. It is the recording of all the correctly interpreted
+messages of the protocol.
 
 ![Figure: class context](assets/SEC-LSM-MGR.fig-class-context.svg)
 
+The method `raise_error` sets the `error_flag` until a call to the
+method `clear`. The error state is queried using the method `has_error`.
+
+The methods `set_id`, `add_permission`, `add_path`, `add_plug` and `clear`
+are the function implementing the corresponding protocol queries:
+`id`, `permission`, `path`, `plug` and `clear`. It returns a numerical
+status whose values are:
+
+- `0`: succes
+- `-EINVAL`: invalid parameter
+- `-EEXIST`: already set or added
+- `-ENOTRECOVERABLE`: context in error, requires a clear
+- `-ENOMEM`: out of memory
+- `-ENOENT`: path doesn't exist
+- `-EACCES`: inaccessible path
+- `-ENOTDIR`: not a directory
+
+The function `has_permission` checks the list of permissions in
+the current context and returns true if the permission is given.
+
+The function `visit` is used to inspect the content of the
+context.
+
+Internally, the class context uses instances of `permission_set`, `path_set`
+and `plugset` to handle its data.
 
 ![Figure: classes used for the context](assets/SEC-LSM-MGR.fig-class-context-items.svg)
+
+These classes have little behaviour: initialisation, addition of item an
+clearing of data
 
 
 ## The action
@@ -232,47 +236,6 @@ The actions are either help or interaction with the server.
 
 
 
-
-
-## Content delivery
-
-The delivery is made of 3 artifacts:
-
-- the service SEC-LSM-MANAGER
-- the client static library
-- the client tools for administration and test
-
-![Figure: Content delivery](assets/SEC-LSM-MGR.fig-delivery.svg)
-
-### Content delivery of the service
-
-This delivery is made of the following artifacts:
-
-- the binary implementing the service
-- the configuration files for the policy
-- the configuration files for systemd integration
-- the administration guide
-
-### Content delivery of the client static library
-
-- the static client library
-- one C header file declaring and summarizing
-  the exported symbols of the library
-- the integration guide for developpers
-
-The library offers to client of SEC-LSM-MANAGER the recommended way to interact
-with the SEC-LSM-MANAGER. The library encapsulate details of the protocol and
-present to it clients the clean inteface of the class `sec-lsm-manager-client`.
-
-The library is provided in its static version in order to be linked statically
-to its clients. The reason of doing so is for removing an attackabke item.
-
-
-
-### Content delivery of the client tool
-
-- the client tool binary
-- the manual page for using it
 
 
 

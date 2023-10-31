@@ -1,5 +1,18 @@
 # Review history of sec-lsm-manager
 
+## Final reviews
+
+-----------------------------------------------------------
+  ID      Reviewer         Date*     Reviewed documents
+------ ---------------- ------------ ----------------------
+
+-----------------------------------------------------------
+
+(\*) Date in parenthesis are indicating the starting
+date of a not achieved review
+
+
+
 ## Intermediate reviews
 
 ---------------------------------------------------------
@@ -12,7 +25,6 @@ IREV1  Louis-Baptiste    2023-11-06  @SEC-LSM-MGR.HRQ
                                      @SEC-LSM-MGR.RKA
 
 ---------------------------------------------------------
-
 
 (\*) Date in parenthesis are indicating the starting
 date of a not achieved review

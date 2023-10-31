@@ -11,25 +11,16 @@ class context {
   + {static} create()
   + destroy()
   + init()
-  + clear()
   + raise_error()
   + has_error(): bool
-  + {static} is_valid_id(id: string): int
   + set_id(id: string): int
   + add_permission(permission: string): int
-  + has_permission(permission: string): int
   + add_path(path, type: string): int
   + add_plug(expdir, impid, impdir: string): int
+  + clear()
+  + {static} is_valid_id(id: string): int
+  + has_permission(permission: string): int
   + visit(visitor: visitor)
-}
-
-
-
-abstract class visitor {
-  + {abstract} id(id: string)
-  + {abstract} path(path, type: string)
-  + {abstract} permission(permission: string)
-  + {abstract} plug(expdir, impid, impdir: string)
 }
 
 
@@ -37,6 +28,7 @@ abstract class visitor {
 class plugset
 class path_set
 class permission_set
+abstract class visitor
 
 context o-- plugset : plugset
 context o-- path_set : path_set

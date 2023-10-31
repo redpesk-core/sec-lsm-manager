@@ -1,5 +1,11 @@
 @startuml
 
+abstract class visitor {
+  + {abstract} id(id: string)
+  + {abstract} path(path, type: string)
+  + {abstract} permission(permission: string)
+  + {abstract} plug(expdir, impid, impdir: string)
+}
 
 class plug {
   # next: plug
@@ -62,5 +68,9 @@ class permission_set {
    + add(permission: string)
    + has(permission: string): bool
 }
+
+visitor -[hidden]-> plug
+visitor -[hidden]> permission_set
+permission_set -[hidden]-> path_set
 
 @enduml

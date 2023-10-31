@@ -13,33 +13,16 @@
 
 ### Specifications
 
-- @SEC-LSM-MGR.OVE: **overviews**
-- @SEC-LSM-MGR.HRQ: **high level requirements**
-- @SEC-LSM-MGR.LRQ: **low level requirements**
-- @SEC-LSM-MGR.RKA: **Risk analysis**
+- @SEC-LSM-MGR.IDX: **This index**
+- @SEC-LSM-MGR.OVE: **Overview of SEC-LSM-MANAGER**
+- @SEC-LSM-MGR.HRQ: **High level requirements**
 - @SEC-LSM-MGR.SDS: **Software design**
+- @SEC-LSM-MGR.RKA: **Risk analysis**
+- @SEC-LSM-MGR.RVH: **Review history**
+
+- @SEC-LSM-MGR.PRO: **Protocol**
 - @SEC-LSM-MGR.HTC: **High level test cases**
-- @SEC-LSM-MGR.LTC: **Low level test cases**
-
-
-### Reports
-
-
-### Documentations 
-
-- @SEC-LSM-MGR.ADM: **administration manual**
-- @SEC-LSM-MGR.USR: **user manual**
-- @SEC-LSM-MGR.DEV: **developer manual**
-- @SEC-LSM-MGR.PRO: **protocol**
-
-
-### Others
-
-- @SEC-LSM-MGR.CON: **conformity check specification**
-- @SEC-LSM-MGR.REQ: **requirements (obsolete)**
-- @SEC-LSM-MGR.DIS: **discussion**
-- @SEC-LSM-MGR.SPE: **specification**
-- @SEC-LSM-MGR.SEC: **security**
+- @SEC-LSM-MGR.ADM: **Administration and security manual**
 
 
 

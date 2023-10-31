@@ -28,6 +28,11 @@ class pollitem {
 class client {
   + version
   + invalid: bool
+  + {static} create(fdin, fdout)
+  + is_connected(): bool
+  + disconnect()
+  + destroy()
+  + process_input()
 }
 
 class prot
@@ -35,7 +40,6 @@ class context
 
 
 pollitem <|-- slms
-pollitem <|-- client
 
 slms -left- socket
 slms  *- "*" client : clients
