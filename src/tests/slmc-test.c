@@ -32,8 +32,6 @@
 #include "protocol/client.h"
 #include "protocol/pollitem.h"
 
-#define PARANO 0 /* avoid dead code to improve coverage */
-
 int main(int ac, const char **av)
 {
     const char *prog = *av;
@@ -46,21 +44,21 @@ int main(int ac, const char **av)
     while(*++av) {
         char byte;
         client_t *client;
-        int rc, pfds[2], df1, st;
+        int rc, pfds[2] = {0,0}, df1, st;
         const char *name = strcmp(*av, "-") ? *av : "/dev/stdin";
         int fd = open(name, O_RDONLY);
-        if (PARANO && fd < 0) {
+        if (fd < 0) {
             fprintf(stderr, "error %s: %s\n", *av, strerror(errno));
             continue;
         }
         df1 = dup(1);
-        if (PARANO && df1 < 0) {
+        if (df1 < 0) {
             fprintf(stderr, "error can't dup: %s\n", strerror(errno));
             close(fd);
             continue;
         }
         rc = pipe(pfds);
-        if (PARANO && rc < 0) {
+        if (rc < 0) {
             fprintf(stderr, "error can't pipe: %s\n", strerror(errno));
             close(fd);
             close(df1);
@@ -69,7 +67,7 @@ int main(int ac, const char **av)
         fcntl(pfds[0], F_SETFL, O_RDONLY|O_NONBLOCK);
         fcntl(pfds[1], F_SETFL, O_WRONLY|O_NONBLOCK);
         rc = client_create(&client, pfds[0], df1);
-        if (PARANO && rc < 0) {
+        if (rc < 0) {
             fprintf(stderr, "error can't create client: %s\n", strerror(-rc));
             close(fd);
             close(df1);

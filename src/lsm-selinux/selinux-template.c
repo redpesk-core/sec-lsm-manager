@@ -450,16 +450,17 @@ __nonnull() __wur static bool check_module(semanage_handle_t *semanage_handle, c
         if (rc < 0) {
             rc = -errno;
             ERROR("semanage_module_info_get_name : %d %s", -rc, strerror(-rc));
-            goto end;
+            goto end2;
         }
 
         if (!strcmp(module_name, id)) {
             ret = true;
-            goto end;
+            goto end2;
         }
     }
-end:
+end2:
     free_module_info_list(semanage_handle, semanage_module_info_list, semanage_module_info_len);
+end:
     return ret;
 }
 

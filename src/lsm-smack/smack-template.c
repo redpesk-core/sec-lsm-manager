@@ -245,6 +245,7 @@ int create_smack_rules(const context_t *context) {
     }
 
     DEBUG("create_smack_rules success");
+    close(fd);
     goto end;
 
 error2:

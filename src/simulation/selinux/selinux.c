@@ -141,6 +141,8 @@ int semanage_module_list(semanage_handle_t *sh, semanage_module_info_t **semanag
     }
 
     *semanage_module_info = (semanage_module_info_t *)malloc(sizeof(semanage_module_info_t) * (size_t)(*num_modules));
+    if (*semanage_module_info == NULL)
+        return -1;
 
     dir = opendir(SELINUX_POLICY_DIR);
     if (dir != NULL) {
