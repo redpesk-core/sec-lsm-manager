@@ -1,0 +1,133 @@
+#-- ID --------------
+#size
+
+clear
+id 
+
+clear
+id a
+
+clear
+id aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+
+#invalid characters
+
+clear
+id a/b
+
+#unrecoverable
+
+clear
+id a/b
+id xx
+
+#exists
+
+clear
+id xx
+id xx
+
+#-- PERMISSION --------------
+#size
+
+clear
+permission 
+
+clear
+permission a
+
+clear
+permission aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+
+#unrecoverable
+
+clear
+id a/b
+permission urn
+
+#duplicate
+
+clear
+permission urn
+permission toto
+permission tata
+permission toto
+
+
+#-- PATH --------------
+
+#unrecoverable
+
+clear
+id a/b
+path / default
+
+#valid
+
+clear
+path / ourgh!
+
+#duplicate
+
+clear
+path / default
+path / default
+
+# size
+
+clear
+path  default
+
+# exist
+
+clear
+path /dfhrufherfh default
+
+#-- PLUG --------------
+
+#unrecoverable
+clear
+id a/b
+plug / toto /
+
+#already
+
+clear
+plug / toto /tmp
+plug /tmp tata /run
+plug /tmp titi /var
+plug / tutu /run
+
+#valid id
+
+clear
+plug /  /tmp
+clear
+plug / x /tmp
+clear
+plug / a/b /tmp
+
+#not exist
+
+clear
+plug /torara toto /tmp
+clear
+plug /tmp titi /eliuhgfzierhg
+
+#-- INSTALL --------------
+
+#unrecoverable
+
+clear
+id a/b
+install
+
+#id required
+
+clear
+path / id
+install
+
+
+# vim: noai ts=3 sw=3 et list
+

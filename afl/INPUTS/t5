@@ -1,5 +1,10 @@
 log
 log on
+id toto
+path / default
+permission urn:zarg
+display
+clear
 log
 log off
 log
