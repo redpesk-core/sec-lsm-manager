@@ -234,13 +234,14 @@ error but that querying an existing path doesn't
 
 .PRECONDITION
 
+1. A file named `/TODO` does not exist on the system
+2. A file named `/tmp` exists on the system
+
 .PROCEDURE
 
-1. Check that the file `/TOTO` does not exist
-2. Run the command `sec-lsm-manager-cmd path /TOTO default` and check it that
+1. Run the command `sec-lsm-manager-cmd path /TOTO default` and check it that
    returns an error
-3. Check that the file `/tmp` exists
-4. Run the command `sec-lsm-manager-cmd path /tmp default` and check it that
+2. Run the command `sec-lsm-manager-cmd path /tmp default` and check it that
    does not return an error but a valid acknowledge
 
 ### Check path type validity of path properties
@@ -257,6 +258,8 @@ but that querying a valid type doesn't
 .REQUIRED-BY @SEC-LSM-MGR.PRO-U-VAL-PAT-TYP
 
 .PRECONDITION
+
+1. A file named `/tmp` exists on the system
 
 .PROCEDURE
 
@@ -279,6 +282,8 @@ a path already given
 .REQUIRED-BY @SEC-LSM-MGR.PRO-U-ONL-ONC-PER-PAT
 
 .PRECONDITION
+
+1. A file named `/tmp` exists on the system
 
 .PROCEDURE
 
@@ -376,6 +381,8 @@ Check that validity of plug arguments property is correctly checked
 .REQUIRED-BY @SEC-LSM-MGR.PRO-U-VAL-DIR
 
 .PRECONDITION
+
+1. A directory named `/nowhere` does not exist on the system
 
 .PROCEDURE
 
