@@ -197,7 +197,7 @@ recovered in any way.
 
 When a SETTING or an ACTION fails, noticed by returning an error status
 in reply, the context shall enter in error state. When a context is in
-error state, it refuses all new propertiess (SETTING) and all actions
+error state, it refuses all new properties (SETTING) and all actions
 (ACTION) except CLEAR. If a refused query is received, the reply is
 `error not-recoverable`.
 
@@ -543,7 +543,6 @@ and enters in error state:
 - already-set: that permission is already set in the context.
 - not-recoverable: the context is in error state.
 - internal: internal server error.
-
 
 
 
