@@ -1,7 +1,9 @@
 @startebnf
 
-QUERY = KEY, { "SP", ARG }, "LF";
+'**IREV1:** SP is not a common abbreviation for the space character.
 
-REPLY = [ KEY, { "SP", DATA }, "LF" ], ( "done" | "error" ), { "SP", VALUE }, "LF";
+QUERY = KEY, { "SPACE", ARG }, "LF";
+
+REPLY = [ KEY, { "SPACE", DATA }, "LF" ], ( "done" | "error" ), { "SPACE", VALUE }, "LF";
 
 @endebnf

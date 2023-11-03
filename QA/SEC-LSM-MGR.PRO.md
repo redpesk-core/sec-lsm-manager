@@ -185,8 +185,11 @@ the diagram below:
 
 .RULE SEC-LSM-MGR.PRO-U-CON-ERA-DIS
 
-When the client disconnects, its context is dropped to the trash and
-can not be recovered in any way.
+**IREV1:** the trash is not a thing in the SEC-LSM-MANAGER, this
+expression should not be used to avoid confusion.
+
+When the client disconnects, its context is dropped and cannot be
+recovered in any way.
 
 ### Error state
 
@@ -200,7 +203,11 @@ error state, it refuses all new propertiess (SETTING) and all actions
 
 ![Figure: state protocol](assets/SEC-LSM-MGR.fig-protocol-states.svg)
 
+**IREV1:** the dotted arrow isn't used anywhere else so an explanation
+is required.
 
+The dotted arrow indicates the HELLO query is optional (see
+@SEC-LSM-MGR.PRO-U-HEL-OPT below).
 
 ### Summary of queries
 

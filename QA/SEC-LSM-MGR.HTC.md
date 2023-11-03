@@ -342,6 +342,10 @@ but that querying a valid doesn't
 
 .PROCEDURE
 
+**IREV1:** `too small` and `too big` should either both be there or
+none. This can be discussed since the client does not display that
+information.
+
 1. Run the command `sec-lsm-manager-cmd permission p1` and check that it
    does not return an error but a valid acknowledge
 2. Run the command `sec-lsm-manager-cmd permission $(head -c 1024 /dev/zero | tr '\0' x)`
@@ -349,7 +353,7 @@ but that querying a valid doesn't
 3. Run the command `sec-lsm-manager-cmd permission p` and check it that
    returns an error (too small)
 4. Run the command `sec-lsm-manager-cmd permission $(head -c 1025 /dev/zero | tr '\0' x)`
-   and check it that returns an error
+   and check that it returns an error (too big)
 
 ### Setting plug properties
 
@@ -408,8 +412,11 @@ already set since previous clear.
 
 .PROCEDURE
 
+**IREV1:** `nothing` is not accurate since status messages will appear.
+
 1. Run the command `sec-lsm-manager-cmd display` and check it
-   displays nothing
+   does not display a context (eventually `initialization success` and
+   `ok`, nothing more)
 2. Run the command `sec-lsm-manager-cmd id xx display` and check it
    displays `id xx`
 3. Run the command `sec-lsm-manager-cmd path / default display` and check it
@@ -433,9 +440,9 @@ Check that querying the clear of the context removes all set properties.
 
 .PROCEDURE
 
+**IREV1:** the first display displays all set properties; only the
+second display is empty.
+
 1. Run the command `sec-lsm-manager-cmd -ek id xx path / default
-   permission xx plug / xx / display clear display` and check that display
-   doesn't report any property.
-
-
-
+   permission xx plug / xx / display clear display` and check that the
+   second display doesn't report any property.
