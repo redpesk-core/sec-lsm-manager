@@ -46,6 +46,21 @@ static const char *type_strings[number_path_type] =
 [type_public] = "public"
 };
 
+/***********************/
+/*** PRIVATE METHODS ***/
+/***********************/
+
+static path_t *path_set_search(path_set_t *path_set, const char *path)
+{
+    size_t idx;
+    for (idx = 0 ; idx < path_set->size ; idx++) {
+        path_t *p = path_set->paths[idx];
+        if (0 == strcmp(path, p->path))
+            return p;
+    }
+    return NULL;
+}
+
 /**********************/
 /*** PUBLIC METHODS ***/
 /**********************/
@@ -125,3 +140,11 @@ const char *path_type_name(enum path_type path_type) {
     ERROR("Path type invalid");
     return "invalid";
 }
+
+/* see paths.h */
+__wur __nonnull()
+bool path_set_has(path_set_t *path_set, const char *path)
+{
+    return NULL != path_set_search(path_set, path);
+}
+

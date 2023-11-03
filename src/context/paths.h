@@ -94,6 +94,16 @@ extern void path_set_init(path_set_t *path_set) __nonnull();
 extern void path_set_clear(path_set_t *path_set) __nonnull();
 
 /**
+ * @brief checks if a path is in the set
+ *
+ * @param path_set[in] path_set handler
+ * @param path[in] The path to check
+ * @return true if path is in the set or otherwise false
+ */
+__wur __nonnull()
+extern bool path_set_has(path_set_t *path_set, const char *path);
+
+/**
  * @brief Add a path to paths
  *
  * @param path_set[in] path_set handler

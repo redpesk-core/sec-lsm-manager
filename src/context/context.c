@@ -227,11 +227,9 @@ int context_add_path(context_t *context, const char *path, const char *type)
     }
 
     /* check duplication */
-    for (i = 0; i < context->path_set.size; i++) {
-        if (!strcmp(context->path_set.paths[i]->path, path)) {
-            ERROR("path already added");
-            return -EEXIST;
-        }
+    if (path_set_has(&context->path_set, path)) {
+        ERROR("path already added");
+        return -EEXIST;
     }
 
     /* check existing path */
