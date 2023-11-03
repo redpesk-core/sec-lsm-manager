@@ -181,7 +181,6 @@ int context_set_id(context_t *context, const char *id) {
 /* see context.h */
 int context_add_permission(context_t *context, const char *permission)
 {
-    size_t i;
     int rc;
 
     /* check error state */
@@ -191,11 +190,9 @@ int context_add_permission(context_t *context, const char *permission)
     }
 
     /* check duplication */
-    for (i = 0; i < context->permission_set.size; i++) {
-        if (!strcmp(context->permission_set.permissions[i], permission)) {
-            ERROR("permission already defined");
-            return -EEXIST;
-        }
+    if (permission_set_has(&(context->permission_set), permission)) {
+        ERROR("permission already defined");
+        return -EEXIST;
     }
 
     rc = permission_set_add(&(context->permission_set), permission);
