@@ -45,8 +45,6 @@ Check that the service starts automatically.
 
 .REQUIRED-BY @SEC-LSM-MGR.HRQ-R-SYS-SER
 
-.PRECONDITION
-
 .PROCEDURE
 
 1. The command `sec-lsm-manager-cmd log` must output `logging off` or
@@ -61,8 +59,6 @@ Check that the service automatically stops after the defined period.
 .TYPE integration
 
 .REQUIRED-BY @SEC-LSM-MGR.HRQ-R-SYS-SER
-
-.PRECONDITION
 
 .PROCEDURE
 
@@ -84,8 +80,6 @@ Check that the server socket can only be accessed by clients of the group sec-ls
 .TYPE integration
 
 .REQUIRED-BY @SEC-LSM-MGR.HRQ-R-PRO-SOC
-
-.PRECONDITION
 
 .PROCEDURE
 
@@ -113,7 +107,6 @@ disconnection.
 
 .REQUIRED-BY @SEC-LSM-MGR.HRQ-R-CON-PRO
 
-.PRECONDITION
 .REQUIRED-BY @SEC-LSM-MGR.PRO-U-DIS-PRO-VIO
 
 .PROCEDURE
@@ -137,7 +130,6 @@ except `clear` are returning `error not-recoverable`
 
 .REQUIRED-BY @SEC-LSM-MGR.HRQ-R-CON-PRO
 
-.PRECONDITION
 .REQUIRED-BY @SEC-LSM-MGR.PRO-U-ERR-STA
 
 .PROCEDURE
@@ -160,7 +152,6 @@ Check that id property is correctly recorded in the context.
 
 .REQUIRED-BY @SEC-LSM-MGR.HRQ-R-CON-PRO
 
-.PRECONDITION
 .REQUIRED-BY @SEC-LSM-MGR.PRO-U-VAL-ID-QUE
 
 .PROCEDURE
@@ -178,7 +169,6 @@ Check that querying an invalid id return an error
 
 .REQUIRED-BY @SEC-LSM-MGR.HRQ-R-CON-PRO
 
-.PRECONDITION
 .REQUIRED-BY @SEC-LSM-MGR.PRO-U-VAL-APP-IDE
 
 .PROCEDURE
@@ -204,7 +194,6 @@ Check that it is an error to set the id property if it was already set
 
 .REQUIRED-BY @SEC-LSM-MGR.HRQ-R-CON-PRO
 
-.PRECONDITION
 .REQUIRED-BY @SEC-LSM-MGR.PRO-U-QUE-ID-ONL-ONC
 
 .PROCEDURE
@@ -223,7 +212,6 @@ Check that path properties are correctly recorded in the context
 
 .REQUIRED-BY @SEC-LSM-MGR.HRQ-R-CON-PRO
 
-.PRECONDITION
 .REQUIRED-BY @SEC-LSM-MGR.PRO-U-VAL-PAT-QUE
 
 .PROCEDURE
@@ -308,7 +296,6 @@ Check that permission property is correctly recorded in the context
 
 .REQUIRED-BY @SEC-LSM-MGR.HRQ-R-CON-PRO
 
-.PRECONDITION
 .REQUIRED-BY @SEC-LSM-MGR.PRO-U-VAL-PER-QUE
 
 .PROCEDURE
@@ -327,7 +314,6 @@ a permission already given.
 
 .REQUIRED-BY @SEC-LSM-MGR.HRQ-R-CON-PRO
 
-.PRECONDITION
 .REQUIRED-BY @SEC-LSM-MGR.PRO-U-QUE-PER-ONL-ONC
 
 .PROCEDURE
@@ -347,7 +333,6 @@ but that querying a valid doesn't
 
 .REQUIRED-BY @SEC-LSM-MGR.HRQ-R-CON-PRO
 
-.PRECONDITION
 .REQUIRED-BY @SEC-LSM-MGR.PRO-U-VAL-APP-PER
 
 .PROCEDURE
@@ -367,7 +352,6 @@ but that querying a valid doesn't
 
 Check that plug property is correctly recorded in the context
 
-.PRECONDITION
 .TYPE integration
 
 .REQUIRED-BY @SEC-LSM-MGR.HRQ-R-CON-PRO
@@ -413,7 +397,6 @@ already set since previous clear.
 
 .REQUIRED-BY @SEC-LSM-MGR.HRQ-R-CON-PRO
 
-.PRECONDITION
 .REQUIRED-BY @SEC-LSM-MGR.PRO-U-VAL-DIS-QUE
 
 .PROCEDURE
@@ -439,7 +422,6 @@ Check that querying the clear of the context removes all set properties.
 
 .REQUIRED-BY @SEC-LSM-MGR.HRQ-R-CON-PRO
 
-.PRECONDITION
 .REQUIRED-BY @SEC-LSM-MGR.PRO-U-VAL-CLE-QUE
 
 .PROCEDURE
