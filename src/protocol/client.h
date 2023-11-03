@@ -69,15 +69,17 @@ __nonnull()
 extern void client_destroy(client_t *client);
 
 /**
- * @brief
+ * @brief Process the available input if any.
+ * A negative error code different from -EAGAIN
+ * should imply a disconnection.
  *
  * @param[in] client pointer to the client instance
  * @return a strict positive number on success,
- *         0 if all input consumed but input terminated
- *         -EAGAIN if all input consumed
+ *         0 if all input consumed but input terminated and to be closed
+ *         -EAGAIN if all available input consumed
  *         -INVAL if disconnected
- *         -EPROTO on protocol violation and disconnection
- *         -EMSGSIZE on too big message and disconnection
+ *         -EPROTO on protocol violation
+ *         -EMSGSIZE on too big messages
  *         other negative values are error
  */
 __nonnull()
