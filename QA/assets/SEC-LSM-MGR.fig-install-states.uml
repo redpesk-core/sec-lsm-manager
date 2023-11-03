@@ -1,11 +1,11 @@
 @startuml
 
-state no_install_possible {
-   state empty : no property received
-   state need_id : received property needing an ID\nBut not received any ID
+state install_not_possible {
+   state empty : no property received yet
+   state need_id : received property needing an ID\nbut no ID received yet
 }
 state install_allowed {
-  state no_id : received properties not needing ID
+  state no_id : received properties not needing an ID
   state has_id : received an ID
 }
 

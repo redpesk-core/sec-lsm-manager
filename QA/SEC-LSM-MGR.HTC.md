@@ -13,7 +13,7 @@
 .git-id($Id$)
 
 The component redpesk-core/sec-lsm-manager is here denoted as
-SEC-LSM-MANAGER
+SEC-LSM-MANAGER.
 
 This document list the tests ensuring that high level requirements
 of SEC-LSM-MANAGER (@SEC-LSM-MGR.HRQ) are fulfilled.
@@ -112,9 +112,9 @@ disconnection.
 .TYPE integration
 
 .REQUIRED-BY @SEC-LSM-MGR.HRQ-R-CON-PRO
-.REQUIRED-BY @SEC-LSM-MGR.PRO-U-DIS-PRO-VIO
 
 .PRECONDITION
+.REQUIRED-BY @SEC-LSM-MGR.PRO-U-DIS-PRO-VIO
 
 .PROCEDURE
 
@@ -123,8 +123,8 @@ disconnection.
 2. Enter `sec-lsm-manager 1`
 3. Check it returns `done 1`
 4. Enter `turlututu`
-5. Check that the connection is closed and that socat gives up
-   Before closing, the SEC-LSM-MANAGER can report `error invalid`
+5. Check that the connection is closed and that socat gives up; before
+   closing, the SEC-LSM-MANAGER can report `error invalid`
 
 ### Error state
 
@@ -136,9 +136,9 @@ except `clear` are returning `error not-recoverable`
 .TYPE integration
 
 .REQUIRED-BY @SEC-LSM-MGR.HRQ-R-CON-PRO
-.REQUIRED-BY @SEC-LSM-MGR.PRO-U-ERR-STA
 
 .PRECONDITION
+.REQUIRED-BY @SEC-LSM-MGR.PRO-U-ERR-STA
 
 .PROCEDURE
 
@@ -147,21 +147,21 @@ except `clear` are returning `error not-recoverable`
 2. Check that it outputs `error not-recoverable` where expected:
    for the commands from `id xx` to `uninstall`
 3. Repeat the previous steps but replace the error generation `id x`
-   with errors linked to an other setting: `path / x`, `permission x`,
+   with errors linked to another setting: `path / x`, `permission x`,
    `plug / x /`.
 
 ### Setting of id properties
 
 .TEST-CASE SEC-LSM-MGR.HTC-T-SET-ID-PRO
 
-Check that id property is correctly recorded in the context
+Check that id property is correctly recorded in the context.
 
 .TYPE integration
 
 .REQUIRED-BY @SEC-LSM-MGR.HRQ-R-CON-PRO
-.REQUIRED-BY @SEC-LSM-MGR.PRO-U-VAL-ID-QUE
 
 .PRECONDITION
+.REQUIRED-BY @SEC-LSM-MGR.PRO-U-VAL-ID-QUE
 
 .PROCEDURE
 
@@ -177,9 +177,9 @@ Check that querying an invalid id return an error
 .TYPE integration
 
 .REQUIRED-BY @SEC-LSM-MGR.HRQ-R-CON-PRO
-.REQUIRED-BY @SEC-LSM-MGR.PRO-U-VAL-APP-IDE
 
 .PRECONDITION
+.REQUIRED-BY @SEC-LSM-MGR.PRO-U-VAL-APP-IDE
 
 .PROCEDURE
 
@@ -198,15 +198,14 @@ Check that querying an invalid id return an error
 
 .TEST-CASE SEC-LSM-MGR.HTC-T-NO-SEC-ID-PRO
 
-Check that it is an error to query a id property if the id property
-has already be given
+Check that it is an error to set the id property if it was already set
 
 .TYPE integration
 
 .REQUIRED-BY @SEC-LSM-MGR.HRQ-R-CON-PRO
-.REQUIRED-BY @SEC-LSM-MGR.PRO-U-QUE-ID-ONL-ONC
 
 .PRECONDITION
+.REQUIRED-BY @SEC-LSM-MGR.PRO-U-QUE-ID-ONL-ONC
 
 .PROCEDURE
 
@@ -223,9 +222,9 @@ Check that path properties are correctly recorded in the context
 .TYPE integration
 
 .REQUIRED-BY @SEC-LSM-MGR.HRQ-R-CON-PRO
-.REQUIRED-BY @SEC-LSM-MGR.PRO-U-VAL-PAT-QUE
 
 .PRECONDITION
+.REQUIRED-BY @SEC-LSM-MGR.PRO-U-VAL-PAT-QUE
 
 .PROCEDURE
 
@@ -236,12 +235,13 @@ Check that path properties are correctly recorded in the context
 
 .TEST-CASE SEC-LSM-MGR.HTC-T-CHE-PAT-EXI-PAT-PRO
 
-Check that setting the path property on an inexistng file returns an error
-but that querying an existing path doesn't
+Check that setting the path property on a non-existent file returns an
+error but that querying an existing path doesn't
 
 .TYPE integration
 
 .REQUIRED-BY @SEC-LSM-MGR.HRQ-R-CON-PRO
+
 .REQUIRED-BY @SEC-LSM-MGR.PRO-U-VAL-PAT
 
 .PRECONDITION
@@ -265,6 +265,7 @@ but that querying a valid type doesn't
 .TYPE integration
 
 .REQUIRED-BY @SEC-LSM-MGR.HRQ-R-CON-PRO
+
 .REQUIRED-BY @SEC-LSM-MGR.PRO-U-VAL-PAT-TYP
 
 .PRECONDITION
@@ -286,6 +287,7 @@ a path already given
 .TYPE integration
 
 .REQUIRED-BY @SEC-LSM-MGR.HRQ-R-CON-PRO
+
 .REQUIRED-BY @SEC-LSM-MGR.PRO-U-ONL-ONC-PER-PAT
 
 .PRECONDITION
@@ -305,9 +307,9 @@ Check that permission property is correctly recorded in the context
 .TYPE integration
 
 .REQUIRED-BY @SEC-LSM-MGR.HRQ-R-CON-PRO
-.REQUIRED-BY @SEC-LSM-MGR.PRO-U-VAL-PER-QUE
 
 .PRECONDITION
+.REQUIRED-BY @SEC-LSM-MGR.PRO-U-VAL-PER-QUE
 
 .PROCEDURE
 
@@ -324,9 +326,9 @@ a permission already given.
 .TYPE integration
 
 .REQUIRED-BY @SEC-LSM-MGR.HRQ-R-CON-PRO
-.REQUIRED-BY @SEC-LSM-MGR.PRO-U-QUE-PER-ONL-ONC
 
 .PRECONDITION
+.REQUIRED-BY @SEC-LSM-MGR.PRO-U-QUE-PER-ONL-ONC
 
 .PROCEDURE
 
@@ -344,14 +346,14 @@ but that querying a valid doesn't
 .TYPE integration
 
 .REQUIRED-BY @SEC-LSM-MGR.HRQ-R-CON-PRO
-.REQUIRED-BY @SEC-LSM-MGR.PRO-U-VAL-APP-PER
 
 .PRECONDITION
+.REQUIRED-BY @SEC-LSM-MGR.PRO-U-VAL-APP-PER
 
 .PROCEDURE
 
-1. Run the command `sec-lsm-manager-cmd permission p1` and check it that
-   and check it that does not return an error but a valid acknowledge
+1. Run the command `sec-lsm-manager-cmd permission p1` and check that it
+   does not return an error but a valid acknowledge
 2. Run the command `sec-lsm-manager-cmd permission $(head -c 1024 /dev/zero | tr '\0' x)`
    and check it that does not return an error but a valid acknowledge
 3. Run the command `sec-lsm-manager-cmd permission p` and check it that
@@ -363,12 +365,13 @@ but that querying a valid doesn't
 
 .TEST-CASE SEC-LSM-MGR.HTC-T-SET-PLU-PRO
 
-.TYPE integration
 Check that plug property is correctly recorded in the context
 
 .PRECONDITION
+.TYPE integration
 
 .REQUIRED-BY @SEC-LSM-MGR.HRQ-R-CON-PRO
+
 .REQUIRED-BY @SEC-LSM-MGR.PRO-U-VAL-PLU-QUE
 
 .PROCEDURE
@@ -380,10 +383,12 @@ Check that plug property is correctly recorded in the context
 
 .TEST-CASE SEC-LSM-MGR.HTC-T-CHE-PLU-VAL
 
-.TYPE integration
 Check that validity of plug arguments property is correctly checked
 
+.TYPE integration
+
 .REQUIRED-BY @SEC-LSM-MGR.HRQ-R-CON-PRO
+
 .REQUIRED-BY @SEC-LSM-MGR.PRO-U-VAL-DIR
 
 .PRECONDITION
@@ -407,9 +412,9 @@ already set since previous clear.
 .TYPE integration
 
 .REQUIRED-BY @SEC-LSM-MGR.HRQ-R-CON-PRO
-.REQUIRED-BY @SEC-LSM-MGR.PRO-U-VAL-DIS-QUE
 
 .PRECONDITION
+.REQUIRED-BY @SEC-LSM-MGR.PRO-U-VAL-DIS-QUE
 
 .PROCEDURE
 
@@ -433,9 +438,9 @@ Check that querying the clear of the context removes all set properties.
 .TYPE integration
 
 .REQUIRED-BY @SEC-LSM-MGR.HRQ-R-CON-PRO
-.REQUIRED-BY @SEC-LSM-MGR.PRO-U-VAL-CLE-QUE
 
 .PRECONDITION
+.REQUIRED-BY @SEC-LSM-MGR.PRO-U-VAL-CLE-QUE
 
 .PROCEDURE
 
