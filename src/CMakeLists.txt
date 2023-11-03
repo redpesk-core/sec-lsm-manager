@@ -63,6 +63,7 @@ add_library(common-lib OBJECT
     context/plugs.c
     file-utils.c
     log.c
+    path-utils.c
     permission/cynagora-interface.c
     protocol/client.c
     protocol/pollitem.c
