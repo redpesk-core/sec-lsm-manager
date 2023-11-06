@@ -59,11 +59,6 @@ allow connection only from authorized clients. The minimal
 requirement is that the socket must be accessible only to processes
 of the group `sec-lsm-manager`.
 
-**IREV1:** "authorities" would mean some high-privileged process; why a
-privileged process would want to connect to SEC-LSM-MANAGER? This seems
-to be about clients which have the permission to use SEC-LSM-MANAGER, in
-other words "authorized clients".
-
 **MOTIVATION**
 SEC-LSM-MANAGER is a sensitive service. It shall be accessible only
 by authorized clients.

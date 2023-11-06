@@ -1,7 +1,5 @@
 @startebnf
 
-'**IREV1:** SP is not a common abbreviation for the space character.
-
 QUERY = KEY, { "SPACE", ARG }, "LF";
 
 REPLY = [ KEY, { "SPACE", DATA }, "LF" ], ( "done" | "error" ), { "SPACE", VALUE }, "LF";

@@ -34,9 +34,6 @@ The process SEC-LSM-MGR is killed or crashes.
 - The SEC-LSM-MGR should be able to rollback from an aborted transaction.
   (TODO)
 
-**IREV1:**: UDS is not used anywhere else and isn't an acronym which is
-met often so it should be in its full form for the first occurrence.
-
 ## Usurpation of Unix Domain Socket
 
 .RISK SEC-LSM-MGR.RKA-K-USU-UDS
@@ -87,12 +84,9 @@ of the system.
 
 **Mitigation**:
 
-**IREV1:** dead link. The backslash is necessary otherwise the generated
-hyperlink contains a dot.
-
 - SEC-LSM-MGR must check using DAC, MAC and CYNAGORA if the client is
 authorized. This check must be strong and cannot be tampered. See
-@SEC-LSM-MGR.HRQ-R-PRO-SOC\.
+@SEC-LSM-MGR.HRQ-R-PRO-SOC.
 
 ## Denial-of-service
 
