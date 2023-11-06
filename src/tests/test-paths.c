@@ -72,7 +72,7 @@ START_TEST(test_path_set_add_path) {
     ck_assert_str_eq(paths.paths[41]->path, "/test/n40");
     ck_assert_int_eq((int)paths.paths[41]->path_type, type_conf);
     ck_assert_int_eq(path_set_add(&paths, "/test_slash/", type_lib), 0);
-    ck_assert_str_eq(paths.paths[51]->path, "/test_slash");
+    ck_assert_str_eq(paths.paths[51]->path, "/test_slash/");
     ck_assert_int_eq((int)paths.paths[51]->path_type, type_lib);
 
     ck_assert_int_eq(path_set_add(&paths, "//", type_data), 0);

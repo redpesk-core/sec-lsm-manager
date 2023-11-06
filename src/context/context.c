@@ -31,6 +31,7 @@
 
 #include "log.h"
 #include "file-utils.h"
+#include "path-utils.h"
 
 /***********************/
 /*** PRIVATE METHODS ***/
@@ -209,8 +210,9 @@ int context_add_permission(context_t *context, const char *permission)
 __wur __nonnull()
 int context_add_path(context_t *context, const char *path, const char *type)
 {
+    char stdpath[SEC_LSM_MANAGER_MAX_SIZE_PATH + 1];
     enum path_type path_type;
-    size_t i;
+    size_t path_len;
     int rc;
 
     /* check error state */
@@ -222,25 +224,32 @@ int context_add_path(context_t *context, const char *path, const char *type)
     /* check type validity */
     path_type = path_type_get(type);
     if (!path_type_is_valid(path_type)) {
-        ERROR("type invalid: %d", path_type);
+        ERROR("type invalid: %s", type);
+        return -EINVAL;
+    }
+
+    /* normalize the path */
+    path_len = path_std(stdpath, sizeof stdpath, path);
+    if (path_len >= sizeof stdpath) {
+        ERROR("path too long: %s", path);
         return -EINVAL;
     }
 
     /* check duplication */
-    if (path_set_has(&context->path_set, path)) {
+    if (path_set_has(&context->path_set, stdpath)) {
         ERROR("path already added");
         return -EEXIST;
     }
 
     /* check existing path */
-    rc = check_path_exists(path);
+    rc = check_path_exists(stdpath);
     if (rc < 0) {
         ERROR("path %s isn't accessible: %s", path, strerror(-rc));
         return rc;
     }
 
     /* add the path to the set */
-    rc = path_set_add(&(context->path_set), path, path_type);
+    rc = path_set_add(&(context->path_set), stdpath, path_type);
     if (rc < 0) {
         ERROR("can't add path %s: %d %s", path, -rc, strerror(-rc));
         return rc;
