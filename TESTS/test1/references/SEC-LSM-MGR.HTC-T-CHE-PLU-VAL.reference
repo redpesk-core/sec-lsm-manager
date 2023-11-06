@@ -1,0 +1,10 @@
+ls: cannot access '/nowhere': No such file or directory
+>> initialization success
+plug /nowhere id /
+>> plug, error: not-found
+>> initialization success
+plug / x /
+>> plug, error: invalid
+>> initialization success
+plug / id /nowhere
+>> plug, error: not-found

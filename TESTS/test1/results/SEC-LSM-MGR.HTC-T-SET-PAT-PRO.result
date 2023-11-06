@@ -1,0 +1,11 @@
+>> initialization success
+path /tmp data
+>> ok
+path /etc conf
+>> ok
+display
+################## SECURE APP ##################
+path /tmp data
+path /etc conf
+################################################
+>> ok

@@ -1,0 +1,76 @@
+>> initialization success
+id x
+>> id, error: invalid
+id xx
+>> id, error: not-recoverable
+path / default
+>> path, error: not-recoverable
+permission xx
+>> permission, error: not-recoverable
+plug / xx /
+>> plug, error: not-recoverable
+install
+>> install, error: not-recoverable
+uninstall
+>> uninstall, error: not-recoverable
+clear
+>> ok
+id xx
+>> ok
+>> initialization success
+permission x
+>> permission, error: invalid
+id xx
+>> id, error: not-recoverable
+path / default
+>> path, error: not-recoverable
+permission xx
+>> permission, error: not-recoverable
+plug / xx /
+>> plug, error: not-recoverable
+install
+>> install, error: not-recoverable
+uninstall
+>> uninstall, error: not-recoverable
+clear
+>> ok
+id xx
+>> ok
+>> initialization success
+path / x
+>> path, error: invalid
+id xx
+>> id, error: not-recoverable
+path / default
+>> path, error: not-recoverable
+permission xx
+>> permission, error: not-recoverable
+plug / xx /
+>> plug, error: not-recoverable
+install
+>> install, error: not-recoverable
+uninstall
+>> uninstall, error: not-recoverable
+clear
+>> ok
+id xx
+>> ok
+>> initialization success
+plug / x /
+>> plug, error: invalid
+id xx
+>> id, error: not-recoverable
+path / default
+>> path, error: not-recoverable
+permission xx
+>> permission, error: not-recoverable
+plug / xx /
+>> plug, error: not-recoverable
+install
+>> install, error: not-recoverable
+uninstall
+>> uninstall, error: not-recoverable
+clear
+>> ok
+id xx
+>> ok

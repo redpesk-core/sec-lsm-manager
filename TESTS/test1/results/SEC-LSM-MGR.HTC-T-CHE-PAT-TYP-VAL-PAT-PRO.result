@@ -1,0 +1,7 @@
+drwxrwxrwt. 8 root root 4096 Nov  6 15:41 /tmp
+>> initialization success
+path /tmp toto
+>> path, error: invalid
+>> initialization success
+path /tmp data
+>> ok

@@ -1,0 +1,11 @@
+>> initialization success
+permission p1
+>> ok
+permission p2
+>> ok
+display
+################## SECURE APP ##################
+permission p1
+permission p2
+################################################
+>> ok

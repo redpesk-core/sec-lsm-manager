@@ -1,0 +1,21 @@
+>> initialization success
+id xx
+>> ok
+path / default
+>> ok
+permission xx
+>> ok
+plug / xx /
+>> ok
+display
+################## SECURE APP ##################
+id xx
+path / default
+permission xx
+plug / xx /
+################################################
+>> ok
+clear
+>> ok
+display
+>> ok
