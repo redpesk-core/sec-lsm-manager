@@ -92,7 +92,7 @@ Check that the server socket can only be accessed by clients of the group sec-ls
 
 2. Check that a process not in the group `sec-lsm-manager` can't connect
    to the socket `/run/sec-lsm-manager.socket`. It can be done, by
-   example, using the utility `socat` as in the the command:
+   example, using the utility `socat` as in the command:
    `echo sec-lsm-manager 1 |
     sudo -u guest socat stdio unix-client:/run/sec-lsm-manager.socket`
 
