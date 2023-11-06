@@ -1,4 +1,4 @@
-# The Protocol of redpesk-core/sec-lsm-manager
+# The protocol of redpesk-core/sec-lsm-manager
 
 .VERSION: DRAFT
 
@@ -8,23 +8,24 @@
 
 .DIFFUSION: CONFIDENTIAL
 
+.REVIEW: IREV1
+
 .git-id($Id$)
 
 The component redpesk-core/sec-lsm-manager is here denoted as
-SEC-LSM-MANAGER
+SEC-LSM-MANAGER.
 
-The document SEC-LSM-MGR.OVE describes SEC-LSM-MANAGER
-
+The document @SEC-LSM-MGR.OVE describes SEC-LSM-MANAGER.
 
 ## The protocol
 
-The SEC-LSM-MANAGER protocol normalize the exchanges between
-the SEC-LSM-MANAGER, here named as *the server*, and any process
-requiring service of SEC-LSM-MANAGER, here named *the client*.
+The SEC-LSM-MANAGER protocol normalizes exchanges between the
+SEC-LSM-MANAGER, here named *the server*, and any process requiring
+service of SEC-LSM-MANAGER, here named *the client*.
 
-The protocol is oriented *line of text*.
-Its implementation and description is splitted in two layers following
-OSI layering standard: presentation and application.
+The protocol is *text line* oriented. Its implementation and description
+are split in two layers following the OSI layering standard: presentation
+and application.
 
 The presentation layer decodes the received data to sets of fields,
 hiding decoding details, providing one set for each received line.
@@ -33,6 +34,7 @@ hiding encoding details.
 
 The application layer gives semantic meaning to received and emitted
 set of keys.
+
 
 
 ## Presentation layer
@@ -58,7 +60,7 @@ binary value 10.
 Within a line, the protocol distinguishes fields. The fields are separated by
 exactly one space character (SPACE) of binary value 32.
 
-```
+```bnf
 STREAM ::= [ LINE ]...
 
 LINE ::= [ FIELD [ "SPACE" FIELD ]... ] "LF"
@@ -68,53 +70,55 @@ LINE ::= [ FIELD [ "SPACE" FIELD ]... ] "LF"
 
 .RULE SEC-LSM-MGR.PRO-U-ESC
 
-Because SPACE or LF could be present in fields, the protocol use an escaping
-character to hold it. The escaping character is the BACKSLASH (`\`) of binary
-code 92. Each occurence of characters SPACE or LF must be escaped if present
-in fields. Escaping the character BACKSLASH is (with itself) is needed only if
-it is at end of a field or if it is followed in field by SPACE or LF because
-when decoding received bytes, if the character BACKSLASH is not followed by SPACE,
-LF or BACKSLASH (itself), it is taken litteraly. Though paranoiac emitter can
-safely escape every occurencies of BACKSLASH.
+Because SPACE or LF could be present in fields, the protocol uses an
+escaping character to hold it. The escaping character is the BACKSLASH
+(`\`) of binary code 92. Each occurrence of characters SPACE or LF must
+be escaped if present in fields. Escaping the character BACKSLASH (with
+itself) is needed only if it is at the end of a field, or if it is
+followed in the field by SPACE or LF. That is because when decoding
+received bytes, if the character BACKSLASH is not followed by SPACE, LF
+or BACKSLASH (itself), it is taken literally. Though paranoiac emitter
+can safely escape every occurrences of BACKSLASH.
 
-```
+```bnf
 FIELD ::= [ CHAR ]...
 
 CHAR ::= "any character except SPACE, LF or BACKSLASH"
        | "BACKSLASH" [ "SPACE" | "LF" | "BACKSLASH" ]
 ```
 
-Note that empty lines (line without field) and empy fields (field with no
-character) are possible and permitted.
+Note that empty lines (lines without any field) and empty fields (fields
+with no character) are possible and allowed.
 
-These rules are summarized on the below schema:
+These rules are summarized on the diagram below:
 
 ![Figure: presentation layer](assets/SEC-LSM-MGR.fig-protocol-presentation.svg)
+
 
 
 ## Application layer
 
 Basically, the SEC-LSM-MANAGER protocol is a sequential query/reply
-protocol. It means that when connected, the client sends queries and
-for each query receives a reply (in the query order). In practice, the
-server process completely each query before processing the nexts.
+protocol. It means that when connected, the client sends queries, and
+for each query it gets a reply (in the query order). In practice, the
+server processes completely each query before processing the next one.
 
 ### Structure of queries and replies
 
-Each query match one line of the transport and so one set of fields as
+Each query matches one line of the transport and so one set of fields as
 presented by the presentation layer. The first field of the field set
 (line) is the key (**KEY**) of the query, the remaining fields are
 the arguments (**ARG**).
 
 For each query, there is one reply.
 
-A reply is made of one or more field sets (lines). Similary to queries,
-the first field is a key of the reply. The two keys `done` (**DONE**) and
-`error` (**ERROR**) are terminating the reply. The key `done` indicates
-a success in the execution of the query, conversely, the key `error`
-indicates a failure. All the preceding field sets (lines) are
-keyed data sets (and it is obvious that none of it is keyed by
-**done** or **error**).
+A reply is made of one or more field sets (lines). Similarly to queries,
+the first field is a key of the reply. The two keys `done` (**DONE**)
+and `error` (**ERROR**) are terminating the reply. The key `done`
+indicates a success in the execution of the query; conversely, the key
+`error` indicates a failure. All the preceding field sets (lines) are
+keyed data sets (and it is obvious that none of it is keyed by **done**
+or **error**).
 
 This can be summarized by the figure:
 
@@ -136,10 +140,10 @@ The server always send data in reply to a query.
 
 A violation of the protocol occurs in the following cases:
 
-- a received field is not valid utf8;
-- the keyword of the query is unknown;
-- the count of parameter does not match the expected count;
-- for LOG request if the argument is neither `on` nor `off`.
+- a received field is not valid UTF8;
+- the query keyword is unknown;
+- the number of parameters does not match the expected count;
+- for a LOG request, if the argument is neither `on` nor `off`.
 
 ### Protocol violation report
 
@@ -155,8 +159,8 @@ the violation shall report it to its pair using the reply `error protocol`.
 After reporting a violation of the protocol, the party detecting the
 violation shall disconnect unilaterally.
 
-In other world, after sending `error protocol`, the connection
-shall be closed.
+In other words, after sending `error protocol`, the connection shall be
+closed.
 
 ### Client context
 
@@ -164,16 +168,16 @@ For each client, the SEC-LSM-MANAGER holds a client context.
 
 At connection, the client context is empty (clear).
 
-Depending on how they act on context, the queries can be grouped
+Depending on how they act on the context, the queries can be grouped
 in 4 kinds:
 
-1. HELLO:   negociate the version of the protocol used for the context
+1. HELLO:   negotiate the version of the protocol used for the context
 2. INFO:    don't change the context
 3. SETTING: change the context by setting properties
 4. ACTION:  apply context for action or clear it
 
 So, using these categories, a client interaction can be summarized by
-the below figure:
+the diagram below:
 
 ![Figure: protocol overview](assets/SEC-LSM-MGR.fig-protocol-app-overview.svg)
 
@@ -181,37 +185,40 @@ the below figure:
 
 .RULE SEC-LSM-MGR.PRO-U-CON-ERA-DIS
 
-When the client disconnects, its context is dropped to the trash and
-can not be recovered in any way.
+When the client disconnects, its context is dropped and cannot be
+recovered in any way.
 
 ### Error state
 
 .RULE SEC-LSM-MGR.PRO-U-ERR-STA
 
 When a SETTING or an ACTION fails, noticed by returning an error status
-in reply, the context shall enters in error state.
-When a context is in error state, it refuses all settings
-(SETTING) and all actions (ACTION) except CLEAR. If a refused
-query is received, the reply is `error not-recoverable`.
+in reply, the context shall enter in error state. When a context is in
+error state, it refuses all new properties (SETTING) and all actions
+(ACTION) except CLEAR. If a refused query is received, the reply is
+`error not-recoverable`.
 
 ![Figure: state protocol](assets/SEC-LSM-MGR.fig-protocol-states.svg)
 
-
+The dotted arrow indicates the HELLO query is optional (see
+@SEC-LSM-MGR.PRO-U-HEL-OPT below).
 
 ### Summary of queries
 
 The protocol defines the below queries:
 
-- **HELLO**: negociation of the version of the protocol (HELLO)
+- **HELLO**: protocol version negotiation (HELLO)
 - **LOG**: query or set the global log status of SEC-LSM-MANAGER (INFO)
 - **DISPLAY**: list the current context properties (INFO)
 - **ID**: set the application identifier (SETTING)
 - **PATH**: add a path property (SETTING)
 - **PERMISSION**: add a permission property (SETTING)
-- **PLUG**: add a plug property (SETTING) 
+- **PLUG**: add a plug property (SETTING)
 - **CLEAR**: reset the context, remove properties, clear error (ACTION)
-- **INSTALL**: install security based on current properties (ACTION)
-- **UNINSTALL**: remove security based on current properties (ACTION)
+- **INSTALL**: install security policy based on current properties
+  (ACTION)
+- **UNINSTALL**: remove security policy based on current properties
+  (ACTION)
 
 ![Figure: queries](assets/SEC-LSM-MGR.fig-protocol-queries.svg)
 
@@ -219,9 +226,10 @@ The protocol defines the below queries:
 
 ### HELLO at connection
 
-The query HELLO serves the purpose of negociating a version of the protocol.
+The HELLO query serves the purpose of negotiating a version of the
+protocol.
 
-synopsis:
+Synopsis:
 
 ![Figure: HELLO](assets/SEC-LSM-MGR.fig-protocol-hello.svg)
 
@@ -234,17 +242,17 @@ will use. That value is in the list presented by the query.
 
 .RULE SEC-LSM-MGR.PRO-U-HEL-SHA-BE-FIR-QUE
 
-The hello query shall be the first query that present the client.
-If the client send an HELLO query after an other query, it is an
-error and a protocol violation.
+The HELLO query shall be the first query that the client emits. If the
+client sends an HELLO query after another query, it is an error and a
+protocol violation.
 
-#### Server return the version to use
+#### Server returns the version to use
 
 .RULE SEC-LSM-MGR.PRO-U-SER-RET-VER-USE
 
-The server scans in order the versions offered by the client and
-choose to use the first version it supports. The reply values is that
-choosen version.
+The server scans in order the versions offered by the client and chooses
+to use the first version it supports. The reply value is that chosen
+version.
 
 #### Disconnection if unsupported versions
 
@@ -260,14 +268,10 @@ violations.
 
 .RULE SEC-LSM-MGR.PRO-U-HEL-OPT
 
-Negociating the protocol version at cannection is optionnal.
-When no HELLO annouce is made, the default version of the protocol
-is the latest available version: 1.
-
-The reason why the latest is used is because the protocol is intended
-be backward compatible.
-
-
+Negotiating the protocol version at connection is optional. When no
+HELLO announcement is made, the default version of the protocol is the
+latest available version: 1. That is because the protocol is intended be
+backwards compatible.
 
 ### LOG: Getting and setting logging
 
@@ -277,16 +281,16 @@ debugging or for auditing.
 
 That query never fail.
 
-synopsis:
+Synopsis:
 
 ![Figure: LOG](assets/SEC-LSM-MGR.fig-protocol-log.svg)
 
 This query doesn't change the context of the client but it can
-change the global state of the server SEC-LSM-MANAGER.
+change the global state of the SEC-LSM-MANAGER server.
 
-Without argument, it simply queries the current state of logging.
+Without an argument, it simply queries the current state of logging.
 
-With an argument, it set on or off the logging.
+With an argument, it sets on or off the logging.
 
 In all cases, it returns the final state of logging.
 
@@ -309,16 +313,15 @@ currently off.
 
 ### DISPLAY: Listing the context
 
-The query DISPLAY sends to the client its current context. That
-behaviour can be used for debugging and for reporting
-messages on failure.
+The DISPLAY query sends to the client its current context. That behavior
+can be used for debugging and for reporting messages on failure.
 
-synopsis:
+Synopsis:
 
 ![Figure: DISPLAY](assets/SEC-LSM-MGR.fig-protocol-display.svg)
 
-Received data are keyed with `string` then the next fields are
-corresponding to the received queries except for `error`.
+Received data is keyed with `string`, then the following fields match
+the received queries except for `error`.
 
 The error status is only sent when the context is in error state.
 
@@ -332,38 +335,38 @@ A valid DISPLAY query has no argument.
 
 .RULE SEC-LSM-MGR.PRO-U-VAL-DIS-REP
 
-A DISPLAY queries shall normally not fail but because it can encounter
-network issue during the display of properties, it can report an error.
+A DISPLAY query should not fail but since it can encounter network
+issues while displaying the properties, it can report an error.
 
-The reply to a DISPLAY query is made of as many field sets (lines)
-as needed, all of it having the key `string` with values except the
-last one that has the key `done` without value.
+The reply to a DISPLAY query is made of as many field sets (lines) as
+needed, all of them having the key `string` with values except the last
+one that has the key `done` without value.
 
-The valid values for the key `string` are:
+The valid values following the key `string` are:
 
-- the queries of of previous property settings except CLEAR
-  i.e. the queries ID, PATH, PERMISSION and PLUG
+- queries of previously set properties except CLEAR (i.e. the queries
+  ID, PATH, PERMISSION and PLUG)
 
-- the values `error` `on` if and only if the context has entered
+- the values `error on` if and only if the context has entered
   in error state and needs a CLEAR
 
-In case of error during display of properties, the server
-replies `error internal` and enters in error state.
-
+In case of an error while displaying properties, the server replies
+`error internal` and enters in error state.
 
 ### ID: Setting the application identifier
 
-The query ID set the identifier of the application in the current client context.
+The ID query sets the identifier of the application in the current
+client context.
 
-synopsis:
+Synopsis:
 
 ![Figure: ID](assets/SEC-LSM-MGR.fig-protocol-id.svg)
 
 Set the ID of the application in the context.
 
-Setting the application identifier is not mandatory. Some properties may not
-require it. For version 1 of the protocol, only the property *path* with the
-type *default* does not require identifier.
+Setting the application identifier is not mandatory. Some properties may
+not require it. For version 1 of the protocol, only the *path* property
+with the *default* type does not require an identifier.
 
 The figure below shows that rule for installation/uninstallation.
 
@@ -380,9 +383,10 @@ that must be valid.
 
 .RULE SEC-LSM-MGR.PRO-U-VAL-APP-IDE
 
-A valid application identifier must match the regular expression
+A valid application identifier must match the following regular
+expression:
 
-```
+```regex
 [-_a-zA-Z0-9]{2,200}
 ```
 
@@ -390,33 +394,34 @@ A valid application identifier must match the regular expression
 
 .RULE SEC-LSM-MGR.PRO-U-QUE-ID-ONL-ONC
 
-It is an error to query setting the application identifier if the application
-identifier has already been set.
+It is an error to send an ID query to set the application identifier if
+it has already been set.
 
 #### Valid ID reply
 
-On success, a ID reply has no value.
+.RULE SEC-LSM-MGR.PRO-U-VAL-ID-REP
 
-On error, a ID reply has one of the below error indicator
-and enters in error state:
+On success, an ID reply has no value.
 
-- invalid: the identifier is invalid
-- already-set: the identifier is already set in the context
-- not-recoverable: the context has been in error state
-- internal: internal server error
+On error, an ID reply has one of the following error indicators and
+enters in error state:
 
-
+- invalid: the identifier is invalid.
+- already-set: the identifier is already set in the context.
+- not-recoverable: the context is in error state.
+- internal: internal server error.
 
 ### PATH: Adding a path
 
-The query PATH adds a path property telling the expected security type
-of an item of the filesystem (file, link or directory).
+The PATH query adds a path property telling the expected security type
+of an item in the filesystem (file, link or directory).
 
-synopsis:
+Synopsis:
 
 ![Figure: PATH](assets/SEC-LSM-MGR.fig-protocol-path.svg)
 
-Add the file system entry of PATH with the given PATH-TYPE in the context.
+Adds the file system entry of PATH with the given PATH-TYPE in the
+context.
 
 #### Valid PATH query
 
@@ -467,8 +472,8 @@ The valid values for PATH-TYPE are:
 
 .RULE SEC-LSM-MGR.PRO-U-ONL-ONC-PER-PAT
 
-The path property of a given path shall be set only one time. Trying to set
-the path property of an already set path shall lead to an error.
+The path property of a given path shall be set only one time. Trying to
+set the path property twice for the same path shall lead to an error.
 
 #### Valid PATH reply
 
@@ -479,32 +484,32 @@ On success, a PATH reply has no value.
 On error, a PATH reply has one of the below error indicator
 and enters in error state:
 
-- invalid: the path or its path-type is invalid
-- already-set: that path is already set in the context
-- not-found: the path doesn't exist
-- no-access: the path can't be accessed
-- not-recoverable: the context has been in error state
-- internal: internal server error
+- invalid: the path or its path-type is invalid.
+- already-set: that path is already set in the context.
+- not-found: the path doesn't exist.
+- no-access: the path can't be accessed.
+- not-recoverable: the context has been in error state.
+- internal: internal server error.
 
 
 
 ### PERMISSION: Adding a permission
 
-The PERMISSION query adds a property permission telling to grant a permission
-to the application.
+The PERMISSION query adds a permission property telling to grant a
+permission to the application.
 
-synopsis:
+Synopsis:
 
 ![Figure: PERMISSION](assets/SEC-LSM-MGR.fig-protocol-permission.svg)
 
-Add the PERMISSION in the context.
+Adds the PERMISSION in the context.
 
 #### Valid PERMISSION query
 
 .RULE SEC-LSM-MGR.PRO-U-VAL-PER-QUE
 
-A valid PERMISSION query has one argument, the permission
-that must be valid.
+A valid PERMISSION query has one argument, the permission, that must be
+valid.
 
 #### Valid application permission
 
@@ -516,8 +521,8 @@ A valid permission is a string of at least 2 bytes and at most 1024 bytes.
 
 .RULE SEC-LSM-MGR.PRO-U-QUE-PER-ONL-ONC
 
-It is an error to query setting a permission if that permission has already
-been set.
+It is an error to send a PERMISSION query for a permission which has
+already been set.
 
 #### Valid PERMISSION reply
 
@@ -525,14 +530,13 @@ been set.
 
 On success, a PERMISSION reply has no value.
 
-On error, a PERMISSION reply has one of the below error indicator
+On error, a PERMISSION reply has one of the following error indicator
 and enters in error state:
 
-- invalid: the permision is invalid
-- already-set: that permision is already set in the context
-- not-recoverable: the context has been in error state
-- internal: internal server error
-
+- invalid: the permission is invalid.
+- already-set: that permission is already set in the context.
+- not-recoverable: the context is in error state.
+- internal: internal server error.
 
 
 
@@ -542,15 +546,15 @@ The PLUG query adds a property telling to plug an exported directory in
 an importing directory and to allow the access to the exported directory
 content to an application.
 
-synopsis:
+Synopsis:
 
 ![Figure: PLUG](assets/SEC-LSM-MGR.fig-protocol-plug.svg)
 
 Plugs the directory of path EXPORTED in the directory of path IMPORT
 and gives access to its content to the application of APPID.
 
-Note that the application APPID should have access to IMPORT the directory
-of importation.
+Note that the application APPID should have access to the IMPORT
+directory.
 
 #### Valid PLUG query
 
@@ -558,25 +562,25 @@ of importation.
 
 A valid PLUG query has 3 arguments:
 
-1. the path of the exported directory to plug
-2. the identifier of the application allowed to access the plugged directory,
-   shall be a valid application identifier
-3. the path of the importation directory
+1. the path of the exported directory to plug.
+2. the identifier of the application allowed to access the plugged
+   directory, shall be a valid application identifier.
+3. the path of the importation directory.
 
 #### Validity of directories
 
 .RULE SEC-LSM-MGR.PRO-U-VAL-DIR
 
-The entries EXPORTED and IMPORT must exist exist in the filesytem, must be
-directories and the size of each path is not bigger than 1024 bytes.
+The EXPORTED and IMPORT entries must exist exist in the filesystem, must
+be directories and the size of each path not bigger than 1024 bytes.
 
 #### Only once per import directory
 
 .RULE SEC-LSM-MGR.PRO-U-ONL-ONC-PER-IMP-DIR
 
-The IMPORT directory shall be set only one time. Trying to set
-the plug property lead to an error if an already existing plug property
-exists with a same IMPORT path.
+The IMPORT directory shall be set only once. Trying to set the plug
+property leads to an error if a plug property already exists with the
+same IMPORT path.
 
 #### Valid PLUG reply
 
@@ -584,32 +588,32 @@ exists with a same IMPORT path.
 
 On success, a PLUG reply has no value.
 
-On error, a PLUG reply has one of the below error indicator
-and enters in error state:
+On error, a PLUG reply has one of the following error indicators and
+enters in error state:
 
-- invalid: an argument is invalid
-- already-set: that IMPORT already has a plug in the context
-- not-found: one of the directories doesn't exist
-- no-access: one of the directories can't be accessed
-- not-dir: one of the paths is not a directory
-- not-recoverable: the context has been in error state
-- internal: internal server error
+- invalid: an argument is invalid.
+- already-set: that IMPORT already has a plug in the context.
+- not-found: one of the directories doesn't exist.
+- no-access: one of the directories can't be accessed.
+- not-dir: one of the paths is not a directory.
+- not-recoverable: the context has been in error state.
+- internal: internal server error.
 
 
 
-### CLEAR: Reseting the context
+### CLEAR: Resetting the context
 
-The query CLEAR removes all properties of the context and clears
-the error state.
+The query CLEAR removes all properties from the context and clears the
+error state.
 
-That query never fail.
+That query never fails.
 
-synopsis:
+Synopsis:
 
 ![Figure: CLEAR](assets/SEC-LSM-MGR.fig-protocol-clear.svg)
 
 The client asks SEC-LSM-MANAGER to reset the state of the context to its
-original state as if connection just occured.
+original state as if connection just occurred.
 
 #### Valid CLEAR query
 
@@ -621,16 +625,16 @@ A valid CLEAR query has no argument.
 
 .RULE SEC-LSM-MGR.PRO-U-VAL-CLE-REP
 
-CLEAR query never fails and alway reply done without value.
+CLEAR query never fails and always replies done without value.
 
 
 
-### INSTALL: Query installation
+### INSTALL: Policy installation
 
-The INSTALL query expect the SEC-LSM-MANAGER to install the security
+The INSTALL query expects the SEC-LSM-MANAGER to install the security
 policy as defined by the current context.
 
-synopsis:
+Synopsis:
 
 ![Figure: INSTALL](assets/SEC-LSM-MGR.fig-protocol-install.svg)
 
@@ -648,22 +652,22 @@ The valid INSTALL query has no argument.
 
 On success, an INSTALL reply has no value.
 
-On error, an INSTALL reply has one of the below error indicator
-and enters in error state:
+On error, an INSTALL reply has one of the following error indicators and
+enters in error state:
 
-- invalid: the application identifier is missing
-- forbidden: no permission to install plugin
-- not-recoverable: the context has been in error state
-- internal: internal server error
+- invalid: the application identifier is missing.
+- forbidden: no permission to install plugin.
+- not-recoverable: the context is in error state.
+- internal: internal server error.
 
 
 
-### UNINSTALL: Query uninstallation
+### UNINSTALL: Policy removal
 
-The UNINSTALL query expect the SEC-LSM-MANAGER to remove the security
+The UNINSTALL query expects the SEC-LSM-MANAGER to remove the security
 policy that was installed accordingly to the current context.
 
-synopsis:
+Synopsis:
 
 ![Figure: UNINSTALL](assets/SEC-LSM-MGR.fig-protocol-uninstall.svg)
 
@@ -681,16 +685,15 @@ The valid UNINSTALL query has no argument.
 
 On success, an UNINSTALL reply has no value.
 
-On error, an UNINSTALL reply has one of the below error indicator
+On error, an UNINSTALL reply has one of the following error indicators
 and enters in error state:
 
-- invalid: the application identifier is missing
-- not-recoverable: the context has been in error state
-- internal: internal server error
+- invalid: the application identifier is missing.
+- not-recoverable: the context is in error state.
+- internal: internal server error.
+
 
 
 ## Protocol summary view
 
 ![Figure: protocol summary](assets/SEC-LSM-MGR.fig-protocol-grammar.svg)
-
-

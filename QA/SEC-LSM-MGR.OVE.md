@@ -2,11 +2,13 @@
 
 .VERSION: DRAFT
 
+.REVIEW: IREV1
+
 ## Overview
 
-The component SEC-LSM-MANAGER must be the only component allowed
-to administrate Linux Security Modules (LSM) and permission's
-database CYNAGORA.
+The component SEC-LSM-MANAGER must be the only component allowed to
+administrate Linux Security Modules (LSM) and the permissions database
+CYNAGORA.
 
 Administration is needed at least for adding and removing managed
 applications. For these actions, the system must:
@@ -14,19 +16,18 @@ applications. For these actions, the system must:
 - update the security policy of LSM and CYNAGORA
 - update the file system accordingly to new LSM policy
 
-None of this action is possible without enough privilege.
-So the SEC-LSM-MANAGER has the privileges to do it.
+None of these actions is possible without the necessary privileges.
+The SEC-LSM-MANAGER has the required privileges.
 
-Linux Security Modules (LSM) are tightly bound in the kernel
-and can't be removed without without access to kernel arguments
-at boot. The 2 targeted LSM are:
+LSMs are tightly bound to the kernel and can't be removed without access
+to the kernel arguments at boot. The 2 targeted LSMs are:
 
 - SELinux, the widely used mandatory access control for Linux
 - SMACK, a lightweight mandatory access control for Linux
   well suited for embedded systems
 
-The permission database (CYNAGORA) is service running outside
-of the kernel. Its administration access is protected.
+The permission database (CYNAGORA) is a service running outside of
+the kernel. Its administrative access is protected.
 
 The figure shows the component SEC-LSM-MANAGER in the system:
 
@@ -53,24 +54,24 @@ to remove an application.
 
 ![Figure: use of SEC-LSM-MANAGER](assets/SEC-LSM-MGR.OVE.fig-2.svg)
 
-When installing files, the application manager checks the
-package to be installed. When it is validated, it asks the security
-manager SEC-LSM-MANAGER to set-up the security policy for the
-installed application.
+When installing files, the application manager checks the package to be
+installed. When it is validated, it asks the security manager
+SEC-LSM-MANAGER to setup the security policy for the installed
+application.
 
-Deinstallation follows the same path.
+Uninstallation follows the same path.
 
 ## Discussion
 
 The SEC-LSM-MANAGER is bound with the application manager
 that is its only known client.
 
-The reason of splitting the application manager in that two
-components are:
+The reason of splitting the application manager in these two components
+are:
 
 - historical: that is the way it was done in Tizen
 - separation of concerns and of privileges: the application
-  manager does not need privilege
+  manager does not need any privilege
 - double check: the SEC-LSM-MANAGER has its own separate checks
 - the application manager does not depend on the kernel LSM used
-- emphasis separation between logical policy and real policy
+- emphasis on the separation between logical policy and real policy

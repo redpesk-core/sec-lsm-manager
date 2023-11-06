@@ -1,7 +1,7 @@
 @startebnf
 
-QUERY = KEY, { "SP", ARG }, "LF";
+QUERY = KEY, { "SPACE", ARG }, "LF";
 
-REPLY = [ KEY, { "SP", DATA }, "LF" ], ( "done" | "error" ), { "SP", VALUE }, "LF";
+REPLY = [ KEY, { "SPACE", DATA }, "LF" ], ( "done" | "error" ), { "SPACE", VALUE }, "LF";
 
 @endebnf
