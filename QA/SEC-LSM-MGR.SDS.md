@@ -203,39 +203,31 @@ clearing of data
 
 ## The action
 
+The class `action` performs installation or uninstallation of an application
+described by a context, the current context for clients of SEC-LSM-MANAGER.
 
+Installation and unstallation involves 2 parts: cynagora the permission
+manager and the Mandatory Access Control selected Smack or SELinux.
 
 ![Figure: class action](assets/SEC-LSM-MGR.fig-class-action.svg)
 
+The class `action` only has static method because it doesn't need
+variable: all it needs is in the context.
 
+It use the class `cynagora_interface` for:
 
+- query the permission database when plug is required
+- add permission on installation
+- remove permissions on uninstallation
 
-## The tool
+It uses the class `MAC` for:
 
-The tool is binary program that can be used 4 of different ways:
+- getting the label of the application for cynagora
+- installing the files and rules
+- uninstalling the files and rules
 
-- getting its version (argument -v or --version)
-- getting a short help (argument -h or --help)
-- submitting commands in script
-- submitting commands interactively in a console
-
-The main usage is for testing so it will be mostly used interactively.
-
-The tool is made of components:
-
-- the component **scanner**: implement scanning of command lines
-- the component **interpreter**: implement interpretation of
-  commands as actions
-
-The actions are either help or interaction with the server.
-
-
-
-...
-
-
-
-
-
+The implementation of the effective class MAC and its
+*virtual* static classes is made using the an aliasing
+mechanism.
 
 
