@@ -266,6 +266,9 @@ __wur __nonnull()
 int context_add_plug(context_t *context, const char *expdir, const char *impid, const char *impdir)
 {
     int rc;
+    char stdexpdir[SEC_LSM_MANAGER_MAX_SIZE_PATH + 1];
+    char stdimpdir[SEC_LSM_MANAGER_MAX_SIZE_PATH + 1];
+    size_t path_len;
 
     /* check error state */
     if (context->error_flag) {
@@ -273,8 +276,22 @@ int context_add_plug(context_t *context, const char *expdir, const char *impid, 
         return -ENOTRECOVERABLE;
     }
 
+    /* normalize expdir */
+    path_len = path_std(stdexpdir, sizeof stdexpdir, expdir);
+    if (path_len >= sizeof stdexpdir) {
+        ERROR("path too long: %s", expdir);
+        return -EINVAL;
+    }
+
+    /* normalize impdir */
+    path_len = path_std(stdimpdir, sizeof stdimpdir, impdir);
+    if (path_len >= sizeof stdimpdir) {
+        ERROR("impdir too long: %s", impdir);
+        return -EINVAL;
+    }
+
     /* check duplication */
-    if (plugset_has(&context->plugset, NULL, NULL, impdir)) {
+    if (plugset_has(&context->plugset, NULL, NULL, stdimpdir)) {
         ERROR("import directory already added");
         return -EEXIST;
     }
@@ -287,19 +304,19 @@ int context_add_plug(context_t *context, const char *expdir, const char *impid, 
     }
 
     /* check directories */
-    rc = check_directory_exists(expdir);
+    rc = check_directory_exists(stdexpdir);
     if (rc < 0) {
         ERROR("invalid exported directory %s", expdir);
         return rc;
     }
-    rc = check_directory_exists(impdir);
+    rc = check_directory_exists(stdimpdir);
     if (rc < 0) {
         ERROR("invalid import directory %s", impdir);
         return rc;
     }
 
     /* add the plug property */
-    rc = plugset_add(&(context->plugset), expdir, impid, impdir);
+    rc = plugset_add(&(context->plugset), stdexpdir, impid, stdimpdir);
     if (rc < 0) {
         ERROR("can't add plug %d %s", -rc, strerror(-rc));
         return rc;
