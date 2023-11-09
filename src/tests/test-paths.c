@@ -76,7 +76,9 @@ START_TEST(test_path_set_add_path) {
     ck_assert_int_eq((int)paths.paths[51]->path_type, type_lib);
 
     ck_assert_int_eq(path_set_add(&paths, "//", type_data), 0);
-    ck_assert_str_eq(paths.paths[52]->path, "/");
+    /* IREV2: path normalization is in the context, so path_set_add doesn't normalize
+              Is this test still relevant? */
+    ck_assert_str_eq(paths.paths[52]->path, "//");
     ck_assert_int_eq((int)paths.paths[52]->path_type, type_data);
 
     path_set_clear(&paths);
