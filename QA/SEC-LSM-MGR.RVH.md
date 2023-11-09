@@ -24,7 +24,7 @@ IREV1  Louis-Baptiste    2023-11-06  @SEC-LSM-MGR.HRQ
                                      @SEC-LSM-MGR.PRO
                                      @SEC-LSM-MGR.RKA
 
-IREV2  Louis-Baptiste   (2023-11-06) source code
+IREV2  Louis-Baptiste    2023-11-09  source code
        Sobolewski
 
 ---------------------------------------------------------
