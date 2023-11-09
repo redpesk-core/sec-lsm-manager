@@ -204,26 +204,26 @@ static int send_fields(sec_lsm_manager_t *sec_lsm_manager, const char **fields, 
  */
 __nonnull((1, 2)) __wur
 static int putxkv(sec_lsm_manager_t *sec_lsm_manager, const char *command, const char *optarg, ...) {
+    //IREV2: rewrite method so no `nf + 1` and `nf - 1` are needed and the code is more understandable
     int nf, rc;
     const char *fields[8] = {0};
+    const char *tmp;
+    va_list va;
 
     /* prepare fields */
     fields[0] = command;
     nf = 1;
+    tmp = optarg;
 
-    va_list va;
     va_start(va, optarg);
-
-    fields[nf++] = optarg;
-
-    while (fields[nf - 1] != NULL && nf < 7) {
-        fields[nf++] = va_arg(va, const char *);
+    while (tmp != NULL && nf < (int)(sizeof fields / sizeof *fields)) {
+        fields[nf++] = tmp;
+        tmp = va_arg(va, const char *);
     }
-
     va_end(va);
 
     /* send now */
-    rc = send_fields(sec_lsm_manager, fields, nf - 1);
+    rc = send_fields(sec_lsm_manager, fields, nf);
     return rc;
 }
 
