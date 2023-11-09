@@ -1,0 +1,8 @@
+ls: cannot access '/TOTO': No such file or directory
+drwxrwxrwt. 8 root root 4096 Nov  6 15:41 /tmp
+>> initialization success
+path /TOTO default
+>> path, error: not-found
+>> initialization success
+path /tmp default
+>> ok

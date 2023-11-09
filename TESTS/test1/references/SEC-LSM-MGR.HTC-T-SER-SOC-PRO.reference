@@ -1,0 +1,4 @@
+srw-rw----. 1 sec-lsm-manager sec-lsm-manager * 0 Nov  6 13:20 /run/sec-lsm-manager.socket
+>> initialization success
+log
+[/builddir/build/BUILD/sec-lsm-manager-2.4.1/src/main-sec-lsm-manager-cmd.c:229] error : log, unexpected error: Permission denied

@@ -1,25 +1,38 @@
 @startuml
 
 class action {
-  + install(context)
-  + uninstall(context)
+  + {static} install(context)
+  + {static} uninstall(context)
 }
 
 class cynagora_interface {
-  + set_policies(label, permission_set): int
-  + drop_policies(label): int
-  + check_permission(label, permission): int
+  + {static} set_policies(label, permission_set): int
+  + {static} drop_policies(label): int
+  + {static} check_permission(label, permission): int
 }
 
 abstract class MAC {
 
-  + install(context): int
-  + uninstall(context): int
-  + get_label(out label, in id: string)
+  + {static} install(context): int
+  + {static} uninstall(context): int
+  + {static} get_label(out label, in id: string)
+}
 
+class smack {
+  + {static} install(context): int
+  + {static} uninstall(context): int
+  + {static} get_label(out label, in id: string)
+}
+
+class selinux {
+  + {static} install(context): int
+  + {static} uninstall(context): int
+  + {static} get_label(out label, in id: string)
 }
 
 action -- cynagora_interface
 action -- MAC
+MAC <|-- smack
+MAC <|-- selinux
 
 @enduml

@@ -1,0 +1,5 @@
+>> initialization success
+id toto
+>> ok
+id titi
+>> id, error: already-set
