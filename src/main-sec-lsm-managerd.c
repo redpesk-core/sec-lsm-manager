@@ -239,6 +239,7 @@ int main(int ac, char **av) {
         if (rc >= 0 && names) {
             for (rc = 0; names[rc]; rc++) {
                 if (!strcmp(names[rc], SYSTEMD_NAME))
+                    // we choose not to free spec_socket because it's small and the program can exit in a lot of places
                     spec_socket = strdup(SYSTEMD_SOCKET);
                 free(names[rc]);
             }
@@ -247,6 +248,7 @@ int main(int ac, char **av) {
     }
 #endif
     if (!spec_socket)
+        // we choose not to free spec_socket because it's small and the program can exit in a lot of places
         rc = asprintf(&spec_socket, "%s:%s/%s", sec_lsm_manager_default_socket_scheme, socketdir,
                       sec_lsm_manager_default_socket_name);
     if (!spec_socket) {

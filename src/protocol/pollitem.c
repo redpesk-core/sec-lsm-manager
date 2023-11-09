@@ -54,7 +54,9 @@ int pollitem_mod(pollitem_t *pollitem, uint32_t events, int pollfd) {
 }
 
 /* see pollitem.h */
-int pollitem_del(pollitem_t *pollitem, int pollfd) { return pollitem_do(pollitem, 0, pollfd, EPOLL_CTL_DEL); }
+int pollitem_del(pollitem_t *pollitem, int pollfd) {
+    return pollitem_do(pollitem, 0, pollfd, EPOLL_CTL_DEL);
+}
 
 /* see pollitem.h */
 int pollitem_wait_dispatch(int pollfd, int timeout) {

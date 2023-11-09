@@ -474,10 +474,14 @@ int prot_write(prot_t *prot, int fdout)
 }
 
 /* see prot.h */
-int prot_can_read(prot_t *prot) { return prot->inbuf.count < PROT_MAX_BUFFER_LENGTH; }
+int prot_can_read(prot_t *prot) {
+    return prot->inbuf.count < PROT_MAX_BUFFER_LENGTH;
+}
 
 /* see prot.h */
-int prot_read(prot_t *prot, int fdin) { return inbuf_read(&prot->inbuf, fdin); }
+int prot_read(prot_t *prot, int fdin) {
+    return inbuf_read(&prot->inbuf, fdin);
+}
 
 /* see prot.h */
 int prot_get(prot_t *prot, const char ***fields) {
