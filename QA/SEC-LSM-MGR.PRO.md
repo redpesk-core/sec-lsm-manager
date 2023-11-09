@@ -434,7 +434,7 @@ and its type, *PATH-TYPE*.
 
 .RULE SEC-LSM-MGR.PRO-U-VAL-PAT
 
-A valid path matches the 3 below criterions:
+A valid path matches the 3 criteria below:
 
 1. its length is not bigger than 1024 bytes;
 2. it is absolute (starts with a slash);

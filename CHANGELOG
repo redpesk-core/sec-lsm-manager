@@ -1,0 +1,10 @@
+Version 2.6.0
+-------------
+
+ - Add path normalization to ensure unicity
+ - enforce paths to be absolute
+
+Version 2.5.0
+-------------
+
+ - Major refactor with improvements
