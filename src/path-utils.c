@@ -54,7 +54,7 @@ size_t path_std(char *buffer, size_t size, const char *path)
             if (len < size)
                 buffer[len] = *path;
             if (*path == 0) {
-#if 0                
+                // IREV2: an empty path should return "." to indicate it is relative
                 if (len == 0) {
                     if (size > 0)
                         buffer[0] = '.';
@@ -62,7 +62,6 @@ size_t path_std(char *buffer, size_t size, const char *path)
                         buffer[1] = 0;
                     len = 1;
                 }
-#endif           
                 return len;
             }
             len++;
@@ -110,4 +109,3 @@ test: gcc -o pstd pstd.c
   ==> [4] /a/c
 
 #endif
-

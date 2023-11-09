@@ -29,6 +29,7 @@
 #include "setup-tests.h"
 
 #include "file-utils.h"
+#include "path-utils.h"
 #include "sizes.h"
 
 START_TEST(test_check_file_exists) {
@@ -91,9 +92,36 @@ START_TEST(test_remove_file) {
 }
 END_TEST
 
+// IREV2: test suite for src/path-utils.c#path_std()
+START_TEST(test_path_std) {
+    const char* data[][2] = {
+        /* path to standardize, expected result */
+        { "", "." },
+        { ".", "." },
+        { "..", "." },
+        { "relative/path/..", "relative" },
+        { "/.", "/" },
+        { "/..", "/" },
+        { "//pouet", "/pouet" },
+        { "/../../pouet", "/pouet" },
+        { "/////a///./b/..//////c//.", "/a/c" },
+        { "/pouet/...", "/pouet/..." },
+        { "/süß/unicode/..", "/süß" },
+    };
+
+    for (size_t i = 0; i < sizeof(data) / sizeof(data[0]); i++) {
+        char out[64];
+        size_t rc = path_std(out, sizeof out, data[i][0]);
+        ck_assert_str_eq(out, data[i][1]);
+        ck_assert_uint_eq(rc, strlen(data[i][1]));
+    }
+}
+END_TEST
+
 void test_utils(void) {
     addtest(test_check_file_exists);
     addtest(test_check_dir);
     addtest(test_check_executable);
     addtest(test_remove_file);
+    addtest(test_path_std);
 }
