@@ -434,8 +434,11 @@ and its type, *PATH-TYPE*.
 
 .RULE SEC-LSM-MGR.PRO-U-VAL-PAT
 
-A valid path is the path to an existing entry in the filesystem and the size
-of the path is not bigger than 1024 bytes.
+A valid path matches the 3 below criterions:
+
+1. its length is not bigger than 1024 bytes;
+2. it is absolute (starts with a slash);
+3. it points to an existing entry in the filesystem.
 
 #### Validity of the path type
 

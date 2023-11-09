@@ -234,6 +234,12 @@ int context_add_path(context_t *context, const char *path, const char *type)
         return -EINVAL;
     }
 
+    /* check absolute */
+    if (path_len < 1 || stdpath[0] != '/') {
+        ERROR("path is not absolute: %s", path);
+        return -EINVAL;
+    }
+
     /* check duplication */
     if (path_set_has(&context->path_set, stdpath)) {
         ERROR("path already added");
@@ -283,10 +289,22 @@ int context_add_plug(context_t *context, const char *expdir, const char *impid, 
         return -EINVAL;
     }
 
+    /* check absolute */
+    if (path_len < 1 || stdexpdir[0] != '/') {
+        ERROR("expdir is not absolute: %s", expdir);
+        return -EINVAL;
+    }
+
     /* normalize impdir */
     path_len = path_std(stdimpdir, sizeof stdimpdir, impdir);
     if (path_len >= sizeof stdimpdir) {
         ERROR("impdir too long: %s", impdir);
+        return -EINVAL;
+    }
+
+    /* check absolute */
+    if (path_len < 1 || stdimpdir[0] != '/') {
+        ERROR("impdir is not absolute: %s", impdir);
         return -EINVAL;
     }
 
