@@ -85,7 +85,11 @@ int main(int ac, const char **av)
                     pfds[1] = -1;
                     break;
                 }
-                write(df1, &byte, 1);
+                rc = (int)write(df1, &byte, 1);
+                if (rc <= 0) {
+                    fprintf(stderr, "error can't write stdout: %s\n", strerror(errno));
+                    return 1;
+                }
                 if (st == 1)
                     st = byte == '#' ? 2 : 3;
                 if (st == 3) {
