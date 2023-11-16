@@ -1,0 +1,17 @@
+@startuml
+
+start
+if (context has id?) then (yes)
+	: create smack rules;
+	: load smack rules;
+	: install plugs;
+else (no)
+endif
+: label paths;
+if (success?) then (yes)
+else (no)
+	: uninstall;
+endif
+stop
+
+@enduml

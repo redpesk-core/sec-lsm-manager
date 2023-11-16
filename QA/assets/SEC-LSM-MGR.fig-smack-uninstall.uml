@@ -1,0 +1,13 @@
+@startuml
+
+start
+: unlabel paths;
+if (context has id?) then (yes)
+	: uninstall plugs;
+	: unload smack rules;
+	: remove smack rules;
+else (no)
+endif
+stop
+
+@enduml

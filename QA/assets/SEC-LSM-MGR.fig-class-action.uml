@@ -3,6 +3,9 @@
 class action {
   + {static} install(context)
   + {static} uninstall(context)
+  ..
+  - {static} check_context(context, out label): int
+  - {static} check_plug_installable(context): int
 }
 
 class cynagora_interface {

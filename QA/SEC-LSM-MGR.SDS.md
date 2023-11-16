@@ -227,7 +227,57 @@ It uses the class `MAC` for:
 - uninstalling the files and rules
 
 The implementation of the effective class MAC and its
-*virtual* static classes is made using the an aliasing
+*virtual* static classes is made using aliasing
 mechanism.
 
+On its side, action performs two checks before processing:
+
+- `check_context`: checks the context and retrieves
+  the application label as expected by the LSM
+- `check_plug_installable`: check that plug requests
+  are valid and permitted (that check implies cynagora
+  queries)
+
+## The Smack action
+
+Smack action is called for 3 different purposes:
+
+- `get_label`: Getting the Smack application label for populating Cynagora
+  permission database
+- `install`: Compute and install the Smack rules accordingly to the context
+- `uninstall`: Remove any rule related to the what context describes
+
+Installing involves the following steps:
+
+![Figure: install smack](assets/SEC-LSM-MGR.fig-smack-install.svg)
+
+The operation are:
+
+- **create smack rules**: create the file `/etc/smack/accesses.d/<ID>.smack` that
+  contains the Smack rules for the application of id `<ID>`. Use the template
+  file `/usr/share/sec-lsm-manager/app-template.smack`
+
+- **load smack rules**: add the created rules of the created file into the living
+  rule set of the kernel.
+
+- **install plugs**: create symbolic links of plugs and set them label
+
+- **label paths**: set the smack label for each path of the context
+
+When installation fails, it an uninstallation is performed for cleaning.
+
+The uninstallation involves the following steps:
+
+![Figure: uninstall smack](assets/SEC-LSM-MGR.fig-smack-uninstall.svg)
+
+The operation are:
+
+- **unlabel paths**: set common label to paths of the context
+
+- **uninstall plugs**: remove symbolic links of plugs
+
+- **unload smack rules**: remove rules of `/etc/smack/accesses.d/<ID>.smack`
+  from kernel's live rules
+
+- **remove smack rules**: remove the file of rules `/etc/smack/accesses.d/<ID>.smack`
 
