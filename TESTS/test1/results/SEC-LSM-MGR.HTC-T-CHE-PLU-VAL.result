@@ -1,4 +1,4 @@
-ls: cannot access '/nowhere': No such file or directory
+ls: impossible d'accéder à '/nowhere': Aucun fichier ou dossier de ce type
 >> initialization success
 plug /nowhere id /
 >> plug, error: not-found

@@ -46,10 +46,10 @@ START_TEST(test_plugset_deinit)
     plugset_init(&plugset);
     ck_assert_ptr_null(plugset);
 
-    ck_assert_int_eq(plugset_add(&plugset, "a", "b", "c"), 0);
+    ck_assert_int_eq(plugset_add(&plugset, "/tmp/a", "xb", "/tmp/c"), 0);
     ck_assert_ptr_nonnull(plugset);
 
-    ck_assert_int_eq(plugset_add(&plugset, "u", "v", "w"), 0);
+    ck_assert_int_eq(plugset_add(&plugset, "/tmp/u", "xv", "/tmp/w"), 0);
     ck_assert_ptr_nonnull(plugset);
 
     plugset_clear(&plugset);
@@ -64,20 +64,20 @@ START_TEST(test_plugset_add) {
     plugset_init(&plugset);
     ck_assert_ptr_null(plugset);
 
-    ck_assert_int_eq(plugset_add(&plugset, "a", "b", "c"), 0);
+    ck_assert_int_eq(plugset_add(&plugset, "/tmp/a", "xb", "/tmp/c"), 0);
     ck_assert_ptr_nonnull(plugset);
-    ck_assert_str_eq("a", plugset->expdir);
-    ck_assert_str_eq("b", plugset->impid);
-    ck_assert_str_eq("c", plugset->impdir);
+    ck_assert_str_eq("/tmp/a", plugset->expdir);
+    ck_assert_str_eq("xb", plugset->impid);
+    ck_assert_str_eq("/tmp/c", plugset->impdir);
 
-    ck_assert_int_eq(plugset_add(&plugset, "u", "v", "w"), 0);
+    ck_assert_int_eq(plugset_add(&plugset, "/tmp/u", "xv", "/tmp/w"), 0);
     ck_assert_ptr_nonnull(plugset);
-    ck_assert_str_eq("u", plugset->expdir);
-    ck_assert_str_eq("v", plugset->impid);
-    ck_assert_str_eq("w", plugset->impdir);
-    ck_assert_str_eq("a", plugset->next->expdir);
-    ck_assert_str_eq("b", plugset->next->impid);
-    ck_assert_str_eq("c", plugset->next->impdir);
+    ck_assert_str_eq("/tmp/u", plugset->expdir);
+    ck_assert_str_eq("xv", plugset->impid);
+    ck_assert_str_eq("/tmp/w", plugset->impdir);
+    ck_assert_str_eq("/tmp/a", plugset->next->expdir);
+    ck_assert_str_eq("xb", plugset->next->impid);
+    ck_assert_str_eq("/tmp/c", plugset->next->impdir);
 
     plugset_clear(&plugset);
     ck_assert_ptr_null(plugset);

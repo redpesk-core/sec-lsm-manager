@@ -56,6 +56,7 @@ option(SIMULATE_SELINUX     "simulate selinux" OFF)
 option(FORTIFY              "fortify" ON)
 option(COMPILE_TEST         "compile test" ON)
 option(DEBUG                "debug" OFF)
+option(COVERAGE             "coverage" OFF)
 
 ##########################################################################
 # define user and group
@@ -221,6 +222,23 @@ if(FORTIFY)
 endif()
 
 message("\n#################################################################\n")
+
+###########################################################################
+
+if(COVERAGE)
+	add_compile_definitions(COVERAGE=1)
+	add_compile_options(--coverage)
+	add_link_options(--coverage)
+
+	find_program(GVOVR gcovr)
+	message("Adding coverage target with GCOVR=${GVOVR}")
+
+	add_custom_target(coverage
+                    COMMAND rm -rf ${CMAKE_SOURCE_DIR}/coverage && mkdir ${CMAKE_SOURCE_DIR}/coverage
+                    COMMAND ${GVOVR} -r ${CMAKE_SOURCE_DIR}/src --object-directory=${CMAKE_BINARY_DIR} --html --html-details -o ${CMAKE_SOURCE_DIR}/coverage/index.html
+                    COMMAND ${GVOVR} -r ${CMAKE_SOURCE_DIR}/src --object-directory=${CMAKE_BINARY_DIR}
+                    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+endif()
 
 ###########################################################################
 # Check libraries

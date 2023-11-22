@@ -1,0 +1,20 @@
+id toto
+path /home/jobol/redpesk/redpesk-core/sec-lsm-manager/afl/INPUTS/t1 conf
+path /home/jobol/redpesk/redpesk-core/sec-lsm-manager/afl/INPUTS/t2 data
+path /home/jobol/redpesk/redpesk-core/sec-lsm-manager/afl/INPUTS/t3 exec
+path /home/jobol/redpesk/redpesk-core/sec-lsm-manager/afl/INPUTS/t4 http
+path /home/jobol/redpesk/redpesk-core/sec-lsm-manager/afl/INPUTS/t5 icon
+path /home/jobol/redpesk/redpesk-core/sec-lsm-manager/afl/INPUTS/t6 lib
+path /home/jobol/redpesk/redpesk-core/sec-lsm-manager/afl/INPUTS id
+path /home/jobol/redpesk/redpesk-core/sec-lsm-manager/afl default
+path /home/jobol/redpesk/redpesk-core/sec-lsm-manager/afl/INPUTS/t7 plug
+path /home/jobol/redpesk/redpesk-core/sec-lsm-manager/afl/INPUTS/t8 public
+permission taratata
+permission urn:redpesk:permission:humhum:partner:export:plug
+permission urn:redpesk:permission:humhum:public:export:plug
+
+plug /home/jobol/redpesk/redpesk-core/sec-lsm-manager/afl/OUTPUTS humhum /home/jobol/redpesk/redpesk-core/sec-lsm-manager/afl/DATA
+
+
+install
+clear

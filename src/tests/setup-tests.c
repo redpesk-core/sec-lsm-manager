@@ -103,6 +103,9 @@ int main(int argc, char const *argv[]) {
     addtcase("utils");
     test_utils();
 
+    addtcase("plug");
+    test_plugs();
+
 #if !SIMULATE_CYNAGORA
     addtcase("cynagora");
     test_cynagora();

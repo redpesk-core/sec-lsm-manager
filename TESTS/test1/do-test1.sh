@@ -97,6 +97,6 @@ cd $(dirname $0)
 for name in $tests
 do
 	echo $name ...
-	eval "$(get_test $name)" > result/$name.result 2>&1
+	eval "$(get_test $name)" > results/$name.result 2>&1
 done
 

@@ -65,9 +65,6 @@ function(build_tests_for_mac MAC_NAME)
     target_include_directories(tests-${MAC_NAME} PRIVATE $<TARGET_PROPERTY:app-${MAC_NAME},INTERFACE_INCLUDE_DIRECTORIES>)
     target_link_libraries(tests-${MAC_NAME} PRIVATE cap common-lib socket-std app-${MAC_NAME})
 
-    target_compile_options(tests-${MAC_NAME} PRIVATE --coverage)
-    target_link_libraries(tests-${MAC_NAME} PRIVATE --coverage)
-
     target_link_libraries(tests-${MAC_NAME} PRIVATE ${check_LDFLAGS} ${check_LINK_LIBRARIES})
     target_include_directories(tests-${MAC_NAME} PRIVATE ${check_INCLUDE_DIRS})
     target_include_directories(tests-${MAC_NAME} PRIVATE ..)
@@ -85,15 +82,6 @@ endif()
 if(WITH_SELINUX)
     build_tests_for_mac("selinux")
 endif()
-
-find_program(GVOVR gcovr)
-message("GCOVR=${GVOVR}")
-
-add_custom_target(coverage
-                    COMMAND rm -rf ${CMAKE_BINARY_DIR}/coverage && mkdir ${CMAKE_BINARY_DIR}/coverage
-                    COMMAND ${GVOVR} --exclude ${CMAKE_SOURCE_DIR}/src/mustach -r ${CMAKE_SOURCE_DIR}/src --object-directory=${CMAKE_BINARY_DIR} --html --html-details -o ${CMAKE_BINARY_DIR}/coverage/index.html
-                    COMMAND ${GVOVR} --exclude ${CMAKE_SOURCE_DIR}/src/mustach -r ${CMAKE_SOURCE_DIR}/src --object-directory=${CMAKE_BINARY_DIR}
-                    WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
 
 if(SIMULATE_CYNAGORA)
     set(CYNTAG simcyn)

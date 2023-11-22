@@ -119,6 +119,10 @@ static const char versiontxt[] = "sec-lsm-managerd version " VERSION;
 static int isid(const char *text);
 static int ensure_directory(const char *path, int uid, int gid);
 
+#if COVERAGE
+static void leavecov(int sig) { (void)sig; exit(0); }
+#endif
+
 int main(int ac, char **av) {
     int opt;
     int rc;
@@ -368,6 +372,10 @@ int main(int ac, char **av) {
 #endif
 
     signal(SIGPIPE, SIG_IGN); /* avoid SIGPIPE! */
+#if COVERAGE
+    signal(SIGINT, leavecov);
+    signal(SIGUSR1, leavecov);
+#endif
     rc = sec_lsm_manager_server_create(&server, spec_socket);
     if (rc < 0) {
         fprintf(stderr, "can't initialize server: %s\n", strerror(errno));
