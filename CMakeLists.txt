@@ -200,16 +200,24 @@ add_compile_options(
 	-Wconversion
 	-Wextra
 	-Wmissing-prototypes
-	-Wno-nonnull-compare
 	-Wpedantic
 	-Wpointer-arith
 	-Wshadow
 	-Wstrict-prototypes
 
-	-Werror=maybe-uninitialized
 	-Werror=implicit-function-declaration
 )
 
+if(CMAKE_C_COMPILER_ID EQUAL GNU)
+	add_compile_options(
+		-Wno-nonnull-compare
+		-Werror=maybe-uninitialized
+	)
+elseif(CMAKE_C_COMPILER_ID EQUAL Clang)
+	add_compile_options(
+		-Werror=uninitialized
+	)
+endif()
 #add_compile_options(-ffile-prefix-map=${CMAKE_SOURCE_DIR}=.)
 
 add_compile_definitions(_GNU_SOURCE)
