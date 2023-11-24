@@ -8,3 +8,33 @@ Version 2.5.0
 -------------
 
  - Major refactor with improvements
+ - Disconnect on too big input
+ - New client API for display
+ - Fix broken state and disconnection
+ - Improves test, add fuzzing
+
+Version 2.4.1
+-------------
+
+ - Fix Smack template
+ - Normalized error reports
+ - Rewrite of 'display' using visitor
+ - Fix lengths processing
+ - Fix validation of arguments of protocol
+ - Validate utf8 strings
+
+Version 2.4.0
+-------------
+
+ - Print the released version when asked
+ - No more default user and group, set it explicitely in command line
+ - Fix setting of group and supplementary groups
+ - Break connection on protocol violation
+ - Add path type 'default'
+ - Remove smack labels for path type default
+ - Implement installation of any application
+ - Add plug mechanism with cynagora check (for Smack only)
+ - Add path type 'plug'
+ - Refactor of tests
+ - Allow empty lines in protocol
+
