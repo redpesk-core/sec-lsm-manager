@@ -79,4 +79,7 @@ int smack_accesses_clear(struct smack_accesses *handle) {
     return 0;
 }
 
-void smack_accesses_free(struct smack_accesses *handle) { printf("smack_smackfs_path(%p)\n", (void *)handle); }
+void smack_accesses_free(struct smack_accesses *handle) {
+	printf("smack_smackfs_path(%p)\n", (void *)handle);
+}
+
