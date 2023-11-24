@@ -3,13 +3,11 @@
 rootdir=$(realpath $(dirname $0))
 builddir=$rootdir/afl-build
 afldir=$rootdir/afl
+flavour=sma
+#flavour=sel
 
-#export AFL_USE_ASAN=1
-#export AFL_USE_MSAN=1
-#export AFL_USE_UBSAN=1
-#export AFL_USE_CFISAN=1
-#export AFL_USE_TSAN=1
-#export AFL_USE_LSAN=1
+target=slmc-test-simcyn-sim${flavour}
+core=${builddir}/src/tests/${target}
 
 mkdir -p $builddir
 cd $builddir || exit 1
@@ -26,12 +24,31 @@ cmake .. \
 	-DCOMPILE_TEST=ON \
 	-DDEBUG=ON
 
-make -j
+build() {
+	local ext=$1
+	shift
+	[[ $# -gt 0 ]] && export "$@"
+	make -B ${target}
+	mv src/tests/${target} src/tests/${target}.$ext
+}
+
+( build std )
+( build asan AFL_USE_ASAN=1 )
+#export AFL_USE_MSAN=1
+( build ubsan AFL_USE_UBSAN=1 )
+#export AFL_USE_CFISAN=1
+#export AFL_USE_TSAN=1
+#export AFL_USE_LSAN=1
 
 cd $afldir
 
-prog=$builddir/src/tests/slmc-test-simcyn-simsma
-#prog=$builddir/src/tests/slmc-test-simcyn-simsel
+prog=$builddir/src/tests/${target}
 
-afl-fuzz -i INPUTS -o OUTPUTS -- $prog
+cat << EOC
 
+cd $afldir
+afl-fuzz -P explore -M std -i INPUTS -o OUTPUTS -- $prog.std @@
+afl-fuzz -P explore -S asan -i INPUTS -o OUTPUTS -- $prog.asan @@
+afl-fuzz -P explore -S ubsan -i INPUTS -o OUTPUTS -- $prog.ubsan @@
+
+EOC
