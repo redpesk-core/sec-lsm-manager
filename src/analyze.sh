@@ -25,7 +25,11 @@ INCS="
 #	-fdump-analyzer-exploded-graph
 #"
 
-gcc -fanalyzer $DEFS $INCS $OPTS *.c */*.c */*/*.c
+echo "running analyzer ..."
+gcc -c -fanalyzer $DEFS $INCS $OPTS *.c */*.c */*/*.c
+echo "cleaning now ..."
+find . -name '*.o' -exec rm '{}' ';'
+echo "done"
 
 
 
