@@ -1,6 +1,6 @@
 # Risk analysis of redpesk-core/sec-lsm-manager
 
-.VERSION: DRAFT
+.VERSION: 2.6.0
 
 .AUTHOR: José Bollo [IoT.bzh]
 

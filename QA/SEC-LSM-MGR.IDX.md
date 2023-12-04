@@ -1,6 +1,6 @@
 # Index file for redpesk-core/sec-lsm-manager
 
-.VERSION: DRAFT
+.VERSION: 2.6.0
 
 ### Roles
 

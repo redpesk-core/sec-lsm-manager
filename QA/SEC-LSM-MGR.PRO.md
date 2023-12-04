@@ -1,12 +1,12 @@
 # The protocol of redpesk-core/sec-lsm-manager
 
-.VERSION: DRAFT
+.VERSION: 2.6.0
 
 .AUTHOR: José Bollo [IoT.bzh]
 
 .AUDIENCE: ENGINEERING
 
-.DIFFUSION: CONFIDENTIAL
+.DIFFUSION: PUBLIC
 
 .REVIEW: IREV1
 

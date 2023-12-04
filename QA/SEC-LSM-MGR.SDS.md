@@ -1,6 +1,6 @@
 # Software design document of redpesk-core/sec-lsm-manager
 
-.VERSION: DRAFT
+.VERSION: 2.6.0
 .AUTHOR: José Bollo [IoT.bzh]
 
 The component redpesk-core/sec-lsm-manager is here denoted as
