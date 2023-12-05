@@ -91,9 +91,9 @@ static plug_t *search(plugset_t *plugset, const char *expdir, const char *impid,
 {
     plug_t *plug = *plugset;
     while (plug != NULL
-        && (expdir == NULL || 0 == strcmp(plug->expdir, expdir))
-        && (impid == NULL  || 0 == strcmp(plug->impid, impid))
-        && (impdir == NULL || 0 == strcmp(plug->impdir, impdir)))
+        && ((expdir != NULL && 0 != strcmp(plug->expdir, expdir))
+         || (impid  != NULL && 0 != strcmp(plug->impid,  impid))
+         || (impdir != NULL && 0 != strcmp(plug->impdir, impdir))))
         plug = plug->next;
     return plug;
 }
