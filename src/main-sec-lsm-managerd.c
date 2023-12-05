@@ -78,7 +78,7 @@
 #define _USER_ 'u'
 #define _VERSION_ 'v'
 
-static const char shortopts[] = "d:g:hi:klmMOoS:s:u:v";
+static const char shortopts[] = "d:g:G:hklMOoS:s:u:v";
 
 static const struct option longopts[] = {{"group", 1, NULL, _GROUP_},
                                          {"groups", 1, NULL, _GROUPS_},
