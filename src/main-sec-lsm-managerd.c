@@ -116,11 +116,21 @@ static const char helptxt[] =
 
 static const char versiontxt[] = "sec-lsm-managerd version " VERSION;
 
+static sec_lsm_manager_server_t *server;
+
 static int isid(const char *text);
 static int ensure_directory(const char *path, int uid, int gid);
 
 #if COVERAGE
-static void leavecov(int sig) { (void)sig; exit(0); }
+static void leavecov(int sig)
+{
+    (void)sig;
+    if (server != NULL) {
+        sec_lsm_manager_server_stop(server, 0);
+        sec_lsm_manager_server_destroy(server);
+    }
+    exit(0);
+}
 #endif
 
 int main(int ac, char **av) {
@@ -146,12 +156,18 @@ int main(int ac, char **av) {
     char *nxtg = NULL;
     struct passwd *pw;
     struct group *gr;
-    sec_lsm_manager_server_t *server;
     char *spec_socket;
     gid_t gids[SUPL_GROUPS_MAX] = {0};
     size_t number_groups = 0;
-    cap_value_t cap_vector[] = {CAP_MAC_ADMIN,       CAP_DAC_OVERRIDE, CAP_MAC_OVERRIDE, CAP_SYS_ADMIN,
-                                CAP_DAC_READ_SEARCH, CAP_SETFCAP,      CAP_FOWNER};
+    cap_value_t cap_vector[] = {
+        CAP_DAC_OVERRIDE,
+        CAP_DAC_READ_SEARCH,
+        CAP_FOWNER,
+        CAP_MAC_ADMIN,
+        CAP_MAC_OVERRIDE,
+        CAP_SETFCAP,
+        CAP_SYS_ADMIN
+    };
     cap_t cap = {0};
 
     setlinebuf(stdout);
