@@ -65,7 +65,7 @@ void mac_get_label(char label[SEC_LSM_MANAGER_MAX_SIZE_LABEL + 1], const char *a
  */
 __nonnull()
 static int unset_path_labels(const char *path) {
-    int rc, pp = get_path_property(path);
+    int rc, rc2, pp = get_path_property(path);
 
     DEBUG("unset_path_labels %s pp=%d", path, pp);
 
@@ -74,30 +74,24 @@ static int unset_path_labels(const char *path) {
 
     // file
     rc = unset_xattr(path, XATTR_NAME_SMACK);
-    if (rc < 0) {
+    if (rc < 0)
         ERROR("unlabel(%s): %d %s", path, -rc, strerror(-rc));
-        return rc;
-    }
 
     // exec
-    if (pp == PATH_FILE_EXEC) {
-        rc = unset_xattr(path, XATTR_NAME_SMACKEXEC);
-        if (rc < 0) {
-            ERROR("unlabel exec(%s): %d %s", path, -rc, strerror(-rc));
-            return rc;
-        }
+    rc2 = unset_xattr(path, XATTR_NAME_SMACKEXEC);
+    if (rc2 < 0) {
+        ERROR("unlabel exec(%s): %d %s", path, -rc2, strerror(-rc2));
+        rc = rc < 0 ? rc : rc2;
     }
 
     // dir
-    if (pp == PATH_DIRECTORY) {
-        rc = unset_xattr(path, XATTR_NAME_SMACKTRANSMUTE);
-        if (rc < 0) {
-            ERROR("unlabel transmute(%s): %d %s", path, -rc, strerror(-rc));
-            return rc;
-        }
+    rc2 = unset_xattr(path, XATTR_NAME_SMACKTRANSMUTE);
+    if (rc2 < 0) {
+        ERROR("unlabel transmute(%s): %d %s", path, -rc2, strerror(-rc2));
+        rc = rc < 0 || pp != PATH_DIRECTORY ? rc : rc2;
     }
 
-    return 0;
+    return rc;
 }
 
 /**
@@ -124,32 +118,30 @@ static int put_xattr(const char *path, const char *xattr, const char *value)
 __nonnull((1, 2)) __wur
 int smack_set_path_labels(const char *path, const char *label, const char *execlabel, bool transmute)
 {
+    int rc, rc2;
+
     // access
-    int rc = put_xattr(path, XATTR_NAME_SMACK, label);
-    if (rc < 0) {
+    rc = put_xattr(path, XATTR_NAME_SMACK, label);
+    if (rc < 0)
         ERROR("put_xattr(%s,%s,%s) : %d %s", path, XATTR_NAME_SMACK, label, -rc, strerror(-rc));
-        return rc;
-    }
 
     // exec
-    if (execlabel) {
-        rc = put_xattr(path, XATTR_NAME_SMACKEXEC, execlabel);
-        if (rc < 0) {
-            ERROR("put_smack(%s,%s,%s) : %d %s", path, XATTR_NAME_SMACKEXEC, execlabel, -rc, strerror(-rc));
-            return rc;
-        }
+    rc2 = put_xattr(path, XATTR_NAME_SMACKEXEC, execlabel);
+    if (rc < 0) {
+        ERROR("put_smack(%s,%s,%s) : %d %s", path, XATTR_NAME_SMACKEXEC,
+                   execlabel ? execlabel : "<none>", -rc2, strerror(-rc2));
+        rc = rc < 0 ? rc : rc2;
     }
 
     // transmute
-    if (transmute) {
-        rc = set_xattr(path, XATTR_NAME_SMACKTRANSMUTE, "TRUE");
-        if (rc < 0) {
-            ERROR("set_xattr(%s,%s,%s) : %d %s", path, XATTR_NAME_SMACKTRANSMUTE, "TRUE", -rc, strerror(-rc));
-            return rc;
-        }
+    rc2 = put_xattr(path, XATTR_NAME_SMACKTRANSMUTE, transmute ? "TRUE" : NULL);
+    if (rc2 < 0) {
+        ERROR("set_xattr(%s,%s,%s) : %d %s", path, XATTR_NAME_SMACKTRANSMUTE,
+                   transmute ? "TRUE" : "<none>", -rc2, strerror(-rc2));
+        rc = rc < 0 || !transmute ? rc : rc2;
     }
 
-    return 0;
+    return rc;
 }
 
 /**
