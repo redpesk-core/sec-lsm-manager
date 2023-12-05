@@ -204,6 +204,15 @@ static int nstr = 0;
 static int echo = 0;
 static int last_status = 0;
 
+static void _exit_(int status)
+{
+    if (sec_lsm_manager != NULL) {
+        sec_lsm_manager_disconnect(sec_lsm_manager);
+        sec_lsm_manager_destroy(sec_lsm_manager);
+    }
+    exit(status);
+}
+
 static void _echo_(int ac, char **av)
 {
     if (echo && ac) {
@@ -515,7 +524,7 @@ static int do_any(int ac, char **av) {
 
     if (!strcmp(av[0], "quit")) {
         _echo_(1, av);
-        exit(0);
+        _exit_(0);
     }
 
     if (!strcmp(av[0], "help") || !strcmp(av[0], "?"))
@@ -532,7 +541,7 @@ static void do_all(int ac, char **av, int quit) {
         last_status = 0;
         rc = do_any(ac, av);
         if (quit && (rc <= 0 || last_status < 0))
-            exit(1);
+            _exit_(1);
         ac -= rc;
         av += rc;
     }
@@ -581,30 +590,30 @@ int main(int ac, char **av) {
     /* handles help, version, error */
     if (help) {
         puts(helptxt);
-        return 0;
+        _exit_(0);
     }
 
     if (version) {
         puts(versiontxt);
-        return 0;
+        _exit_(0);
     }
 
     if (error)
-        return 1;
+        _exit_(1);
 
     /* initialize server */
     signal(SIGPIPE, SIG_IGN); /* avoid SIGPIPE! */
     rc = sec_lsm_manager_create(&sec_lsm_manager, socket);
     if (rc < 0) {
         ERROR("initialization failed : %d %s", -rc, strerror(-rc));
-        return 1;
+        _exit_(1);
     }
 
     LOG("initialization success");
 
     if (optind < ac) {
         do_all(ac - optind, av + optind, !keep_going);
-        return 0;
+        _exit_(0);
     }
 
     bufill = 0;
@@ -627,5 +636,6 @@ int main(int ac, char **av) {
             }
         }
     }
+    _exit_(0);
     return 0;
 }
