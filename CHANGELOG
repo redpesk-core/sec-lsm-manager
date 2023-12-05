@@ -1,3 +1,13 @@
+Version 2.6.1
+-------------
+
+ - Fix one letter options of the daemon
+ - Fix plug control of duplicates
+ - Cleanup of server for coverage tests
+ - Cleanup of client at exit
+ - Rework of setting smack extended attributes in simulation
+ - Enforce smack extended attributes
+
 Version 2.6.0
 -------------
 

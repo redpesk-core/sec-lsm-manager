@@ -1,7 +1,7 @@
 # Manual of redpesk-core/sec-lsm-manager
 
 
-.VERSION: 2.6.0
+.VERSION: 2.6.1
 
 .AUTHOR: José Bollo [IoT.bzh]
 
