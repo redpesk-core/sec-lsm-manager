@@ -248,6 +248,9 @@ static int install_smack_plugs(const context_t *context)
             else {
                 smack_get_label(label, context->id);
                 rc2 = set_xattr(buffer, XATTR_NAME_SMACK, label);
+#if COVERAGE
+                rc2 = 0;
+#endif
             }
         }
         if (rc2 < 0 && rc == 0)

@@ -24,25 +24,44 @@
 #ifndef SEC_LSM_MANAGER_XATTR_SMACK_H
 #define SEC_LSM_MANAGER_XATTR_SMACK_H
 
-#if !SIMULATE_SMACK
 #include "xattr-utils.h"
-#else
 
+#if SIMULATE_SMACK
+
+#include <linux/xattr.h>
 #include <stdio.h>
 
+#undef XATTR_NAME_SMACK
+#undef XATTR_NAME_SMACKEXEC
+#undef XATTR_NAME_SMACKTRANSMUTE
+#undef XATTR_NAME_SMACKIPIN
+#undef XATTR_NAME_SMACKIPOUT
+#undef XATTR_NAME_SMACKMMAP
+
+#define XATTR_NAME_SMACK          XATTR_USER_PREFIX "simul." XATTR_SMACK_SUFFIX
+#define XATTR_NAME_SMACKEXEC      XATTR_USER_PREFIX "simul." XATTR_SMACK_EXEC
+#define XATTR_NAME_SMACKTRANSMUTE XATTR_USER_PREFIX "simul." XATTR_SMACK_TRANSMUTE
+#define XATTR_NAME_SMACKIPIN      XATTR_USER_PREFIX "simul." XATTR_SMACK_IPIN
+#define XATTR_NAME_SMACKIPOUT     XATTR_USER_PREFIX "simul." XATTR_SMACK_IPOUT
+#define XATTR_NAME_SMACKMMAP      XATTR_USER_PREFIX "simul." XATTR_SMACK_MMAP
+
 __wur __nonnull()
-static int set_xattr(const char *path, const char *xattr, const char *value)
+static inline int simulate_set_xattr(const char *path, const char *xattr, const char *value)
 {
     printf("set_xattr(%s, %s, %s)\n", path, xattr, value);
-    return 0;
+    return set_xattr(path, xattr, value);
 }
 
 __wur __nonnull()
-static int unset_xattr(const char *path, const char *xattr)
+static inline int simulate_unset_xattr(const char *path, const char *xattr)
 {
     printf("unset_xattr(%s, %s)\n", path, xattr);
-    return 0;
+    return unset_xattr(path, xattr);
 }
+
+#define set_xattr    simulate_set_xattr
+#define unset_xattr  simulate_unset_xattr
+
 #endif
 
 #endif
