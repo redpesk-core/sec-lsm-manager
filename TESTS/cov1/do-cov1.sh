@@ -225,7 +225,7 @@ trap - EXIT
 sleep 0.5
 mkdir -p $H/coverage
 gcovr \
-	--html-title "Coverage Report for sec-lsm-manager" \
+	--html-title "coverage report for sec-lsm-manager" \
 	--root $R/src \
 	--exclude-directories '.*tests.*' \
 	--sort-percentage \
@@ -234,5 +234,36 @@ gcovr \
 	--exclude '.*/main-sec-lsm-manager-cmd.c' \
 	--exclude '.*/main-sec-lsm-managerd-launch.c' \
 	--exclude '.*/simulation/smack/.*' \
+	--exclude-unreachable-branches \
+	--keep \
 	--object-directory $R/build/src
 
+gcovr \
+	--html-title "coverage symmary report for sec-lsm-manager" \
+	--root $R/src \
+	--exclude-directories '.*tests.*' \
+	--sort-percentage \
+	--html \
+	--output $H/coverage-summary.html \
+	--exclude '.*/main-sec-lsm-manager-cmd.c' \
+	--exclude '.*/main-sec-lsm-managerd-launch.c' \
+	--exclude '.*/simulation/smack/.*' \
+	--exclude-unreachable-branches \
+	--keep \
+	--object-directory $R/build/src
+
+gcovr \
+	--html-title "coverage symmary report for sec-lsm-manager" \
+	--root $R/src \
+	--exclude-directories '.*tests.*' \
+	--sort-percentage \
+	--txt \
+	--output $H/coverage.txt \
+	--exclude '.*/main-sec-lsm-manager-cmd.c' \
+	--exclude '.*/main-sec-lsm-managerd-launch.c' \
+	--exclude '.*/simulation/smack/.*' \
+	--exclude-unreachable-branches \
+	--delete \
+	--object-directory $R/build/src
+
+cut -c-$(grep TOTAL $H/coverage.txt|wc -c) $H/coverage.txt > $H/coverage-summary.txt

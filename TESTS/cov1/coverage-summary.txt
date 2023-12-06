@@ -1,0 +1,33 @@
+----------------------------------------------------------------
+                           GCC Code Coverage Report
+Directory: ../../src
+----------------------------------------------------------------
+File                                       Lines    Exec  Cover 
+----------------------------------------------------------------
+path-utils.c                                  32      32   100%
+log.c                                         19      19   100%
+utf8-utils.c                                  11      11   100%
+context/plugs.c                               41      41   100%
+protocol/sec-lsm-manager-protocol.c            6       6   100%
+lsm-smack/xattr-smack.h                        6       6   100%
+context/context.c                            174     168    96% 
+context/paths.c                               53      49    92% 
+protocol/prot.c                              209     190    90% 
+main-sec-lsm-managerd.c                      234     212    90% 
+protocol/pollitem.c                           18      16    88% 
+context/permissions.c                         42      37    88% 
+permission/cynagora-interface.c               66      57    86% 
+protocol/sec-lsm-manager.c                   243     207    85% 
+protocol/client.c                            269     224    83% 
+action/action.c                               74      61    82% 
+xattr-utils.c                                 16      13    81% 
+lsm-smack/smack.c                            150     116    77% 
+templating/template.c                         65      50    76% 
+lsm-smack/smack-template.c                    99      74    74% 
+file-utils.c                                  88      61    69% 
+protocol/sec-lsm-manager-server.c            141      95    67% 
+protocol/socket.c                            114      46    40% 
+templating/mustach.c                         228      91    39% 
+----------------------------------------------------------------
+TOTAL                                       2398    1882    78%
+----------------------------------------------------------------
