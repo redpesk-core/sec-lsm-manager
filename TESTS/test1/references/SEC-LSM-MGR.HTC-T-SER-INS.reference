@@ -1,4 +1,3 @@
-/usr/bin/sec-lsm-manager-cmd
 /usr/bin/sec-lsm-managerd
 /usr/lib/systemd/system
 /usr/lib/systemd/system/sec-lsm-manager.service

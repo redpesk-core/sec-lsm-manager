@@ -1,1 +1,8 @@
-./do-test1.sh: ligne 100: rpm : commande introuvable
+/usr/bin/sec-lsm-managerd
+/usr/lib/systemd/system
+/usr/lib/systemd/system/sec-lsm-manager.service
+/usr/lib/systemd/system/sec-lsm-manager.socket
+/usr/lib/systemd/system/sec-lsm-manager.target
+/usr/lib/systemd/system/sockets.target.wants
+/usr/lib/systemd/system/sockets.target.wants/sec-lsm-manager.socket
+
