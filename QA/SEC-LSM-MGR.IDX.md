@@ -16,13 +16,14 @@
 - @SEC-LSM-MGR.IDX: **This index**
 - @SEC-LSM-MGR.OVE: **Overview of SEC-LSM-MANAGER**
 - @SEC-LSM-MGR.HRQ: **High level requirements**
+- @SEC-LSM-MGR.PRO: **Protocol**
 - @SEC-LSM-MGR.SDS: **Software design**
+- @SEC-LSM-MGR.HTC: **High level test cases**
+- @SEC-LSM-MGR.TRS: **Test results**
+- @SEC-LSM-MGR.ADM: **Administration and security manual**
 - @SEC-LSM-MGR.RKA: **Risk analysis**
 - @SEC-LSM-MGR.RVH: **Review history**
 
-- @SEC-LSM-MGR.PRO: **Protocol**
-- @SEC-LSM-MGR.HTC: **High level test cases**
-- @SEC-LSM-MGR.ADM: **Administration and security manual**
 
 
 
