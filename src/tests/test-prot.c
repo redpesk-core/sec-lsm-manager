@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2023 IoT.bzh Company
+ * Copyright (C) 2020-2024 IoT.bzh Company
  * Author: José Bollo <jose.bollo@iot.bzh>
  *
  * $RP_BEGIN_LICENSE$

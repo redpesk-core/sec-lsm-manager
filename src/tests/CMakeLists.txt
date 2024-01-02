@@ -1,5 +1,5 @@
 ###########################################################################
-# Copyright 2020-2023 IoT.bzh Company
+# Copyright 2020-2024 IoT.bzh Company
 #
 # Author: Arthur Guyader <arthur.guyader@iot.bzh>
 #
