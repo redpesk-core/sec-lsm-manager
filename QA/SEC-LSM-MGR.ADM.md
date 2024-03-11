@@ -218,7 +218,7 @@ Description=sec-lsm-manager socket
 
 [Socket]
 FileDescriptorName=sec-lsm-manager
-ListenStream=/var/run/sec-lsm-manager.socket
+ListenStream=/run/sec-lsm-manager.socket
 SocketUser=sec-lsm-manager
 SocketGroup=sec-lsm-manager
 SocketMode=0660
@@ -320,7 +320,7 @@ otpions:
     -s, --shutoff VALUE   shutting off time in seconds
 
     -S, --socketdir xxx   set the base directory xxx for sockets
-                            (default: /home/jobol/.locenv/sec/var/run)
+                            (default: /run)
     -M, --make-socket-dir make the socket directory
     -O, --own-socket-dir  set user and group on socket directory
 

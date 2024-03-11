@@ -48,7 +48,7 @@ const char _uninstall_[] = "uninstall";
 #endif
 
 #if !defined(SEC_LSM_MANAGER_SOCKET_DIR)
-#define SEC_LSM_MANAGER_SOCKET_DIR "/var/run"
+#define SEC_LSM_MANAGER_SOCKET_DIR "/run"
 #endif
 
 #define SOCKPREFIX SEC_LSM_MANAGER_SOCKET_SCHEME ":" SEC_LSM_MANAGER_SOCKET_DIR "/"

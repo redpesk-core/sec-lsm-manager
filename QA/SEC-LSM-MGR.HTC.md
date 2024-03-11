@@ -112,7 +112,7 @@ disconnection.
 .PROCEDURE
 
 1. Connect to SEC-LSM-MANAGER using command
-   `socat stdio unix-client:/var/run/sec-lsm-manager.socket`
+   `socat stdio unix-client:/run/sec-lsm-manager.socket`
 2. Enter `sec-lsm-manager 1`
 3. Check it returns `done 1`
 4. Enter `turlututu`
