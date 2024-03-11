@@ -22,6 +22,8 @@
 # $RP_END_LICENSE$
 ###########################################################################
 
+set(SYSTEMD_UNIT_DIR "${CMAKE_INSTALL_PREFIX}/lib/systemd/system"
+                  CACHE PATH "Path to systemd system unit files")
 
 CONFIGURE_FILE(${CMAKE_PROJECT_NAME}.service.in      ${CMAKE_PROJECT_NAME}.service @ONLY)
 CONFIGURE_FILE(${CMAKE_PROJECT_NAME}.socket.in       ${CMAKE_PROJECT_NAME}.socket @ONLY)
