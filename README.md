@@ -6,7 +6,7 @@
 ![SELinux build](https://img.shields.io/badge/build_selinux-success-success)
 ![Test coverage](https://img.shields.io/badge/tests_coverage-90-green)
 
-![Logo](./logo_sec_lsm_manager.png)
+![Logo](./logo-sec-lsm-manager.png)
 
 ## Overview
 
