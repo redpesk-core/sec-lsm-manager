@@ -1,3 +1,12 @@
+version 2.6.2
+-------------
+
+ - New logo
+ - Use /run instead of /var/run
+ - Add export of path types
+ - Updated tests and reports
+ - Fix install of systemd files
+
 Version 2.6.1
 -------------
 
