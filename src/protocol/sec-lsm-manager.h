@@ -91,6 +91,20 @@ __nonnull() __wur
 extern int sec_lsm_manager_add_path(sec_lsm_manager_t *sec_lsm_manager, const char *path, const char *path_type);
 
 /**
+ * known path types
+ */
+#define SEC_LSM_MANAGER_PATH_TYPE_DEFAULT  "default"
+#define SEC_LSM_MANAGER_PATH_TYPE_CONF     "conf"
+#define SEC_LSM_MANAGER_PATH_TYPE_DATA     "data"
+#define SEC_LSM_MANAGER_PATH_TYPE_EXEC     "exec"
+#define SEC_LSM_MANAGER_PATH_TYPE_HTTP     "http"
+#define SEC_LSM_MANAGER_PATH_TYPE_ICON     "icon"
+#define SEC_LSM_MANAGER_PATH_TYPE_ID       "id"
+#define SEC_LSM_MANAGER_PATH_TYPE_LIB      "lib"
+#define SEC_LSM_MANAGER_PATH_TYPE_PLUG     "plug"
+#define SEC_LSM_MANAGER_PATH_TYPE_PUBLIC   "public"
+
+/**
  * @brief Add a plug to sec_lsm_manager client handler
  *
  * @param sec_lsm_manager sec_lsm_manager client handler
