@@ -36,10 +36,10 @@ START_TEST(test_check_file_exists) {
     bool exists;
     char tmp_file[SEC_LSM_MANAGER_MAX_SIZE_PATH] = {'\0'};
     create_tmp_file(tmp_file);
-    get_file_informations(tmp_file, &exists, NULL, NULL);
+    get_file_informations(tmp_file, true, &exists, NULL, NULL);
     ck_assert_int_eq((int)exists, 1);
     remove(tmp_file);
-    get_file_informations(tmp_file, &exists, NULL, NULL);
+    get_file_informations(tmp_file, true, &exists, NULL, NULL);
     ck_assert_int_eq((int)exists, 0);
 }
 END_TEST
@@ -49,13 +49,13 @@ START_TEST(test_check_dir) {
     char tmp_file[SEC_LSM_MANAGER_MAX_SIZE_PATH] = {'\0'};
     char tmp_dir[SEC_LSM_MANAGER_MAX_SIZE_DIR] = {'\0'};
     create_tmp_file(tmp_file);
-    get_file_informations(tmp_file, NULL, NULL, &is_dir);
+    get_file_informations(tmp_file, true, NULL, NULL, &is_dir);
     ck_assert_int_eq((int)is_dir, 0);
     remove(tmp_file);
-    get_file_informations(tmp_file, NULL, NULL, &is_dir);
+    get_file_informations(tmp_file, true, NULL, NULL, &is_dir);
     ck_assert_int_eq((int)is_dir, 0);
     create_tmp_dir(tmp_dir);
-    get_file_informations(tmp_dir, NULL, NULL, &is_dir);
+    get_file_informations(tmp_dir, true, NULL, NULL, &is_dir);
     ck_assert_int_eq((int)is_dir, 1);
     rmdir(tmp_dir);
 }
@@ -66,20 +66,20 @@ START_TEST(test_check_executable) {
     char tmp_file[SEC_LSM_MANAGER_MAX_SIZE_PATH] = {'\0'};
     char tmp_dir[SEC_LSM_MANAGER_MAX_SIZE_DIR] = {'\0'};
     create_tmp_file(tmp_file);
-    get_file_informations(tmp_file, NULL, &is_exec, NULL);
+    get_file_informations(tmp_file, true, NULL, &is_exec, NULL);
     ck_assert_int_eq((int)is_exec, 0);
     chmod(tmp_file, 0700);
-    get_file_informations(tmp_file, NULL, &is_exec, NULL);
+    get_file_informations(tmp_file, true, NULL, &is_exec, NULL);
     ck_assert_int_eq((int)is_exec, 1);
     remove(tmp_file);
     create_tmp_dir(tmp_dir);
-    get_file_informations(tmp_dir, NULL, &is_exec, NULL);
+    get_file_informations(tmp_dir, true, NULL, &is_exec, NULL);
     ck_assert_int_eq((int)is_exec, 0);
     chmod(tmp_dir, 0400);
-    get_file_informations(tmp_dir, NULL, &is_exec, NULL);
+    get_file_informations(tmp_dir, true, NULL, &is_exec, NULL);
     ck_assert_int_eq((int)is_exec, 0);
     rmdir(tmp_dir);
-    get_file_informations(tmp_dir, NULL, &is_exec, NULL);
+    get_file_informations(tmp_dir, true, NULL, &is_exec, NULL);
     ck_assert_int_eq((int)is_exec, 0);
 }
 END_TEST

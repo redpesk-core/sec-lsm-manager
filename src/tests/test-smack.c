@@ -154,7 +154,7 @@ START_TEST(test_smack_install) {
 
     bool exists;
     get_smack_rule_path(rule_path, context->id);
-    get_file_informations(rule_path, &exists, NULL, NULL);
+    get_file_informations(rule_path, true, &exists, NULL, NULL);
     ck_assert_int_eq(exists, true);
     ck_assert_int_eq(compare_xattr(data_dir, XATTR_NAME_SMACK, "App:testid:Data"), true);
     ck_assert_int_eq(compare_xattr(data_dir, XATTR_NAME_SMACKTRANSMUTE, "TRUE"), true);
@@ -207,7 +207,7 @@ START_TEST(test_smack_uninstall) {
     ck_assert_int_eq(smack_uninstall(context), 0);
 
     bool exists;
-    get_file_informations("/etc/smack/accesses.d/app-testid", &exists, NULL, NULL);
+    get_file_informations("/etc/smack/accesses.d/app-testid", true, &exists, NULL, NULL);
     ck_assert_int_eq(exists, false);
 
     context_destroy(context);

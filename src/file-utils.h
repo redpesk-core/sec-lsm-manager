@@ -32,11 +32,12 @@
  * @brief Check if file exists
  *
  * @param[in] path The path of the file
+ * @param[in] follow follow links
  * @param[out] exists true if file exists
  * @param[out] is_exec true if file is regular and executable
  * @param[out] is_dir true if file is a directory
  */
-extern void get_file_informations(const char *path, bool *exists, bool *is_exec, bool *is_dir) __nonnull((1));
+extern void get_file_informations(const char *path, bool follow, bool *exists, bool *is_exec, bool *is_dir) __nonnull((1));
 
 /**
  * @brief Create a file
@@ -66,23 +67,27 @@ extern char *read_file(const char *path);
  * @brief Get property of the path
  *
  * @param[in] path the path of the file
+ * @param[in] follow follow links, don't return PATH_LINK
  * @return
  *   - PATH_FILE_DATA == 0  it exists and is a simple file
  *   - PATH_FILE_EXEC == 1  it exists and is an executable file
  *   - PATH_DIRECTORY == 2  it exists and is a directory
+ *   - PATH_LINK == 3       it exists and is a link
  *   - -ENOENT  it doesn't exist
  *   - -EACCES  not allowed to access it
  *   - -ENOMEM  no more kernel memory
  */
 __nonnull() __wur
-extern int get_path_property(const char path[]);
+extern int get_path_property(const char path[], bool follow);
 #define PATH_FILE_DATA 0
 #define PATH_FILE_EXEC 1
 #define PATH_DIRECTORY 2
+#define PATH_LINK      3
 
 /**
  * @brief Check if the path exists
  * @param[in] path the path to check
+ * @param[in] follow follow links
  * @return
  *   - 0        it exists
  *   - -ENOENT  it doesn't exist
@@ -90,11 +95,12 @@ extern int get_path_property(const char path[]);
  *   - -ENOMEM  no more kernel memory
  */
 __nonnull() __wur
-extern int check_path_exists(const char path[]);
+extern int check_path_exists(const char path[], bool follow);
 
 /**
  * @brief Check if the path exists and is a directory
  * @param[in] path the path to check
+ * @param[in] follow follow links
  * @return
  *   - 0        it exists
  *   - -ENOENT  it doesn't exist
@@ -103,6 +109,6 @@ extern int check_path_exists(const char path[]);
  *   - -ENOTDIR path exists but is not a directory
  */
 __nonnull() __wur
-extern int check_directory_exists(const char path[]);
+extern int check_directory_exists(const char path[], bool follow);
 
 #endif

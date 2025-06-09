@@ -222,11 +222,11 @@ ret:
 __nonnull() __wur static bool check_app_module_files_exists(const selinux_module_t *selinux_module) {
     bool exists;
     int sum = 0;
-    get_file_informations(selinux_module->selinux_te_file, &exists, NULL, NULL);
+    get_file_informations(selinux_module->selinux_te_file, true, &exists, NULL, NULL);
     sum += exists;
-    get_file_informations(selinux_module->selinux_fc_file, &exists, NULL, NULL);
+    get_file_informations(selinux_module->selinux_fc_file, true, &exists, NULL, NULL);
     sum += exists;
-    get_file_informations(selinux_module->selinux_if_file, &exists, NULL, NULL);
+    get_file_informations(selinux_module->selinux_if_file, true, &exists, NULL, NULL);
     sum += exists;
 
     if (sum != 3) {

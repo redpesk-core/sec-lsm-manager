@@ -65,7 +65,7 @@ void mac_get_label(char label[SEC_LSM_MANAGER_MAX_SIZE_LABEL + 1], const char *a
  */
 __nonnull()
 static int unset_path_labels(const char *path) {
-    int rc, rc2, pp = get_path_property(path);
+    int rc, rc2, pp = get_path_property(path, false);
 
     DEBUG("unset_path_labels %s pp=%d", path, pp);
 
@@ -167,7 +167,7 @@ static int label_all_paths(const context_t *context, bool set)
         path = context->path_set.paths[i];
         def = &path_type_definitions[path->path_type];
 
-        pp = get_path_property(path->path);
+        pp = get_path_property(path->path, false);
         DEBUG("labbelling %s pp=%d", path->path, pp);
         if (pp < 0)
             rc = pp;

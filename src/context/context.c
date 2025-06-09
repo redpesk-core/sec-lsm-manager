@@ -247,7 +247,7 @@ int context_add_path(context_t *context, const char *path, const char *type)
     }
 
     /* check existing path */
-    rc = check_path_exists(stdpath);
+    rc = check_path_exists(stdpath, false);
     if (rc < 0) {
         ERROR("path %s isn't accessible: %s", path, strerror(-rc));
         return rc;
@@ -322,12 +322,12 @@ int context_add_plug(context_t *context, const char *expdir, const char *impid, 
     }
 
     /* check directories */
-    rc = check_directory_exists(stdexpdir);
+    rc = check_directory_exists(stdexpdir, true);
     if (rc < 0) {
         ERROR("invalid exported directory %s", expdir);
         return rc;
     }
-    rc = check_directory_exists(stdimpdir);
+    rc = check_directory_exists(stdimpdir, true);
     if (rc < 0) {
         ERROR("invalid import directory %s", impdir);
         return rc;

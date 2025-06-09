@@ -74,7 +74,7 @@ static void trfid(const char *id, char _id_[SEC_LSM_MANAGER_MAX_SIZE_ID + 1])
  */
 __nonnull() __wur static int label_file(const char *path, const char *label) {
     bool exists;
-    get_file_informations(path, &exists, NULL, NULL);
+    get_file_informations(path, false, &exists, NULL, NULL);
     if (!exists) {
         DEBUG("%s not exists", path);
         return -ENOENT;

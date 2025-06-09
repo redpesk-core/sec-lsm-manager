@@ -41,8 +41,8 @@ static const size_t BLOCKSIZE = 8192;
 /**********************/
 
 /* see file-utils.h */
-void get_file_informations(const char *path, bool *exists, bool *is_exec, bool *is_dir) {
-    int rc = get_path_property(path);
+void get_file_informations(const char *path, bool follow, bool *exists, bool *is_exec, bool *is_dir) {
+    int rc = get_path_property(path, follow);
 
     if (exists)
         *exists = rc >= 0;
@@ -146,10 +146,10 @@ end:
 
 /* see file-utils.h */
 __nonnull()
-int get_path_property(const char path[])
+int get_path_property(const char path[], bool follow)
 {
     struct stat s;
-    int rc = stat(path, &s);
+    int rc = (follow ? stat : lstat)(path, &s);
     if (rc < 0) {
         switch (errno) {
         case ENOENT:
@@ -158,6 +158,8 @@ int get_path_property(const char path[])
         default: rc = -EACCES; break;
         }
     }
+    else if (S_ISLNK(s.st_mode))
+        rc = PATH_LINK;
     else if (S_ISDIR(s.st_mode))
         rc = PATH_DIRECTORY;
     else if ((s.st_mode & (S_IXUSR | S_IXGRP | S_IXOTH)) != 0)
@@ -168,16 +170,16 @@ int get_path_property(const char path[])
 }
 
 /* see file-utils.h */
-int check_path_exists(const char path[])
+int check_path_exists(const char path[], bool follow)
 {
-    int rc = get_path_property(path);
+    int rc = get_path_property(path, follow);
     return rc < 0 ? rc : 0;
 }
 
 /* see file-utils.h */
-int check_directory_exists(const char path[])
+int check_directory_exists(const char path[], bool follow)
 {
-    int rc = get_path_property(path);
+    int rc = get_path_property(path, follow);
     return rc < 0 ? rc : rc == PATH_DIRECTORY ? 0 : -ENOTDIR;
 }
 
