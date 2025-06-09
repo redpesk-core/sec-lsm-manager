@@ -37,9 +37,18 @@
 #include <cynagora.h>
 #endif
 
+#include "perm-cynagora.h"
+
 #define CYNAGORA_SELECT_ALL "#"
 #define CYNAGORA_INSERT_ALL "*"
 #define CYNAGORA_AUTHORIZED "yes"
+
+const perm_mgr_itf_t cynagora_itf =
+	{
+		.add_permissions  = cynagora_set_policies,
+		.drop_permissions = cynagora_drop_policies,
+		.check_permission = cynagora_check_permission
+	};
 
 /** cynagora client used by all client */
 cynagora_t *cynagora_handler = NULL;
