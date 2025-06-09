@@ -64,7 +64,7 @@ add_library(common-lib OBJECT
     file-utils.c
     log.c
     path-utils.c
-    permission/cynagora-interface.c
+    perm-cynagora/cynagora-interface.c
     protocol/client.c
     protocol/pollitem.c
     protocol/prot.c

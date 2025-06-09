@@ -17,7 +17,7 @@
 
 #include "setup-tests.h"
 
-#include "permission/cynagora-interface.h"
+#include "perm-cynagora/cynagora-interface.h"
 
 START_TEST(test_cynagora_set_policies) {
     char *id = "testid";

@@ -41,7 +41,6 @@
 #define CYNAGORA_INSERT_ALL "*"
 #define CYNAGORA_AUTHORIZED "yes"
 
-
 /** cynagora client used by all client */
 cynagora_t *cynagora_handler = NULL;
 
