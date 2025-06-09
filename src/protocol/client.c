@@ -341,7 +341,7 @@ __nonnull((1)) static void onrequest(client_t *client, unsigned count, const cha
             send_done(client, args[idx]);
             return;
         }
-        /* switch automatically to version 1 */
+        /* switch automatically to default version */
         client->version = DEFAULT_PROTOCOL_VERSION;
     }
 

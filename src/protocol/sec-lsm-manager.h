@@ -137,8 +137,8 @@ __nonnull() __wur
 extern int sec_lsm_manager_clear(sec_lsm_manager_t *sec_lsm_manager);
 
 /**
- * @brief Install an application with all defined paramters in the security manager handle
- * You need at least to set the id
+ * @brief Install an application with all defined paramters
+ * in the security manager handle (permissions, paths, plugs)
  *
  * @param[in] sec_lsm_manager sec_lsm_manager client handler
  * @return 0 in case of success or a negative -errno value
@@ -147,8 +147,7 @@ __nonnull() __wur
 extern int sec_lsm_manager_install(sec_lsm_manager_t *sec_lsm_manager);
 
 /**
- * @brief Uninstall an application (cynagora permissions, paths)
- * You need at least to set the id
+ * @brief Uninstall an application (permissions, paths, plugs)
  *
  * @param[in] sec_lsm_manager sec_lsm_manager client handler
  * @return 0 in case of success or a negative -errno value

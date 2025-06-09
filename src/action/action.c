@@ -43,7 +43,6 @@
  * @brief Check if application plugs can be installed
  *
  * @param[in] context the application to be checked
- * @param[in] cynagora handler to cynagora access
  * @return 0 in case of success or a negative -errno value
  */
 __nonnull() __wur
