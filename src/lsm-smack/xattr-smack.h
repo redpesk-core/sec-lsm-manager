@@ -48,14 +48,14 @@
 __wur __nonnull()
 static inline int simulate_set_xattr(const char *path, const char *xattr, const char *value)
 {
-    printf("set_xattr(%s, %s, %s)\n", path, xattr, value);
+    fprintf(stderr, "set_xattr(%s, %s, %s)\n", path, xattr, value);
     return set_xattr(path, xattr, value);
 }
 
 __wur __nonnull()
 static inline int simulate_unset_xattr(const char *path, const char *xattr)
 {
-    printf("unset_xattr(%s, %s)\n", path, xattr);
+    fprintf(stderr, "unset_xattr(%s, %s)\n", path, xattr);
     return unset_xattr(path, xattr);
 }
 

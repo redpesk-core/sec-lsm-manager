@@ -34,7 +34,7 @@ static int ptr = 0;
 #endif
 
 ssize_t smack_label_length(const char *label) {
-    printf("smack_label_length(%s)\n", label);
+    fprintf(stderr, "smack_label_length(%s)\n", label);
     ssize_t len = (ssize_t)strlen(label);
     if (len >= SMACK_LABEL_LEN) {
         len = -1;
@@ -43,43 +43,43 @@ ssize_t smack_label_length(const char *label) {
 }
 
 const char *smack_smackfs_path(void) {
-    printf("smack_smackfs_path()\n");
+    fprintf(stderr, "smack_smackfs_path()\n");
     return SMACK_FS_PATH;
 }
 
 int smack_accesses_new(struct smack_accesses **handle) {
-    printf("smack_accesses_new()\n");
+    fprintf(stderr, "smack_accesses_new()\n");
     *handle = (void *)(intptr_t)(++ptr);
     return 0;
 }
 
 int smack_accesses_add(struct smack_accesses *handle, const char *subject, const char *object,
                        const char *access_type) {
-    printf("smack_accesses_add(%p,%s,%s,%s)\n", (void *)handle, subject, object, access_type);
+    fprintf(stderr, "smack_accesses_add(%p,%s,%s,%s)\n", (void *)handle, subject, object, access_type);
     return 0;
 }
 
 int smack_accesses_apply(struct smack_accesses *handle) {
-    printf("smack_accesses_apply(%p)\n", (void *)handle);
+    fprintf(stderr, "smack_accesses_apply(%p)\n", (void *)handle);
     return 0;
 }
 
 int smack_accesses_save(struct smack_accesses *handle, int fd) {
-    printf("smack_accesses_save(%p,%d)\n", (void *)handle, fd);
+    fprintf(stderr, "smack_accesses_save(%p,%d)\n", (void *)handle, fd);
     return 0;
 }
 
 int smack_accesses_add_from_file(struct smack_accesses *handle, int fd) {
-    printf("smack_accesses_add_from_file(%p,%d)\n", (void *)handle, fd);
+    fprintf(stderr, "smack_accesses_add_from_file(%p,%d)\n", (void *)handle, fd);
     return 0;
 }
 
 int smack_accesses_clear(struct smack_accesses *handle) {
-    printf("smack_accesses_clear(%p)\n", (void *)handle);
+    fprintf(stderr, "smack_accesses_clear(%p)\n", (void *)handle);
     return 0;
 }
 
 void smack_accesses_free(struct smack_accesses *handle) {
-	printf("smack_smackfs_path(%p)\n", (void *)handle);
+    fprintf(stderr, "smack_smackfs_path(%p)\n", (void *)handle);
 }
 

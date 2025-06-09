@@ -33,7 +33,7 @@
 __wur __nonnull()
 static int set_xattr(const char *path, const char *xattr, const char *value)
 {
-    printf("set_xattr(%s, %s, %s)\n", path, xattr, value);
+    fprintf(stderr, "set_xattr(%s, %s, %s)\n", path, xattr, value);
     return 0;
 }
 
@@ -41,7 +41,7 @@ static int set_xattr(const char *path, const char *xattr, const char *value)
 __wur __nonnull()
 static int unset_xattr(const char *path, const char *xattr)
 {
-    printf("unset_xattr(%s, %s)\n", path, xattr);
+    fprintf(stderr, "unset_xattr(%s, %s)\n", path, xattr);
     return 0;
 }
 #endif

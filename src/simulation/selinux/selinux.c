@@ -56,54 +56,54 @@ struct semanage_module_info {
 ////////////////////////////////////////////
 
 int is_selinux_enabled(void) {
-    printf("cynagora_async_process()\n");
+    fprintf(stderr, "is_selinux_enabled()\n");
     return 1;
 }
 
 int selinux_restorecon(const char *pathname, unsigned int restorecon_flags) {
-    printf("selinux_restorecon(%s, %u)\n", pathname, restorecon_flags);
+    fprintf(stderr, "selinux_restorecon(%s, %u)\n", pathname, restorecon_flags);
     return 0;
 }
 
 int semanage_is_connected(semanage_handle_t *sh) {
-    printf("semanage_is_connected(%p)\n", (void *)sh);
+    fprintf(stderr, "semanage_is_connected(%p)\n", (void *)sh);
     return 0;
 }
 
 int semanage_disconnect(semanage_handle_t *sh) {
-    printf("semanage_disconnect(%p)\n", (void *)sh);
+    fprintf(stderr, "semanage_disconnect(%p)\n", (void *)sh);
     return 0;
 }
 
 semanage_handle_t *semanage_handle_create(void) {
-    printf("semanage_handle_create()\n");
+    fprintf(stderr, "semanage_handle_create()\n");
     semanage_handle_t *ret = (void *)(intptr_t)(++ptr);
     return ret;
 }
 
 void semanage_set_create_store(semanage_handle_t *handle, int create_store) {
-    printf("semanage_set_create_store(%p, %d)\n", (void *)handle, create_store);
+    fprintf(stderr, "semanage_set_create_store(%p, %d)\n", (void *)handle, create_store);
 }
 
 int semanage_set_default_priority(semanage_handle_t *sh, uint16_t priority) {
-    printf("semanage_set_default_priority(%p, %u)\n", (void *)sh, priority);
+    fprintf(stderr, "semanage_set_default_priority(%p, %u)\n", (void *)sh, priority);
     return 0;
 }
 
 int semanage_connect(semanage_handle_t *sh) {
-    printf("semanage_connect(%p)\n", (void *)sh);
+    fprintf(stderr, "semanage_connect(%p)\n", (void *)sh);
     return 0;
 }
 
 int semanage_commit(semanage_handle_t *sh) {
-    printf("semanage_commit(%p)\n", (void *)sh);
+    fprintf(stderr, "semanage_commit(%p)\n", (void *)sh);
     return 0;
 }
 
-void semanage_handle_destroy(semanage_handle_t *sh) { printf("semanage_handle_destroy(%p)\n", (void *)sh); }
+void semanage_handle_destroy(semanage_handle_t *sh) { fprintf(stderr, "semanage_handle_destroy(%p)\n", (void *)sh); }
 
 int semanage_module_install_file(semanage_handle_t *sh, const char *file_path) {
-    printf("semanage_module_install_file(%p, %s)\n", (void *)sh, file_path);
+    fprintf(stderr, "semanage_module_install_file(%p, %s)\n", (void *)sh, file_path);
     mkdir(SELINUX_POLICY_DIR, 0755);
     char path[SEC_LSM_MANAGER_MAX_SIZE_PATH];
     char *f_tmp = strdup(file_path);
@@ -115,7 +115,7 @@ int semanage_module_install_file(semanage_handle_t *sh, const char *file_path) {
 }
 
 int semanage_module_remove(semanage_handle_t *sh, char *module_name) {
-    printf("semanage_module_remove(%p, %s)\n", (void *)sh, module_name);
+    fprintf(stderr, "semanage_module_remove(%p, %s)\n", (void *)sh, module_name);
     char path[SEC_LSM_MANAGER_MAX_SIZE_PATH];
     snprintf(path, SEC_LSM_MANAGER_MAX_SIZE_PATH, "%s/%s", SELINUX_POLICY_DIR, module_name);
     remove(path);
@@ -123,7 +123,7 @@ int semanage_module_remove(semanage_handle_t *sh, char *module_name) {
 }
 
 int semanage_module_list(semanage_handle_t *sh, semanage_module_info_t **semanage_module_info, int *num_modules) {
-    printf("semanage_module_list(%p)\n", (void *)sh);
+    fprintf(stderr, "semanage_module_list(%p)\n", (void *)sh);
     *semanage_module_info = NULL;
     *num_modules = 0;
 
@@ -160,23 +160,23 @@ int semanage_module_list(semanage_handle_t *sh, semanage_module_info_t **semanag
 }
 
 semanage_module_info_t *semanage_module_list_nth(semanage_module_info_t *list, int n) {
-    printf("semanage_module_list_nth(%p, %d)\n", (void *)list, n);
+    fprintf(stderr, "semanage_module_list_nth(%p, %d)\n", (void *)list, n);
     return list + n;
 }
 
 int semanage_module_info_get_name(semanage_handle_t *sh, semanage_module_info_t *modinfo, const char **name) {
-    printf("semanage_module_info_get_name(%p, %p)\n", (void *)sh, (void *)modinfo);
+    fprintf(stderr, "semanage_module_info_get_name(%p, %p)\n", (void *)sh, (void *)modinfo);
     *name = modinfo->name;
     return 0;
 }
 
 int semanage_module_info_destroy(semanage_handle_t *handle, semanage_module_info_t *modinfo) {
-    printf("semanage_module_info_destroy(%p, %p)\n", (void *)handle, (void *)modinfo);
+    fprintf(stderr, "semanage_module_info_destroy(%p, %p)\n", (void *)handle, (void *)modinfo);
     return 0;
 }
 
 int launch_compile(const char *id) {
-    printf("launch_compile(%s)\n", id);
+    fprintf(stderr, "launch_compile(%s)\n", id);
     char path[SEC_LSM_MANAGER_MAX_SIZE_PATH];
     snprintf(path, SEC_LSM_MANAGER_MAX_SIZE_PATH, "%s/%s.pp", SELINUX_RULES_DIR, id);
     int rc = create_file(path);
