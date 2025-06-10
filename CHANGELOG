@@ -1,6 +1,7 @@
 version 2.6.3
 -------------
 
+ - Add offline mode in option
  - Implement tunable permission manager
  - Send simulation output to stderr
  - Remove normal output of launcher

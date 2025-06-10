@@ -63,6 +63,7 @@ add_library(common-lib OBJECT
     context/plugs.c
     file-utils.c
     log.c
+    offline.c
     path-utils.c
     perm-cynagora/cynagora-interface.c
     protocol/client.c

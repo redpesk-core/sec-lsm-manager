@@ -44,6 +44,7 @@
 
 #include "protocol/sec-lsm-manager-protocol.h"
 #include "protocol/sec-lsm-manager-server.h"
+#include "offline.h"
 
 #if !defined(SYSTEMD_NAME)
 #define SYSTEMD_NAME "sec-lsm-manager"
@@ -65,6 +66,7 @@
 
 #define CAP_COUNT (sizeof cap_vector / sizeof cap_vector[0])
 
+#define _OFFLINE_ '\001'
 #define _GROUP_ 'g'
 #define _GROUPS_ 'G'
 #define _HELP_ 'h'
@@ -86,6 +88,7 @@ static const struct option longopts[] = {{"group", 1, NULL, _GROUP_},
                                          {"keep-going", 0, NULL, _KEEPGOING_},
                                          {"log", 0, NULL, _LOG_},
                                          {"make-socket-dir", 0, NULL, _MAKESOCKDIR_},
+                                         {"offline", 0, NULL, _OFFLINE_},
                                          {"own-socket-dir", 0, NULL, _OWNSOCKDIR_},
                                          {"shutoff", 1, NULL, _SHUTOFF_ },
                                          {"socketdir", 1, NULL, _SOCKETDIR_},
@@ -104,6 +107,7 @@ static const char helptxt[] =
     "    -l, --log             activate log of transactions\n"
     "    -k, --keep-going      continue to run on some errors\n"
     "    -s, --shutoff VALUE   shutting off time in seconds\n"
+    "        --offline         offline operation\n"
     "\n"
     "    -S, --socketdir xxx   set the base directory xxx for sockets\n"
     "                            (default: %s)\n"
@@ -143,6 +147,7 @@ int main(int ac, char **av) {
     int help = 0;
     int version = 0;
     int error = 0;
+    int offli = 0;
     int uid = -1;
     int gid = -1;
     int g;
@@ -197,6 +202,9 @@ int main(int ac, char **av) {
                 break;
             case _MAKESOCKDIR_:
                 makesockdir = 1;
+                break;
+            case _OFFLINE_:
+                offli = 1;
                 break;
             case _OWNSOCKDIR_:
                 ownsockdir = 1;
@@ -392,6 +400,12 @@ int main(int ac, char **av) {
     signal(SIGINT, leavecov);
     signal(SIGUSR1, leavecov);
 #endif
+
+    /* offline? */
+    if (offli)
+        offline();
+
+    /* create server */
     rc = sec_lsm_manager_server_create(&server, spec_socket);
     if (rc < 0) {
         fprintf(stderr, "can't initialize server: %s\n", strerror(errno));
