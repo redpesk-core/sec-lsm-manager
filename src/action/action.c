@@ -31,7 +31,7 @@
 
 #include "log.h"
 #include "file-utils.h"
-#include "perm-cynagora/cynagora-interface.h"
+#include "perm-cynagora/perm-cynagora.h"
 #include "mac-interface.h"
 
 
@@ -65,9 +65,9 @@ static int check_plug_installable(context_t *context)
 
         /* compute the label of the application importing the plug */
         mac_get_label(label, plugit->impid);
-        sts = cynagora_check_permission(label, perm_public_plug);
+        sts = cynagora_itf.check_permission(label, perm_public_plug);
         if (sts < 0) {
-            ERROR("can't query cynagora");
+            ERROR("can't icheck permission %s", perm_public_plug);
         }
         else {
             /* compute the scope of the required permision */
@@ -130,14 +130,14 @@ int action_install(context_t *context)
     if (rc < 0)
         return rc;
 
-    /* set cynagora policies */
+    /* set permissions */
     if (has_id) {
-        rc = cynagora_set_policies(label, &(context->permission_set), 1);
+        rc = cynagora_itf.add_permissions(label, &(context->permission_set), 1);
         if (rc < 0) {
-            ERROR("cynagora_set_policies: %d %s", -rc, strerror(-rc));
+            ERROR("error adding permissions: %d %s", -rc, strerror(-rc));
             return rc;
         }
-        DEBUG("cynagora_set_policies success");
+        DEBUG("adding permissions success");
     }
 
     /* set LSM / MAC policies */
@@ -145,9 +145,9 @@ int action_install(context_t *context)
     if (rc < 0) {
         ERROR("mac_install: %d %s", -rc, strerror(-rc));
         if (has_id) {
-            rc2 = cynagora_drop_policies(label);
+            rc2 = cynagora_itf.drop_permissions(label);
             if (rc2 < 0) {
-                ERROR("cannot delete policy: %d %s", -rc2, strerror(-rc2));
+                ERROR("cannot drop permissions: %d %s", -rc2, strerror(-rc2));
             }
         }
         return rc;
@@ -169,11 +169,11 @@ int action_uninstall(context_t *context)
     if (rc < 0)
         return rc;
 
-    /* drop cynagora policies */
+    /* drop permissions */
     if (has_id) {
-        rc = cynagora_drop_policies(label);
+        rc = cynagora_itf.drop_permissions(label);
         if (rc < 0) {
-            ERROR("cynagora_drop_policies: %d %s", -rc, strerror(-rc));
+            ERROR("cannot drop permissions: %d %s", -rc, strerror(-rc));
             return rc;
         }
     }
