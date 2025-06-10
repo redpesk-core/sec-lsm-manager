@@ -58,6 +58,7 @@ static int check_plug_installable(context_t *context)
     plug_t *plugit;
     const char *scope;
     int sts;
+    const perm_mgr_itf_t *permgr = context->permgr != NULL ? context->permgr : &cynagora_itf;
     int rc = 0;
 
     /* iterate over the plug requests */
@@ -65,7 +66,7 @@ static int check_plug_installable(context_t *context)
 
         /* compute the label of the application importing the plug */
         mac_get_label(label, plugit->impid);
-        sts = cynagora_itf.check_permission(label, perm_public_plug);
+        sts = permgr->check_permission(label, perm_public_plug);
         if (sts < 0) {
             ERROR("can't icheck permission %s", perm_public_plug);
         }
@@ -123,6 +124,7 @@ int action_install(context_t *context)
     /* check consistency */
     char label[SEC_LSM_MANAGER_MAX_SIZE_LABEL + 1];
     bool has_id = context->id[0] != '\0';
+    const perm_mgr_itf_t *permgr = context->permgr != NULL ? context->permgr : &cynagora_itf;
     int rc2, rc = check_context(context, label);
     if (rc < 0)
         return rc;
@@ -132,7 +134,7 @@ int action_install(context_t *context)
 
     /* set permissions */
     if (has_id) {
-        rc = cynagora_itf.add_permissions(label, &(context->permission_set), 1);
+        rc = permgr->add_permissions(label, &(context->permission_set), 1);
         if (rc < 0) {
             ERROR("error adding permissions: %d %s", -rc, strerror(-rc));
             return rc;
@@ -145,7 +147,7 @@ int action_install(context_t *context)
     if (rc < 0) {
         ERROR("mac_install: %d %s", -rc, strerror(-rc));
         if (has_id) {
-            rc2 = cynagora_itf.drop_permissions(label);
+            rc2 = permgr->drop_permissions(label);
             if (rc2 < 0) {
                 ERROR("cannot drop permissions: %d %s", -rc2, strerror(-rc2));
             }
@@ -165,13 +167,14 @@ int action_uninstall(context_t *context)
     /* check consistency */
     char label[SEC_LSM_MANAGER_MAX_SIZE_LABEL + 1];
     bool has_id = context->id[0] != '\0';
+    const perm_mgr_itf_t *permgr = context->permgr != NULL ? context->permgr : &cynagora_itf;
     int rc = check_context(context, label);
     if (rc < 0)
         return rc;
 
     /* drop permissions */
     if (has_id) {
-        rc = cynagora_itf.drop_permissions(label);
+        rc = permgr->drop_permissions(label);
         if (rc < 0) {
             ERROR("cannot drop permissions: %d %s", -rc, strerror(-rc));
             return rc;

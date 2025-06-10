@@ -49,6 +49,7 @@ __nonnull() void context_init(context_t *context) {
     permission_set_init(&(context->permission_set));
     context->need_id = false;
     context->error_flag = false;
+    context->permgr = NULL;
 }
 
 /**
@@ -376,5 +377,14 @@ int context_visit(context_t *context, void *visitor, const context_visitor_itf_t
             rc = itf->plug(visitor, plugit->expdir, plugit->impid, plugit->impdir);
 
     return rc;
+}
+
+/* see context.h */
+__nonnull((1))
+const perm_mgr_itf_t *context_set_permission_manager(context_t *context, const perm_mgr_itf_t *permgr)
+{
+    const perm_mgr_itf_t *prvpermgr = context->permgr;
+    context->permgr = permgr;
+    return prvpermgr;
 }
 

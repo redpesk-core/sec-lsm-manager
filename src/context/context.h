@@ -30,6 +30,7 @@
 #include "permissions.h"
 #include "paths.h"
 #include "plugs.h"
+#include "perm-mgr.h"
 
 typedef struct context {
     char id[SEC_LSM_MANAGER_MAX_SIZE_ID + 1];
@@ -38,6 +39,7 @@ typedef struct context {
     plugset_t plugset; /**< set of plug directives */
     bool need_id; /**< flags if id is needed */
     bool error_flag;
+    const perm_mgr_itf_t *permgr;
 } context_t;
 
 /**
@@ -206,5 +208,17 @@ extern int context_visit(
     void *visitor,
     const context_visitor_itf_t *itf);
 
+/**
+ * @brief Set the permission manager and returns the previous one
+ *
+ * @param[in] context the context to be set
+ * @param[in] permgr the permission manager to set (might be NULL for default)
+ *
+ * @return the previous value (might be NULL)
+ */
+__nonnull((1))
+extern const perm_mgr_itf_t *context_set_permission_manager(
+    context_t *context,
+    const perm_mgr_itf_t *permgr);
 
 #endif
