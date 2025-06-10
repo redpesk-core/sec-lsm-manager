@@ -633,3 +633,10 @@ int client_process_input(client_t *client)
     }
 }
 
+/* see client.h */
+__nonnull((1))
+const perm_mgr_itf_t *client_set_permission_manager(client_t *client, const perm_mgr_itf_t *permgr)
+{
+    return context_set_permission_manager(client->context, permgr);
+}
+

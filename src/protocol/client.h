@@ -28,6 +28,8 @@
 #include <stdbool.h>
 #include <time.h>
 
+#include "context/perm-mgr.h"
+
 /** abstract client type */
 typedef struct client client_t;
 
@@ -84,6 +86,17 @@ extern void client_destroy(client_t *client);
  */
 __nonnull()
 extern int client_process_input(client_t *client);
+
+/**
+ * @brief Set the permission manager and returns the previous one
+ *
+ * @param[in] client pointer to the client instance
+ * @param[in] permgr the permission manager to set (might be NULL for default)
+ *
+ * @return the previous value (might be NULL)
+ */
+__nonnull((1))
+extern const perm_mgr_itf_t *client_set_permission_manager(client_t *client, const perm_mgr_itf_t *permgr);
 
 #endif /* PROTOCOL_CLIENT_H */
 
