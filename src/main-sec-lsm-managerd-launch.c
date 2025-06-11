@@ -84,8 +84,6 @@ bool run_if(int argc, char **argv, char **envp, const char *binary, const char *
     if (condpath && access(condpath, F_OK) != 0 && errno == ENOENT)
         return false;
 
-    fprintf(stdout, ">> Launching %s\n", binary);
-//    argv[0] = (char*)binary;
     execve(binary, argv, envp);
 
     fprintf(stderr, "error executing %s: %s\n", binary, strerror(errno));

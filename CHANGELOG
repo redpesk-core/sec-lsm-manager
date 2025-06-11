@@ -1,6 +1,7 @@
 version 2.6.3
 -------------
 
+ - Remove normal output of launcher
  - Distinguishes symlinks and allow to follow it or not
 
 version 2.6.2
