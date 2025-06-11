@@ -24,6 +24,6 @@
 #ifndef SEC_LSM_MANAGER_OFFLINE_H
 #define SEC_LSM_MANAGER_OFFLINE_H
 
-extern void offline();
+extern void offline(void);
 
 #endif

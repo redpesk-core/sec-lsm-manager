@@ -65,7 +65,7 @@ static void fail(const char *message)
     exit(EXIT_FAILURE);
 }
 
-void offline()
+void offline(void)
 {
     perm_mgr_itf_t offlineitf =
     {

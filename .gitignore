@@ -4,3 +4,4 @@ afl-build
 site/
 pdfs/
 .*.swp
+TESTS/

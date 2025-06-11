@@ -66,25 +66,29 @@ static path_t *path_set_search(path_set_t *path_set, const char *path)
 /**********************/
 
 /* see paths.h */
-void path_set_init(path_set_t *path_set) {
+__nonnull()
+void path_set_init(path_set_t *path_set)
+{
     path_set->size = 0;
     path_set->paths = NULL;
 }
 
 /* see paths.h */
-void path_set_clear(path_set_t *path_set) {
-    if (path_set) {
-        while(path_set->size)
-            free(path_set->paths[--path_set->size]);
-        free(path_set->paths);
-        path_set->paths = NULL;
-    }
+__nonnull()
+void path_set_clear(path_set_t *path_set)
+{
+    while(path_set->size)
+        free(path_set->paths[--path_set->size]);
+    free(path_set->paths);
+    path_set->paths = NULL;
 }
 
 /* see paths.h */
+__wur __nonnull()
 int path_set_add(path_set_t *path_set, const char *path, enum path_type path_type)
 {
     size_t path_len = strlen(path);
+    path_t **path_set_tmp, *path_item;
 
     if (path_len < 1 || path_len >= SEC_LSM_MANAGER_MAX_SIZE_PATH) {
         ERROR("invalid path size : %ld", path_len);
@@ -96,14 +100,14 @@ int path_set_add(path_set_t *path_set, const char *path, enum path_type path_typ
         return -EINVAL;
     }
 
-    path_t **path_set_tmp = (path_t **)realloc(path_set->paths, sizeof(path_t*) * (path_set->size + 1));
+    path_set_tmp = (path_t **)realloc(path_set->paths, sizeof(path_t*) * (path_set->size + 1));
     if (path_set_tmp == NULL) {
         ERROR("realloc path_set_t");
         return -ENOMEM;
     }
     path_set->paths = path_set_tmp;
 
-    path_t *path_item = (path_t *)malloc(sizeof(path_t) + path_len + 1);
+    path_item = (path_t *)malloc(sizeof(path_t) + path_len + 1);
     if (path_item == NULL) {
         ERROR("malloc path_item");
         return -ENOMEM;
@@ -118,12 +122,16 @@ int path_set_add(path_set_t *path_set, const char *path, enum path_type path_typ
 }
 
 /* see paths.h */
-bool path_type_is_valid(enum path_type path_type) {
+__wur
+bool path_type_is_valid(enum path_type path_type)
+{
     return path_type > type_unset && path_type < number_path_type;
 }
 
 /* see paths.h */
-enum path_type path_type_get(const char *path_type_string) {
+__wur __nonnull()
+enum path_type path_type_get(const char *path_type_string)
+{
     enum path_type type = number_path_type;
     while (--type != type_unset && strcmp(path_type_string, type_strings[type]) != 0);
     if (type == type_unset)
@@ -132,7 +140,9 @@ enum path_type path_type_get(const char *path_type_string) {
 }
 
 /* see paths.h */
-const char *path_type_name(enum path_type path_type) {
+__wur __nonnull()
+const char *path_type_name(enum path_type path_type)
+{
     if (path_type >= type_unset && path_type < number_path_type)
         return type_strings[path_type];
     ERROR("Path type invalid");

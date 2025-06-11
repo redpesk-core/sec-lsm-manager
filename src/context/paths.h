@@ -83,7 +83,8 @@ typedef struct path_set {
  *
  * @param[in] path_set path_set handler
  */
-extern void path_set_init(path_set_t *path_set) __nonnull();
+__nonnull()
+extern void path_set_init(path_set_t *path_set);
 
 /**
  * @brief Free paths that have been added
@@ -91,7 +92,8 @@ extern void path_set_init(path_set_t *path_set) __nonnull();
  *
  * @param[in] path_set path_set handler
  */
-extern void path_set_clear(path_set_t *path_set) __nonnull();
+__nonnull()
+extern void path_set_clear(path_set_t *path_set);
 
 /**
  * @brief checks if a path is in the set
@@ -111,7 +113,8 @@ extern bool path_set_has(path_set_t *path_set, const char *path);
  * @param path_type[in] The path_type to add
  * @return 0 in case of success or a negative -errno value
  */
-extern int path_set_add(path_set_t *path_set, const char *path, enum path_type path_type) __wur __nonnull();
+__wur __nonnull()
+extern int path_set_add(path_set_t *path_set, const char *path, enum path_type path_type);
 
 /**
  * @brief Check if path_type is valid
@@ -119,7 +122,8 @@ extern int path_set_add(path_set_t *path_set, const char *path, enum path_type p
  * @param[in] path_type The path_type to check
  * @return int 0 if not valid or 1 if valid
  */
-extern bool path_type_is_valid(enum path_type path_type) __wur;
+__wur
+extern bool path_type_is_valid(enum path_type path_type);
 
 /**
  * @brief Get the path type object associate to a string path type
@@ -127,7 +131,8 @@ extern bool path_type_is_valid(enum path_type path_type) __wur;
  * @param[in] path_type_string The string path type
  * @return enum path_type The enumeration associate
  */
-extern enum path_type path_type_get(const char *path_type_string) __wur __nonnull();
+__wur __nonnull()
+extern enum path_type path_type_get(const char *path_type_string);
 
 /**
  * @brief Get the path type string associate to a enum path_type
@@ -135,6 +140,7 @@ extern enum path_type path_type_get(const char *path_type_string) __wur __nonnul
  * @param[in] path_type The path type enumeration
  * @return const char* The string associate
  */
-extern const char *path_type_name(enum path_type path_type) __wur;
+__wur
+extern const char *path_type_name(enum path_type path_type);
 
 #endif

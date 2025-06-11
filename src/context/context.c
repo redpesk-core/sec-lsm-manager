@@ -42,7 +42,8 @@
  *
  * @param[in] context handler
  */
-__nonnull() void context_init(context_t *context) {
+__nonnull()
+void context_init(context_t *context) {
     memset(context->id, '\0', SEC_LSM_MANAGER_MAX_SIZE_ID);
     path_set_init(&(context->path_set));
     plugset_init(&(context->plugset));
@@ -82,6 +83,7 @@ static int setids(
 /**********************/
 
 /* see context.h */
+__nonnull() __wur
 int context_create(context_t **context) {
     *context = (context_t *)malloc(sizeof(context_t));
     if (*context == NULL) {
@@ -94,34 +96,37 @@ int context_create(context_t **context) {
 }
 
 /* see context.h */
+__nonnull()
 void context_destroy(context_t *context) {
     context_clear(context);
     free(context);
 }
 
 /* see context.h */
+__nonnull()
 void context_clear(context_t *context) {
-    if (context) {
-        context->id[0] = '\0';
-        permission_set_clear(&(context->permission_set));
-        plugset_clear(&(context->plugset));
-        path_set_clear(&(context->path_set));
-        context->need_id = false;
-        context->error_flag = false;
-    }
+    context->id[0] = '\0';
+    permission_set_clear(&(context->permission_set));
+    plugset_clear(&(context->plugset));
+    path_set_clear(&(context->path_set));
+    context->need_id = false;
+    context->error_flag = false;
 }
 
 /* see context.h */
+__nonnull()
 void context_raise_error(context_t *context) {
     context->error_flag = true;
 }
 
 /* see context.h */
+__nonnull()
 bool context_has_error(context_t *context) {
     return context->error_flag;
 }
 
 /* see context.h */
+__nonnull() __wur
 int context_is_valid_id(const char *id)
 {
     char car;
@@ -157,6 +162,7 @@ int context_is_valid_id(const char *id)
 }
 
 /* see context.h */
+__nonnull() __wur
 int context_set_id(context_t *context, const char *id) {
     int rc;
 
@@ -180,6 +186,7 @@ int context_set_id(context_t *context, const char *id) {
 }
 
 /* see context.h */
+__nonnull() __wur
 int context_add_permission(context_t *context, const char *permission)
 {
     int rc;

@@ -39,6 +39,10 @@
 #include "sec-lsm-manager-protocol.h"
 #include "socket.h"
 
+/* this is an API interface code so strict checking
+ * of arguments is good. */
+#pragma GCC diagnostic ignored "-Wnonnull-compare"
+
 /**
  * connection state
  */
@@ -447,6 +451,7 @@ static int sync_process(
 /**********************/
 
 /* see sec-lsm-manager.h */
+__nonnull((1)) __wur
 int sec_lsm_manager_create(sec_lsm_manager_t **psec_lsm_manager, const char *socketspec)
 {
     int rc;
@@ -494,6 +499,7 @@ error:
 }
 
 /* see sec-lsm-manager.h */
+__nonnull()
 void sec_lsm_manager_destroy(sec_lsm_manager_t *sec_lsm_manager) {
     /* check parameters not NULL */
     if (sec_lsm_manager != NULL) {
@@ -506,6 +512,7 @@ void sec_lsm_manager_destroy(sec_lsm_manager_t *sec_lsm_manager) {
 }
 
 /* see sec-lsm-manager.h */
+__nonnull()
 void sec_lsm_manager_disconnect(sec_lsm_manager_t *sec_lsm_manager) {
     /* check parameters not NULL */
     if (sec_lsm_manager != NULL)
@@ -513,6 +520,7 @@ void sec_lsm_manager_disconnect(sec_lsm_manager_t *sec_lsm_manager) {
 }
 
 /* see sec-lsm-manager.h */
+__nonnull() __wur
 int sec_lsm_manager_set_id(sec_lsm_manager_t *sec_lsm_manager, const char *id) {
     /* check parameters not NULL */
     if (sec_lsm_manager == NULL || id == NULL)
@@ -523,6 +531,7 @@ int sec_lsm_manager_set_id(sec_lsm_manager_t *sec_lsm_manager, const char *id) {
 }
 
 /* see sec-lsm-manager.h */
+__nonnull() __wur
 int sec_lsm_manager_add_path(sec_lsm_manager_t *sec_lsm_manager, const char *path, const char *path_type) {
     /* check parameters not NULL */
     if (sec_lsm_manager == NULL || path == NULL || path_type == NULL)
@@ -545,6 +554,7 @@ int sec_lsm_manager_add_plug(sec_lsm_manager_t *sec_lsm_manager, const char *exp
 }
 
 /* see sec-lsm-manager.h */
+__nonnull() __wur
 int sec_lsm_manager_add_permission(sec_lsm_manager_t *sec_lsm_manager, const char *permission) {
     /* check parameters not NULL */
     if (sec_lsm_manager == NULL || permission == NULL)
@@ -555,6 +565,7 @@ int sec_lsm_manager_add_permission(sec_lsm_manager_t *sec_lsm_manager, const cha
 }
 
 /* see sec-lsm-manager.h */
+__nonnull() __wur
 int sec_lsm_manager_clear(sec_lsm_manager_t *sec_lsm_manager) {
     /* check parameters not NULL */
     if (sec_lsm_manager == NULL)
@@ -564,6 +575,7 @@ int sec_lsm_manager_clear(sec_lsm_manager_t *sec_lsm_manager) {
 }
 
 /* see sec-lsm-manager.h */
+__nonnull() __wur
 int sec_lsm_manager_install(sec_lsm_manager_t *sec_lsm_manager) {
     /* check parameters not NULL */
     if (sec_lsm_manager == NULL)
@@ -573,6 +585,7 @@ int sec_lsm_manager_install(sec_lsm_manager_t *sec_lsm_manager) {
 }
 
 /* see sec-lsm-manager.h */
+__nonnull() __wur
 int sec_lsm_manager_uninstall(sec_lsm_manager_t *sec_lsm_manager) {
     /* check parameters not NULL */
     if (sec_lsm_manager == NULL)
@@ -599,6 +612,7 @@ static int wait_log_reply(sec_lsm_manager_t *sec_lsm_manager, void *closure)
 }
 
 /* see sec-lsm-manager.h */
+__nonnull() __wur
 int sec_lsm_manager_log(sec_lsm_manager_t *sec_lsm_manager, int on, int off) {
     /* check parameters not NULL */
     if (sec_lsm_manager == NULL)
@@ -630,6 +644,7 @@ static int wait_display_replies(sec_lsm_manager_t *sec_lsm_manager, void *closur
 }
 
 /* see sec-lsm-manager.h */
+__nonnull((1,2)) __wur
 int sec_lsm_manager_display(
         sec_lsm_manager_t *sec_lsm_manager,
         void (*callback)(void *, int count, const char *[]),
@@ -647,6 +662,7 @@ int sec_lsm_manager_display(
 }
 
 /* see sec-lsm-manager.h */
+__nonnull() __wur
 int sec_lsm_manager_error_message(sec_lsm_manager_t *sec_lsm_manager, char **message)
 {
     int idx;

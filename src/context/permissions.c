@@ -36,19 +36,19 @@
 /**********************/
 
 /* see permissions.h */
+__nonnull()
 void permission_set_init(permission_set_t *permission_set) {
     permission_set->size = 0;
     permission_set->permissions = NULL;
 }
 
 /* see permissions.h */
+__nonnull()
 void permission_set_clear(permission_set_t *permission_set) {
-    if (permission_set) {
-        while (permission_set->size)
-            free(permission_set->permissions[--permission_set->size]);
-        free(permission_set->permissions);
-        permission_set->permissions = NULL;
-    }
+    while (permission_set->size)
+        free(permission_set->permissions[--permission_set->size]);
+    free(permission_set->permissions);
+    permission_set->permissions = NULL;
 }
 
 /* see permissions.h */
@@ -67,6 +67,7 @@ bool permission_set_has(const permission_set_t *permission_set, const char *perm
 }
 
 /* see permissions.h */
+__nonnull() __wur
 int permission_set_add(permission_set_t *permission_set, const char *permission) {
 
     size_t size;
