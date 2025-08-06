@@ -16,27 +16,27 @@ The defined macros are:
 | ------------------------------------------- | ---------------------------------------------------------------------------------- |
 | `MUSTACH_IF(xxx) ... [ ELSE ...] ENDIF`     | `{{#xxx}} ... [{{/xxx}}{{^xxx}} ...] {{/xxx}}`                                     |
 | `MUSTACH_IF_NOT(xxx) ... [ ELSE ...] ENDIF` | `{{^xxx}} ... [{{/xxx}}{{#xxx}} ...] {{/xxx}}`                                     |
-| `PERM(xxx)`                                 | `@PREFIX_PERMISSION@permission:xxx` where `@PREFIX_PERMISSION@` becomes `urn:AGL:` |
+| `PERM(xxx)`                                 | `@PREFIX_PERMISSION@permission:xxx` where `@PREFIX_PERMISSION@` becomes `urn:redpesk:` |
 | `IF_PERM(xxx)`                              | is like `MUSTACH_IF(PERM(xxx))`                                                    |
 | `IF_NOT_PERM(xxx)`                          | is like `MUSTACH_IF_NOT(PERM(xxx))`                                                |
 
 For example, instead of writing :
 
 ```text
-{{#urn:AGL:permission::partner:scope-platform}}
+{{#urn:redpesk:permission::partner:scope-platform}}
 rw_platform_var({{id_underscore}}_t);
-{{/urn:AGL:permission::partner:scope-platform}}
+{{/urn:redpesk:permission::partner:scope-platform}}
 ```
 
 We write:
 
 ```text
-MUSTACH_IF(urn:AGL:permission::partner:scope-platform)
+MUSTACH_IF(urn:redpesk:permission::partner:scope-platform)
 rw_platform_var({{id_underscore}}_t);
 ENDIF
 ```
 
-Or because the permission starts with `urn:AGL:permission:`, it is enough to only write:
+Or because the permission starts with `urn:redpesk:permission:`, it is enough to only write:
 
 ```text
 IF_PERM(:partner:scope-platform)

@@ -71,7 +71,7 @@ set(CYNAGORA_GROUP cynagora CACHE STRING "group of the daemon")
 set(SEC_LSM_MANAGER_DATADIR         "${CMAKE_INSTALL_FULL_DATADIR}/${CMAKE_PROJECT_NAME}")
 set(SEC_LSM_MANAGER_SOCKET_NAME     "sec-lsm-manager.socket")
 
-set(PREFIX_PERMISSION               "urn:AGL:")
+set(PREFIX_PERMISSION               "urn:redpesk:")
 
 # SELINUX
 

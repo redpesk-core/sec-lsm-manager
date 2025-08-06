@@ -143,7 +143,7 @@ static const char help_permission_text[] =
     "\n"
     "Add a permission for the application\n"
     "\n"
-    "Example : permission urn:AGL:permission::partner:scope-platform\n"
+    "Example : permission urn:redpesk:permission::partner:scope-platform\n"
     "\n";
 
 static const char help_install_text[] =
