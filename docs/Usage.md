@@ -64,7 +64,7 @@ sec_lsm_manager_add_path(sec_lsm_manager, "/opt/demo-app/www/style.css", "http")
 You can then add permissions:
 
 ```c
-sec_lsm_manager_add_permission(sec_lsm_manager, "urn:AGL::partner:create-can-socket");
+sec_lsm_manager_add_permission(sec_lsm_manager, "urn:redpesk:permission::partner:create-can-socket");
 ```
 
 > A permission must be composed of at least two characters.
@@ -121,13 +121,13 @@ id demo-app
 >> ok
 path /opt/demo-app id
 >> ok
-permission urn:AGL::partner:create-can-socket
+permission urn:redpesk:permission::partner:create-can-socket
 >> ok
 display
 ################## SECURE APP ##################
 id demo-app
 path /opt/demo-app id
-permission "urn:AGL::partner:create-can-socket"
+permission "urn:redpesk:permission::partner:create-can-socket"
 ################################################
 >> ok
 install
