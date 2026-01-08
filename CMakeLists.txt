@@ -1,5 +1,5 @@
 ###########################################################################
-# Copyright (C) 2020-2025 IoT.bzh Company
+# Copyright (C) 2020-2026 IoT.bzh Company
 #
 # Author: José Bollo <jose.bollo@iot.bzh>
 # Author: Arthur Guyader <arthur.guyader@iot.bzh>

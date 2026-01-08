@@ -1,7 +1,7 @@
 include(../macros.in)
 
 ###########################################################################
-# Copyright (C) 2020-2025 IoT.bzh Company
+# Copyright (C) 2020-2026 IoT.bzh Company
 #
 # Author: Arthur Guyader <arthur.guyader@iot.bzh>
 #
