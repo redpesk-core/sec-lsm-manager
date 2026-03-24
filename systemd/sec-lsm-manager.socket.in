@@ -1,20 +1,20 @@
 [Unit]
-Description=@CMAKE_PROJECT_NAME@ socket
+Description=sec-lsm-manager socket
 
 [Socket]
-FileDescriptorName=@CMAKE_PROJECT_NAME@
-ListenStream=@SOCKET_DIR@/@CMAKE_PROJECT_NAME@.socket
+FileDescriptorName=sec-lsm-manager
+ListenStream=@SOCKET_DIR@/sec-lsm-manager.socket
 SocketUser=@USER@
 SocketGroup=@GROUP@
 SocketMode=0660
 SmackLabelIPIn=@
 SmackLabelIPOut=@
 
-Service=@CMAKE_PROJECT_NAME@.service
+Service=sec-lsm-manager.service
 
 [Unit]
-Wants=@CMAKE_PROJECT_NAME@.target
-Before=@CMAKE_PROJECT_NAME@.target
+Wants=sec-lsm-manager.target
+Before=sec-lsm-manager.target
 
 [Install]
 WantedBy=sockets.target

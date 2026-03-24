@@ -172,8 +172,6 @@ add_compile_definitions(SEC_LSM_MANAGER_SOCKET_DIR="${SOCKET_DIR}")
 set(BINARY_DIR "${CMAKE_INSTALL_FULL_BINDIR}" CACHE PATH "directory path of binaries")
 add_compile_definitions(BINARY_DIR="${BINARY_DIR}")
 
-add_compile_definitions(SYSTEMD_NAME="${CMAKE_PROJECT_NAME}")
-
 ##########################################################################
 # define compile options
 
