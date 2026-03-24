@@ -152,29 +152,6 @@ if(WITH_SELINUX)
     daemon_for_mac(selinux)
 endif()
 
-####################################
-# build and install sec-lsm-managerd
-####################################
-
-message("[*] Create : sec-lsm-managerd")
-
-add_executable(sec-lsm-managerd main-sec-lsm-managerd-launch.c)
-
-if(WITH_SMACK)
-    target_compile_definitions(sec-lsm-managerd PRIVATE WITH_SMACK=1)
-    target_compile_definitions(sec-lsm-managerd PRIVATE SMACK_BYNARY_NAME="sec-lsm-manager-smackd")
-endif()
-
-if(WITH_SELINUX)
-    target_compile_definitions(sec-lsm-managerd PRIVATE WITH_SELINUX=1)
-    target_compile_definitions(sec-lsm-managerd PRIVATE SELINUX_BYNARY_NAME="sec-lsm-manager-selinuxd")
-endif()
-
-install(TARGETS sec-lsm-managerd
-    RUNTIME DESTINATION ${CMAKE_INSTALL_FULL_BINDIR})
-
-message("[x] Done : sec-lsm-managerd\n")
-
 ###########################################
 # build and install sec-lsm-manager-cmd
 ###########################################

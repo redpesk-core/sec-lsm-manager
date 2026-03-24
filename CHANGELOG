@@ -2,6 +2,7 @@ version ?????
 -------------
 
  - Fix names in systemd files
+ - Removing of the launcher sec-lsm-managerd
 
 version 2.7.0
 -------------
