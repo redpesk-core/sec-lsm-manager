@@ -26,7 +26,7 @@
 cmake_minimum_required(VERSION 3.14)
 
 project(sec-lsm-manager
-    VERSION 2.7.0
+    VERSION 2.8.0
     DESCRIPTION "Security LSM Manager"
     HOMEPAGE_URL "https://github.com/redpesk-core/sec-lsm-manager"
     LANGUAGES C
