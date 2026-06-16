@@ -2,11 +2,9 @@
 
 ## Dependencies
 
-> If you are missing any dependencies please follow this guide: [redpesk-build-host]({% chapter_link host-configuration-doc.setup-your-build-host %})
+Deploy a `SDK` container: [Overview]({% chapter_link sdk-container-doc.overview %})
 
 Smack is not packaged and has to be compiled from source.
-
-### Fedora / Centos
 
 ```bash
 dnf install check-devel sec-cynagora-devel libsemanage-devel libselinux-devel systemd-devel libcap-devel
@@ -22,24 +20,6 @@ cd smack
 make
 sudo make install
 ```
-
-### Ubuntu / Debian
-
-```bash
-apt install check sec-cynagora-dev libsemanage-dev libselinux1-dev libsystemd-dev libcap-dev
-```
-
-Build Smack:
-
-```bash
-sudo apt install autoconf libtool pkg-config make
-git clone https://github.com/smack-team/smack
-cd smack
-./autogen.sh
-make
-sudo make install
-```
-
 ## Options
 
 It is possible to modify the following compilation options when executing the cmake command:
