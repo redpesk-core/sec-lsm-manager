@@ -1,6 +1,6 @@
 # SMACK
 
-SMACK (Simplified Mandatory Access Control Kernel) allows to define simple rules to limit a user or a process rights.
+SMACK (Simplified Mandatory Access Control Kernel) allows defining simple rules to limit a user or a process rights.
 
 ## Context
 
@@ -20,9 +20,9 @@ System  User  rwxat
 
 - System is the subject's label
 - User is the object's label
-- rwx are the access read, write, execute, append and transmute
+- rwxat are the read, write, execute, append and transmute accesses.
 
-> ℹ️ The processes System can read, write and execute User objects.
+> ℹ️ The System processes can read, write and execute User objects.
 
 ### Possible access
 
@@ -68,9 +68,9 @@ Changes are applied on restart.
 
 |     | REQUESTED BY                | REQUESTED ON                |
 | --- | --------------------------- | --------------------------- |
-| *   | 🛑 Access                  | ✔️ Access                 |
-| ^   | ✔️ Read or execute access |                             |
-| _   |                             | ✔️ Read or execute access |
+| *   | 🛑 Access                   | ✔️ Access                   |
+| ^   | ✔️ Read or execute access   |                             |
+| _   |                             | ✔️ Read or execute access   |
 
 ✔️ If subject and object have the same label
 

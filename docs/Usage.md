@@ -9,11 +9,11 @@ Within an application, we can qualify our files according to several types:
 - http:    http files
 - icon:    icon file
 - id:      basename app directory
-- lib:     libraries files
+- lib:     library files
 - plug:    plugin files
 - public:  public files
 
-Moreover an application can have particular rights, for example for a CAN socket creation.
+Moreover an application can have particular rights, for example to allow a CAN socket creation.
 
 The first thing to do is to send all this information to the sec-lsm-manager
 so it can proceed with the installation.
@@ -36,7 +36,7 @@ We need to define an id to identify our application:
 sec_lsm_manager_set_id(sec_lsm_manager, "demo-app");
 ```
 
-> An id can only be composed of alpha numeric character, '-' and '_'. It must also be composed of at least two characters.
+> An id can only include alpha numeric characters, '-' and '_'. It must also include at least two characters.
 
 We will then qualify the different files of our application:
 
@@ -59,7 +59,7 @@ sec_lsm_manager_add_path(sec_lsm_manager, "/opt/demo-app/www/index.html", "http"
 sec_lsm_manager_add_path(sec_lsm_manager, "/opt/demo-app/www/style.css", "http");
 ```
 
-> A path must be composed of at least two characters.
+> A path must include at least two characters.
 
 You can then add permissions:
 
@@ -67,7 +67,7 @@ You can then add permissions:
 sec_lsm_manager_add_permission(sec_lsm_manager, "urn:redpesk:permission::partner:create-can-socket");
 ```
 
-> A permission must be composed of at least two characters.
+> A permission must include at least two characters.
 
 For more information about permissions: [Permissions]({% chapter_link sec-lsm-manager.permissions-definition %})
 
@@ -79,7 +79,7 @@ sec_lsm_manager_install(sec_lsm_manager);
 
 ### Uninstall
 
-To uninstall the application security context, you must define its id and the installed paths:
+To uninstall the application security context, you must set its id and the installed paths:
 
 ```c
 sec_lsm_manager_set_id(sec_lsm_manager, "demo-app");
@@ -87,7 +87,7 @@ sec_lsm_manager_add_path(....)...
 sec_lsm_manager_uninstall(sec_lsm_manager);
 ```
 
-Permissions will be automatically removed by just knowing the id.
+Knowing the id is enough to automatically remove the permissions.
 
 ### Additional
 
@@ -97,7 +97,7 @@ It is possible to display the status of a handler with the display function:
 sec_lsm_manager_display(sec_lsm_manager);
 ```
 
-⚠️ If an error occurs, a flag is raised and it is impossible to continue without using the clear function
+⚠️ If an error occurs, a flag is raised and it is impossible to continue without using the clear function.
 
 ```c
 sec_lsm_manager_clear(sec_lsm_manager);

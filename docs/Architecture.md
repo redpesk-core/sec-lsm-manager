@@ -13,7 +13,7 @@ It is possible to install sec-lsm-manager-smackd or sec-lsm-manager-selinuxd or 
 They are those that will define the security policy, label files and send
 permissions to cynagora.
 
-To receive the instructions, they will create a socket and listen it.
+To receive the instructions, they will create a socket and listen to it.
 The socket can be a systemd or unix socket.
 
 ## libsec-lsm-manager
@@ -24,4 +24,4 @@ It is necessary to include the `sec-lsm-manager.h` file to use it.
 
 ## sec-lsm-manager-cmd
 
-sec-lsm-manager-cmd is a utility that allows to use the shared library via the command line.
+sec-lsm-manager-cmd is a utility that allows using the shared library via the command line.

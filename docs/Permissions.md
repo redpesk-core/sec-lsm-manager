@@ -1,6 +1,6 @@
 # Permissions
 
-In the sec-lsm-manager, the following system permission is used : [redpesk-permissions]({% chapter_link application-framework.permissions %})
+In the sec-lsm-manager, the following system permissions are used : [redpesk-permissions]({% chapter_link application-framework.permissions %})
 
 ## Cynagora
 
@@ -9,7 +9,7 @@ For example, if we add the permission `urn:redpesk:permission::partner:scope-pla
 to a demo-app we will have :
 
 ```
-CLIENT    SESSION,  USER,  PERMISSION                                  RESULT  EXPIRE
+CLIENT    SESSION   USER   PERMISSION                                      RESULT  EXPIRE
 demo-app  *         *      urn:redpesk:permission::partner:scope-platform  yes     forever
 ```
 
@@ -17,21 +17,19 @@ For more details on cynagora: [sec-cynagora](https://github.com/redpesk-core/sec
 
 ## Mandatory Access Control
 
-At this time permissions only have an impact on SELinux.
-They will allow to add additional authorizations to an application.
+At the moment permissions only have an impact on SELinux.
+They allow adding authorizations to an application.
 For example the `urn:redpesk:permission::partner:scope-platform` permission will allow access to the `/var/scope-platform` folder.
 
 Here is a list of currently supported permissions and their effect :
 
 - urn:redpesk:permission::partner:scope-platform
-  > Allow access to the `/var/scope-platform` folder
+  > Allows access to the `/var/scope-platform` folder
 - urn:redpesk:permission::partner:create-can-socket
-  > Allow create and write on can socket
-- urn:redpesk:permission::partner:read-afbtest
-  > Allow read binding afbtest
+  > Allows creation of a can socket and writing to it
 - urn:redpesk:permission::partner:execute-shell
-  > Allow execute shell and programs in bin directories
+  > Allows execution of shell and programs in bin directories
 - urn:redpesk:permission::partner:manage-tmp
-  > Allow manage all files types in `/tmp`
+  > Allows managing all files types in `/tmp`
 - urn:redpesk:permission::partner:manage-user-shared
-  > Allow manage all files types in `/run/user/[id]/usrshr/`
+  > Allows managing all files types in `/run/user/[id]/usrshr/`

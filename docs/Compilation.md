@@ -7,7 +7,7 @@ Deploy a `SDK` container: [Overview]({% chapter_link sdk-container-doc.overview 
 Smack is not packaged and has to be compiled from source.
 
 ```bash
-dnf install check-devel sec-cynagora-devel libsemanage-devel libselinux-devel systemd-devel libcap-devel
+sudo dnf install check-devel sec-cynagora-devel libsemanage-devel libselinux-devel systemd-devel libcap-devel
 ```
 
 Build Smack:
@@ -28,14 +28,14 @@ It is possible to modify the following compilation options when executing the cm
 - **WITH_SMACK** (default: `OFF`) : SMACK mode
 - **WITH_SELINUX** (default: `OFF`): SELinux mode
 
-+ **WITH_SIMULATION** (default: `OFF`): active simulations for cynagora, SMACK and SELinux
-+ **SIMULATE_CYNAGORA** (default: `OFF`): simulate cynagora
-+ **SIMULATE_SMACK** (default: `OFF`): simulate SMACK
-+ **SIMULATE_SELINUX** (default: `OFF`): simulate SELinux
++ **WITH_SIMULATION** (default: `OFF`): activates simulations for cynagora, SMACK and SELinux
++ **SIMULATE_CYNAGORA** (default: `OFF`): simulates cynagora
++ **SIMULATE_SMACK** (default: `OFF`): simulates SMACK
++ **SIMULATE_SELINUX** (default: `OFF`): simulates SELinux
 
-- **FORTIFY** (default: `ON`): fortify source code
-- **COMPILE_TEST** (default: `ON`): compile tests
-- **DEBUG** (default: `OFF`): active debug mode (symbols, debug message)
+- **FORTIFY** (default: `ON`): fortifies source code
+- **COMPILE_TEST** (default: `ON`): compiles tests
+- **DEBUG** (default: `OFF`): activates debug mode (symbols, debug messages)
 
 For example with DEBUG option and only SELinux:
 
@@ -45,7 +45,7 @@ cmake -DDEBUG=ON -DWITH_SELINUX=ON ..
 
 ## Environment Variables
 
-Then there are variables defined at compile time in the `CMakeLists.txt` file that can be changed at runtime by defining an environment variable.
+There are variables defined at compile time, in the `CMakeLists.txt` file, that can be changed at runtime by setting an environment variable.
 
 For example the **SEC_LSM_MANAGER_SOCKET_NAME** variable which contains `sec-lsm-manager.socket` can be modified at launch:
 
